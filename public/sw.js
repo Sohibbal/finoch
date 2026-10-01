@@ -1,4 +1,4 @@
-const CACHE_NAME = "voicash-shell-v1";
+const CACHE_NAME = "voicash-shell-v2";
 const STATIC_ASSETS = [
   "/",
   "/manifest.json",
@@ -49,11 +49,10 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Handle static assets: Cache first, fallback to network
+  // Handle static assets & scripts: Network first with cache fallback to prevent stale layouts
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      if (cached) return cached;
-      return fetch(event.request).then((response) => {
+    fetch(event.request)
+      .then((response) => {
         if (!response || response.status !== 200 || response.type !== "basic") {
           return response;
         }
@@ -62,7 +61,9 @@ self.addEventListener("fetch", (event) => {
           cache.put(event.request, responseToCache);
         });
         return response;
-      });
-    })
+      })
+      .catch(() => {
+        return caches.match(event.request);
+      })
   );
 });

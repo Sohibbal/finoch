@@ -35,16 +35,23 @@ export function TopNav({ onOpenPrivacy, userEmail }: TopNavProps) {
     <nav className="hidden md:flex items-center gap-3">
       <Link
         href="/"
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
       >
         <Home className="w-4 h-4" />
         <span>Beranda</span>
       </Link>
 
+      <a
+        href="#fitur"
+        className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+      >
+        <span>Fitur</span>
+      </a>
+
       <button
         type="button"
         onClick={onOpenPrivacy}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
       >
         <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
         <span>Privasi</span>
