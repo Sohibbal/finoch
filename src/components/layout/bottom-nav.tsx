@@ -12,7 +12,7 @@ interface BottomNavProps {
 
 export function BottomNav({ onOpenVoice, onOpenPrivacy, userEmail }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex items-center justify-around max-w-md mx-auto sm:rounded-t-3xl">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex items-center justify-around max-w-md mx-auto sm:rounded-t-3xl">
       <Link
         href="/"
         className="flex flex-col items-center gap-0.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium"

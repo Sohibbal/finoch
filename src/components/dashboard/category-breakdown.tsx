@@ -40,13 +40,13 @@ export function CategoryBreakdown({ metrics }: CategoryBreakdownProps) {
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
           <span className="text-slate-600 dark:text-slate-300 font-medium">
-            Primer: <strong className="text-slate-900 dark:text-slate-100">{primerPercentage}%</strong>
+            Primer (Pokok): <strong className="text-emerald-700 dark:text-emerald-400 font-bold">{primerPercentage}%</strong>
           </span>
         </div>
         <div className="flex items-center gap-1.5">
           <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
           <span className="text-slate-600 dark:text-slate-300 font-medium">
-            Bocor Halus: <strong className="text-slate-900 dark:text-slate-100">{bocorHalusPercentage}%</strong>
+            Bocor Halus: <strong className="text-amber-700 dark:text-amber-400 font-bold">{bocorHalusPercentage}%</strong>
           </span>
         </div>
       </div>

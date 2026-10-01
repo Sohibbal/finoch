@@ -92,51 +92,62 @@ export function MetricCards({ expenses }: MetricCardsProps) {
   const metrics = calculateMetrics(expenses);
 
   return (
-    <div className="space-y-3">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
       {/* Primary month card */}
-      <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-indigo-500/10 blur-xl pointer-events-none" />
+      <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-slate-900 text-white shadow-xl relative overflow-hidden flex flex-col justify-between">
+        <div className="absolute top-0 right-0 -mr-8 -mt-8 w-32 h-32 rounded-full bg-emerald-500/10 blur-xl pointer-events-none" />
 
         <div className="flex items-center justify-between text-indigo-200 mb-1">
           <span className="text-xs font-medium uppercase tracking-wider flex items-center gap-1.5">
-            <Wallet className="w-3.5 h-3.5" />
-            Pengeluaran Bulan Ini
+            <Wallet className="w-3.5 h-3.5 text-emerald-400" />
+            Bulan Ini
           </span>
-          <span className="text-[11px] px-2 py-0.5 rounded-full bg-white/10 text-indigo-100">
+          <span className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-medium">
             {new Date().toLocaleDateString("id-ID", { month: "long" })}
           </span>
         </div>
 
-        <h2 className="text-3xl font-extrabold tracking-tight mt-1 text-white">
+        <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight mt-1 text-white">
           {formatRupiah(metrics.totalMonth)}
         </h2>
 
-        <p className="text-xs text-indigo-300 mt-2">
-          Primer: <span className="font-semibold text-emerald-300">{formatRupiah(metrics.primerTotal)}</span> • Bocor Halus: <span className="font-semibold text-amber-300">{formatRupiah(metrics.bocorHalusTotal)}</span>
+        <p className="text-xs text-indigo-200 mt-2">
+          Primer: <span className="font-semibold text-emerald-300">{formatRupiah(metrics.primerTotal)}</span>
         </p>
       </div>
 
-      {/* Today and Week summary cards */}
-      <div className="grid grid-cols-2 gap-3">
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <TrendingDown className="w-3.5 h-3.5 text-indigo-500" />
+      {/* Today summary card */}
+      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+            <TrendingDown className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             Hari Ini
           </span>
-          <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mt-1">
-            {formatRupiah(metrics.totalToday)}
-          </p>
+          <span className="w-2 h-2 rounded-full bg-emerald-500" />
         </div>
+        <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-2">
+          {formatRupiah(metrics.totalToday)}
+        </p>
+        <p className="text-xs text-slate-400 mt-1">
+          Pengeluaran 24 jam terakhir
+        </p>
+      </div>
 
-        <div className="p-4 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-          <span className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1">
-            <Calendar className="w-3.5 h-3.5 text-indigo-500" />
+      {/* Week summary card */}
+      <div className="p-5 rounded-3xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-sm flex flex-col justify-between">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-1.5 uppercase tracking-wider">
+            <Calendar className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
             Minggu Ini
           </span>
-          <p className="text-base sm:text-lg font-bold text-slate-900 dark:text-slate-100 mt-1">
-            {formatRupiah(metrics.totalWeek)}
-          </p>
+          <span className="w-2 h-2 rounded-full bg-indigo-500" />
         </div>
+        <p className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-slate-100 mt-2">
+          {formatRupiah(metrics.totalWeek)}
+        </p>
+        <p className="text-xs text-slate-400 mt-1">
+          Akumulasi 7 hari terakhir
+        </p>
       </div>
     </div>
   );
