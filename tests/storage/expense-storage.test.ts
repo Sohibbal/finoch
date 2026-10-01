@@ -91,4 +91,27 @@ describe("Expense Storage & Sync Queue", () => {
     const queue = await syncQueue.getPendingItems();
     expect(queue.some(q => q.payload.userId === "user-123")).toBe(true);
   });
+
+  it("reliably migrates multiple guest expenses without transaction auto-commit error and cleans up old queue", async () => {
+    // Record 3 guest expenses
+    await expenseStorage.saveExpense({ itemName: "Nasi Uduk", amount: 10000, category: "primer", userId: "guest" });
+    await expenseStorage.saveExpense({ itemName: "Es Teh", amount: 5000, category: "bocor_halus", userId: "guest" });
+    await expenseStorage.saveExpense({ itemName: "Bensin", amount: 20000, category: "primer", userId: "guest" });
+
+    // Migrate all 3 items to user-999
+    const count = await expenseStorage.claimGuestExpenses("user-999");
+    expect(count).toBe(3);
+
+    const guestItems = await expenseStorage.getExpenses("guest");
+    expect(guestItems).toHaveLength(0);
+
+    const userItems = await expenseStorage.getExpenses("user-999");
+    expect(userItems).toHaveLength(3);
+
+    // Verify queue items: no orphaned guest queue items remain
+    const queue = await syncQueue.getPendingItems();
+    const guestQueueItems = queue.filter(q => q.payload.userId === "guest");
+    expect(guestQueueItems).toHaveLength(0);
+    expect(queue).toHaveLength(3);
+  });
 });

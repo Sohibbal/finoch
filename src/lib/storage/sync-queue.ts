@@ -47,6 +47,17 @@ export class SyncQueueManager {
     }
   }
 
+  async removeGuestItems(): Promise<void> {
+    const db = await getDatabase();
+    const all = await db.getAll("sync_queue");
+    const guestItemIds = all
+      .filter((item) => item.payload.userId === "guest")
+      .map((item) => item.id);
+    if (guestItemIds.length > 0) {
+      await this.removeItems(guestItemIds);
+    }
+  }
+
   async clearQueue(): Promise<void> {
     const db = await getDatabase();
     await db.clear("sync_queue");

@@ -116,7 +116,7 @@ export class ExpenseStorage {
     const index = tx.store.index("by-user");
     const guestExpenses = await index.getAll("guest");
 
-    let count = 0;
+    const migratedList: Expense[] = [];
     for (const exp of guestExpenses) {
       const migrated: Expense = {
         ...exp,
@@ -125,12 +125,20 @@ export class ExpenseStorage {
         syncStatus: "pending",
       };
       await tx.store.put(migrated);
-      await syncQueue.enqueue("create", migrated);
-      count++;
+      migratedList.push(migrated);
     }
 
     await tx.done;
-    return count;
+
+    // Clean up legacy guest queue items to prevent duplication
+    await syncQueue.removeGuestItems();
+
+    // Enqueue migrated items for authenticated cloud sync
+    for (const migrated of migratedList) {
+      await syncQueue.enqueue("create", migrated);
+    }
+
+    return migratedList.length;
   }
 
   async clearAll(): Promise<void> {
