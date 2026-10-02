@@ -10,15 +10,25 @@ interface VoiceRecorderProps {
   onStart: () => void;
   onStop: () => void;
   isSupported?: boolean;
+  isTranscribing?: boolean;
 }
 
-export function VoiceRecorder({ state, onStart, onStop, isSupported = true }: VoiceRecorderProps) {
+export function VoiceRecorder({
+  state,
+  onStart,
+  onStop,
+  isSupported = true,
+  isTranscribing = false,
+}: VoiceRecorderProps) {
   const isListening = state === "listening";
-  const isProcessing = state === "processing";
+  const isProcessing = state === "processing" || isTranscribing;
   const isSaved = state === "saved";
   const isError = state === "error";
 
   const getStatusLabel = () => {
+    if (isTranscribing) {
+      return "Menerjemahkan dengan AI lokal...";
+    }
     switch (state) {
       case "listening":
         return "Mendengarkan... Bicara sekarang";
@@ -43,6 +53,9 @@ export function VoiceRecorder({ state, onStart, onStop, isSupported = true }: Vo
     if (state === "listening") {
       return "Berhenti bicara 2 detik untuk analisis otomatis";
     }
+    if (state === "error") {
+      return "Bicara lagi atau gunakan input Catat Manual di bawah";
+    }
     return "";
   };
 
@@ -52,8 +65,8 @@ export function VoiceRecorder({ state, onStart, onStop, isSupported = true }: Vo
         {/* Pulsing ring during listening */}
         {isListening && (
           <>
-            <div className="absolute w-24 h-24 rounded-full bg-emerald-500/20 animate-ping" />
-            <div className="absolute w-28 h-28 rounded-full bg-emerald-500/10 animate-pulse" />
+            <div className="absolute w-24 h-24 rounded-full bg-blue-500/20 animate-ping" />
+            <div className="absolute w-28 h-28 rounded-full bg-blue-500/10 animate-pulse" />
           </>
         )}
 
@@ -69,10 +82,10 @@ export function VoiceRecorder({ state, onStart, onStop, isSupported = true }: Vo
               : isProcessing
               ? "bg-slate-700 text-slate-300 shadow-slate-700/20 cursor-wait"
               : isSaved
-              ? "bg-emerald-600 text-white shadow-emerald-600/30"
+              ? "bg-blue-600 text-white shadow-blue-600/30"
               : isError
               ? "bg-amber-600 text-white"
-              : "bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30"
+              : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30"
           }`}
         >
           {isProcessing ? (

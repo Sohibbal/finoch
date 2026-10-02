@@ -24,8 +24,8 @@ export function TranscriptPreview({
           Suara Terdeteksi
         </span>
         {isListening && (
-          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1 text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
             Live
           </span>
         )}

@@ -2,7 +2,7 @@
 
 import React from "react";
 import { Edit3, Trash2, Tag } from "lucide-react";
-import type { ParsedVoiceItem, ExpenseCategory } from "@/lib/types/expense";
+import type { ParsedVoiceItem } from "@/lib/types/expense";
 
 interface ParsedExpenseListProps {
   items: ParsedVoiceItem[];
@@ -52,7 +52,7 @@ export function ParsedExpenseList({
               <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                 {item.itemName}
               </h4>
-              <p className="text-base font-bold text-indigo-600 dark:text-indigo-400 mt-0.5">
+              <p className="text-base font-bold text-blue-600 dark:text-blue-400 mt-0.5">
                 {formatRupiah(item.amount)}
               </p>
 
@@ -62,7 +62,7 @@ export function ParsedExpenseList({
                 onClick={() => onToggleCategory(item.id)}
                 className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
                   isPrimer
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
+                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
                     : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
                 }`}
               >

@@ -108,7 +108,7 @@ export function ExpenseEditor({ item, isOpen, onSave, onClose }: ExpenseEditorPr
                 onClick={() => setCategory("primer")}
                 className={`py-2 px-3 rounded-xl text-xs font-medium border text-center transition ${
                   category === "primer"
-                    ? "bg-emerald-600 text-white border-emerald-600"
+                    ? "bg-blue-600 text-white border-blue-600"
                     : "bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700"
                 }`}
               >
@@ -138,7 +138,7 @@ export function ExpenseEditor({ item, isOpen, onSave, onClose }: ExpenseEditorPr
             </button>
             <button
               type="submit"
-              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium text-white bg-indigo-600 hover:bg-indigo-500 flex items-center justify-center gap-1.5 transition"
+              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 flex items-center justify-center gap-1.5 transition"
             >
               <Check className="w-3.5 h-3.5" />
               Simpan Perubahan

@@ -42,13 +42,13 @@ export function ManualExpenseInput({ onParsed, disabled }: ManualExpenseInputPro
           }}
           disabled={disabled}
           placeholder="Atau ketik di sini: beli bensin 20rb..."
-          className="w-full pl-3.5 pr-11 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
+          className="w-full pl-3.5 pr-11 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 text-xs sm:text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
         />
         <button
           type="submit"
           disabled={!text.trim() || disabled}
           aria-label="Kirim teks pengeluaran"
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white transition-colors"
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:bg-slate-300 dark:disabled:bg-slate-700 text-white transition-colors"
         >
           <Send className="w-3.5 h-3.5" />
         </button>

@@ -31,4 +31,9 @@ describe("Voice Flow Component Definitions", () => {
     const manual = await import("@/components/expense/manual-expense-input");
     expect(manual.ManualExpenseInput).toBeDefined();
   });
+
+  it("exports OfflineModelCard component", async () => {
+    const card = await import("@/components/expense/offline-model-card");
+    expect(card.OfflineModelCard).toBeDefined();
+  });
 });
