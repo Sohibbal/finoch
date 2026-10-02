@@ -36,6 +36,9 @@ export function VoiceExpenseSheet({
     isOnline,
     isTranscribing,
     isModelDownloaded,
+    activeModelTier,
+    selectedModelTier,
+    setSelectedModelTier,
     isDownloadingModel,
     modelDownloadProgress,
     isSupported,
@@ -267,6 +270,9 @@ export function VoiceExpenseSheet({
             <div className="pt-1">
               <OfflineModelCard
                 isModelDownloaded={isModelDownloaded}
+                activeModelTier={activeModelTier}
+                selectedModelTier={selectedModelTier}
+                onSelectTier={setSelectedModelTier}
                 isDownloading={isDownloadingModel}
                 downloadProgress={modelDownloadProgress}
                 onDownload={downloadOfflineModel}

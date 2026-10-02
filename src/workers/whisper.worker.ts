@@ -18,12 +18,17 @@ if (env.backends?.onnx?.wasm) {
 
 class PipelineSingleton {
   static task = "automatic-speech-recognition" as const;
-  static model = "Xenova/whisper-tiny";
+  static currentModel = "Xenova/whisper-base";
   static instance: any = null;
 
-  static async getInstance(progress_callback?: (data: any) => void) {
-    if (this.instance === null) {
-      this.instance = await pipeline(this.task, this.model, {
+  static async getInstance(
+    modelId?: string,
+    progress_callback?: (data: any) => void
+  ) {
+    const targetModel = modelId || this.currentModel;
+    if (this.instance === null || this.currentModel !== targetModel) {
+      this.currentModel = targetModel;
+      this.instance = await pipeline(this.task, targetModel, {
         progress_callback,
         quantized: true,
       });
@@ -33,17 +38,17 @@ class PipelineSingleton {
 }
 
 self.addEventListener("message", async (event: MessageEvent) => {
-  const { type, audio } = event.data || {};
+  const { type, audio, model, tier } = event.data || {};
 
   if (type === "load") {
     try {
-      await PipelineSingleton.getInstance((progress: any) => {
+      await PipelineSingleton.getInstance(model, (progress: any) => {
         self.postMessage({
           status: "progress",
           data: progress,
         });
       });
-      self.postMessage({ status: "ready" });
+      self.postMessage({ status: "ready", data: { tier } });
     } catch (err: any) {
       self.postMessage({
         status: "error",
@@ -52,19 +57,21 @@ self.addEventListener("message", async (event: MessageEvent) => {
     }
   } else if (type === "warmup") {
     try {
-      await PipelineSingleton.getInstance();
-      self.postMessage({ status: "ready" });
+      await PipelineSingleton.getInstance(model);
+      self.postMessage({ status: "ready", data: { tier } });
     } catch {
       // Warmup silent fallback
     }
   } else if (type === "transcribe") {
     try {
-      const transcriber = await PipelineSingleton.getInstance();
+      const transcriber = await PipelineSingleton.getInstance(model);
       self.postMessage({ status: "transcribing" });
 
       const output = await transcriber(audio, {
         language: "indonesian",
         task: "transcribe",
+        temperature: 0.0,
+        max_new_tokens: 128,
       });
 
       const rawText =

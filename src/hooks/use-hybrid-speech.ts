@@ -2,7 +2,11 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
-import { useOfflineWhisper } from "@/hooks/use-offline-whisper";
+import {
+  useOfflineWhisper,
+  OfflineModelTier,
+  OFFLINE_MODEL_CONFIGS,
+} from "@/hooks/use-offline-whisper";
 import {
   convertAudioBlobTo16kHz,
   checkAudioSupport,
@@ -35,13 +39,16 @@ export interface UseHybridSpeechReturn {
   isOnline: boolean;
   isTranscribing: boolean;
   isModelDownloaded: boolean;
+  activeModelTier: OfflineModelTier | null;
+  selectedModelTier: OfflineModelTier;
+  setSelectedModelTier: (tier: OfflineModelTier) => void;
   isDownloadingModel: boolean;
   modelDownloadProgress: number;
   isSupported: boolean;
   startListening: () => Promise<void>;
   stopListening: () => void;
   resetTranscript: () => void;
-  downloadOfflineModel: () => Promise<boolean>;
+  downloadOfflineModel: (tier?: OfflineModelTier) => Promise<boolean>;
   deleteOfflineModel: () => Promise<void>;
 }
 
@@ -294,6 +301,9 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
     isOnline,
     isTranscribing: offlineWhisper.isTranscribing,
     isModelDownloaded: offlineWhisper.isModelDownloaded,
+    activeModelTier: offlineWhisper.activeModelTier,
+    selectedModelTier: offlineWhisper.selectedModelTier,
+    setSelectedModelTier: offlineWhisper.setSelectedModelTier,
     isDownloadingModel: offlineWhisper.isDownloading,
     modelDownloadProgress: offlineWhisper.downloadProgress,
     isSupported,
