@@ -136,7 +136,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         } else if (errType === "no-speech") {
           userMsg = "Tidak terdengar suara. Silakan coba bicara lebih jelas.";
         } else if (errType === "network") {
-          userMsg = "Koneksi jaringan suara terganggu. Coba periksa koneksi Anda.";
+          userMsg = "Pengenalan suara browser memerlukan koneksi internet di Chrome/Edge. Anda tetap bisa menggunakan Catat Manual di bawah yang 100% offline.";
         }
 
         setError(errType);
@@ -171,6 +171,12 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     if (!isSupported || !recognitionRef.current) {
       setError("unsupported");
       setErrorMessage("Browser Anda tidak mendukung Web Speech API.");
+      return;
+    }
+
+    if (typeof navigator !== "undefined" && !navigator.onLine) {
+      setError("network");
+      setErrorMessage("Perangkat sedang offline. Pengenalan suara browser memerlukan koneksi internet di Chrome/Edge. Anda tetap bisa menggunakan Catat Manual di bawah yang 100% offline.");
       return;
     }
 

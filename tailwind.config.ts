@@ -9,6 +9,15 @@ const config: Config = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: [
+          "var(--font-plus-jakarta-sans)",
+          "Plus Jakarta Sans",
+          "system-ui",
+          "-apple-system",
+          "sans-serif",
+        ],
+      },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",

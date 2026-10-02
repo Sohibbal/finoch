@@ -38,8 +38,8 @@ export function SyncIndicator() {
 
   if (status === "syncing") {
     return (
-      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-800">
-        <RefreshCw className="w-3 h-3 animate-spin text-indigo-500" />
+      <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+        <RefreshCw className="w-3 h-3 animate-spin text-blue-500" />
         <span>Sinkronisasi...</span>
       </div>
     );
@@ -62,9 +62,9 @@ export function SyncIndicator() {
   return (
     <div
       title="Tersinkronisasi aman dengan cloud"
-      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-50 dark:bg-emerald-950/50 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800"
+      className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800"
     >
-      <Check className="w-3 h-3 text-emerald-500" />
+      <Check className="w-3 h-3 text-blue-500" />
       <span>Tersinkron</span>
     </div>
   );

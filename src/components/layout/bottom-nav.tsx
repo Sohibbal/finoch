@@ -1,54 +1,67 @@
 "use client";
 
 import React from "react";
-import { Mic, ShieldCheck, User, Home } from "lucide-react";
+import { Mic, User, Home } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 interface BottomNavProps {
   onOpenVoice: () => void;
-  onOpenPrivacy: () => void;
+  onOpenPrivacy?: () => void;
   userEmail?: string | null;
 }
 
-export function BottomNav({ onOpenVoice, onOpenPrivacy, userEmail }: BottomNavProps) {
+export function BottomNav({ onOpenVoice, userEmail }: BottomNavProps) {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
+  const isLogin = pathname === "/login" || pathname === "/register";
+
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-800 px-4 py-2 flex items-center justify-around max-w-md mx-auto sm:rounded-t-3xl">
-      <Link
-        href="/"
-        className="flex flex-col items-center gap-0.5 text-xs text-indigo-600 dark:text-indigo-400 font-medium"
+    <div className="md:hidden fixed bottom-5 left-0 right-0 z-40 px-5 pointer-events-none flex justify-center">
+      <nav
+        aria-label="Navigasi Bawah Mobile (Beranda, Suara, Akun)"
+        className="pointer-events-auto w-full max-w-[320px] h-15 bg-white/95 dark:bg-[#0e1526]/95 border border-slate-200/90 dark:border-blue-500/25 rounded-full shadow-2xl shadow-slate-900/15 dark:shadow-blue-950/60 px-3 py-1.5 flex items-center justify-between backdrop-blur-xl transition-all"
       >
-        <Home className="w-5 h-5" />
-        <span>Beranda</span>
-      </Link>
-
-      {/* Floating Center Voice Button */}
-      <div className="-mt-7">
-        <button
-          type="button"
-          onClick={onOpenVoice}
-          aria-label="Catat pengeluaran dengan suara"
-          className="w-14 h-14 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white shadow-xl shadow-indigo-600/30 flex items-center justify-center transition-transform active:scale-95"
+        {/* 1. KIRI: Beranda */}
+        <Link
+          href="/"
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition active:scale-95 ${
+            isHome
+              ? "bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300"
+          }`}
+          aria-label="Halaman Beranda"
         >
-          <Mic className="w-7 h-7" />
-        </button>
-      </div>
+          <Home className="w-4 h-4 stroke-[2.2]" />
+          <span>Beranda</span>
+        </Link>
 
-      <button
-        type="button"
-        onClick={onOpenPrivacy}
-        className="flex flex-col items-center gap-0.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
-      >
-        <ShieldCheck className="w-5 h-5" />
-        <span>Privasi</span>
-      </button>
+        {/* 2. TENGAH: Icon Microphone Floating Trigger */}
+        <div className="relative -mt-5">
+          <button
+            type="button"
+            onClick={onOpenVoice}
+            aria-label="Bicara untuk catat pengeluaran"
+            className="w-13 h-13 rounded-full bg-gradient-to-tr from-blue-600 via-indigo-600 to-sky-500 text-white flex items-center justify-center shadow-xl shadow-blue-500/40 border-2 border-white dark:border-[#0e1526] hover:scale-105 active:scale-95 transition-transform"
+          >
+            <Mic className="w-6 h-6 stroke-[2.5]" />
+          </button>
+        </div>
 
-      <Link
-        href={userEmail ? "/login" : "/login"}
-        className="flex flex-col items-center gap-0.5 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 font-medium"
-      >
-        <User className="w-5 h-5" />
-        <span>{userEmail ? "Akun" : "Masuk"}</span>
-      </Link>
-    </nav>
+        {/* 3. KANAN: Akun */}
+        <Link
+          href={userEmail ? "/#akun" : "/login"}
+          className={`flex items-center gap-1.5 px-3 py-2 rounded-full text-xs font-bold transition active:scale-95 ${
+            isLogin
+              ? "bg-blue-50 dark:bg-blue-500/20 text-blue-700 dark:text-blue-300 shadow-sm"
+              : "text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-300"
+          }`}
+          aria-label={userEmail ? "Profil Akun Mahasiswa" : "Masuk Akun"}
+        >
+          <User className="w-4 h-4 stroke-[2.2]" />
+          <span>{userEmail ? "Akun" : "Masuk"}</span>
+        </Link>
+      </nav>
+    </div>
   );
 }

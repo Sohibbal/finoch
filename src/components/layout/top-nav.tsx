@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShieldCheck, User, Moon, Sun, Home, LogIn } from "lucide-react";
+import { ShieldCheck, User, LogIn, Sun, Moon } from "lucide-react";
 import { SyncIndicator } from "../dashboard/sync-indicator";
 
 interface TopNavProps {
@@ -14,9 +14,8 @@ export function TopNav({ onOpenPrivacy, userEmail }: TopNavProps) {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
-    // Check local storage or document class for theme
-    const isDarkMode = document.documentElement.classList.contains("dark");
-    setIsDark(isDarkMode);
+    const hasDarkClass = document.documentElement.classList.contains("dark");
+    setIsDark(hasDarkClass);
   }, []);
 
   const toggleTheme = () => {
@@ -32,42 +31,48 @@ export function TopNav({ onOpenPrivacy, userEmail }: TopNavProps) {
   };
 
   return (
-    <nav className="hidden md:flex items-center gap-3">
+    <nav className="hidden md:flex items-center gap-2">
       <Link
         href="/"
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+        className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition"
       >
-        <Home className="w-4 h-4" />
-        <span>Beranda</span>
+        Beranda
       </Link>
 
       <a
         href="#fitur"
-        className="px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+        className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition"
       >
-        <span>Fitur</span>
+        Fitur
+      </a>
+
+      <a
+        href="#testing-suara"
+        className="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition"
+      >
+        Testing Suara
       </a>
 
       <button
         type="button"
         onClick={onOpenPrivacy}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+        className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/[0.06] transition"
       >
-        <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+        <ShieldCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
         <span>Privasi</span>
       </button>
 
       {/* Sync Badge */}
-      <div className="pl-1">
+      <div className="px-1">
         <SyncIndicator />
       </div>
 
-      {/* Theme Switcher */}
+      {/* Theme Toggle Button */}
       <button
         type="button"
         onClick={toggleTheme}
-        aria-label="Toggle tema gelap/terang"
-        className="p-2 rounded-xl text-slate-500 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+        aria-label={isDark ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
+        className="p-2 rounded-full text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-slate-100 dark:hover:bg-white/[0.08] transition active:scale-95"
       >
         {isDark ? (
           <Sun className="w-4 h-4 text-amber-400" />
@@ -76,20 +81,22 @@ export function TopNav({ onOpenPrivacy, userEmail }: TopNavProps) {
         )}
       </button>
 
-      {/* User Login/Account */}
+      {/* User Login/Account Button */}
       <Link
         href="/login"
-        className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white shadow-sm shadow-emerald-600/20 transition active:scale-95"
+        className="flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white dark:bg-white/[0.08] dark:text-blue-300 border border-blue-600 dark:border-blue-500/25 dark:hover:bg-white/[0.12] transition active:scale-95 shadow-sm shadow-blue-600/20"
       >
         {userEmail ? (
           <>
-            <User className="w-3.5 h-3.5" />
+            <div className="w-5 h-5 rounded-full bg-blue-100 dark:bg-blue-500/20 border border-blue-300 dark:border-blue-400/40 flex items-center justify-center text-[10px] text-blue-700 dark:text-blue-300 font-bold">
+              {userEmail.charAt(0).toUpperCase()}
+            </div>
             <span className="max-w-[120px] truncate">{userEmail.split("@")[0]}</span>
           </>
         ) : (
           <>
             <LogIn className="w-3.5 h-3.5" />
-            <span>Masuk</span>
+            <span>Masuk Akun</span>
           </>
         )}
       </Link>
