@@ -8,13 +8,19 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String    // bcrypt hashed
-  name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  expenses  Expense[]
+  id                String             @id @default(uuid())
+  email             String             @unique
+  password          String             // bcrypt hashed
+  name              String
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+  profile           FinancialProfile?
+  expenses          Expense[]
+  transactions      Transaction[]
+  goals             FinancialGoal[]
+  recurringExpenses RecurringExpense[]
+  insights          AiInsight[]
+  simulations       Simulation[]
 
   @@map("users")
 }
@@ -32,4 +38,106 @@ model Expense {
 
   @@index([userId, updatedAt])
   @@map("expenses")
+}
+
+model FinancialProfile {
+  id                   String   @id @default(uuid())
+  userId               String   @unique
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  monthlyIncome        Int      // Dalam IDR
+  incomeType           String   // "salary" | "freelance" | "business" | "allowance" | "other"
+  currentSavings       Int      // Total tabungan saat ini
+  monthlyFixedExpenses Int      // Pengeluaran tetap primer (sewa kos, tagihan wajib)
+  financialPriority    String   // "saving" | "emergency_fund" | "buy_item" | "education" | "travel" | "debt_repayment" | "other"
+  currency             String   @default("IDR")
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  @@map("financial_profiles")
+}
+
+model Transaction {
+  id              String   @id // Client UUID (mendukung local-first & offline sync)
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String   // "income" | "expense"
+  amount          Int      // Nominal dalam Rupiah
+  category        String   // "Food", "Groceries", "Transportation", "Housing", "Bills", "Health", "Education", "Entertainment", "Shopping", "Subscription", "Family", "Other"
+  spendingType    String   @default("needs") // "needs" (50%) | "wants" (30%) | "savings" (20%)
+  merchant        String?  // Contoh: "Mie Gacoan", "Indomaret"
+  description     String?
+  transactionDate DateTime @default(now())
+  paymentMethod   String   @default("Cash") // "Cash", "Bank Transfer", "Debit Card", "Credit Card", "E-Wallet", "Other"
+  source          String   // "manual" | "ocr" | "voice"
+  metadata        Json?    // Menyimpan OCR confidence, item breakdown, atau raw transcript suara
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([userId, transactionDate])
+  @@index([userId, category])
+  @@map("transactions")
+}
+
+model FinancialGoal {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String   // Contoh: "Beli Laptop Kerja"
+  targetAmount  Int      // Target nominal Rupiah
+  currentAmount Int      @default(0) // Tabungan teralokasi
+  targetDate    DateTime // Tenggat target
+  category      String   // "gadget", "emergency_fund", "vehicle", "travel", "education", "other"
+  status        String   @default("on_track") // "on_track" | "at_risk" | "behind_target" | "achieved"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([userId, status])
+  @@map("financial_goals")
+}
+
+model RecurringExpense {
+  id        String    @id @default(uuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name      String    // Contoh: "Netflix", "Kost Bulanan", "Spotify"
+  amount    Int
+  category  String
+  frequency String    @default("monthly") // "monthly" | "weekly" | "yearly"
+  nextDate  DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@map("recurring_expenses")
+}
+
+model AiInsight {
+  id             String   @id @default(uuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           String   // "spending_increase" | "spending_decrease" | "recurring" | "unusual_spending" | "goal_projection"
+  title          String
+  description    String
+  evidence       Json     // Bukti angka: { "current": 920000, "previous": 720000, "changePercent": 27.78 }
+  impact         String   // Dampak finansial
+  recommendation String   // Rekomendasi tindakan nyata
+  confidence     Float?   @default(0.95)
+  createdAt      DateTime @default(now())
+
+  @@index([userId, createdAt])
+  @@map("ai_insights")
+}
+
+model Simulation {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  inputParameters Json
+  result          Json
+  createdAt       DateTime @default(now())
+
+  @@index([userId])
+  @@map("simulations")
 }
