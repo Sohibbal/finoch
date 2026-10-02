@@ -12,6 +12,7 @@
 
 # Production
 /build
+/public/wasm/
 
 # Misc
 .DS_Store

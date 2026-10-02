@@ -3,7 +3,11 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import { useOfflineWhisper } from "@/hooks/use-offline-whisper";
-import { convertAudioBlobTo16kHz, checkAudioSupport } from "@/lib/audio/audio-processor";
+import {
+  convertAudioBlobTo16kHz,
+  checkAudioSupport,
+  isAudioSilent,
+} from "@/lib/audio/audio-processor";
 
 export type SpeechEngineMode = "online" | "offline-whisper" | "offline-unready";
 
@@ -62,6 +66,16 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
+  const silenceIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const maxRecordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const analyserContextRef = useRef<AudioContext | null>(null);
+
+  // Otomatis beralih ke offline jika Web Speech API mengembalikan error network
+  useEffect(() => {
+    if (onlineSpeech.error === "network") {
+      setIsOnline(false);
+    }
+  }, [onlineSpeech.error]);
 
   // Monitor network status
   useEffect(() => {
@@ -84,19 +98,51 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
     isModelDownloaded: offlineWhisper.isModelDownloaded,
   });
 
-  // Stop offline recorder helper
-  const stopOfflineRecording = useCallback(() => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
-      try {
-        mediaRecorderRef.current.stop();
-      } catch {}
+  // Pembersihan audio detector & stream offline
+  const cleanupOfflineAudio = useCallback(() => {
+    if (silenceIntervalRef.current) {
+      clearInterval(silenceIntervalRef.current);
+      silenceIntervalRef.current = null;
+    }
+    if (maxRecordingTimerRef.current) {
+      clearTimeout(maxRecordingTimerRef.current);
+      maxRecordingTimerRef.current = null;
+    }
+    if (analyserContextRef.current) {
+      analyserContextRef.current.close().catch(() => {});
+      analyserContextRef.current = null;
     }
     if (audioStreamRef.current) {
       audioStreamRef.current.getTracks().forEach((track) => track.stop());
       audioStreamRef.current = null;
     }
-    setIsOfflineRecording(false);
   }, []);
+
+  // Stop offline recorder helper
+  const stopOfflineRecording = useCallback(() => {
+    cleanupOfflineAudio();
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+      try {
+        mediaRecorderRef.current.stop();
+      } catch {}
+    }
+    setIsOfflineRecording(false);
+  }, [cleanupOfflineAudio]);
+
+  // Cleanup saat unmount
+  useEffect(() => {
+    return () => {
+      cleanupOfflineAudio();
+    };
+  }, [cleanupOfflineAudio]);
+
+  const stopListening = useCallback(() => {
+    if (engineMode === "online") {
+      onlineSpeech.stopListening();
+    } else {
+      stopOfflineRecording();
+    }
+  }, [engineMode, onlineSpeech, stopOfflineRecording]);
 
   const startListening = useCallback(async () => {
     setOfflineError(null);
@@ -139,11 +185,22 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
           type: recorder.mimeType || "audio/webm",
         });
 
-        if (audioBlob.size === 0) return;
+        if (audioBlob.size === 0) {
+          setOfflineError("Tidak ada rekaman suara.");
+          return;
+        }
 
         try {
           const pcmData = await convertAudioBlobTo16kHz(audioBlob);
+          if (isAudioSilent(pcmData, 0.005)) {
+            setOfflineError("Tidak terdengar suara. Silakan coba bicara lebih jelas.");
+            return;
+          }
           const resultText = await offlineWhisper.transcribe(pcmData);
+          if (!resultText) {
+            setOfflineError("Suara belum dapat dikenali. Silakan coba bicara lebih dekat ke mikrofon.");
+            return;
+          }
           setOfflineTranscript(resultText);
         } catch (err: any) {
           setOfflineError(err?.message || "Gagal mentranskripsi audio secara lokal.");
@@ -153,19 +210,55 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
       mediaRecorderRef.current = recorder;
       recorder.start(250); // potong setiap 250ms
       setIsOfflineRecording(true);
-    } catch (err: any) {
+
+      // Pasang Silence Detector otomatis via Web Audio API
+      try {
+        const AudioCtxClass =
+          window.AudioContext ||
+          (window as unknown as { webkitAudioContext: typeof AudioContext })
+            .webkitAudioContext;
+        const audioCtx = new AudioCtxClass();
+        analyserContextRef.current = audioCtx;
+
+        const source = audioCtx.createMediaStreamSource(stream);
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 256;
+        source.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        let hasSpoken = false;
+        let lastSpeechTime = Date.now();
+
+        silenceIntervalRef.current = setInterval(() => {
+          analyser.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const avg = sum / dataArray.length;
+
+          // Ambang batas pendeteksian suara manusia
+          if (avg > 14) {
+            hasSpoken = true;
+            lastSpeechTime = Date.now();
+          } else if (hasSpoken && Date.now() - lastSpeechTime > 1800) {
+            // Berhenti bicara selama 1.8 detik -> auto-stop
+            stopOfflineRecording();
+          }
+        }, 120);
+
+        // Batas maksimal rekaman 15 detik untuk keamanan
+        maxRecordingTimerRef.current = setTimeout(() => {
+          stopOfflineRecording();
+        }, 15000);
+      } catch (e) {
+        console.warn("Silence detector initialization warning:", e);
+      }
+    } catch {
       setOfflineError("Izin mikrofon diperlukan untuk merekam suara.");
       setIsOfflineRecording(false);
     }
-  }, [engineMode, onlineSpeech, offlineWhisper]);
-
-  const stopListening = useCallback(() => {
-    if (engineMode === "online") {
-      onlineSpeech.stopListening();
-    } else {
-      stopOfflineRecording();
-    }
-  }, [engineMode, onlineSpeech, stopOfflineRecording]);
+  }, [engineMode, onlineSpeech, offlineWhisper, stopOfflineRecording]);
 
   const resetTranscript = useCallback(() => {
     onlineSpeech.resetTranscript();

@@ -4,6 +4,18 @@ import { pipeline, env } from "@xenova/transformers";
 env.allowLocalModels = false;
 env.useBrowserCache = true;
 
+// Arahkan WebAssembly ke host lokal /wasm/ agar 100% offline tanpa CDN jsdelivr
+const workerOrigin =
+  typeof self !== "undefined" && self.location && self.location.origin
+    ? self.location.origin
+    : "";
+const wasmBase = workerOrigin ? `${workerOrigin}/wasm/` : "/wasm/";
+
+if (env.backends?.onnx?.wasm) {
+  env.backends.onnx.wasm.wasmPaths = wasmBase;
+  env.backends.onnx.wasm.numThreads = 1;
+}
+
 class PipelineSingleton {
   static task = "automatic-speech-recognition" as const;
   static model = "Xenova/whisper-tiny";
@@ -13,6 +25,7 @@ class PipelineSingleton {
     if (this.instance === null) {
       this.instance = await pipeline(this.task, this.model, {
         progress_callback,
+        quantized: true,
       });
     }
     return this.instance;
@@ -37,6 +50,13 @@ self.addEventListener("message", async (event: MessageEvent) => {
         error: err?.message || String(err),
       });
     }
+  } else if (type === "warmup") {
+    try {
+      await PipelineSingleton.getInstance();
+      self.postMessage({ status: "ready" });
+    } catch {
+      // Warmup silent fallback
+    }
   } else if (type === "transcribe") {
     try {
       const transcriber = await PipelineSingleton.getInstance();
@@ -47,9 +67,11 @@ self.addEventListener("message", async (event: MessageEvent) => {
         task: "transcribe",
       });
 
-      const text =
+      const rawText =
         output?.text || (typeof output === "string" ? output : "") || "";
-      self.postMessage({ status: "complete", output: text.trim() });
+      // Bersihkan special tokens seperti [BLANK_AUDIO] atau noise
+      const cleanText = rawText.replace(/\[.*?\]/g, "").trim();
+      self.postMessage({ status: "complete", output: cleanText });
     } catch (err: any) {
       self.postMessage({
         status: "error",

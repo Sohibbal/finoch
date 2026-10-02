@@ -105,6 +105,16 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
     return workerRef.current;
   }, []);
 
+  // Warmup model saat komponen dimuat jika model sudah tersimpan
+  useEffect(() => {
+    if (isModelDownloaded) {
+      const worker = getOrCreateWorker();
+      if (worker) {
+        worker.postMessage({ type: "warmup" });
+      }
+    }
+  }, [isModelDownloaded, getOrCreateWorker]);
+
   // Cleanup worker saat unmount
   useEffect(() => {
     return () => {
@@ -119,6 +129,16 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
     setError(null);
     setIsDownloading(true);
     setDownloadProgress(5);
+
+    // Pastikan file WebAssembly runtime lokal ikut tersimpan di cache PWA
+    try {
+      if (typeof window !== "undefined" && typeof caches !== "undefined") {
+        const cache = await caches.open("voicash-shell-v2");
+        await cache.addAll(["/wasm/ort-wasm-simd.wasm", "/wasm/ort-wasm.wasm"]);
+      }
+    } catch (e) {
+      console.warn("PWA WASM precache note:", e);
+    }
 
     const worker = getOrCreateWorker();
     if (!worker) {

@@ -125,7 +125,12 @@ export async function convertAudioBlobTo16kHz(blob: Blob): Promise<Float32Array>
     (window as unknown as { webkitAudioContext: typeof AudioContext })
       .webkitAudioContext;
 
-  const audioCtx = new AudioContextClass({ sampleRate: TARGET_SAMPLE_RATE });
+  let audioCtx: AudioContext;
+  try {
+    audioCtx = new AudioContextClass({ sampleRate: TARGET_SAMPLE_RATE });
+  } catch {
+    audioCtx = new AudioContextClass();
+  }
   try {
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
     const channelData = audioBuffer.getChannelData(0); // Mono channel primer

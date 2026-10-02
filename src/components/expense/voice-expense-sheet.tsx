@@ -51,31 +51,45 @@ export function VoiceExpenseSheet({
   const [editingItem, setEditingItem] = useState<ParsedVoiceItem | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
 
-  // Sync state with speech recognition lifecycle
+  // 1. Sync state saat merekam
   useEffect(() => {
     if (isListening) {
       setVoiceState("listening");
       setStatusMessage(null);
-    } else if (voiceState === "listening" && !isListening) {
-      // Finished listening -> process transcript
-      const fullText = transcript.trim();
-      if (fullText) {
-        setVoiceState("processing");
-        const items = parseIndonesianExpense(fullText);
-        if (items.length > 0) {
-          setParsedItems(items);
-          setVoiceState("review");
-        } else {
-          setVoiceState("error");
-          setStatusMessage("Pengeluaran belum dapat dikenali. Silakan coba lagi atau gunakan ketikan teks.");
-        }
+    }
+  }, [isListening]);
+
+  // 2. Sync state saat AI lokal Whisper mentranskripsi
+  useEffect(() => {
+    if (isTranscribing) {
+      setVoiceState("processing");
+      setStatusMessage(null);
+    }
+  }, [isTranscribing]);
+
+  // 3. Tangani hasil transkripsi setelah selesai merekam dan mentranskripsi
+  useEffect(() => {
+    // Jangan proses selama masih merekam suara atau AI masih mentranskripsi
+    if (isListening || isTranscribing) return;
+
+    const fullText = transcript.trim();
+    if (fullText) {
+      setVoiceState("processing");
+      const items = parseIndonesianExpense(fullText);
+      if (items.length > 0) {
+        setParsedItems(items);
+        setVoiceState("review");
+        setStatusMessage(null);
       } else {
-        setVoiceState("idle");
+        setVoiceState("error");
+        setStatusMessage(
+          "Pengeluaran belum dapat dikenali. Silakan coba bicara lebih jelas atau gunakan Catat Manual."
+        );
       }
     }
-  }, [isListening, transcript, voiceState]);
+  }, [transcript, isListening, isTranscribing]);
 
-  // Handle speech recognition error
+  // 4. Tangani error pengenalan suara
   useEffect(() => {
     if (speechError) {
       setVoiceState("error");

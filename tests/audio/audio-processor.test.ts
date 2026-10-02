@@ -77,4 +77,11 @@ describe("Audio Processor Module", () => {
       expect(typeof support.mimeType).toBe("string");
     });
   });
+
+  describe("convertAudioBlobTo16kHz", () => {
+    it("exports convertAudioBlobTo16kHz function", async () => {
+      const module = await import("@/lib/audio/audio-processor");
+      expect(typeof module.convertAudioBlobTo16kHz).toBe("function");
+    });
+  });
 });
