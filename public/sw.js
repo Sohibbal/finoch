@@ -1,6 +1,11 @@
-const CACHE_NAME = "voicash-shell-v2";
+const CACHE_NAME = "finra-shell-v1";
 const STATIC_ASSETS = [
   "/",
+  "/dashboard",
+  "/simulator",
+  "/goals",
+  "/copilot",
+  "/onboarding",
   "/manifest.json",
   "/favicon.ico",
   "/icons/icon-192.png",
@@ -43,13 +48,13 @@ self.addEventListener("fetch", (event) => {
   if (event.request.mode === "navigate") {
     event.respondWith(
       fetch(event.request).catch(() => {
-        return caches.match("/");
+        return caches.match(url.pathname).then((res) => res || caches.match("/"));
       })
     );
     return;
   }
 
-  // Handle static assets & scripts: Network first with cache fallback to prevent stale layouts
+  // Handle static assets & scripts: Network first with cache fallback
   event.respondWith(
     fetch(event.request)
       .then((response) => {
