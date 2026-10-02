@@ -21,6 +21,9 @@ import {
   RefreshCw,
   Wallet,
   Play,
+  Compass,
+  Camera,
+  Bot,
 } from "lucide-react";
 import { useExpenses } from "@/hooks/use-expenses";
 import { MetricCards, calculateMetrics } from "@/components/dashboard/metric-cards";
@@ -85,20 +88,20 @@ export default function RootPage() {
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           {/* Brand Mark */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-blue-500/30 font-black text-sm tracking-tighter transition group-hover:scale-105">
-              VC
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-indigo-600 flex items-center justify-center text-white shadow-md shadow-emerald-500/30 font-black text-sm tracking-tighter transition group-hover:scale-105">
+              FINRA
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-base sm:text-lg font-black tracking-tight text-slate-900 dark:text-white leading-none">
-                  VoiCash
+                  FINRA
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-300/80 dark:border-blue-500/40">
-                  Mahasiswa
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-500/40">
+                  Digital Twin
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-                Catat pengeluaran cukup dengan bicara
+                See Your Financial Future Before You Live It
               </p>
             </div>
           </Link>
@@ -321,57 +324,60 @@ export default function RootPage() {
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 space-y-16">
           {/* 1. HERO SECTION: Value Proposition & CTAs */}
           <section className="text-center max-w-4xl mx-auto space-y-6 pt-2">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-100 dark:bg-blue-500/15 border border-blue-300 dark:border-blue-500/30 text-blue-800 dark:text-blue-300 text-xs font-bold shadow-sm">
-              <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-              <span>100% Suara Bahasa Indonesia • PWA Local-First • Zero Cloud AI Cost</span>
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-100 dark:bg-emerald-500/15 border border-emerald-300 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold shadow-sm">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+              <span>AI Financial Digital Twin • Model 50/30/20 • Hybrid Voice & OCR • Zero Voice Cost</span>
             </div>
 
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 dark:text-white tracking-tight leading-[1.12]">
-              Kelola Keuangan Kuliah Cukup dengan{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-500 to-blue-400 dark:from-blue-400 dark:via-indigo-300 dark:to-sky-300">
-                Bicara.
+              See Your Financial Future Before You{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 via-teal-500 to-indigo-500 dark:from-emerald-400 dark:via-teal-300 dark:to-indigo-300">
+                Live It.
               </span>
             </h1>
 
             <p className="text-sm sm:text-base text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-              Ucapkan pengeluaran seperti{" "}
-              <em className="text-blue-700 dark:text-blue-300 font-semibold">
-                &ldquo;makan ayam geprek 15 ribu sama es teh 5 ribu&rdquo;
-              </em>
-              . VoiCash otomatis memecah item transaksi, memahami angka gaul (ceban, gocap, 15rb), dan mengawasi kebocoran anggaran mahasiswa.
+              Ubah transaksi harian dari suara dan foto struk menjadi Digital Twin 50/30/20. Simulasikan keputusan anggaran di What-If Simulator dan capai target keuangan Anda bersama AI Copilot.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setIsVoiceOpen(true)}
-                className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-blue-600/30 transition active:scale-95 group"
+              <Link
+                href="/onboarding"
+                className="w-full sm:w-auto px-7 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-indigo-600 hover:from-emerald-500 hover:to-indigo-500 text-white font-black text-sm flex items-center justify-center gap-2.5 shadow-xl shadow-emerald-600/30 transition active:scale-95 group"
               >
-                <Mic className="w-5 h-5 group-hover:scale-110 transition-transform stroke-[2.2]" />
-                <span>Mulai Bicara Sekarang (Tamu)</span>
-              </button>
+                <Sparkles className="w-5 h-5 group-hover:scale-110 transition-transform stroke-[2.2]" />
+                <span>Bangun Digital Twin Saya</span>
+              </Link>
 
               <Link
-                href="/login"
+                href="/dashboard"
                 className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-white dark:bg-white/[0.06] hover:bg-slate-50 dark:hover:bg-white/[0.1] border border-slate-300 dark:border-white/[0.08] text-slate-800 dark:text-slate-200 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
               >
-                <LogIn className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Masuk Akun Cloud</span>
+                <span>Buka Dashboard</span>
+                <ChevronRight className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              </Link>
+
+              <Link
+                href="/simulator"
+                className="w-full sm:w-auto px-6 py-3.5 rounded-2xl bg-purple-50 dark:bg-purple-950/40 hover:bg-purple-100 dark:hover:bg-purple-900/50 border border-purple-200 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-sm flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
+              >
+                <Compass className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span>Coba Simulator</span>
               </Link>
             </div>
 
             {/* Trust Highlights */}
             <div className="pt-2 flex flex-wrap items-center justify-center gap-6 text-xs text-slate-500 dark:text-slate-400">
               <div className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Web Speech Native</span>
+                <Smartphone className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Offline Whisper & Web Speech</span>
               </div>
               <div className="flex items-center gap-2">
-                <Lock className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                <span>Audio Tidak Diunggah</span>
+                <Lock className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <span>Suara Tidak Diunggah ke Cloud</span>
               </div>
               <div className="flex items-center gap-2">
-                <ShieldCheck className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 <span>Offline Local-First PWA</span>
               </div>
             </div>
