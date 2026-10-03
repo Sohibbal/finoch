@@ -40,7 +40,7 @@ export function UnifiedConfirmationModal({
   const [validationError, setValidationError] = useState<string>("");
 
   useEffect(() => {
-    if (candidate) {
+    if (isOpen && candidate) {
       setFormData({
         ...candidate,
         merchant: candidate.merchant || "Transaksi Baru",
@@ -52,7 +52,7 @@ export function UnifiedConfirmationModal({
       setShowItemDetails(Boolean(candidate.items && candidate.items.length > 0));
       setValidationError("");
     }
-  }, [candidate]);
+  }, [isOpen, candidate]);
 
   if (!isOpen || !formData) return null;
 

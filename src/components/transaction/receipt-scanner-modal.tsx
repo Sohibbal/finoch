@@ -38,12 +38,15 @@ export function ReceiptScannerModal({
     setUseCamera(false);
   };
 
+  const wasOpenRef = useRef(isOpen);
+
   useEffect(() => {
-    if (!isOpen) {
+    if (wasOpenRef.current && !isOpen) {
       stopCamera();
       setIsScanning(false);
       setErrorMessage("");
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen]);
 
   const startCamera = async () => {

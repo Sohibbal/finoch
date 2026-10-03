@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 export const SILENCE_TIMEOUT_MS = 2000;
 export const SPEECH_LANG_ID = "id-ID";
@@ -203,15 +203,28 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     setErrorMessage(null);
   }, []);
 
-  return {
-    isListening,
-    transcript,
-    interimTranscript,
-    error,
-    errorMessage,
-    isSupported,
-    startListening,
-    stopListening,
-    resetTranscript,
-  };
+  return useMemo(
+    () => ({
+      isListening,
+      transcript,
+      interimTranscript,
+      error,
+      errorMessage,
+      isSupported,
+      startListening,
+      stopListening,
+      resetTranscript,
+    }),
+    [
+      isListening,
+      transcript,
+      interimTranscript,
+      error,
+      errorMessage,
+      isSupported,
+      startListening,
+      stopListening,
+      resetTranscript,
+    ]
+  );
 }

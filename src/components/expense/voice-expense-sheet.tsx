@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { X, CheckCircle, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { useHybridSpeech } from "@/hooks/use-hybrid-speech";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
@@ -53,27 +53,28 @@ export function VoiceExpenseSheet({
   const [parsedItems, setParsedItems] = useState<ParsedVoiceItem[]>([]);
   const [editingItem, setEditingItem] = useState<ParsedVoiceItem | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const wasOpenRef = useRef(isOpen);
 
   // 1. Sync state saat merekam
   useEffect(() => {
-    if (isListening) {
+    if (isOpen && isListening) {
       setVoiceState("listening");
       setStatusMessage(null);
     }
-  }, [isListening]);
+  }, [isOpen, isListening]);
 
   // 2. Sync state saat AI lokal Whisper mentranskripsi
   useEffect(() => {
-    if (isTranscribing) {
+    if (isOpen && isTranscribing) {
       setVoiceState("processing");
       setStatusMessage(null);
     }
-  }, [isTranscribing]);
+  }, [isOpen, isTranscribing]);
 
   // 3. Tangani hasil transkripsi setelah selesai merekam dan mentranskripsi
   useEffect(() => {
-    // Jangan proses selama masih merekam suara atau AI masih mentranskripsi
-    if (isListening || isTranscribing) return;
+    // Jangan proses jika sheet ditutup, selama masih merekam suara, atau AI masih mentranskripsi
+    if (!isOpen || isListening || isTranscribing) return;
 
     const fullText = transcript.trim();
     if (fullText) {
@@ -90,25 +91,26 @@ export function VoiceExpenseSheet({
         );
       }
     }
-  }, [transcript, isListening, isTranscribing]);
+  }, [isOpen, transcript, isListening, isTranscribing]);
 
   // 4. Tangani error pengenalan suara
   useEffect(() => {
-    if (speechError) {
+    if (isOpen && speechError) {
       setVoiceState("error");
       setStatusMessage(speechError);
     }
-  }, [speechError]);
+  }, [isOpen, speechError]);
 
   // Reset when modal opens/closes
   useEffect(() => {
-    if (!isOpen) {
+    if (wasOpenRef.current && !isOpen) {
       stopListening();
       resetTranscript();
       setParsedItems([]);
       setVoiceState("idle");
       setStatusMessage(null);
     }
+    wasOpenRef.current = isOpen;
   }, [isOpen, stopListening, resetTranscript]);
 
   if (!isOpen) return null;

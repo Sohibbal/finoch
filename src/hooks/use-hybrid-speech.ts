@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useSpeechRecognition } from "@/hooks/use-speech-recognition";
 import {
   useOfflineWhisper,
@@ -69,6 +69,19 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
 
   // Offline speech engine (Whisper Web Worker)
   const offlineWhisper = useOfflineWhisper();
+
+  const {
+    stopListening: onlineStopListening,
+    resetTranscript: onlineResetTranscript,
+    startListening: onlineStartListening,
+  } = onlineSpeech;
+
+  const {
+    transcribe: offlineTranscribe,
+    downloadModel: offlineDownloadModel,
+    deleteModel: offlineDeleteModel,
+    setSelectedModelTier: offlineSetSelectedModelTier,
+  } = offlineWhisper;
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioStreamRef = useRef<MediaStream | null>(null);
@@ -145,18 +158,18 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
 
   const stopListening = useCallback(() => {
     if (engineMode === "online") {
-      onlineSpeech.stopListening();
+      onlineStopListening();
     } else {
       stopOfflineRecording();
     }
-  }, [engineMode, onlineSpeech, stopOfflineRecording]);
+  }, [engineMode, onlineStopListening, stopOfflineRecording]);
 
   const startListening = useCallback(async () => {
     setOfflineError(null);
 
     if (engineMode === "online") {
-      onlineSpeech.resetTranscript();
-      onlineSpeech.startListening();
+      onlineResetTranscript();
+      onlineStartListening();
       return;
     }
 
@@ -203,7 +216,7 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
             setOfflineError("Tidak terdengar suara. Silakan coba bicara lebih jelas.");
             return;
           }
-          const resultText = await offlineWhisper.transcribe(pcmData);
+          const resultText = await offlineTranscribe(pcmData);
           if (!resultText) {
             setOfflineError("Suara belum dapat dikenali. Silakan coba bicara lebih dekat ke mikrofon.");
             return;
@@ -265,13 +278,19 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
       setOfflineError("Izin mikrofon diperlukan untuk merekam suara.");
       setIsOfflineRecording(false);
     }
-  }, [engineMode, onlineSpeech, offlineWhisper, stopOfflineRecording]);
+  }, [
+    engineMode,
+    onlineResetTranscript,
+    onlineStartListening,
+    offlineTranscribe,
+    stopOfflineRecording,
+  ]);
 
   const resetTranscript = useCallback(() => {
-    onlineSpeech.resetTranscript();
+    onlineResetTranscript();
     setOfflineTranscript("");
     setOfflineError(null);
-  }, [onlineSpeech]);
+  }, [onlineResetTranscript]);
 
   // Unified returned values
   const isListening =
@@ -292,25 +311,48 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
     typeof window !== "undefined" &&
     (onlineSpeech.isSupported || typeof navigator.mediaDevices !== "undefined");
 
-  return {
-    isListening,
-    transcript,
-    interimTranscript,
-    error,
-    engineMode,
-    isOnline,
-    isTranscribing: offlineWhisper.isTranscribing,
-    isModelDownloaded: offlineWhisper.isModelDownloaded,
-    activeModelTier: offlineWhisper.activeModelTier,
-    selectedModelTier: offlineWhisper.selectedModelTier,
-    setSelectedModelTier: offlineWhisper.setSelectedModelTier,
-    isDownloadingModel: offlineWhisper.isDownloading,
-    modelDownloadProgress: offlineWhisper.downloadProgress,
-    isSupported,
-    startListening,
-    stopListening,
-    resetTranscript,
-    downloadOfflineModel: offlineWhisper.downloadModel,
-    deleteOfflineModel: offlineWhisper.deleteModel,
-  };
+  return useMemo(
+    () => ({
+      isListening,
+      transcript,
+      interimTranscript,
+      error,
+      engineMode,
+      isOnline,
+      isTranscribing: offlineWhisper.isTranscribing,
+      isModelDownloaded: offlineWhisper.isModelDownloaded,
+      activeModelTier: offlineWhisper.activeModelTier,
+      selectedModelTier: offlineWhisper.selectedModelTier,
+      setSelectedModelTier: offlineSetSelectedModelTier,
+      isDownloadingModel: offlineWhisper.isDownloading,
+      modelDownloadProgress: offlineWhisper.downloadProgress,
+      isSupported,
+      startListening,
+      stopListening,
+      resetTranscript,
+      downloadOfflineModel: offlineDownloadModel,
+      deleteOfflineModel: offlineDeleteModel,
+    }),
+    [
+      isListening,
+      transcript,
+      interimTranscript,
+      error,
+      engineMode,
+      isOnline,
+      offlineWhisper.isTranscribing,
+      offlineWhisper.isModelDownloaded,
+      offlineWhisper.activeModelTier,
+      offlineWhisper.selectedModelTier,
+      offlineSetSelectedModelTier,
+      offlineWhisper.isDownloading,
+      offlineWhisper.downloadProgress,
+      isSupported,
+      startListening,
+      stopListening,
+      resetTranscript,
+      offlineDownloadModel,
+      offlineDeleteModel,
+    ]
+  );
 }

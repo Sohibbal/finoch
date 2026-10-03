@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 export type OfflineModelTier = "base" | "small";
 
@@ -264,17 +264,32 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
     [getOrCreateWorker, activeModelTier, selectedModelTier]
   );
 
-  return {
-    isModelDownloaded,
-    activeModelTier,
-    selectedModelTier,
-    setSelectedModelTier,
-    isDownloading,
-    downloadProgress,
-    isTranscribing,
-    error,
-    downloadModel,
-    deleteModel,
-    transcribe,
-  };
+  return useMemo(
+    () => ({
+      isModelDownloaded,
+      activeModelTier,
+      selectedModelTier,
+      setSelectedModelTier,
+      isDownloading,
+      downloadProgress,
+      isTranscribing,
+      error,
+      downloadModel,
+      deleteModel,
+      transcribe,
+    }),
+    [
+      isModelDownloaded,
+      activeModelTier,
+      selectedModelTier,
+      setSelectedModelTier,
+      isDownloading,
+      downloadProgress,
+      isTranscribing,
+      error,
+      downloadModel,
+      deleteModel,
+      transcribe,
+    ]
+  );
 }
