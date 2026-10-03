@@ -67,44 +67,60 @@ export async function POST(req: Request) {
     let llmErrorMessage: string | null = null;
 
     if (llmConfig) {
-      try {
-        const res = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${llmConfig.apiKey}`,
-          },
-          body: JSON.stringify({
-            model: llmConfig.model,
-            messages: [
-              { role: "system", content: systemPrompt },
-              { role: "user", content: message },
-            ],
-            temperature: 0.5,
-          }),
-          signal: AbortSignal.timeout(15000),
-        });
+      const candidateModels = Array.from(
+        new Set([llmConfig.model, ...(llmConfig.fallbackModels || [])])
+      );
 
-        if (res.ok) {
-          const data = await res.json();
-          const reply = data.choices?.[0]?.message?.content?.trim();
-          if (reply) {
-            return NextResponse.json({
-              reply,
-              source: "llm",
-              model: llmConfig.model,
-              provider: llmConfig.provider,
-            });
+      for (const candidateModel of candidateModels) {
+        try {
+          const res = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${llmConfig.apiKey}`,
+            },
+            body: JSON.stringify({
+              model: candidateModel,
+              messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: message },
+              ],
+              temperature: 0.5,
+            }),
+            signal: AbortSignal.timeout(15000),
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const reply = data.choices?.[0]?.message?.content?.trim();
+            if (reply) {
+              return NextResponse.json({
+                reply,
+                source: "llm",
+                model: candidateModel,
+                provider: llmConfig.provider,
+              });
+            }
+          } else {
+            const errorText = await res.text();
+            console.warn(
+              `[Copilot LLM ${candidateModel} Error ${res.status}]`,
+              errorText
+            );
+            llmErrorMessage = `HTTP ${res.status}: ${errorText.slice(0, 150)}`;
+            // If model does not exist (404), continue trying next candidate
+            if (res.status === 404 || errorText.includes("does not exist")) {
+              continue;
+            }
+            break;
           }
-        } else {
-          const errorText = await res.text();
-          console.error(`[Copilot LLM Error ${res.status}]`, errorText);
-          llmErrorMessage = `HTTP ${res.status}: ${errorText.slice(0, 150)}`;
+        } catch (err: unknown) {
+          const errorMsg =
+            err instanceof Error ? err.message : "Network/Timeout error";
+          console.error(`[Copilot LLM ${candidateModel} Exception]`, errorMsg);
+          llmErrorMessage = errorMsg;
+          break;
         }
-      } catch (err: unknown) {
-        const errorMsg = err instanceof Error ? err.message : "Network/Timeout error";
-        console.error("[Copilot LLM Exception]", errorMsg);
-        llmErrorMessage = errorMsg;
       }
     } else {
       llmErrorMessage = "OPENAI_API_KEY belum terdeteksi. Pastikan file .env ada dan restart npm run dev.";

@@ -26,7 +26,8 @@ describe("LLM Client Auto Configuration", () => {
     expect(config).not.toBeNull();
     expect(config?.provider).toBe("groq");
     expect(config?.baseUrl).toBe("https://api.groq.com/openai/v1");
-    expect(config?.model).toBe("llama-3.3-70b-versatile");
+    expect(config?.model).toBe("openai/gpt-oss-20b");
+    expect(config?.fallbackModels).toContain("openai/gpt-oss-20b");
   });
 
   it("auto detects Gemini provider and sets Google OpenAI-compatible endpoint", () => {

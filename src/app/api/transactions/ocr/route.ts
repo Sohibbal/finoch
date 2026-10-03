@@ -83,39 +83,53 @@ Pilih category PERSIS dari salah satu 9 kategori berikut:
 Teks OCR Struk:
 ${rawText}`;
 
-    const res = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${llmConfig.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: llmConfig.model,
-        messages: [{ role: "user", content: prompt }],
-        temperature: 0.1,
-      }),
-      signal: AbortSignal.timeout(10000),
-    });
+    const candidateModels = Array.from(
+      new Set([llmConfig.model, ...(llmConfig.fallbackModels || [])])
+    );
 
-    if (!res.ok) return null;
+    for (const candidateModel of candidateModels) {
+      try {
+        const res = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${llmConfig.apiKey}`,
+          },
+          body: JSON.stringify({
+            model: candidateModel,
+            messages: [{ role: "user", content: prompt }],
+            temperature: 0.1,
+          }),
+          signal: AbortSignal.timeout(10000),
+        });
 
-    const data = await res.json();
-    const content = data.choices?.[0]?.message?.content?.trim();
-    if (!content) return null;
+        if (!res.ok) {
+          if (res.status === 404) continue;
+          return null;
+        }
 
-    const cleaned = content.replace(/^```json\s*|\s*```$/g, "").trim();
-    const parsed = JSON.parse(cleaned);
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content?.trim();
+        if (!content) continue;
 
-    return {
-      merchant: parsed.merchant || "Struk Belanja",
-      amount: Number(parsed.amount) || 0,
-      category: parsed.category || "Other",
-      spendingType: parsed.spendingType || "wants",
-      date: parsed.date || new Date().toISOString().split("T")[0],
-      source: "ocr",
-      confidence: 0.95,
-      items: Array.isArray(parsed.items) ? parsed.items : [],
-    };
+        const cleaned = content.replace(/^```json\s*|\s*```$/g, "").trim();
+        const parsed = JSON.parse(cleaned);
+
+        return {
+          merchant: parsed.merchant || "Struk Belanja",
+          amount: Number(parsed.amount) || 0,
+          category: parsed.category || "Other",
+          spendingType: parsed.spendingType || "wants",
+          date: parsed.date || new Date().toISOString().split("T")[0],
+          source: "ocr",
+          confidence: 0.95,
+          items: Array.isArray(parsed.items) ? parsed.items : [],
+        };
+      } catch {
+        continue;
+      }
+    }
+    return null;
   } catch {
     return null;
   }
