@@ -138,18 +138,18 @@ export default function GoalsPage() {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-20">
       {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5">
+      <header className="sticky top-0 z-30 bg-white/85 dark:bg-[#091124]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-9 h-9 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold shadow-md shadow-emerald-500/20">
-                <Target className="w-5 h-5" />
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div className="w-9 h-9 rounded-xl bg-[#0f274a] dark:bg-blue-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-900/20">
+                <Target className="w-5 h-5 text-blue-300 dark:text-white" />
               </div>
               <div>
                 <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
                   FINRA
                 </span>
-                <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300">
+                <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300">
                   Goals
                 </span>
               </div>
@@ -157,24 +157,24 @@ export default function GoalsPage() {
           </div>
 
           <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600 dark:text-slate-300">
-            <Link href="/dashboard" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+            <Link href="/dashboard" className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
               Dashboard
             </Link>
-            <Link href="/simulator" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+            <Link href="/simulator" className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
               What-If Simulator
             </Link>
-            <Link href="/goals" className="text-emerald-600 dark:text-emerald-400">
+            <Link href="/goals" className="text-blue-700 dark:text-blue-400 font-bold">
               Goals
             </Link>
-            <Link href="/copilot" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5">
-              <Bot className="w-4 h-4 text-emerald-500" />
+            <Link href="/copilot" className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
+              <Bot className="w-4 h-4 text-blue-500" />
               AI Copilot
             </Link>
           </nav>
 
           <button
             onClick={() => setIsModalOpen(true)}
-            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs shadow-md shadow-blue-900/20 transition-colors"
           >
             <Plus className="w-4 h-4" />
             Tambah Target
