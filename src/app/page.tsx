@@ -6,13 +6,19 @@ import {
   Mic,
   Camera,
   ArrowRight,
-  ChevronRight,
-  Check,
   ChevronDown,
   ChevronUp,
+  Sparkles,
+  ShieldCheck,
+  Zap,
+  CheckCircle2,
+  Lock,
+  Smartphone,
+  Layers,
 } from "lucide-react";
 import { TopNav } from "@/components/layout/top-nav";
 import { WaveBackground } from "@/components/ui/wave-background";
+import { FeatureFlipCards } from "@/components/landing/feature-flip-cards";
 import { PrivacyDialog } from "@/components/layout/privacy-dialog";
 import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
@@ -30,7 +36,7 @@ export default function RootPage() {
   const [currentCandidate, setCurrentCandidate] = useState<TransactionCandidate | null>(null);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
-  // Interactive Live Twin Preview in Hero
+  // Interactive Live Twin Preview Calculator
   const [previewIncome, setPreviewIncome] = useState(4500000);
   const previewNeeds = Math.round(previewIncome * 0.5);
   const previewWants = Math.round(previewIncome * 0.3);
@@ -73,16 +79,16 @@ export default function RootPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#091124] text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen bg-white dark:bg-[#091124] text-slate-900 dark:text-slate-100 transition-colors selection:bg-blue-600 selection:text-white">
       {/* 1. TOP NAVBAR */}
-      <header className="sticky top-0 z-40 bg-white/80 dark:bg-[#091124]/85 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3.5">
+      <header className="sticky top-0 z-40 bg-white/85 dark:bg-[#091124]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-6 lg:px-8 py-3.5 transition-colors">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 group">
-            <span className="text-xl font-black tracking-tight text-[#0f274a] dark:text-blue-400">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <span className="text-xl font-black tracking-tight text-[#0f274a] dark:text-blue-400 group-hover:opacity-90 transition-opacity">
               FINRA
             </span>
-            <span className="hidden sm:inline-block text-xs font-semibold text-slate-500 dark:text-slate-400 pl-2 border-l border-slate-300 dark:border-slate-700">
-              AI Financial Twin
+            <span className="hidden sm:inline-block text-xs font-semibold text-slate-500 dark:text-slate-400 pl-2.5 border-l border-slate-300 dark:border-slate-700">
+              by VoiCash
             </span>
           </Link>
 
@@ -91,61 +97,248 @@ export default function RootPage() {
             onOpenPrivacy={() => setIsPrivacyOpen(true)}
           />
 
-          {/* Mobile Right Quick Action */}
+          {/* Mobile Quick Actions */}
           <div className="md:hidden flex items-center gap-2">
-            <Link
-              href="/onboarding"
-              className="px-3.5 py-1.5 rounded-xl bg-[#0f274a] dark:bg-blue-600 text-white text-xs font-semibold"
-            >
-              Mulai
-            </Link>
+            {userEmail ? (
+              <Link
+                href="/dashboard"
+                className="px-3.5 py-1.5 rounded-xl bg-[#0f274a] dark:bg-blue-600 text-white text-xs font-semibold"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="px-3 py-1.5 text-xs font-semibold text-slate-700 dark:text-slate-300"
+                >
+                  Masuk
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-3.5 py-1.5 rounded-xl bg-[#0f274a] dark:bg-blue-600 text-white text-xs font-semibold"
+                >
+                  Daftar
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
 
-      {/* 2. HERO SECTION WITH ANIMATED WAVE BACKGROUND */}
-      <section className="relative pt-16 sm:pt-24 pb-20 sm:pb-28 px-4 sm:px-6 lg:px-8 overflow-hidden">
+      {/* 2. FULL 100VH HERO SECTION WITH DICODING-STYLE ANIMATED WAVE BACKGROUND */}
+      <section className="relative min-h-[calc(100dvh-65px)] flex flex-col justify-between items-center text-center px-4 sm:px-6 lg:px-8 pt-12 sm:pt-20 pb-8 sm:pb-12 overflow-hidden">
         <WaveBackground />
 
-        <div className="relative z-10 max-w-4xl mx-auto text-center space-y-8">
-          <div className="space-y-4">
-            <h1 className="text-4xl sm:text-6xl font-black text-slate-950 dark:text-white tracking-tight leading-[1.12]">
-              See Your Financial Future{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600 dark:from-blue-400 dark:via-indigo-300 dark:to-sky-300">
-                Before You Live It.
-              </span>
-            </h1>
+        {/* Top Spacer to keep center balance */}
+        <div className="hidden sm:block h-2" />
 
-            <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-              FINRA memodelkan arus kas harian Anda ke dalam Digital Twin 50/30/20 secara deterministik. Catat instan dengan suara offline atau foto struk belanja, lalu simulasikan keputusan finansial sebelum menjalaninya.
+        {/* Hero Central Content */}
+        <div className="relative z-10 max-w-4xl mx-auto space-y-7 sm:space-y-8 my-auto">
+          {/* Release Badge */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-50 dark:bg-blue-950/70 border border-blue-200/80 dark:border-blue-800 text-blue-800 dark:text-blue-300 text-xs font-semibold shadow-sm animate-fade-in">
+            <Sparkles className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+            <span>Platform Finansial Local-First dengan AI Suara Hibrida</span>
+          </div>
+
+          {/* Main Headline */}
+          <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black text-slate-950 dark:text-white tracking-tight leading-[1.12]">
+            See Your Financial Future{" "}
+            <br className="hidden sm:block" />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-indigo-600 to-sky-600 dark:from-blue-400 dark:via-indigo-300 dark:to-sky-300">
+              Before You Live It.
+            </span>
+          </h1>
+
+          {/* Subtitle */}
+          <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
+            FINRA memodelkan arus kas harian Anda ke dalam Digital Twin 50/30/20 secara deterministik. Catat instan dengan suara offline atau foto struk belanja, lalu simulasikan keputusan finansial sebelum menjalaninya.
+          </p>
+
+          {/* Primary Action Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-2">
+            <Link
+              href="/register"
+              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-sm shadow-lg shadow-blue-950/10 dark:shadow-none transition-all active:scale-95 flex items-center justify-center gap-2"
+            >
+              <span>Mulai Sekarang Gratis</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
+            <Link
+              href="/login"
+              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white dark:bg-[#101c38] hover:bg-slate-50 dark:hover:bg-[#15254b] border border-slate-300 dark:border-[#1e335f] text-slate-800 dark:text-slate-200 font-semibold text-sm transition-all active:scale-95"
+            >
+              Masuk ke Akun
+            </Link>
+          </div>
+
+          {/* Interactive Live Demo Trigger Pills */}
+          <div className="pt-2 flex flex-wrap items-center justify-center gap-2.5">
+            <span className="text-xs text-slate-500 dark:text-slate-400 mr-1 font-medium">
+              Coba Langsung Tanpa Login:
+            </span>
+
+            <button
+              type="button"
+              onClick={() => setIsVoiceOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/90 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700/90 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm transition-colors"
+            >
+              <Mic className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Coba Demo Suara</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsScannerOpen(true)}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-white/90 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700/90 border border-slate-200 dark:border-slate-700 text-xs font-semibold text-slate-800 dark:text-slate-200 shadow-sm transition-colors"
+            >
+              <Camera className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+              <span>Pindai Struk</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Hero Bottom Bar with Trust Points and Scroll Indicator */}
+        <div className="relative z-10 w-full max-w-4xl mx-auto pt-8 border-t border-slate-200/60 dark:border-slate-800/60 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-medium">
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              100% On-Device Voice (Whisper Local)
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              Model Finansial 50/30/20 FINRA
+            </span>
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              PWA Siap Mode Offline
+            </span>
+          </div>
+
+          <a
+            href="#fitur-unggulan"
+            className="inline-flex items-center gap-1 font-semibold text-blue-700 dark:text-blue-400 hover:underline"
+          >
+            <span>Jelajahi Fitur</span>
+            <ChevronDown className="w-4 h-4 animate-bounce" />
+          </a>
+        </div>
+      </section>
+
+      {/* 3. FITUR UNGGULAN: 3 INTERACTIVE 3D FLIP CARDS */}
+      <section
+        id="fitur-unggulan"
+        className="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0c1630]"
+      >
+        <div className="max-w-6xl mx-auto space-y-12">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+              Arsitektur & Keunggulan
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
+              Tiga Pilar Utama FINRA
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Ketuk atau klik kartu mana saja di bawah untuk membalik dan membaca arsitektur teknis serta mekanisme kerjanya secara mendalam.
             </p>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Link
-              href="/onboarding"
-              className="w-full sm:w-auto px-7 py-3.5 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-sm shadow-md transition-all active:scale-95"
-            >
-              Bangun Digital Twin Saya
-            </Link>
+          {/* 3 Flip Cards Component */}
+          <FeatureFlipCards
+            onOpenVoice={() => setIsVoiceOpen(true)}
+            onOpenScanner={() => setIsScannerOpen(true)}
+          />
+        </div>
+      </section>
 
-            <Link
-              href="/simulator"
-              className="w-full sm:w-auto px-6 py-3.5 rounded-xl bg-white dark:bg-[#101c38] hover:bg-slate-50 dark:hover:bg-[#15254b] border border-slate-300 dark:border-[#1e335f] text-slate-800 dark:text-slate-200 font-semibold text-sm transition-all active:scale-95"
-            >
-              Coba Simulator What-If
-            </Link>
+      {/* 4. ALUR KERJA: 3 LANGKAH MUDAH */}
+      <section
+        id="alur-kerja"
+        className="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80"
+      >
+        <div className="max-w-6xl mx-auto space-y-14">
+          <div className="max-w-2xl mx-auto text-center space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+              Proses Kerja
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
+              Tiga Langkah Mengendalikan Finansial
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Dari pengeluaran harian hingga simulasi masa depan tanpa friksi pencatatan manual yang melelahkan.
+            </p>
           </div>
 
-          {/* Interactive Live Twin Calculator Preview */}
-          <div className="mt-12 text-left max-w-2xl mx-auto bg-white dark:bg-[#101c38] rounded-2xl p-6 sm:p-7 shadow-xl shadow-slate-900/5 dark:shadow-none border border-slate-200 dark:border-[#1e335f] space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
+            {/* Step 1 */}
+            <div className="p-7 rounded-2xl bg-white dark:bg-[#101c38] border border-slate-200 dark:border-[#1e335f] shadow-sm space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-400 font-black text-base flex items-center justify-center">
+                1
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Input Instan (Suara / Struk)
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Ucapkan transaksi dalam 3 detik setelah membayar di kasir atau foto struk nota belanja. Pemrosesan berjalan cepat di perangkat Anda.
+              </p>
+            </div>
+
+            {/* Step 2 */}
+            <div className="p-7 rounded-2xl bg-white dark:bg-[#101c38] border border-slate-200 dark:border-[#1e335f] shadow-sm space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-400 font-black text-base flex items-center justify-center">
+                2
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Klasifikasi Deterministik
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Algoritma NLP memisahkan item dan nominal rupiah serta memilah pengeluaran ke pos Kebutuhan (50%) atau Keinginan (30%).
+              </p>
+            </div>
+
+            {/* Step 3 */}
+            <div className="p-7 rounded-2xl bg-white dark:bg-[#101c38] border border-slate-200 dark:border-[#1e335f] shadow-sm space-y-4">
+              <div className="w-10 h-10 rounded-xl bg-sky-100 dark:bg-sky-950 text-sky-700 dark:text-sky-400 font-black text-base flex items-center justify-center">
+                3
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Simulasi & Proteksi Kas
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+                Kembaran finansial Anda mengevaluasi saldo, memicu alert bocor halus, dan memproyeksikan tanggal target tabungan tercapai.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. INTERACTIVE LIVE 50/30/20 TWIN CALCULATOR PREVIEW */}
+      <section
+        id="simulasi-503020"
+        className="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0c1630]"
+      >
+        <div className="max-w-4xl mx-auto space-y-10">
+          <div className="text-center space-y-3">
+            <div className="text-xs font-bold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+              Kalkulator Interaktif
+            </div>
+            <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
+              Preview Alokasi Finansial 50/30/20
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
+              Geser estimasi pemasukan bulanan Anda untuk melihat pembagian anggaran ideal sebelum membuat akun.
+            </p>
+          </div>
+
+          <div className="bg-white dark:bg-[#101c38] rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-[#1e335f] shadow-xl shadow-slate-900/5 dark:shadow-none space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Preview Digital Twin Finansial (Model 50/30/20)
+                  Simulasi Anggaran Bulanan
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Geser estimasi pemasukan untuk melihat alokasi ideal Anda
+                  Model proporsional kebutuhan, keinginan, dan tabungan
                 </p>
               </div>
               <div className="text-right">
@@ -183,7 +376,7 @@ export default function RootPage() {
                   Rp {previewNeeds.toLocaleString("id-ID")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
-                  Makan pokok, sewa, tagihan
+                  Makan pokok, kos, tagihan wajib
                 </div>
               </div>
 
@@ -195,7 +388,7 @@ export default function RootPage() {
                   Rp {previewWants.toLocaleString("id-ID")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
-                  Nongkrong, hobi, hiburan
+                  Nongkrong, hiburan, hobi
                 </div>
               </div>
 
@@ -207,198 +400,81 @@ export default function RootPage() {
                   Rp {previewSavings.toLocaleString("id-ID")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
-                  Dana darurat, investasi
+                  Dana darurat, target impian
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
 
-      {/* 3. DUAL CAPTURE SHOWCASE (VOICE & RECEIPT OCR) */}
-      <section id="fitur-capture" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0c1630]">
-        <div className="max-w-6xl mx-auto space-y-12">
-          <div className="max-w-2xl mx-auto text-center space-y-3">
-            <h2 className="text-3xl font-black text-slate-950 dark:text-white tracking-tight">
-              Pencatatan Tanpa Friksi: Suara & Scan Struk
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300">
-              Ucapkan apa yang Anda beli atau foto struk belanja. FINRA secara cerdas mengenali nominal dan mengklasifikasikan ke Needs vs Wants.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            {/* Left: Offline Voice Capabilities */}
-            <div className="bg-white dark:bg-[#101c38] rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-[#1e335f] space-y-6">
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Hybrid Voice Speech-to-Text
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Didukung Web Speech API saat online dan model Whisper lokal saat offline. Suara Anda diproses langsung di peramban tanpa biaya token API cloud dan tanpa risiko privasi.
-                </p>
+            {/* Interactive Voice Sample Tester */}
+            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 space-y-3">
+              <div className="text-xs font-semibold text-slate-600 dark:text-slate-300">
+                Uji Coba Pengenalan Kalimat Bahasa Indonesia:
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {sampleVoicePhrases.map((phrase, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleTestPhraseSelect(phrase)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      testPhrase === phrase
+                        ? "bg-[#0f274a] text-white dark:bg-blue-600"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                    }`}
+                  >
+                    &ldquo;{phrase}&rdquo;
+                  </button>
+                ))}
               </div>
 
-              {/* Interactive Voice Tester */}
-              <div className="space-y-3 pt-2">
-                <div className="text-xs font-semibold text-slate-500">
-                  Uji Coba Kalimat Transaksi:
+              {/* Parsed Output Box */}
+              <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800 space-y-2">
+                <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
+                  Hasil Pemisahan Transaksi:
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {sampleVoicePhrases.map((phrase, idx) => (
-                    <button
+                <div className="space-y-1.5">
+                  {parsedItems.map((item, idx) => (
+                    <div
                       key={idx}
-                      type="button"
-                      onClick={() => handleTestPhraseSelect(phrase)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                        testPhrase === phrase
-                          ? "bg-[#0f274a] text-white dark:bg-blue-600"
-                          : "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                      }`}
+                      className="flex items-center justify-between text-xs py-1"
                     >
-                      &ldquo;{phrase}&rdquo;
-                    </button>
+                      <span className="font-semibold text-slate-800 dark:text-slate-200">
+                        {item.itemName} ({item.category === "primer" ? "Needs" : "Wants"})
+                      </span>
+                      <span className="font-bold text-slate-900 dark:text-white">
+                        {formatRupiah(item.amount)}
+                      </span>
+                    </div>
                   ))}
                 </div>
-
-                {/* Parsed Output Box */}
-                <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800 space-y-2">
-                  <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                    Hasil Pengenalan Otomatis:
-                  </div>
-                  <div className="space-y-1.5">
-                    {parsedItems.map((item, idx) => (
-                      <div
-                        key={idx}
-                        className="flex items-center justify-between text-xs py-1"
-                      >
-                        <span className="font-semibold text-slate-800 dark:text-slate-200">
-                          {item.itemName} ({item.category === "primer" ? "Needs" : "Wants"})
-                        </span>
-                        <span className="font-bold text-slate-900 dark:text-white">
-                          {formatRupiah(item.amount)}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              <div className="pt-2">
-                <button
-                  type="button"
-                  onClick={() => setIsVoiceOpen(true)}
-                  className="w-full py-3 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs transition-colors"
-                >
-                  Buka Perekam Suara Langsung
-                </button>
               </div>
             </div>
 
-            {/* Right: Hybrid Receipt OCR */}
-            <div className="bg-white dark:bg-[#101c38] rounded-2xl p-6 sm:p-8 border border-slate-200 dark:border-[#1e335f] space-y-6">
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  Hybrid Receipt OCR Scanner
-                </h3>
-                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                  Unggah atau foto struk belanja supermarket, kafe, atau apotek. FINRA mengekstrak nama merchant, tanggal transaksi, total belanja, serta daftar item belanja secara terstruktur.
-                </p>
-              </div>
-
-              <div className="p-6 rounded-xl bg-slate-50 dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800 space-y-4 text-center">
-                <div className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                  Mendukung Struk Belanja Indonesia
-                </div>
-                <div className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
-                  Algoritma regex lokal dan jembatan PaddleOCR mengenali format nota kasir Indomaret, Alfamart, restoran, kafe, dan SPBU.
-                </div>
-                <div className="pt-2">
-                  <button
-                    type="button"
-                    onClick={() => setIsScannerOpen(true)}
-                    className="px-6 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#101c38] hover:bg-slate-50 dark:hover:bg-[#15254b] text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors"
-                  >
-                    Uji Scan Struk Sekarang
-                  </button>
-                </div>
-              </div>
-
-              <div className="text-xs text-slate-500 space-y-1">
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Gerbang Konfirmasi: Seluruh data hasil scan wajib diverifikasi sebelum disimpan.</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-blue-600 shrink-0" />
-                  <span>Fallback Offline: Tetap membaca struk di browser melalui Tesseract Web Worker.</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. WHAT-IF SIMULATOR VALUE PROPOSITION */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80">
-        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
-          <div className="lg:col-span-6 space-y-5">
-            <h2 className="text-3xl font-black text-slate-950 dark:text-white tracking-tight">
-              Simulator What-If: Uji Keputusan Sebelum Menyesal
-            </h2>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Ingin tahu dampaknya jika Anda memangkas pengeluaran kafe Rp 300.000 per bulan? Atau bagaimana jika biaya sewa kos naik mendadak?
-            </p>
-            <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              What-If Simulator menghitung secara deterministik pergeseran tanggal tercapainya target finansial Anda, memperlihatkan peluang surplus atau risiko defisit secara instan.
-            </p>
-            <div className="pt-2">
+            {/* CTA inside calculator */}
+            <div className="pt-2 text-center">
               <Link
-                href="/simulator"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs shadow-sm transition-colors"
+                href="/register"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs transition-colors"
               >
-                <span>Buka Simulator What-If</span>
+                <span>Terapkan Alokasi Ini di Akun Anda</span>
                 <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
           </div>
-
-          <div className="lg:col-span-6 bg-slate-50 dark:bg-[#101c38] rounded-2xl p-6 sm:p-7 border border-slate-200 dark:border-[#1e335f] space-y-4">
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Contoh Skenario Finansial
-            </div>
-
-            <div className="space-y-3">
-              <div className="p-4 rounded-xl bg-white dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800">
-                <div className="text-xs font-bold text-slate-900 dark:text-white">
-                  Skenario: Pangkas Jajan Kopi Rp 200.000 / Bulan
-                </div>
-                <div className="text-xs text-blue-700 dark:text-blue-400 font-semibold mt-1">
-                  Dampak: Target Dana Darurat tercapai 3 bulan lebih cepat.
-                </div>
-              </div>
-
-              <div className="p-4 rounded-xl bg-white dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800">
-                <div className="text-xs font-bold text-slate-900 dark:text-white">
-                  Skenario: Kenaikan Biaya Tempat Tinggal Rp 500.000
-                </div>
-                <div className="text-xs text-amber-600 dark:text-amber-400 font-semibold mt-1">
-                  Dampak: Porsi Needs melampaui 55%, rasio tabungan menyusut menjadi 8%.
-                </div>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
-      {/* 5. FAQ SECTION */}
-      <section id="faq" className="py-20 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0c1630]">
+      {/* 6. FAQ SECTION */}
+      <section
+        id="faq"
+        className="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80"
+      >
         <div className="max-w-3xl mx-auto space-y-8">
           <div className="text-center space-y-2">
             <h2 className="text-2xl sm:text-3xl font-black text-slate-950 dark:text-white tracking-tight">
               Pertanyaan yang Sering Diajukan
             </h2>
-            <p className="text-xs text-slate-500">
+            <p className="text-xs sm:text-sm text-slate-500">
               Informasi seputar privasi, kerja offline, dan model kalkulasi FINRA.
             </p>
           </div>
@@ -429,7 +505,7 @@ export default function RootPage() {
                 <button
                   type="button"
                   onClick={() => setExpandedFaq(expandedFaq === idx ? null : idx)}
-                  className="w-full p-4 text-left font-bold text-sm text-slate-900 dark:text-white flex items-center justify-between"
+                  className="w-full p-4 sm:p-5 text-left font-bold text-sm text-slate-900 dark:text-white flex items-center justify-between"
                 >
                   <span>{faq.q}</span>
                   {expandedFaq === idx ? (
@@ -439,7 +515,7 @@ export default function RootPage() {
                   )}
                 </button>
                 {expandedFaq === idx && (
-                  <div className="px-4 pb-4 text-xs text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3">
+                  <div className="px-4 sm:px-5 pb-5 text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed border-t border-slate-100 dark:border-slate-800 pt-3">
                     {faq.a}
                   </div>
                 )}
@@ -449,19 +525,39 @@ export default function RootPage() {
         </div>
       </section>
 
-      {/* 6. CLEAN NAVY FOOTER */}
-      <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#091124] text-xs text-slate-500">
+      {/* 7. BOTTOM CTA BANNER */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-gradient-to-b from-blue-50/50 to-white dark:from-[#0b162f] dark:to-[#091124]">
+        <div className="max-w-4xl mx-auto text-center space-y-6">
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
+            Kendalikan Finansial Anda Tanpa Kebocoran Kas
+          </h2>
+          <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 max-w-xl mx-auto leading-relaxed">
+            Mulai membangun Digital Twin finansial Anda hari ini. Gratis, tanpa biaya langganan, dan siap digunakan langsung di browser.
+          </p>
+          <div className="pt-2">
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-950/20 dark:shadow-none transition-all active:scale-95"
+            >
+              <span>Buat Akun Gratis Sekarang</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* 8. FOOTER */}
+      <footer className="border-t border-slate-200 dark:border-slate-800/80 py-10 px-4 sm:px-6 lg:px-8 bg-white dark:bg-[#091124] text-xs text-slate-500">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div>
-            <span className="font-bold text-slate-900 dark:text-white">FINRA</span>
-            <span> &copy; {new Date().getFullYear()}. See Your Financial Future Before You Live It.</span>
+            &copy; 2026 FINRA by VoiCash. Solusi Finansial Local-First Mahasiswa & Profesional Muda.
           </div>
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="hover:text-blue-600 transition-colors">
-              Dashboard
+          <div className="flex items-center gap-6 font-medium">
+            <Link href="/login" className="hover:text-blue-600 transition-colors">
+              Masuk
             </Link>
-            <Link href="/simulator" className="hover:text-blue-600 transition-colors">
-              Simulator
+            <Link href="/register" className="hover:text-blue-600 transition-colors">
+              Daftar
             </Link>
             <button
               type="button"
@@ -474,7 +570,7 @@ export default function RootPage() {
         </div>
       </footer>
 
-      {/* Interactive Modals */}
+      {/* Interactive Live Modals */}
       <VoiceExpenseSheet
         isOpen={isVoiceOpen}
         onClose={() => setIsVoiceOpen(false)}
