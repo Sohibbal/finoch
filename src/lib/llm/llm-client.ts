@@ -6,12 +6,21 @@ export interface LlmConfig {
   provider: "groq" | "gemini" | "openrouter" | "openai" | "custom";
 }
 
+function sanitizeEnvVal(val: string | undefined): string | undefined {
+  if (!val) return undefined;
+  let cleaned = val.trim();
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  return cleaned || undefined;
+}
+
 export function getLlmConfig(): LlmConfig | null {
-  const rawKey = process.env.OPENAI_API_KEY?.trim();
+  const rawKey = sanitizeEnvVal(process.env.OPENAI_API_KEY);
   if (!rawKey) return null;
 
-  let baseUrl = process.env.OPENAI_BASE_URL?.trim();
-  let model = process.env.OPENAI_MODEL?.trim();
+  let baseUrl = sanitizeEnvVal(process.env.OPENAI_BASE_URL);
+  let model = sanitizeEnvVal(process.env.OPENAI_MODEL);
   let fallbackModels: string[] = [];
   let provider: LlmConfig["provider"] = "custom";
 
@@ -26,7 +35,7 @@ export function getLlmConfig(): LlmConfig | null {
       "qwen/qwen3.8-27b",
       "llama-3.3-70b-versatile",
     ];
-    if (!model || model === "gpt-4o-mini") {
+    if (!model || model === "gpt-4o-mini" || model === "llama-3.3-70b-versatile") {
       model = "openai/gpt-oss-20b";
     }
   } else if (rawKey.startsWith("AIzaSy")) {

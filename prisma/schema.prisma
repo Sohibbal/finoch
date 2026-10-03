@@ -31,7 +31,7 @@ model Expense {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   itemName  String
   amount    Int
-  category  String   // "primer" | "bocor_halus"
+  category  String   // "Food & Drinks", "Transportation", "Housing & Bills", "Shopping & Clothing", "Entertainment & Leisure", "Education & Career", "Health & Personal Care", "Social & Family", "Other"
   isDeleted Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -47,7 +47,7 @@ model FinancialProfile {
   monthlyIncome        Int      // Dalam IDR
   incomeType           String   // "salary" | "freelance" | "business" | "allowance" | "other"
   currentSavings       Int      // Total tabungan saat ini
-  monthlyFixedExpenses Int      // Pengeluaran tetap primer (sewa kos, tagihan wajib)
+  monthlyFixedExpenses Int      // Pengeluaran tetap bulanan (sewa kos, tagihan wajib)
   financialPriority    String   // "saving" | "emergency_fund" | "buy_item" | "education" | "travel" | "debt_repayment" | "other"
   currency             String   @default("IDR")
   createdAt            DateTime @default(now())
@@ -62,8 +62,8 @@ model Transaction {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   type            String   // "income" | "expense"
   amount          Int      // Nominal dalam Rupiah
-  category        String   // "Food", "Groceries", "Transportation", "Housing", "Bills", "Health", "Education", "Entertainment", "Shopping", "Subscription", "Family", "Other"
-  spendingType    String   @default("needs") // "needs" (50%) | "wants" (30%) | "savings" (20%)
+  category        String   // "Food & Drinks", "Transportation", "Housing & Bills", "Shopping & Clothing", "Entertainment & Leisure", "Education & Career", "Health & Personal Care", "Social & Family", "Other"
+  spendingType    String?  @default("expense")
   merchant        String?  // Contoh: "Mie Gacoan", "Indomaret"
   description     String?
   transactionDate DateTime @default(now())

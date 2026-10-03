@@ -151,51 +151,6 @@ export function UnifiedConfirmationModal({
             />
           </div>
 
-          {/* Digital Twin Spending Type Selector (Needs vs Wants vs Savings) */}
-          <div>
-            <label className="block text-xs font-semibold uppercase tracking-wider text-slate-500 mb-1.5">
-              Alokasi Digital Twin (50/30/20)
-            </label>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => handleSpendingTypeToggle("needs")}
-                className={`py-2 px-3 rounded-xl border text-center transition-all ${
-                  formData.spendingType === "needs"
-                    ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 ring-2 ring-emerald-500"
-                    : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                }`}
-              >
-                <div className="text-xs font-bold">Kebutuhan (50%)</div>
-                <div className="text-[10px] text-slate-500">Primer & Esensial</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSpendingTypeToggle("wants")}
-                className={`py-2 px-3 rounded-xl border text-center transition-all ${
-                  formData.spendingType === "wants"
-                    ? "border-amber-500 bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300 ring-2 ring-amber-500"
-                    : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                }`}
-              >
-                <div className="text-xs font-bold">Keinginan (30%)</div>
-                <div className="text-[10px] text-slate-500">Gaya Hidup & Kafe</div>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSpendingTypeToggle("savings")}
-                className={`py-2 px-3 rounded-xl border text-center transition-all ${
-                  formData.spendingType === "savings"
-                    ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300 ring-2 ring-blue-500"
-                    : "border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                }`}
-              >
-                <div className="text-xs font-bold">Tabungan (20%)</div>
-                <div className="text-[10px] text-slate-500">Dana Masa Depan</div>
-              </button>
-            </div>
-          </div>
-
           {/* Category & Date Row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>

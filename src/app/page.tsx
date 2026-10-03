@@ -36,11 +36,11 @@ export default function RootPage() {
   const [currentCandidate, setCurrentCandidate] = useState<TransactionCandidate | null>(null);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
-  // Interactive Live Twin Preview Calculator
+  // Interactive Live Cashflow Preview Calculator
   const [previewIncome, setPreviewIncome] = useState(4500000);
-  const previewNeeds = Math.round(previewIncome * 0.5);
-  const previewWants = Math.round(previewIncome * 0.3);
-  const previewSavings = Math.round(previewIncome * 0.2);
+  const previewFixed = Math.round(previewIncome * 0.45);
+  const previewFlexible = Math.round(previewIncome * 0.35);
+  const previewSavings = Math.round(previewIncome * 0.20);
 
   // Interactive Voice Phrase Tester
   const sampleVoicePhrases = [
@@ -152,7 +152,7 @@ export default function RootPage() {
 
           {/* Subtitle */}
           <p className="text-base sm:text-lg text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
-            FINRA memodelkan arus kas harian Anda ke dalam Digital Twin 50/30/20 secara deterministik. Catat instan dengan suara offline atau foto struk belanja, lalu simulasikan keputusan finansial sebelum menjalaninya.
+            FINRA memodelkan arus kas harian Anda ke dalam Digital Twin Finansial cerdas berbasis kategori nyata. Catat instan dengan suara offline atau foto struk belanja, lalu simulasikan keputusan finansial sebelum menjalaninya.
           </p>
 
           {/* Primary Action Buttons */}
@@ -208,7 +208,7 @@ export default function RootPage() {
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-              Model Finansial 50/30/20 FINRA
+              Kategori Pengeluaran Nyata & Terarah
             </span>
             <span className="flex items-center gap-1.5">
               <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -293,7 +293,7 @@ export default function RootPage() {
                 Klasifikasi Deterministik
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Algoritma NLP memisahkan item dan nominal rupiah serta memilah pengeluaran ke pos Kebutuhan (50%) atau Keinginan (30%).
+                Algoritma AI cerdas memisahkan item dan nominal rupiah serta mengelompokkan pengeluaran ke kategori nyata seperti Makanan, Transportasi, dan Tagihan.
               </p>
             </div>
 
@@ -306,16 +306,16 @@ export default function RootPage() {
                 Simulasi & Proteksi Kas
               </h3>
               <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-                Kembaran finansial Anda mengevaluasi saldo, memicu alert bocor halus, dan memproyeksikan tanggal target tabungan tercapai.
+                Kembaran finansial Anda mengevaluasi saldo, memantau pengeluaran berlebih, dan memproyeksikan tanggal target tabungan tercapai.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 5. INTERACTIVE LIVE 50/30/20 TWIN CALCULATOR PREVIEW */}
+      {/* 5. INTERACTIVE LIVE CASHFLOW & SAVINGS SIMULATION PREVIEW */}
       <section
-        id="simulasi-503020"
+        id="simulasi-finansial"
         className="py-24 px-4 sm:px-6 lg:px-8 border-t border-slate-100 dark:border-slate-800/80 bg-slate-50/50 dark:bg-[#0c1630]"
       >
         <div className="max-w-4xl mx-auto space-y-10">
@@ -324,10 +324,10 @@ export default function RootPage() {
               Kalkulator Interaktif
             </div>
             <h2 className="text-3xl sm:text-4xl font-black text-slate-950 dark:text-white tracking-tight">
-              Preview Alokasi Finansial 50/30/20
+              Simulasi Proyeksi Arus Kas & Tabungan
             </h2>
             <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
-              Geser estimasi pemasukan bulanan Anda untuk melihat pembagian anggaran ideal sebelum membuat akun.
+              Geser estimasi pemasukan bulanan Anda untuk melihat pembagian alokasi sehat dan simulasi potensi tabungan sebelum membuat akun.
             </p>
           </div>
 
@@ -338,7 +338,7 @@ export default function RootPage() {
                   Simulasi Anggaran Bulanan
                 </h3>
                 <p className="text-xs text-slate-500">
-                  Model proporsional kebutuhan, keinginan, dan tabungan
+                  Model proporsional kebutuhan pokok, gaya hidup, dan tabungan
                 </p>
               </div>
               <div className="text-right">
@@ -370,10 +370,10 @@ export default function RootPage() {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800">
                 <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Kebutuhan (Needs 50%)
+                  Kebutuhan Pokok (Estimasi 45%)
                 </div>
                 <div className="text-base font-black text-slate-900 dark:text-white mt-1">
-                  Rp {previewNeeds.toLocaleString("id-ID")}
+                  Rp {previewFixed.toLocaleString("id-ID")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
                   Makan pokok, kos, tagihan wajib
@@ -382,19 +382,19 @@ export default function RootPage() {
 
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800">
                 <div className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  Keinginan (Wants 30%)
+                  Pengeluaran Fleksibel (Estimasi 35%)
                 </div>
                 <div className="text-base font-black text-slate-900 dark:text-white mt-1">
-                  Rp {previewWants.toLocaleString("id-ID")}
+                  Rp {previewFlexible.toLocaleString("id-ID")}
                 </div>
                 <div className="text-[11px] text-slate-400 mt-0.5">
-                  Nongkrong, hiburan, hobi
+                  Nongkrong, hiburan, belanja harian
                 </div>
               </div>
 
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-[#0b1428] border border-slate-100 dark:border-slate-800">
                 <div className="text-xs font-semibold text-blue-700 dark:text-blue-400">
-                  Tabungan (Savings 20%)
+                  Potensi Tabungan (Estimasi 20%)
                 </div>
                 <div className="text-base font-black text-blue-700 dark:text-blue-400 mt-1">
                   Rp {previewSavings.toLocaleString("id-ID")}
@@ -439,7 +439,7 @@ export default function RootPage() {
                       className="flex items-center justify-between text-xs py-1"
                     >
                       <span className="font-semibold text-slate-800 dark:text-slate-200">
-                        {item.itemName} ({item.category === "primer" ? "Needs" : "Wants"})
+                        {item.itemName} ({item.category || "Umum"})
                       </span>
                       <span className="font-bold text-slate-900 dark:text-white">
                         {formatRupiah(item.amount)}
@@ -490,8 +490,8 @@ export default function RootPage() {
                 a: "FINRA menggunakan pendekatan hybrid. Saat offline, browser menjalankan Web Worker Tesseract.js dan parser regex lokal Indonesia untuk mendeteksi merchant dan nominal total.",
               },
               {
-                q: "Mengapa FINRA menggunakan model 50/30/20?",
-                a: "Model 50/30/20 adalah kerangka keuangan universal yang membagi anggaran ke Kebutuhan (50%), Keinginan (30%), dan Tabungan (20%). Ini menjaga disiplin tanpa membuat hidup terasa terlalu kaku.",
+                q: "Bagaimana FINRA mengelompokkan pengeluaran saya?",
+                a: "FINRA menggunakan 9 kategori pengeluaran alami (seperti Food & Drinks, Transportation, Housing & Bills, Shopping, dll.). AI secara otomatis memilah transaksi dari suara atau foto struk Anda ke kategori yang relevan.",
               },
               {
                 q: "Apakah FINRA bisa dipasang di ponsel seperti aplikasi native?",

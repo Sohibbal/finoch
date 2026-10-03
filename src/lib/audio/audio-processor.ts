@@ -133,7 +133,7 @@ export async function convertAudioBlobTo16kHz(blob: Blob): Promise<Float32Array>
   }
   try {
     const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-    const channelData = audioBuffer.getChannelData(0); // Mono channel primer
+    const channelData = audioBuffer.getChannelData(0); // Mono channel 0
 
     // Jika AudioContext tidak mendukung pengaturan sampleRate awal ke 16000:
     if (audioBuffer.sampleRate !== TARGET_SAMPLE_RATE) {

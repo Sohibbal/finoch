@@ -3,6 +3,7 @@ import { getSessionFromRequest } from "@/lib/auth/jwt";
 import { getLlmConfig } from "@/lib/llm/llm-client";
 import { parseReceiptText } from "@/lib/ocr/receipt-parser";
 import { TransactionCandidate } from "@/types/financial-types";
+import Tesseract from "tesseract.js";
 import { spawn } from "child_process";
 import fs from "fs/promises";
 import path from "path";
@@ -170,20 +171,41 @@ export async function POST(req: Request) {
 
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const tempFileName = `receipt-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
-    tempFilePath = path.join(os.tmpdir(), tempFileName);
-    await fs.writeFile(tempFilePath, buffer);
 
-    // 1. Run PaddleOCR bridge
-    const ocrText = await runPaddleOcrSubprocess(tempFilePath);
+    let ocrText = "";
 
-    // 2. Try LLM Parsing if online and text was extracted
+    // 1. Primary Engine: Tesseract.js in Node.js
+    try {
+      const tessRes = await Tesseract.recognize(buffer, "eng");
+      if (tessRes?.data?.text && tessRes.data.text.trim().length > 0) {
+        ocrText = tessRes.data.text.trim();
+      }
+    } catch (tessErr) {
+      console.warn("Tesseract OCR notice:", tessErr);
+    }
+
+    // 2. Secondary fallback: PaddleOCR subprocess (if available)
+    if (!ocrText || ocrText.length < 5) {
+      try {
+        const tempFileName = `receipt-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
+        tempFilePath = path.join(os.tmpdir(), tempFileName);
+        await fs.writeFile(tempFilePath, buffer);
+        const paddleText = await runPaddleOcrSubprocess(tempFilePath);
+        if (paddleText && paddleText.trim().length > ocrText.length) {
+          ocrText = paddleText.trim();
+        }
+      } catch (paddleErr) {
+        console.warn("PaddleOCR notice:", paddleErr);
+      }
+    }
+
+    // 3. Extract transaction details via LLM
     let candidate: TransactionCandidate | null = null;
-    if (ocrText && ocrText.trim().length > 5) {
+    if (ocrText && ocrText.trim().length > 3) {
       candidate = await parseWithLlm(ocrText);
     }
 
-    // 3. Fallback to deterministic regex parser
+    // 4. Fallback to deterministic regex parser
     if (!candidate) {
       candidate = parseReceiptText(ocrText || "");
     }
@@ -191,7 +213,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       candidate,
       rawText: ocrText,
-      source: "ocr_pipeline",
+      source: ocrText ? "ocr_pipeline" : "empty_ocr",
     });
   } catch (error) {
     return NextResponse.json(

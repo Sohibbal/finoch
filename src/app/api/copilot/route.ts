@@ -128,14 +128,14 @@ export async function POST(req: Request) {
 
     // Deterministic fallback response based on financial facts
     const lower = message.toLowerCase();
-    let reply = `Berdasarkan model Digital Twin Anda, penghasilan Anda adalah Rp${activeFacts.monthlyIncome.toLocaleString("id-ID")} dengan pengeluaran Rp${activeFacts.monthlyExpense.toLocaleString("id-ID")}. Tabungan bersih saat ini Rp${activeFacts.netSavings.toLocaleString("id-ID")}/bulan.`;
+    let reply = `Halo! Pemasukanmu saat ini Rp${activeFacts.monthlyIncome.toLocaleString("id-ID")} dan total pengeluaran Rp${activeFacts.monthlyExpense.toLocaleString("id-ID")}. Kamu masih punya sisa bersih Rp${activeFacts.netSavings.toLocaleString("id-ID")} bulan ini.`;
 
     if (lower.includes("turun") || lower.includes("tabungan")) {
-      reply = `Tabungan bulanan Anda saat ini sebesar Rp${activeFacts.netSavings.toLocaleString("id-ID")}. Faktor pengeluaran terbesar berasal dari kategori ${activeFacts.topCategory}. Jika ingin meningkatkan tabungan hingga mencapai target 20%+, coba pangkas jajan non-esensial sebesar Rp200.000 melalui What-If Simulator!`;
+      reply = `Sisa tabunganmu saat ini Rp${activeFacts.netSavings.toLocaleString("id-ID")}. Pos yang paling banyak menyedot pengeluaran ada di ${activeFacts.topCategory}. Coba kurangi sedikit pos jajan santai lewat What-If Simulator biar tabunganmu lebih tebal!`;
     } else if (lower.includes("laptop") || lower.includes("beli") || lower.includes("aman")) {
-      reply = `Target goal "${activeFacts.goalName}" Anda berstatus [${activeFacts.goalStatus}]. Dengan kapasitas tabungan Rp${activeFacts.netSavings.toLocaleString("id-ID")}/bulan, disarankan tidak membeli secara tunai jika menghabiskan dana darurat. Simulasikan penyesuaian anggaran di menu Simulator untuk melihat tanggal amannya!`;
-    } else if (lower.includes("makan") || lower.includes("food") || lower.includes("gacoan")) {
-      reply = `Pos pengeluaran konsumsi Anda saat ini adalah yang tertinggi: ${activeFacts.topCategory}. Di model 50/30/20, makan pokok termasuk Kebutuhan (Needs), namun jajan kafe/resto termasuk Keinginan (Wants). Pastikan porsi Wants tidak melampaui 30% dari income Anda.`;
+      reply = `Untuk target "${activeFacts.goalName}", statusmu saat ini [${activeFacts.goalStatus}] dengan sisa dana bulanan Rp${activeFacts.netSavings.toLocaleString("id-ID")}. Kalau mau beli sekarang, pastikan jangan sampai menguras dana daruratmu ya. Kamu bisa cek simulasinya di menu Simulator!`;
+    } else if (lower.includes("makan") || lower.includes("food") || lower.includes("gacoan") || lower.includes("kopi")) {
+      reply = `Pos pengeluaran makanan & minumanmu saat ini tercatat ${activeFacts.topCategory}. Ini memang pos paling dominan, jadi trik simpelnya cukup batasi jajan kopi/kafe di akhir pekan saja biar tetap hemat tanpa tersiksa.`;
     }
 
     return NextResponse.json({

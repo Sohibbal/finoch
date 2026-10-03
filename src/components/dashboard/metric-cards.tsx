@@ -9,10 +9,9 @@ export interface ExpenseMetrics {
   totalMonth: number;
   totalToday: number;
   totalWeek: number;
-  primerTotal: number;
-  bocorHalusTotal: number;
-  primerPercentage: number;
-  bocorHalusPercentage: number;
+  topCategoryName: string;
+  topCategoryTotal: number;
+  topCategoryPercentage: number;
 }
 
 export function calculateMetrics(expenses: Expense[]): ExpenseMetrics {
@@ -21,10 +20,9 @@ export function calculateMetrics(expenses: Expense[]): ExpenseMetrics {
       totalMonth: 0,
       totalToday: 0,
       totalWeek: 0,
-      primerTotal: 0,
-      bocorHalusTotal: 0,
-      primerPercentage: 0,
-      bocorHalusPercentage: 0,
+      topCategoryName: "Belum ada pengeluaran",
+      topCategoryTotal: 0,
+      topCategoryPercentage: 0,
     };
   }
 
@@ -38,8 +36,7 @@ export function calculateMetrics(expenses: Expense[]): ExpenseMetrics {
   let totalMonth = 0;
   let totalToday = 0;
   let totalWeek = 0;
-  let primerTotal = 0;
-  let bocorHalusTotal = 0;
+  const categoryTotals: Record<string, number> = {};
 
   for (const exp of expenses) {
     if (exp.isDeleted) continue;
@@ -47,11 +44,8 @@ export function calculateMetrics(expenses: Expense[]): ExpenseMetrics {
 
     if (expTime >= startOfMonth) {
       totalMonth += exp.amount;
-      if (exp.category === "primer") {
-        primerTotal += exp.amount;
-      } else {
-        bocorHalusTotal += exp.amount;
-      }
+      const cat = exp.category || "Other";
+      categoryTotals[cat] = (categoryTotals[cat] || 0) + exp.amount;
     }
 
     if (expTime >= startOfWeek) {
@@ -63,18 +57,24 @@ export function calculateMetrics(expenses: Expense[]): ExpenseMetrics {
     }
   }
 
-  const combined = primerTotal + bocorHalusTotal;
-  const primerPercentage = combined > 0 ? Math.round((primerTotal / combined) * 100) : 0;
-  const bocorHalusPercentage = combined > 0 ? 100 - primerPercentage : 0;
+  let topCategoryName = "Belum ada pengeluaran";
+  let topCategoryTotal = 0;
+  for (const [cat, amt] of Object.entries(categoryTotals)) {
+    if (amt > topCategoryTotal) {
+      topCategoryName = cat;
+      topCategoryTotal = amt;
+    }
+  }
+
+  const topCategoryPercentage = totalMonth > 0 ? Math.round((topCategoryTotal / totalMonth) * 100) : 0;
 
   return {
     totalMonth,
     totalToday,
     totalWeek,
-    primerTotal,
-    bocorHalusTotal,
-    primerPercentage,
-    bocorHalusPercentage,
+    topCategoryName,
+    topCategoryTotal,
+    topCategoryPercentage,
   };
 }
 
@@ -203,14 +203,14 @@ export function MetricCards({ expenses, onOpenVoice, onOpenManual, onOpenPrivacy
               <div>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-800 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
-                    {metrics.primerPercentage > 0 ? `${metrics.primerPercentage}% Primer` : "Primer 65%+"}
+                    {metrics.topCategoryPercentage > 0 ? `${metrics.topCategoryPercentage}% Terbesar` : "Kategori Utama"}
                   </span>
                   <span className="text-xs font-bold text-slate-900 dark:text-white">
-                    {formatRupiah(metrics.primerTotal || metrics.totalMonth || 432500)}
+                    {formatRupiah(metrics.topCategoryTotal || metrics.totalMonth)}
                   </span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Kebutuhan Pokok Kuliah
+                  {metrics.topCategoryName}
                 </p>
               </div>
             </div>

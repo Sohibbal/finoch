@@ -1,4 +1,14 @@
-export type ExpenseCategory = "primer" | "bocor_halus";
+export type ExpenseCategory =
+  | "Food & Drinks"
+  | "Transportation"
+  | "Housing & Bills"
+  | "Shopping & Clothing"
+  | "Entertainment & Leisure"
+  | "Education & Career"
+  | "Health & Personal Care"
+  | "Social & Family"
+  | "Other"
+  | string;
 
 export type SyncStatus = "pending" | "syncing" | "synced" | "failed";
 

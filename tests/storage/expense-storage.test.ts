@@ -14,7 +14,7 @@ describe("Expense Storage & Sync Queue", () => {
     const expense = await expenseStorage.saveExpense({
       itemName: "Nasi Padang",
       amount: 18000,
-      category: "primer",
+      category: "Food & Drinks",
       userId: "guest",
     });
 
@@ -36,7 +36,7 @@ describe("Expense Storage & Sync Queue", () => {
     const expense = await expenseStorage.saveExpense({
       itemName: "Bensin",
       amount: 20000,
-      category: "primer",
+      category: "Transportation",
       userId: "guest",
     });
 
@@ -57,7 +57,7 @@ describe("Expense Storage & Sync Queue", () => {
     const expense = await expenseStorage.saveExpense({
       itemName: "Kopi",
       amount: 10000,
-      category: "bocor_halus",
+      category: "Food & Drinks",
       userId: "guest",
     });
 

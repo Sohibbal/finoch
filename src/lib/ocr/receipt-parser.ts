@@ -162,21 +162,16 @@ export function parseReceiptText(rawText: string): TransactionCandidate {
     lowerAll.includes("nasi") ||
     lowerAll.includes("bakso") ||
     lowerAll.includes("ayam") ||
-    lowerAll.includes("burger")
-  ) {
-    category = "Food";
-    spendingType = "wants";
-  } else if (
+    lowerAll.includes("burger") ||
     lowerAll.includes("indomaret") ||
     lowerAll.includes("alfamart") ||
     lowerAll.includes("superindo") ||
     lowerAll.includes("hypermart") ||
     lowerAll.includes("pasar") ||
-    lowerAll.includes("sabun") ||
-    lowerAll.includes("minyak") ||
+    lowerAll.includes("sembako") ||
     lowerAll.includes("beras")
   ) {
-    category = "Groceries";
+    category = "Food & Drinks";
     spendingType = "needs";
   } else if (
     lowerAll.includes("apotek") ||
@@ -185,14 +180,16 @@ export function parseReceiptText(rawText: string): TransactionCandidate {
     lowerAll.includes("dokter") ||
     lowerAll.includes("klinik")
   ) {
-    category = "Health";
+    category = "Health & Personal Care";
     spendingType = "needs";
   } else if (
     lowerAll.includes("spbu") ||
     lowerAll.includes("pertamina") ||
     lowerAll.includes("shell") ||
     lowerAll.includes("grab") ||
-    lowerAll.includes("gojek")
+    lowerAll.includes("gojek") ||
+    lowerAll.includes("parkir") ||
+    lowerAll.includes("bensin")
   ) {
     category = "Transportation";
     spendingType = "needs";
@@ -201,10 +198,21 @@ export function parseReceiptText(rawText: string): TransactionCandidate {
     lowerAll.includes("pdam") ||
     lowerAll.includes("listrik") ||
     lowerAll.includes("wifi") ||
-    lowerAll.includes("indihome")
+    lowerAll.includes("indihome") ||
+    lowerAll.includes("pulsa") ||
+    lowerAll.includes("kuota")
   ) {
-    category = "Bills";
+    category = "Housing & Bills";
     spendingType = "needs";
+  } else if (
+    lowerAll.includes("baju") ||
+    lowerAll.includes("celana") ||
+    lowerAll.includes("sepatu") ||
+    lowerAll.includes("shopee") ||
+    lowerAll.includes("tokopedia")
+  ) {
+    category = "Shopping & Clothing";
+    spendingType = "wants";
   }
 
   // Confidence calculation

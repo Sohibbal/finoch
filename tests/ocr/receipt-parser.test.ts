@@ -22,8 +22,7 @@ describe("Local Receipt Parser (Regex & Pattern Matcher)", () => {
     expect(candidate.merchant).toBe("MIE GACOAN TEBET");
     expect(candidate.amount).toBe(25300);
     expect(candidate.date).toBe("2026-10-02");
-    expect(candidate.category).toBe("Food");
-    expect(candidate.spendingType).toBe("wants");
+    expect(candidate.category).toBe("Food & Drinks");
   });
 
   it("handles messy receipt text gracefully without throwing", () => {

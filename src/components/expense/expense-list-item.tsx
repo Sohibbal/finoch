@@ -11,7 +11,6 @@ interface ExpenseListItemProps {
 }
 
 export function ExpenseListItem({ expense, onDelete }: ExpenseListItemProps) {
-  const isPrimer = expense.category === "primer";
   const dateFormatted = new Date(expense.createdAt).toLocaleDateString("id-ID", {
     day: "numeric",
     month: "short",
@@ -26,14 +25,8 @@ export function ExpenseListItem({ expense, onDelete }: ExpenseListItemProps) {
           <h4 className="text-sm font-bold text-slate-900 dark:text-white truncate">
             {expense.itemName}
           </h4>
-          <span
-            className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-              isPrimer
-                ? "bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30"
-                : "bg-amber-100 text-amber-800 dark:bg-amber-500/15 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30"
-            }`}
-          >
-            {isPrimer ? "Primer" : "Bocor Halus"}
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 dark:bg-blue-500/15 dark:text-blue-300 border border-blue-200 dark:border-blue-500/30">
+            {expense.category || "Other"}
           </span>
         </div>
 

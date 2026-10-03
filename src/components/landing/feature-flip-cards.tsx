@@ -53,7 +53,7 @@ export function FeatureFlipCards({
         },
         {
           title: "Deterministic Token Splitting",
-          desc: "Mengenali slang nominal rupiah (seperti goceng, ceban, setengah juta) dan memilah kategori belanja ke pos Kebutuhan vs Keinginan.",
+          desc: "Mengenali slang nominal rupiah (seperti goceng, ceban, setengah juta) dan memilah transaksi langsung ke 9 kategori pengeluaran terstruktur.",
         },
       ],
       actionLabel: "Coba Demo Suara",
@@ -75,11 +75,11 @@ export function FeatureFlipCards({
       backPoints: [
         {
           title: "Hybrid Cloud & Edge Pipeline",
-          desc: "Ekstraksi terstruktur saat online dengan dukungan LLM, serta fallback instan menggunakan Tesseract.js Web Worker di peramban saat offline.",
+          desc: "Ekstraksi terstruktur saat online dengan dukungan LLM, serta fallback instan menggunakan Tesseract.js di peramban saat offline.",
         },
         {
-          title: "Klasifikasi Otomatis 50/30/20",
-          desc: "Setiap baris barang belanjaan dipilah otomatis ke pos Kebutuhan (Needs) atau Keinginan (Wants) untuk transparansi arus kas.",
+          title: "Klasifikasi Otomatis 9 Kategori",
+          desc: "Setiap baris barang belanjaan dipilah otomatis ke pos kategori alami seperti Food, Transport, Bills, dan Shopping.",
         },
         {
           title: "Gerbang Konfirmasi Terbuka",
@@ -94,12 +94,12 @@ export function FeatureFlipCards({
       badge: "Financial Twin Sandbox",
       badgeColor: "text-sky-700 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 border-sky-200 dark:border-sky-800",
       icon: Scale,
-      frontTitle: "Kembaran Finansial 50/30/20",
+      frontTitle: "Kembaran Finansial & What-If",
       frontDesc:
         "Simulasikan keputusan keuangan sebelum Anda menjalaninya. Uji dampak nyata jika memangkas jajan kopi atau jika biaya sewa kos naik mendadak.",
       metrics: [
-        { label: "Model Anggaran", value: "50% Needs / 30% Wants / 20% Save" },
-        { label: "Proteksi Kas", value: "Peringatan Bocor Halus" },
+        { label: "Model Anggaran", value: "9 Pos Kategori Nyata" },
+        { label: "Proteksi Kas", value: "Peringatan Pemborosan" },
       ],
       backTitle: "Model Simulasi Prospektif",
       backPoints: [
@@ -108,7 +108,7 @@ export function FeatureFlipCards({
           desc: "Menghitung secara matematis pergeseran tanggal tercapainya target tabungan saat terjadi perubahan pola belanja harian.",
         },
         {
-          title: "Algoritma Deteksi Bocor Halus",
+          title: "Algoritma Efisiensi Pengeluaran",
           desc: "Menandai pengeluaran berulang bernominal kecil yang jika diakumulasikan berpotensi menggerus alokasi tabungan bulanan.",
         },
         {
@@ -118,7 +118,7 @@ export function FeatureFlipCards({
       ],
       actionLabel: "Eksplorasi Simulasi",
       onAction: () => {
-        const el = document.getElementById("simulasi-503020");
+        const el = document.getElementById("simulasi-finansial");
         if (el) el.scrollIntoView({ behavior: "smooth" });
       },
     },

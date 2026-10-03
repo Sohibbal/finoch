@@ -6,7 +6,7 @@ import { useHybridSpeech } from "@/hooks/use-hybrid-speech";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
-import type { ParsedVoiceItem } from "@/lib/types/expense";
+import type { ParsedVoiceItem, ExpenseCategory } from "@/lib/types/expense";
 import { VoiceRecorder, type VoiceState } from "./voice-recorder";
 import { TranscriptPreview } from "./transcript-preview";
 import { ParsedExpenseList } from "./parsed-expense-list";
@@ -73,24 +73,56 @@ export function VoiceExpenseSheet({
 
   // 3. Tangani hasil transkripsi setelah selesai merekam dan mentranskripsi
   useEffect(() => {
-    // Jangan proses jika sheet ditutup, selama masih merekam suara, atau AI masih mentranskripsi
     if (!isOpen || isListening || isTranscribing) return;
 
     const fullText = transcript.trim();
-    if (fullText) {
-      setVoiceState("processing");
-      const items = parseIndonesianExpense(fullText);
-      if (items.length > 0) {
-        setParsedItems(items);
-        setVoiceState("review");
-        setStatusMessage(null);
-      } else {
-        setVoiceState("error");
-        setStatusMessage(
-          "Pengeluaran belum dapat dikenali. Silakan coba bicara lebih jelas atau gunakan Catat Manual."
-        );
+    if (!fullText) return;
+
+    let isMounted = true;
+    setVoiceState("processing");
+
+    async function parseVoice() {
+      try {
+        const res = await fetch("/api/transactions/parse-voice", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ transcript: fullText }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.items) && data.items.length > 0 && isMounted) {
+            setParsedItems(data.items);
+            setVoiceState("review");
+            setStatusMessage(null);
+            return;
+          }
+        }
+      } catch {
+        // Fall through to local parser
+      }
+
+      // Local offline fallback
+      if (isMounted) {
+        const items = parseIndonesianExpense(fullText);
+        if (items.length > 0) {
+          setParsedItems(items);
+          setVoiceState("review");
+          setStatusMessage(null);
+        } else {
+          setVoiceState("error");
+          setStatusMessage(
+            "Pengeluaran belum dapat dikenali. Silakan coba bicara lebih jelas atau gunakan Catat Manual."
+          );
+        }
       }
     }
+
+    parseVoice();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen, transcript, isListening, isTranscribing]);
 
   // 4. Tangani error pengenalan suara
@@ -133,12 +165,25 @@ export function VoiceExpenseSheet({
   };
 
   const handleToggleCategory = (id: string) => {
+    const CATEGORIES: ExpenseCategory[] = [
+      "Food & Drinks",
+      "Transportation",
+      "Housing & Bills",
+      "Shopping & Clothing",
+      "Entertainment & Leisure",
+      "Education & Career",
+      "Health & Personal Care",
+      "Social & Family",
+      "Other",
+    ];
     setParsedItems((prev) =>
       prev.map((item) => {
         if (item.id === id) {
+          const currentIdx = CATEGORIES.indexOf(item.category as ExpenseCategory);
+          const nextCategory = CATEGORIES[(currentIdx + 1) % CATEGORIES.length];
           return {
             ...item,
-            category: item.category === "primer" ? "bocor_halus" : "primer",
+            category: nextCategory,
           };
         }
         return item;

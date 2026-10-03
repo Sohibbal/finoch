@@ -71,29 +71,16 @@ export default function DashboardPage() {
               amount: number;
               category: string;
               createdAt?: string;
-            }) => {
-              const isNeeds =
-                e.category === "primer" ||
-                ["Housing", "Bills", "Groceries", "Health", "Education"].includes(
-                  e.category
-                );
-              return {
-                id: e.id,
-                merchant: e.itemName,
-                amount: e.amount,
-                category:
-                  e.category === "primer"
-                    ? "Kebutuhan Pokok"
-                    : e.category === "bocor_halus"
-                    ? "Jajan / Keinginan"
-                    : e.category,
-                spendingType: isNeeds ? "needs" : "wants",
-                date: e.createdAt
-                  ? new Date(e.createdAt).toISOString().split("T")[0]
-                  : new Date().toISOString().split("T")[0],
-                source: "manual",
-              };
-            }
+            }) => ({
+              id: e.id,
+              merchant: e.itemName,
+              amount: e.amount,
+              category: e.category || "Other",
+              date: e.createdAt
+                ? new Date(e.createdAt).toISOString().split("T")[0]
+                : new Date().toISOString().split("T")[0],
+              source: "manual",
+            })
           );
           setTransactions(mapped);
           return;
@@ -103,20 +90,16 @@ export default function DashboardPage() {
       // Fallback to local storage (IndexedDB)
       const local = await expenseStorage.getExpenses();
       if (local && local.length > 0) {
-        const mapped: TransactionCandidate[] = local.map((e) => {
-          const isNeeds = e.category === "primer";
-          return {
-            id: e.id,
-            merchant: e.itemName,
-            amount: e.amount,
-            category: isNeeds ? "Kebutuhan Pokok" : "Jajan / Keinginan",
-            spendingType: isNeeds ? "needs" : "wants",
-            date: e.createdAt
-              ? new Date(e.createdAt).toISOString().split("T")[0]
-              : new Date().toISOString().split("T")[0],
-            source: "voice",
-          };
-        });
+        const mapped: TransactionCandidate[] = local.map((e) => ({
+          id: e.id,
+          merchant: e.itemName,
+          amount: e.amount,
+          category: e.category || "Other",
+          date: e.createdAt
+            ? new Date(e.createdAt).toISOString().split("T")[0]
+            : new Date().toISOString().split("T")[0],
+          source: "voice",
+        }));
         setTransactions(mapped);
       } else {
         setTransactions([]);
@@ -246,12 +229,10 @@ export default function DashboardPage() {
     setIsConfirmModalOpen(false);
 
     try {
-      const expenseCat: ExpenseCategory =
-        candidate.spendingType === "needs" ? "primer" : "bocor_halus";
       await expenseStorage.saveExpense({
         itemName: candidate.merchant || candidate.description || "Pengeluaran",
         amount: candidate.amount,
-        category: expenseCat,
+        category: candidate.category || "Other",
         createdAt: candidate.date
           ? new Date(candidate.date).toISOString()
           : new Date().toISOString(),

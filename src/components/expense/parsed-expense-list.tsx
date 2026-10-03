@@ -41,8 +41,6 @@ export function ParsedExpenseList({
       </div>
 
       {items.map((item) => {
-        const isPrimer = item.category === "primer";
-
         return (
           <div
             key={item.id}
@@ -56,19 +54,11 @@ export function ParsedExpenseList({
                 {formatRupiah(item.amount)}
               </p>
 
-              {/* Category chip button */}
-              <button
-                type="button"
-                onClick={() => onToggleCategory(item.id)}
-                className={`mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${
-                  isPrimer
-                    ? "bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                    : "bg-amber-50 text-amber-700 dark:bg-amber-950/60 dark:text-amber-300 border border-amber-200 dark:border-amber-800"
-                }`}
-              >
+              {/* Category chip */}
+              <span className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
                 <Tag className="w-3 h-3" />
-                {isPrimer ? "Primer (Pokok)" : "Bocor Halus"}
-              </button>
+                {item.category || "Other"}
+              </span>
             </div>
 
             <div className="flex items-center gap-1">

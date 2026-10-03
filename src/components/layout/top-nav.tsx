@@ -44,10 +44,10 @@ export function TopNav({ onOpenPrivacy, userEmail }: TopNavProps) {
         Alur Kerja
       </a>
       <a
-        href="#simulasi-503020"
+        href="#simulasi-finansial"
         className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors"
       >
-        Simulasi 50/30/20
+        Simulasi Finansial
       </a>
       <a
         href="#faq"

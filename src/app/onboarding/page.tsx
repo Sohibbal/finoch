@@ -38,15 +38,13 @@ export default function OnboardingPage() {
   const priorityOptions = [
     { id: "emergency_fund", label: "Dana Darurat", desc: "Amankan 3 - 6 bulan biaya hidup" },
     { id: "buy_item", label: "Beli Barang Impian", desc: "Laptop, gadget, atau kendaraan" },
-    { id: "saving", label: "Menabung Rutin", desc: "Membangun kebiasaan 20% tabungan" },
+    { id: "saving", label: "Menabung Rutin", desc: "Membangun kebiasaan menabung konsisten" },
     { id: "debt_repayment", label: "Bebas Utang", desc: "Lunasi cicilan lebih cepat" },
     { id: "travel", label: "Traveling / Liburan", desc: "Rencana perjalanan masa depan" },
   ];
 
-  // Baseline 50/30/20 calculation for preview
-  const needs50 = Math.round(formData.monthlyIncome * 0.5);
-  const wants30 = Math.round(formData.monthlyIncome * 0.3);
-  const savings20 = Math.round(formData.monthlyIncome * 0.2);
+  // Cashflow calculation for preview
+  const remainingCashflow = Math.max(0, formData.monthlyIncome - formData.monthlyFixedExpenses);
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -186,7 +184,7 @@ export default function OnboardingPage() {
                     Tabungan & Komitmen Wajib
                   </h3>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Posisi cadangan dana saat ini dan biaya hidup primer
+                    Posisi cadangan dana saat ini dan komitmen biaya hidup
                   </p>
                 </div>
               </div>
@@ -292,31 +290,31 @@ export default function OnboardingPage() {
               <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                   <TrendingUp className="w-4 h-4 text-emerald-500" />
-                  Alokasi Digital Twin Rekomendasi (50/30/20)
+                  Ringkasan Estimasi Arus Kas
                 </div>
                 <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-950/40">
-                    <div className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
-                      Kebutuhan (50%)
+                  <div className="p-2 rounded-lg bg-blue-100/50 dark:bg-blue-950/40">
+                    <div className="text-xs font-medium text-blue-800 dark:text-blue-300">
+                      Penghasilan
                     </div>
                     <div className="text-sm font-bold text-slate-900 dark:text-white">
-                      Rp {needs50.toLocaleString("id-ID")}
+                      Rp {formData.monthlyIncome.toLocaleString("id-ID")}
                     </div>
                   </div>
                   <div className="p-2 rounded-lg bg-amber-100/50 dark:bg-amber-950/40">
                     <div className="text-xs font-medium text-amber-800 dark:text-amber-300">
-                      Keinginan (30%)
+                      Biaya Tetap
                     </div>
                     <div className="text-sm font-bold text-slate-900 dark:text-white">
-                      Rp {wants30.toLocaleString("id-ID")}
+                      Rp {formData.monthlyFixedExpenses.toLocaleString("id-ID")}
                     </div>
                   </div>
-                  <div className="p-2 rounded-lg bg-blue-100/50 dark:bg-blue-950/40">
-                    <div className="text-xs font-medium text-blue-800 dark:text-blue-300">
-                      Tabungan (20%)
+                  <div className="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-950/40">
+                    <div className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
+                      Sisa Siap Kelola
                     </div>
                     <div className="text-sm font-bold text-slate-900 dark:text-white">
-                      Rp {savings20.toLocaleString("id-ID")}
+                      Rp {remainingCashflow.toLocaleString("id-ID")}
                     </div>
                   </div>
                 </div>

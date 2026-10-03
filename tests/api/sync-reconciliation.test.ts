@@ -10,7 +10,7 @@ describe("Sync Conflict Reconciliation", () => {
       userId: "u-1",
       itemName: "Nasi Goreng Spesial",
       amount: 20000,
-      category: "primer",
+      category: "Food & Drinks",
       createdAt: "2026-10-01T10:00:00.000Z",
       updatedAt: "2026-10-01T10:05:00.000Z",
     };
@@ -20,7 +20,7 @@ describe("Sync Conflict Reconciliation", () => {
       userId: "u-1",
       itemName: "Nasi Goreng Biasa",
       amount: 15000,
-      category: "primer",
+      category: "Food & Drinks",
       createdAt: "2026-10-01T10:00:00.000Z",
       updatedAt: "2026-10-01T10:02:00.000Z",
     };
@@ -36,7 +36,7 @@ describe("Sync Conflict Reconciliation", () => {
       userId: "u-1",
       itemName: "Kopi Hitam",
       amount: 8000,
-      category: "bocor_halus",
+      category: "Food & Drinks",
       createdAt: "2026-10-01T08:00:00.000Z",
       updatedAt: "2026-10-01T08:10:00.000Z",
     };
@@ -46,7 +46,7 @@ describe("Sync Conflict Reconciliation", () => {
       userId: "u-1",
       itemName: "Kopi Susu",
       amount: 12000,
-      category: "bocor_halus",
+      category: "Food & Drinks",
       createdAt: "2026-10-01T08:00:00.000Z",
       updatedAt: "2026-10-01T08:15:00.000Z",
     };
