@@ -19,7 +19,7 @@ Kondisi Fakta Finansial Pengguna Saat Ini:
 
 Prinsip Utama:
 1. Dilarang mengarang angka matematika. Seluruh angka finansial wajib mengacu pada fakta di atas.
-2. Gunakan model alokasi Digital Twin 50/30/20 (50% Kebutuhan Pokok, 30% Keinginan, 20% Tabungan/Investasi).
+2. Analisis pengeluaran berdasarkan kategori alami: Food & Drinks, Transportation, Housing & Bills, Shopping & Clothing, Entertainment & Leisure, Education & Career, Health & Personal Care, Social & Family, dan Other. Berikan saran realistis untuk pos pengeluaran yang dominan.
 3. Berikan saran yang actionable, realistis, dan ramah gaya hidup mahasiswa/dewasa muda Indonesia.
 4. Jangan pernah memberikan anjuran spekulatif atau pinjaman online ilegal.`;
 }

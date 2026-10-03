@@ -4,9 +4,18 @@ export type TransactionSource = "manual" | "ocr" | "voice";
 export type GoalStatus = "on_track" | "at_risk" | "behind_target" | "achieved";
 
 export const SPENDING_CATEGORIES = [
+  "Food & Drinks",
+  "Transportation",
+  "Housing & Bills",
+  "Shopping & Clothing",
+  "Entertainment & Leisure",
+  "Education & Career",
+  "Health & Personal Care",
+  "Social & Family",
+  "Other",
+  // Backward-compatible category aliases
   "Food",
   "Groceries",
-  "Transportation",
   "Housing",
   "Bills",
   "Health",
@@ -15,7 +24,6 @@ export const SPENDING_CATEGORIES = [
   "Shopping",
   "Subscription",
   "Family",
-  "Other",
 ] as const;
 
 export type SpendingCategory = (typeof SPENDING_CATEGORIES)[number];
@@ -31,7 +39,7 @@ export interface TransactionCandidate {
   merchant?: string;
   amount: number;
   category: SpendingCategory | string;
-  spendingType: SpendingType;
+  spendingType?: SpendingType;
   date: string;
   source: TransactionSource;
   confidence?: number;
@@ -120,7 +128,7 @@ export function validateTransactionCandidate(c: Partial<TransactionCandidate>): 
   if (!c.category || !SPENDING_CATEGORIES.includes(c.category as SpendingCategory)) {
     errors.push("Kategori wajib ditentukan dan valid.");
   }
-  if (!c.spendingType || !["needs", "wants", "savings"].includes(c.spendingType)) {
+  if (c.spendingType && !["needs", "wants", "savings"].includes(c.spendingType)) {
     errors.push("Tipe alokasi belanja harus needs, wants, atau savings.");
   }
   if (!c.date || isNaN(Date.parse(c.date))) {

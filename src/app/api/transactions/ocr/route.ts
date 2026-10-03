@@ -65,15 +65,20 @@ Ekstrak data dari teks OCR struk berikut ke dalam format JSON valid tanpa format
 {
   "merchant": "Nama Toko / Resto",
   "amount": 25000,
-  "category": "Food",
-  "spendingType": "wants",
+  "category": "Food & Drinks",
   "date": "2026-10-02",
   "items": [{"name": "Nama Item", "amount": 10000}]
 }
-Aturan spendingType:
-- needs: groceries/pasar/sembako, obat/kesehatan, tagihan wajib, transportasi harian
-- wants: makan di resto/kafe, bioskop, jajan boba/kopi, belanja hiburan
-Kategori yang diperbolehkan: Food, Groceries, Transportation, Housing, Bills, Health, Education, Entertainment, Shopping, Subscription, Family, Other.
+Pilih category PERSIS dari salah satu 9 kategori berikut:
+- Food & Drinks (makan resto/warteg, jajan kopi, sembako)
+- Transportation (bensin, ojek online, tiket/parkir)
+- Housing & Bills (sewa kos, listrik, air, pulsa/internet)
+- Shopping & Clothing (baju, sepatu, skincare, belanja barang)
+- Entertainment & Leisure (bioskop, streaming, game, rekreasi)
+- Education & Career (kuliah, buku, print tugas, kursus)
+- Health & Personal Care (obat, dokter, perawatan diri)
+- Social & Family (kirim uang keluarga, kado, sedekah)
+- Other (biaya administrasi atau lainnya)
 
 Teks OCR Struk:
 ${rawText}`;
