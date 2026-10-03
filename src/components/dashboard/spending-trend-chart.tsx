@@ -47,9 +47,9 @@ export function SpendingTrendChart({ data }: SpendingTrendChartProps) {
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-base font-bold text-slate-900 dark:text-white">
-            Tren Pengeluaran Digital Twin
+            Tren Pengeluaran Finansial
           </h3>
-          <p className="text-xs text-slate-500">Perbandingan Kebutuhan, Keinginan, dan Tabungan</p>
+          <p className="text-xs text-slate-500">Histori alokasi pengeluaran dan tabungan per bulan</p>
         </div>
       </div>
 
@@ -80,15 +80,15 @@ export function SpendingTrendChart({ data }: SpendingTrendChartProps) {
             <Legend
               wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }}
               formatter={(value) => {
-                if (value === "needs") return "Kebutuhan";
-                if (value === "wants") return "Keinginan";
-                if (value === "savings") return "Tabungan";
+                if (value === "needs") return "Biaya Pokok";
+                if (value === "wants") return "Biaya Fleksibel";
+                if (value === "savings") return "Tabungan Bersih";
                 return value;
               }}
             />
-            <Bar dataKey="needs" fill="#10b981" radius={[4, 4, 0, 0]} name="needs" />
+            <Bar dataKey="needs" fill="#3b82f6" radius={[4, 4, 0, 0]} name="needs" />
             <Bar dataKey="wants" fill="#f59e0b" radius={[4, 4, 0, 0]} name="wants" />
-            <Bar dataKey="savings" fill="#3b82f6" radius={[4, 4, 0, 0]} name="savings" />
+            <Bar dataKey="savings" fill="#10b981" radius={[4, 4, 0, 0]} name="savings" />
           </BarChart>
         </ResponsiveContainer>
       </div>
