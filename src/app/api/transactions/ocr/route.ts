@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
+import { getLlmConfig } from "@/lib/llm/llm-client";
 import { parseReceiptText } from "@/lib/ocr/receipt-parser";
 import { TransactionCandidate } from "@/types/financial-types";
 import { spawn } from "child_process";
@@ -55,11 +56,8 @@ async function runPaddleOcrSubprocess(filePath: string): Promise<string> {
 }
 
 async function parseWithLlm(rawText: string): Promise<TransactionCandidate | null> {
-  const apiKey = process.env.OPENAI_API_KEY;
-  const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
-  const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
-
-  if (!apiKey) return null;
+  const llmConfig = getLlmConfig();
+  if (!llmConfig) return null;
 
   try {
     const prompt = `Anda adalah asisten ekstraksi data struk belanja finansial untuk aplikasi FINRA.
@@ -80,14 +78,14 @@ Kategori yang diperbolehkan: Food, Groceries, Transportation, Housing, Bills, He
 Teks OCR Struk:
 ${rawText}`;
 
-    const res = await fetch(`${baseUrl}/chat/completions`, {
+    const res = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${apiKey}`,
+        Authorization: `Bearer ${llmConfig.apiKey}`,
       },
       body: JSON.stringify({
-        model,
+        model: llmConfig.model,
         messages: [{ role: "user", content: prompt }],
         temperature: 0.1,
       }),

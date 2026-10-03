@@ -29,7 +29,19 @@ export default function LoginPage() {
     setIsSubmitting(false);
 
     if (success) {
-      router.push("/");
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const data = await res.json();
+          if (data?.profile) {
+            router.push("/dashboard");
+            return;
+          }
+        }
+      } catch {
+        // Fallback to onboarding if profile check fails
+      }
+      router.push("/onboarding");
     }
   };
 
@@ -51,7 +63,7 @@ export default function LoginPage() {
 
           <div className="pt-2 flex flex-col gap-2.5">
             <Link
-              href="/"
+              href="/dashboard"
               className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-bold transition shadow-lg shadow-blue-600/30 active:scale-98"
             >
               Kembali ke Dashboard

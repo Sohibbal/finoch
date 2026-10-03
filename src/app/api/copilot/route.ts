@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
+import { getLlmConfig } from "@/lib/llm/llm-client";
 import { buildCopilotSystemPrompt, FinancialFacts } from "./prompt-builder";
 
 export async function POST(req: Request) {
@@ -24,23 +26,56 @@ export async function POST(req: Request) {
       goalStatus: "on_track",
     };
 
-    const activeFacts: FinancialFacts = facts || defaultFacts;
-    const systemPrompt = buildCopilotSystemPrompt(activeFacts);
+    let activeFacts: FinancialFacts = facts || defaultFacts;
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    const baseUrl = process.env.OPENAI_BASE_URL || "https://api.openai.com/v1";
-    const model = process.env.OPENAI_MODEL || "gpt-4o-mini";
-
-    if (apiKey) {
+    // Load real facts from user profile & database if authenticated and facts not explicitly passed
+    if (session?.userId && !facts) {
       try {
-        const res = await fetch(`${baseUrl}/chat/completions`, {
+        const [profile, expenses, goals] = await Promise.all([
+          prisma.financialProfile.findUnique({ where: { userId: session.userId } }),
+          prisma.expense.findMany({ where: { userId: session.userId, isDeleted: false } }),
+          prisma.financialGoal.findMany({ where: { userId: session.userId } }),
+        ]);
+
+        if (profile) {
+          const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
+          const catMap = expenses.reduce((acc, e) => {
+            acc[e.category] = (acc[e.category] || 0) + e.amount;
+            return acc;
+          }, {} as Record<string, number>);
+          const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
+          const topCatLabel = topCat
+            ? `${topCat[0]} (Rp${topCat[1].toLocaleString("id-ID")})`
+            : "Konsumsi Harian";
+
+          activeFacts = {
+            monthlyIncome: profile.monthlyIncome,
+            monthlyExpense: totalExpense,
+            netSavings: Math.max(0, profile.monthlyIncome - totalExpense),
+            topCategory: topCatLabel,
+            goalName: goals[0]?.name || "Tabungan Impian",
+            goalStatus: goals[0]?.status || "on_track",
+          };
+        }
+      } catch (dbErr) {
+        console.warn("Could not query user facts from DB for Copilot:", dbErr);
+      }
+    }
+
+    const systemPrompt = buildCopilotSystemPrompt(activeFacts);
+    const llmConfig = getLlmConfig();
+    let llmErrorMessage: string | null = null;
+
+    if (llmConfig) {
+      try {
+        const res = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${apiKey}`,
+            Authorization: `Bearer ${llmConfig.apiKey}`,
           },
           body: JSON.stringify({
-            model,
+            model: llmConfig.model,
             messages: [
               { role: "system", content: systemPrompt },
               { role: "user", content: message },
@@ -54,12 +89,25 @@ export async function POST(req: Request) {
           const data = await res.json();
           const reply = data.choices?.[0]?.message?.content?.trim();
           if (reply) {
-            return NextResponse.json({ reply, source: "llm" });
+            return NextResponse.json({
+              reply,
+              source: "llm",
+              model: llmConfig.model,
+              provider: llmConfig.provider,
+            });
           }
+        } else {
+          const errorText = await res.text();
+          console.error(`[Copilot LLM Error ${res.status}]`, errorText);
+          llmErrorMessage = `HTTP ${res.status}: ${errorText.slice(0, 150)}`;
         }
-      } catch {
-        // Fallback to rule-based fact generator on LLM timeout/error
+      } catch (err: unknown) {
+        const errorMsg = err instanceof Error ? err.message : "Network/Timeout error";
+        console.error("[Copilot LLM Exception]", errorMsg);
+        llmErrorMessage = errorMsg;
       }
+    } else {
+      llmErrorMessage = "OPENAI_API_KEY belum terdeteksi. Pastikan file .env ada dan restart npm run dev.";
     }
 
     // Deterministic fallback response based on financial facts
@@ -74,7 +122,11 @@ export async function POST(req: Request) {
       reply = `Pos pengeluaran konsumsi Anda saat ini adalah yang tertinggi: ${activeFacts.topCategory}. Di model 50/30/20, makan pokok termasuk Kebutuhan (Needs), namun jajan kafe/resto termasuk Keinginan (Wants). Pastikan porsi Wants tidak melampaui 30% dari income Anda.`;
     }
 
-    return NextResponse.json({ reply, source: "facts_fallback" });
+    return NextResponse.json({
+      reply,
+      source: "facts_fallback",
+      llmDiagnostic: llmErrorMessage,
+    });
   } catch (error) {
     return NextResponse.json(
       { error: "Gagal memproses pesan Copilot" },

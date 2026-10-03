@@ -35,7 +35,7 @@ export default function RegisterPage() {
     setIsSubmitting(false);
 
     if (success) {
-      router.push("/");
+      router.push("/onboarding");
     }
   };
 

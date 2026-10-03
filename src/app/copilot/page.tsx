@@ -18,6 +18,10 @@ interface ChatMessage {
   sender: "user" | "copilot";
   text: string;
   timestamp: string;
+  source?: "llm" | "facts_fallback";
+  model?: string;
+  provider?: string;
+  diagnostic?: string | null;
 }
 
 export default function CopilotPage() {
@@ -27,6 +31,7 @@ export default function CopilotPage() {
       sender: "copilot",
       text: "Halo! Saya FINRA AI Copilot. Saya menganalisis kondisi finansial riil Anda dengan model 50/30/20. Ada pertanyaan mengenai pengeluaran, simulasi anggaran, atau target goal Anda?",
       timestamp: "Baru saja",
+      source: "facts_fallback",
     },
   ]);
   const [inputMessage, setInputMessage] = useState("");
@@ -86,6 +91,10 @@ export default function CopilotPage() {
           hour: "2-digit",
           minute: "2-digit",
         }),
+        source: data.source,
+        model: data.model,
+        provider: data.provider,
+        diagnostic: data.llmDiagnostic,
       };
       setMessages((prev) => [...prev, botMsg]);
     } catch {
@@ -183,11 +192,30 @@ export default function CopilotPage() {
               >
                 <p className="whitespace-pre-line">{msg.text}</p>
                 <div
-                  className={`text-[10px] mt-2 text-right ${
+                  className={`text-[10px] mt-2 flex items-center justify-between gap-2 ${
                     msg.sender === "user" ? "text-emerald-100" : "text-slate-400"
                   }`}
                 >
-                  {msg.timestamp}
+                  {msg.sender === "copilot" && msg.source && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {msg.source === "llm" ? (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300">
+                          <Sparkles className="w-3 h-3" />
+                          Live AI ({msg.model || msg.provider})
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                          Mode Heuristik
+                        </span>
+                      )}
+                      {msg.diagnostic && (
+                        <span className="text-[10px] text-amber-600 dark:text-amber-400">
+                          ({msg.diagnostic})
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  <span className="ml-auto">{msg.timestamp}</span>
                 </div>
               </div>
             </div>

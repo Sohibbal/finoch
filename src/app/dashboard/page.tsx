@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   Mic,
@@ -14,6 +15,7 @@ import {
   TrendingDown,
   ShoppingBag,
   History,
+  Loader2,
 } from "lucide-react";
 import { DigitalTwinCard } from "@/components/dashboard/digital-twin-card";
 import { SpendingTrendChart } from "@/components/dashboard/spending-trend-chart";
@@ -21,6 +23,8 @@ import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart"
 import { UnifiedConfirmationModal } from "@/components/transaction/unified-confirmation-modal";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
 import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
+import { expenseStorage } from "@/lib/storage/expense-storage";
+import { syncManager } from "@/lib/sync/sync-manager";
 import {
   calculateCashflowSummary,
   calculateDigitalTwinSplit,
@@ -29,12 +33,15 @@ import {
   DigitalTwinMetrics,
   TransactionCandidate,
 } from "@/types/financial-types";
+import type { ExpenseCategory } from "@/lib/types/expense";
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [currentCandidate, setCurrentCandidate] = useState<TransactionCandidate | null>(null);
+  const [isProfileChecking, setIsProfileChecking] = useState(true);
 
   const [profile, setProfile] = useState<{
     monthlyIncome: number;
@@ -46,60 +53,125 @@ export default function DashboardPage() {
     monthlyFixedExpenses: 1200000,
   });
 
-  const [transactions, setTransactions] = useState<TransactionCandidate[]>([
-    {
-      id: "tx-1",
-      merchant: "Mie Gacoan",
-      amount: 38000,
-      category: "Food",
-      spendingType: "wants",
-      date: new Date().toISOString().split("T")[0],
-      source: "ocr",
-    },
-    {
-      id: "tx-2",
-      merchant: "Sewa Kos Bulanan",
-      amount: 900000,
-      category: "Housing",
-      spendingType: "needs",
-      date: new Date().toISOString().split("T")[0],
-      source: "manual",
-    },
-    {
-      id: "tx-3",
-      merchant: "Superindo Sembako",
-      amount: 250000,
-      category: "Groceries",
-      spendingType: "needs",
-      date: new Date().toISOString().split("T")[0],
-      source: "voice",
-    },
-    {
-      id: "tx-4",
-      merchant: "Kopi Kenangan",
-      amount: 22000,
-      category: "Food",
-      spendingType: "wants",
-      date: new Date().toISOString().split("T")[0],
-      source: "voice",
-    },
-  ]);
+  const [transactions, setTransactions] = useState<TransactionCandidate[]>([]);
 
-  // Load profile from API
-  useEffect(() => {
-    fetch("/api/profile")
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.profile) {
-          setProfile({
-            monthlyIncome: data.profile.monthlyIncome,
-            currentSavings: data.profile.currentSavings,
-            monthlyFixedExpenses: data.profile.monthlyFixedExpenses,
-          });
+  const loadTransactions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/expenses");
+      if (res.ok) {
+        const data = await res.json();
+        if (Array.isArray(data.expenses) && data.expenses.length > 0) {
+          const mapped: TransactionCandidate[] = data.expenses.map(
+            (e: {
+              id: string;
+              itemName: string;
+              amount: number;
+              category: string;
+              createdAt?: string;
+            }) => {
+              const isNeeds =
+                e.category === "primer" ||
+                ["Housing", "Bills", "Groceries", "Health", "Education"].includes(
+                  e.category
+                );
+              return {
+                id: e.id,
+                merchant: e.itemName,
+                amount: e.amount,
+                category:
+                  e.category === "primer"
+                    ? "Kebutuhan Pokok"
+                    : e.category === "bocor_halus"
+                    ? "Jajan / Keinginan"
+                    : e.category,
+                spendingType: isNeeds ? "needs" : "wants",
+                date: e.createdAt
+                  ? new Date(e.createdAt).toISOString().split("T")[0]
+                  : new Date().toISOString().split("T")[0],
+                source: "manual",
+              };
+            }
+          );
+          setTransactions(mapped);
+          return;
         }
-      })
-      .catch(() => {});
+      }
+
+      // Fallback to local storage (IndexedDB)
+      const local = await expenseStorage.getExpenses();
+      if (local && local.length > 0) {
+        const mapped: TransactionCandidate[] = local.map((e) => {
+          const isNeeds = e.category === "primer";
+          return {
+            id: e.id,
+            merchant: e.itemName,
+            amount: e.amount,
+            category: isNeeds ? "Kebutuhan Pokok" : "Jajan / Keinginan",
+            spendingType: isNeeds ? "needs" : "wants",
+            date: e.createdAt
+              ? new Date(e.createdAt).toISOString().split("T")[0]
+              : new Date().toISOString().split("T")[0],
+            source: "voice",
+          };
+        });
+        setTransactions(mapped);
+      } else {
+        setTransactions([]);
+      }
+    } catch (err) {
+      console.warn("Could not load expenses:", err);
+    }
   }, []);
+
+  // Check authentication & load profile from API
+  useEffect(() => {
+    let isMounted = true;
+
+    async function initDashboard() {
+      try {
+        const res = await fetch("/api/profile");
+        if (res.status === 401) {
+          router.push("/login");
+          return;
+        }
+        if (res.ok) {
+          const data = await res.json();
+          if (!data?.profile) {
+            router.push("/onboarding");
+            return;
+          }
+          if (isMounted) {
+            setProfile({
+              monthlyIncome: data.profile.monthlyIncome,
+              currentSavings: data.profile.currentSavings,
+              monthlyFixedExpenses: data.profile.monthlyFixedExpenses,
+            });
+          }
+        }
+      } catch (err) {
+        console.warn("Profile fetch error:", err);
+      } finally {
+        if (isMounted) {
+          setIsProfileChecking(false);
+        }
+      }
+
+      await loadTransactions();
+    }
+
+    initDashboard();
+
+    const unsubscribe = syncManager.subscribe((status) => {
+      if (status === "synced") {
+        loadTransactions();
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      unsubscribe();
+    };
+  }, [router, loadTransactions]);
 
   // Compute live Digital Twin metrics
   const totalNeeds = transactions
@@ -162,12 +234,30 @@ export default function DashboardPage() {
     setIsConfirmModalOpen(true);
   };
 
-  const handleConfirmTransaction = (candidate: TransactionCandidate) => {
-    setTransactions((prev) => [
-      { ...candidate, id: `tx-${Date.now()}` },
-      ...prev,
-    ]);
+  const handleConfirmTransaction = async (candidate: TransactionCandidate) => {
+    const newTx: TransactionCandidate = {
+      ...candidate,
+      id: candidate.id || `tx-${Date.now()}`,
+    };
+    setTransactions((prev) => [newTx, ...prev]);
     setIsConfirmModalOpen(false);
+
+    try {
+      const expenseCat: ExpenseCategory =
+        candidate.spendingType === "needs" ? "primer" : "bocor_halus";
+      await expenseStorage.saveExpense({
+        itemName: candidate.merchant || candidate.description || "Pengeluaran",
+        amount: candidate.amount,
+        category: expenseCat,
+        createdAt: candidate.date
+          ? new Date(candidate.date).toISOString()
+          : new Date().toISOString(),
+      });
+      syncManager.triggerSync();
+      await loadTransactions();
+    } catch (err) {
+      console.warn("Could not persist transaction:", err);
+    }
   };
 
   // Monthly mock trend data based on current transactions
@@ -297,49 +387,61 @@ export default function DashboardPage() {
             </span>
           </div>
 
-          <div className="divide-y divide-slate-100 dark:divide-slate-800">
-            {transactions.map((tx) => (
-              <div
-                key={tx.id}
-                className="py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 px-2 rounded-xl transition-colors"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                    <ShoppingBag className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">
-                      {tx.merchant}
+          {transactions.length === 0 ? (
+            <div className="py-12 text-center text-slate-400 space-y-2">
+              <ShoppingBag className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 opacity-60" />
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                Belum ada transaksi tercatat
+              </p>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Gunakan tombol Bicara, Scan Struk, atau Catat Manual di atas untuk mulai mencatat pengeluaran Anda.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+              {transactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 px-2 rounded-xl transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                      <ShoppingBag className="w-4 h-4" />
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-slate-400">{tx.date}</span>
-                      <span className="text-[10px] px-2 py-0.2 rounded-md font-semibold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                        {tx.category}
-                      </span>
-                      <span
-                        className={`text-[10px] px-2 py-0.2 rounded-md font-bold uppercase ${
-                          tx.spendingType === "needs"
-                            ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
-                            : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"
-                        }`}
-                      >
-                        {tx.spendingType === "needs" ? "Needs (50%)" : "Wants (30%)"}
-                      </span>
+                    <div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">
+                        {tx.merchant}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-slate-400">{tx.date}</span>
+                        <span className="text-[10px] px-2 py-0.2 rounded-md font-semibold uppercase bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                          {tx.category}
+                        </span>
+                        <span
+                          className={`text-[10px] px-2 py-0.2 rounded-md font-bold uppercase ${
+                            tx.spendingType === "needs"
+                              ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300"
+                              : "bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300"
+                          }`}
+                        >
+                          {tx.spendingType === "needs" ? "Needs (50%)" : "Wants (30%)"}
+                        </span>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="text-right">
-                  <div className="text-sm font-bold text-slate-900 dark:text-white">
-                    Rp {tx.amount.toLocaleString("id-ID")}
-                  </div>
-                  <div className="text-[11px] text-slate-400 capitalize">
-                    via {tx.source}
+                  <div className="text-right">
+                    <div className="text-sm font-bold text-slate-900 dark:text-white">
+                      Rp {tx.amount.toLocaleString("id-ID")}
+                    </div>
+                    <div className="text-[11px] text-slate-400 capitalize">
+                      via {tx.source}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </main>
 
@@ -349,6 +451,7 @@ export default function DashboardPage() {
         onClose={() => setIsVoiceOpen(false)}
         onExpenseSaved={() => {
           setIsVoiceOpen(false);
+          loadTransactions();
         }}
       />
 
