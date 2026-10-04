@@ -25,45 +25,30 @@ const CATEGORY_RULES: Array<{
     ],
   },
   {
-    category: "Housing & Bills",
+    category: "Bills & Utilities",
     keywords: [
       "kos", "kost", "kontrakan", "listrik", "token", "pdam", "laundry",
       "pulsa", "kuota", "paket data", "internet", "wifi", "indihome"
     ],
   },
   {
-    category: "Shopping & Clothing",
+    category: "Shopping & Lifestyle",
     keywords: [
       "checkout", "shopee", "tokopedia", "tiktok shop", "olshop", "baju",
       "sepatu", "skincare", "parfum", "makeup", "celana", "kaos", "jaket",
-      "tas", "sandal", "sabun", "odol", "shampoo", "deterjen", "tisu"
-    ],
-  },
-  {
-    category: "Entertainment & Leisure",
-    keywords: [
+      "tas", "sandal", "sabun", "odol", "shampoo", "deterjen", "tisu",
       "game", "top up", "diamond", "mobile legends", "ml", "steam", "valorant",
       "genshin", "netflix", "spotify", "youtube premium", "bioskop", "nonton",
       "cinema", "xxi", "karaoke", "wisata", "liburan"
     ],
   },
   {
-    category: "Education & Career",
+    category: "Other",
     keywords: [
       "kuliah", "fotokopi", "print", "jilid", "buku", "pulpen", "alat tulis",
-      "kertas", "modul", "praktikum", "ukt", "spp", "almamater", "kursus"
-    ],
-  },
-  {
-    category: "Health & Personal Care",
-    keywords: [
+      "kertas", "modul", "praktikum", "ukt", "spp", "almamater", "kursus",
       "obat", "apotek", "dokter", "vitamin", "klinik", "rumah sakit",
-      "perban", "minyak kayu putih", "salon", "barbershop", "cukur"
-    ],
-  },
-  {
-    category: "Social & Family",
-    keywords: [
+      "perban", "minyak kayu putih", "salon", "barbershop", "cukur",
       "kirim uang", "ortu", "keluarga", "kado", "hadiah", "sedekah",
       "infaq", "zakat", "donasi", "traktir", "kondangan", "sumbangan"
     ],
@@ -71,7 +56,7 @@ const CATEGORY_RULES: Array<{
 ];
 
 /**
- * Classifies an expense item name into one of 9 natural categories.
+ * Classifies an expense item name into one of 5 natural categories.
  */
 export function classifyExpenseCategory(itemName: string): ExpenseCategory {
   if (!itemName) return "Other";

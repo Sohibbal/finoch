@@ -31,7 +31,7 @@ export default function CopilotPage() {
     {
       id: "msg-1",
       sender: "copilot",
-      text: "Halo! Saya FINRA AI Copilot. Saya menganalisis kondisi finansial riil Anda dengan model pengeluaran dan Digital Twin. Ada pertanyaan mengenai arus kas, simulasi anggaran, atau target tabungan Anda?",
+      text: "Halo! Saya VoiCash AI Copilot. Saya menganalisis kondisi finansial riil Anda dengan model pengeluaran dan Digital Twin. Ada pertanyaan mengenai arus kas, simulasi anggaran, atau target tabungan Anda?",
       timestamp: "Baru saja",
       source: "facts_fallback",
     },
@@ -81,7 +81,7 @@ export default function CopilotPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Gagal menghubungi FINRA Copilot");
+        throw new Error("Gagal menghubungi VoiCash Copilot");
       }
 
       const data = await res.json();
@@ -98,6 +98,7 @@ export default function CopilotPage() {
         provider: data.provider,
         diagnostic: data.llmDiagnostic,
       };
+
       setMessages((prev) => [...prev, botMsg]);
     } catch {
       setMessages((prev) => [
@@ -115,30 +116,27 @@ export default function CopilotPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#080c16] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors">
+    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
       {/* Desktop Left Sidebar */}
-      <DashboardSidebar className="hidden md:flex min-h-screen sticky top-0" />
+      <DashboardSidebar className="hidden md:flex" />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 h-screen max-h-screen overflow-hidden pb-20 md:pb-0">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-6 py-3.5 transition-colors shrink-0">
+        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors shrink-0">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             {/* Left: Mobile Brand & Page Title */}
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#0f274a] dark:bg-blue-600 flex items-center justify-center text-white font-bold">
-                  <Bot className="w-4 h-4 text-blue-300 dark:text-white" />
-                </div>
-                <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-                  FINRA
+              <div className="md:hidden flex items-center gap-1.5">
+                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
+                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
                 </span>
               </div>
               <div className="hidden md:block">
-                <h1 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                   AI Financial Copilot
                 </h1>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
                   Tanya jawab cerdas berbasis kondisi keuangan riil dan model Digital Twin Anda
                 </p>
               </div>
@@ -154,8 +152,8 @@ export default function CopilotPage() {
         {/* Main Chat Container */}
         <main className="flex-1 max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
           {/* Grounded Banner */}
-          <div className="mb-3 p-3 rounded-xl bg-blue-50/80 dark:bg-blue-950/30 border border-blue-200/80 dark:border-blue-900/50 text-xs text-blue-900 dark:text-blue-200 flex items-center gap-2 shrink-0">
-            <ShieldCheck className="w-4 h-4 shrink-0 text-blue-600 dark:text-blue-400" />
+          <div className="mb-3 p-3 rounded-2xl bg-cream-100 dark:bg-navy-900/60 border border-cream-300 dark:border-navy-800 text-xs text-navy-800 dark:text-cream-200 flex items-center gap-2 shrink-0">
+            <ShieldCheck className="w-4 h-4 shrink-0 text-navy-700 dark:text-cream-300" />
             <span>
               Jawaban didasarkan pada data transaksi riil dan model Digital Twin Anda. Tidak ada halusinasi angka.
             </span>
@@ -173,8 +171,8 @@ export default function CopilotPage() {
                 <div
                   className={`p-2 rounded-xl shrink-0 ${
                     msg.sender === "user"
-                      ? "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300"
-                      : "bg-[#0f274a] dark:bg-blue-600 text-white shadow-md shadow-blue-900/20"
+                      ? "bg-cream-200 dark:bg-navy-800 text-navy-900 dark:text-cream-100"
+                      : "bg-navy-900 dark:bg-cream-100 text-cream-50 dark:text-navy-950 shadow-sm"
                   }`}
                 >
                   {msg.sender === "user" ? (
@@ -185,27 +183,27 @@ export default function CopilotPage() {
                 </div>
 
                 <div
-                  className={`max-w-[80%] rounded-2xl p-4 text-sm leading-relaxed shadow-sm ${
+                  className={`max-w-[80%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed shadow-sm ${
                     msg.sender === "user"
-                      ? "bg-[#0f274a] dark:bg-blue-600 text-white rounded-tr-none"
-                      : "bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none"
+                      ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 rounded-tr-none"
+                      : "bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-navy-950 dark:text-cream-50 rounded-tl-none"
                   }`}
                 >
                   <p className="whitespace-pre-line">{msg.text}</p>
                   <div
                     className={`text-[10px] mt-2 flex items-center justify-between gap-2 ${
-                      msg.sender === "user" ? "text-blue-100" : "text-slate-400"
+                      msg.sender === "user" ? "text-cream-300 dark:text-navy-700" : "text-navy-400 dark:text-cream-400/60"
                     }`}
                   >
                     {msg.sender === "copilot" && msg.source && (
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {msg.source === "llm" ? (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cream-100 dark:bg-navy-900 text-navy-900 dark:text-cream-100">
                             <Sparkles className="w-3 h-3" />
                             Live AI ({msg.model || msg.provider})
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cream-100 dark:bg-navy-900 text-navy-700 dark:text-cream-300">
                             Mode Heuristik
                           </span>
                         )}
@@ -224,11 +222,11 @@ export default function CopilotPage() {
 
             {isLoading && (
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-xl bg-[#0f274a] dark:bg-blue-600 text-white shrink-0">
+                <div className="p-2 rounded-xl bg-navy-900 dark:bg-cream-100 text-cream-50 dark:text-navy-950 shrink-0">
                   <Bot className="w-4 h-4" />
                 </div>
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-4 rounded-2xl rounded-tl-none text-sm text-slate-500 flex items-center gap-2">
-                  <Loader2 className="w-4 h-4 animate-spin text-blue-600 dark:text-blue-400" />
+                <div className="bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-4 rounded-2xl rounded-tl-none text-xs sm:text-sm text-navy-600 dark:text-cream-300/70 flex items-center gap-2">
+                  <Loader2 className="w-4 h-4 animate-spin text-navy-800 dark:text-cream-200" />
                   <span>Menganalisis kondisi finansial Anda...</span>
                 </div>
               </div>
@@ -239,7 +237,7 @@ export default function CopilotPage() {
 
           {/* Quick Prompts Chips */}
           <div className="mb-3 space-y-1.5 shrink-0">
-            <div className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+            <div className="text-[11px] font-semibold text-navy-500 dark:text-cream-400 uppercase tracking-wider">
               Pertanyaan Populer:
             </div>
             <div className="flex flex-wrap gap-2">
@@ -248,7 +246,7 @@ export default function CopilotPage() {
                   key={idx}
                   type="button"
                   onClick={() => handleSendMessage(prompt)}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-400 text-xs text-slate-700 dark:text-slate-300 transition-colors"
+                  className="px-3 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:bg-cream-100 dark:hover:bg-navy-900 text-xs text-navy-800 dark:text-cream-200 transition-colors shadow-sm"
                 >
                   {prompt}
                 </button>
@@ -262,19 +260,19 @@ export default function CopilotPage() {
               e.preventDefault();
               handleSendMessage();
             }}
-            className="flex items-center gap-2 bg-white dark:bg-slate-900 p-2 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm shrink-0"
+            className="flex items-center gap-2 bg-white dark:bg-[#070E1A] p-2 rounded-2xl border border-cream-300 dark:border-navy-800 shadow-sm shrink-0"
           >
             <input
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Tanyakan analisis keuangan Anda ke FINRA..."
-              className="flex-1 px-4 py-2 bg-transparent text-sm text-slate-900 dark:text-white focus:outline-none"
+              placeholder="Tanyakan analisis keuangan Anda ke VoiCash..."
+              className="flex-1 px-3 py-2 bg-transparent text-xs sm:text-sm text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 focus:outline-none"
             />
             <button
               type="submit"
               disabled={!inputMessage.trim() || isLoading}
-              className="p-3 bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl shadow-sm transition-colors"
+              className="p-2.5 bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 disabled:opacity-50 text-cream-50 dark:text-navy-950 rounded-xl shadow-sm transition-colors"
             >
               <Send className="w-4 h-4" />
             </button>

@@ -9,7 +9,6 @@ import {
   CheckCircle2,
   AlertCircle,
   Loader2,
-  Sparkles,
   Save,
 } from "lucide-react";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
@@ -112,29 +111,26 @@ export default function ProfilePage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#080c16] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors">
+    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
       {/* Desktop Left Sidebar */}
-      <DashboardSidebar className="hidden md:flex min-h-screen sticky top-0" />
+      <DashboardSidebar className="hidden md:flex" />
 
       {/* Main Content Column */}
       <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-12">
         {/* Header */}
-        <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-6 py-3.5 transition-colors">
+        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#0f274a] dark:bg-blue-600 flex items-center justify-center text-white font-bold">
-                  <Sparkles className="w-4 h-4 text-blue-300 dark:text-white" />
-                </div>
-                <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-                  FINRA
+              <div className="md:hidden flex items-center gap-1.5">
+                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
+                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
                 </span>
               </div>
               <div className="hidden md:block">
-                <h1 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                   Profil & Pengaturan Finansial
                 </h1>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
                   Ubah data penghasilan, komitmen wajib, dan target yang diinputkan saat onboarding
                 </p>
               </div>
@@ -150,17 +146,17 @@ export default function ProfilePage() {
         <main className="max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
           {/* Identity Box */}
           {user && (
-            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#0c1322] border border-slate-200/80 dark:border-slate-800/80 flex items-center gap-4 transition-colors">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 flex items-center justify-center font-bold text-lg">
+            <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 flex items-center gap-4 transition-colors shadow-sm">
+              <div className="w-12 h-12 rounded-xl bg-cream-200 dark:bg-navy-900 text-navy-950 dark:text-cream-100 flex items-center justify-center font-black text-lg">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div>
-                <h2 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h2 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                   {user.name}
                 </h2>
-                <p className="text-xs text-slate-500">{user.email}</p>
-                <span className="inline-block mt-1 text-[10px] px-2 py-0.5 rounded-md bg-blue-50 dark:bg-blue-950/60 text-blue-700 dark:text-blue-300 font-semibold">
-                  Akun Terverifikasi
+                <p className="text-xs text-navy-600 dark:text-cream-300/70">{user.email}</p>
+                <span className="inline-block mt-1 text-[10px] px-2.5 py-0.5 rounded-full bg-cream-100 dark:bg-navy-900 text-navy-800 dark:text-cream-200 font-semibold border border-cream-200 dark:border-navy-800">
+                  Akun Aktif
                 </span>
               </div>
             </div>
@@ -185,28 +181,28 @@ export default function ProfilePage() {
           )}
 
           {isLoading ? (
-            <div className="p-12 text-center text-slate-400">
-              <Loader2 className="w-6 h-6 animate-spin mx-auto text-blue-600" />
+            <div className="p-12 text-center text-navy-400 dark:text-cream-400/60">
+              <Loader2 className="w-6 h-6 animate-spin mx-auto text-navy-800 dark:text-cream-200" />
               <p className="text-xs mt-2 font-medium">Memuat profil finansial Anda...</p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Section 1: Penghasilan */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0c1322] border border-slate-200/80 dark:border-slate-800/80 space-y-4 transition-colors">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100 dark:border-slate-800/60">
-                  <Wallet className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 space-y-4 transition-colors shadow-sm">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-cream-200 dark:border-navy-800/80">
+                  <Wallet className="w-4 h-4 text-navy-800 dark:text-cream-200" />
+                  <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                     Pemasukan Bulanan
                   </h3>
                 </div>
 
                 <div className="space-y-3">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
                       Nominal Penghasilan Rutin per Bulan (IDR)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-slate-400">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
                         Rp
                       </span>
                       <input
@@ -218,14 +214,14 @@ export default function ProfilePage() {
                             monthlyIncome: Number(e.target.value),
                           })
                         }
-                        className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-900 dark:text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-2">
                       Sumber Pemasukan Utama
                     </label>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -238,12 +234,12 @@ export default function ProfilePage() {
                           }
                           className={`p-3 text-left rounded-xl border text-xs transition-colors ${
                             formData.incomeType === opt.id
-                              ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-semibold"
-                              : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-slate-600 dark:text-slate-400 hover:border-slate-300"
+                              ? "border-navy-900 bg-navy-900 text-cream-50 dark:border-cream-100 dark:bg-cream-100 dark:text-navy-950 font-semibold shadow-sm"
+                              : "border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/30 text-navy-700 dark:text-cream-300 hover:border-navy-400"
                           }`}
                         >
                           <div className="font-bold">{opt.label}</div>
-                          <div className="text-[10px] text-slate-400 mt-0.5">
+                          <div className="text-[10px] opacity-75 mt-0.5">
                             {opt.desc}
                           </div>
                         </button>
@@ -254,21 +250,21 @@ export default function ProfilePage() {
               </div>
 
               {/* Section 2: Tabungan & Pengeluaran Wajib */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0c1322] border border-slate-200/80 dark:border-slate-800/80 space-y-4 transition-colors">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100 dark:border-slate-800/60">
-                  <PiggyBank className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 space-y-4 transition-colors shadow-sm">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-cream-200 dark:border-navy-800/80">
+                  <PiggyBank className="w-4 h-4 text-navy-800 dark:text-cream-200" />
+                  <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                     Tabungan & Komitmen Wajib
                   </h3>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
                       Total Cadangan Tabungan Saat Ini (IDR)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-slate-400">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
                         Rp
                       </span>
                       <input
@@ -280,21 +276,21 @@ export default function ProfilePage() {
                             currentSavings: Number(e.target.value),
                           })
                         }
-                        className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-900 dark:text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
                         required
                       />
                     </div>
-                    <p className="mt-1 text-[11px] text-slate-400">
+                    <p className="mt-1 text-[11px] text-navy-500 dark:text-cream-400">
                       Saldo rekening atau dompet digital cadangan
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
                       Pengeluaran Tetap per Bulan (IDR)
                     </label>
                     <div className="relative">
-                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-slate-400">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
                         Rp
                       </span>
                       <input
@@ -306,11 +302,11 @@ export default function ProfilePage() {
                             monthlyFixedExpenses: Number(e.target.value),
                           })
                         }
-                        className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 text-slate-900 dark:text-white font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
                         required
                       />
                     </div>
-                    <p className="mt-1 text-[11px] text-slate-400">
+                    <p className="mt-1 text-[11px] text-navy-500 dark:text-cream-400">
                       Sewa kos, listrik, pulsa data, dan kebutuhan pokok
                     </p>
                   </div>
@@ -318,10 +314,10 @@ export default function ProfilePage() {
               </div>
 
               {/* Section 3: Prioritas Finansial */}
-              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#0c1322] border border-slate-200/80 dark:border-slate-800/80 space-y-4 transition-colors">
-                <div className="flex items-center gap-2.5 pb-2 border-b border-slate-100 dark:border-slate-800/60">
-                  <User className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+              <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 space-y-4 transition-colors shadow-sm">
+                <div className="flex items-center gap-2.5 pb-2 border-b border-cream-200 dark:border-navy-800/80">
+                  <User className="w-4 h-4 text-navy-800 dark:text-cream-200" />
+                  <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                     Prioritas Finansial Utama
                   </h3>
                 </div>
@@ -336,12 +332,12 @@ export default function ProfilePage() {
                       }
                       className={`p-3 text-left rounded-xl border text-xs transition-colors ${
                         formData.financialPriority === opt.id
-                          ? "border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 text-blue-900 dark:text-blue-200 font-semibold"
-                          : "border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-slate-600 dark:text-slate-400 hover:border-slate-300"
+                          ? "border-navy-900 bg-navy-900 text-cream-50 dark:border-cream-100 dark:bg-cream-100 dark:text-navy-950 font-semibold shadow-sm"
+                          : "border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/30 text-navy-700 dark:text-cream-300 hover:border-navy-400"
                       }`}
                     >
                       <div className="font-bold">{opt.label}</div>
-                      <div className="text-[10px] text-slate-400 mt-0.5">
+                      <div className="text-[10px] opacity-75 mt-0.5">
                         {opt.desc}
                       </div>
                     </button>
@@ -354,7 +350,7 @@ export default function ProfilePage() {
                 <button
                   type="submit"
                   disabled={isSaving}
-                  className="px-6 py-3 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-2 shadow-sm transition-colors disabled:opacity-50"
+                  className="px-6 py-3 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] disabled:opacity-50"
                 >
                   {isSaving ? (
                     <Loader2 className="w-4 h-4 animate-spin" />

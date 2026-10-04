@@ -10,7 +10,6 @@ import {
   Bot,
   User,
   LogOut,
-  Sparkles,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "./theme-toggle";
@@ -31,12 +30,12 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
     },
     {
       href: "/simulator",
-      label: "What-If Simulator",
+      label: "Simulator Arus Kas",
       icon: Compass,
     },
     {
       href: "/goals",
-      label: "Goals",
+      label: "Target Tabungan",
       icon: Target,
     },
     {
@@ -53,26 +52,18 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
 
   return (
     <aside
-      className={`w-64 bg-white dark:bg-[#0c1322] border-r border-slate-200 dark:border-slate-800/80 flex flex-col justify-between p-4 shrink-0 transition-colors ${className}`}
+      className={`w-64 h-screen sticky top-0 self-start overflow-y-auto bg-cream-50 dark:bg-navy-950 border-r border-cream-300 dark:border-navy-800 flex flex-col justify-between p-4 shrink-0 transition-colors ${className}`}
     >
       <div className="space-y-6">
         {/* Brand Header */}
-        <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-1 group">
-          <div className="w-8 h-8 rounded-xl bg-[#0f274a] dark:bg-blue-600 flex items-center justify-center text-white font-bold shadow-sm">
-            <Sparkles className="w-4 h-4 text-blue-300 dark:text-white" />
-          </div>
-          <div>
-            <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-              FINRA
-            </span>
-            <span className="block text-[10px] text-slate-500 font-medium">
-              Smart Financial Assistant
-            </span>
-          </div>
+        <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1 group">
+          <span className="text-lg font-black tracking-tight text-navy-950 dark:text-cream-50">
+            voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+          </span>
         </Link>
 
         {/* Navigation Links */}
-        <nav className="space-y-1">
+        <nav className="space-y-1.5">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -80,13 +71,13 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors ${
+                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition-all ${
                   isActive
-                    ? "bg-blue-50 dark:bg-blue-950/50 text-blue-700 dark:text-blue-400 font-bold"
-                    : "text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100/60 dark:hover:bg-slate-800/40"
+                    ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 font-bold shadow-sm"
+                    : "text-navy-700/80 dark:text-cream-300/80 hover:text-navy-950 dark:hover:text-cream-50 hover:bg-cream-200/50 dark:hover:bg-navy-900/50"
                 }`}
               >
-                <Icon className={`w-4 h-4 ${isActive ? "text-blue-600 dark:text-blue-400" : "text-slate-400"}`} />
+                <Icon className={`w-4 h-4 ${isActive ? "text-current" : "text-navy-500 dark:text-cream-400"}`} />
                 <span>{item.label}</span>
               </Link>
             );
@@ -95,23 +86,23 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
       </div>
 
       {/* Footer Controls: Theme Toggle & User Info */}
-      <div className="pt-4 border-t border-slate-100 dark:border-slate-800/80 space-y-3">
+      <div className="pt-4 border-t border-cream-200 dark:border-navy-800 space-y-3">
         <div className="flex items-center justify-between px-2">
-          <span className="text-xs text-slate-500 font-medium">Tema Tampilan</span>
+          <span className="text-xs text-navy-600 dark:text-cream-400 font-medium">Tema Tampilan</span>
           <ThemeToggle />
         </div>
 
         {user && (
-          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/60 flex items-center justify-between gap-2">
+          <div className="p-2.5 rounded-xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 flex items-center justify-between gap-2 shadow-sm">
             <div className="flex items-center gap-2 overflow-hidden">
-              <div className="w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300 font-bold text-xs flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-cream-200 dark:bg-navy-900 text-navy-950 dark:text-cream-100 font-bold text-xs flex items-center justify-center shrink-0">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div className="truncate">
-                <div className="text-xs font-bold text-slate-800 dark:text-slate-200 truncate">
+                <div className="text-xs font-bold text-navy-950 dark:text-cream-50 truncate">
                   {user.name}
                 </div>
-                <div className="text-[10px] text-slate-400 truncate">
+                <div className="text-[10px] text-navy-500 dark:text-cream-400 truncate">
                   {user.email}
                 </div>
               </div>
@@ -122,7 +113,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
               onClick={() => logout()}
               title="Keluar Akun"
               aria-label="Keluar Akun"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0"
+              className="p-1.5 rounded-lg text-navy-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>

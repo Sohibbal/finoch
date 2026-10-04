@@ -207,7 +207,7 @@ export default function DashboardPage() {
     setCurrentCandidate({
       merchant: "",
       amount: 0,
-      category: "Food",
+      category: "Food & Drinks",
       spendingType: "wants",
       date: new Date().toISOString().split("T")[0],
       source: "manual",
@@ -244,31 +244,60 @@ export default function DashboardPage() {
     }
   };
 
-  // Monthly mock trend data based on current transactions
+  // Category breakdown for current transactions
+  const currentFood = transactions
+    .filter((t) => t.category === "Food & Drinks" || t.category === "Food")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const currentTransport = transactions
+    .filter((t) => t.category === "Transportation")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const currentBills = transactions
+    .filter((t) => t.category === "Bills & Utilities" || t.category === "Housing & Bills" || t.category === "Bills")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const currentShopping = transactions
+    .filter((t) => t.category === "Shopping & Lifestyle" || t.category === "Shopping & Clothing" || t.category === "Entertainment & Leisure")
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  const currentOther = transactions
+    .filter((t) => !["Food & Drinks", "Food", "Transportation", "Bills & Utilities", "Housing & Bills", "Bills", "Shopping & Lifestyle", "Shopping & Clothing", "Entertainment & Leisure"].includes(t.category))
+    .reduce((sum, t) => sum + t.amount, 0);
+
+  // Monthly category spending trend data
   const trendData = [
     {
       month: "Jul",
-      needs: 1200000,
-      wants: 600000,
-      savings: 700000,
+      food: 950000,
+      transport: 300000,
+      bills: 450000,
+      shopping: 280000,
+      other: 120000,
     },
     {
       month: "Agu",
-      needs: 1350000,
-      wants: 750000,
-      savings: 500000,
+      food: 1100000,
+      transport: 350000,
+      bills: 450000,
+      shopping: 400000,
+      other: 150000,
     },
     {
       month: "Sep",
-      needs: 1100000,
-      wants: 620000,
-      savings: 800000,
+      food: 1020000,
+      transport: 280000,
+      bills: 450000,
+      shopping: 310000,
+      other: 140000,
     },
     {
       month: "Okt (Ini)",
-      needs: totalNeeds,
-      wants: totalWants,
-      savings: Math.max(0, cashflow.netSavings),
+      food: currentFood,
+      transport: currentTransport,
+      bills: currentBills,
+      shopping: currentShopping,
+      other: currentOther,
     },
   ];
 
@@ -284,30 +313,27 @@ export default function DashboardPage() {
   }));
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#080c16] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors">
+    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
       {/* Desktop Left Sidebar */}
-      <DashboardSidebar className="hidden md:flex min-h-screen sticky top-0" />
+      <DashboardSidebar className="hidden md:flex" />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-10">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-6 py-3.5 transition-colors">
+        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             {/* Left: Mobile Brand & Page Title */}
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#0f274a] dark:bg-blue-600 flex items-center justify-center text-white font-bold">
-                  <Sparkles className="w-4 h-4 text-blue-300 dark:text-white" />
-                </div>
-                <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-                  FINRA
+              <div className="md:hidden flex items-center gap-1.5">
+                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
+                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
                 </span>
               </div>
               <div className="hidden md:block">
-                <h1 className="text-sm font-bold text-slate-900 dark:text-white">
+                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                   Dashboard Finansial
                 </h1>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
                   Pantau arus kas dan pencatatan pengeluaran Anda
                 </p>
               </div>
@@ -318,21 +344,21 @@ export default function DashboardPage() {
               <ThemeToggle />
               <button
                 onClick={() => setIsVoiceOpen(true)}
-                className="px-3 py-2 rounded-xl bg-[#0f274a] hover:bg-[#183664] dark:bg-blue-600 dark:hover:bg-blue-500 text-white font-semibold text-xs flex items-center gap-1.5 shadow-sm transition-colors"
+                className="px-3.5 py-2 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"
               >
                 <Mic className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Bicara</span>
               </button>
               <button
                 onClick={() => setIsScannerOpen(true)}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-semibold text-xs flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                className="px-3.5 py-2 rounded-full border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] text-navy-800 dark:text-cream-200 font-semibold text-xs flex items-center gap-1.5 hover:bg-cream-100 dark:hover:bg-navy-900 transition-colors"
               >
-                <Camera className="w-3.5 h-3.5 text-blue-500" />
+                <Camera className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Scan Struk</span>
               </button>
               <button
                 onClick={handleOpenManualEntry}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-semibold text-xs flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                className="px-3.5 py-2 rounded-full border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] text-navy-800 dark:text-cream-200 font-semibold text-xs flex items-center gap-1.5 hover:bg-cream-100 dark:hover:bg-navy-900 transition-colors"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Catat Manual</span>
@@ -353,47 +379,47 @@ export default function DashboardPage() {
         </div>
 
         {/* Transaction History & Feed */}
-        <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800/80">
             <div className="flex items-center gap-2">
-              <History className="w-5 h-5 text-emerald-500" />
-              <h3 className="text-base font-bold text-slate-900 dark:text-white">
+              <History className="w-4 h-4 text-navy-700 dark:text-cream-300" />
+              <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
                 Daftar Transaksi Terbaru
               </h3>
             </div>
-            <span className="text-xs text-slate-500">
+            <span className="text-xs text-navy-500 dark:text-cream-400">
               Total {transactions.length} transaksi tercatat
             </span>
           </div>
 
           {transactions.length === 0 ? (
-            <div className="py-12 text-center text-slate-400 space-y-2">
-              <ShoppingBag className="w-8 h-8 mx-auto text-slate-300 dark:text-slate-600 opacity-60" />
-              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <div className="py-12 text-center text-navy-400 dark:text-cream-400/60 space-y-2">
+              <ShoppingBag className="w-8 h-8 mx-auto text-navy-300 dark:text-cream-400/40 opacity-60" />
+              <p className="text-sm font-semibold text-navy-950 dark:text-cream-50">
                 Belum ada transaksi tercatat
               </p>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+              <p className="text-xs text-navy-600 dark:text-cream-300/70 max-w-sm mx-auto">
                 Gunakan tombol Bicara, Scan Struk, atau Catat Manual di atas untuk mulai mencatat pengeluaran Anda.
               </p>
             </div>
           ) : (
-            <div className="divide-y divide-slate-100 dark:divide-slate-800">
+            <div className="divide-y divide-cream-100 dark:divide-navy-800/80">
               {transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="py-3.5 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800/40 px-2 rounded-xl transition-colors"
+                  className="py-3.5 flex items-center justify-between hover:bg-cream-50/80 dark:hover:bg-navy-900/40 px-2 rounded-xl transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    <div className="p-2 rounded-xl bg-cream-100 dark:bg-navy-900 text-navy-800 dark:text-cream-200">
                       <ShoppingBag className="w-4 h-4" />
                     </div>
                     <div>
-                      <div className="text-sm font-bold text-slate-900 dark:text-white">
+                      <div className="text-sm font-bold text-navy-950 dark:text-cream-50">
                         {tx.merchant}
                       </div>
                       <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-slate-400">{tx.date}</span>
-                        <span className="text-[11px] px-2 py-0.5 rounded-md font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        <span className="text-xs text-navy-500 dark:text-cream-400">{tx.date}</span>
+                        <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-cream-100 dark:bg-navy-900 text-navy-700 dark:text-cream-300">
                           {tx.category || "Lainnya"}
                         </span>
                       </div>
@@ -401,10 +427,10 @@ export default function DashboardPage() {
                   </div>
 
                   <div className="text-right">
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">
+                    <div className="text-sm font-black text-navy-950 dark:text-cream-50">
                       Rp {tx.amount.toLocaleString("id-ID")}
                     </div>
-                    <div className="text-[11px] text-slate-400 capitalize">
+                    <div className="text-[11px] text-navy-400 dark:text-cream-400/60 capitalize">
                       via {tx.source}
                     </div>
                   </div>

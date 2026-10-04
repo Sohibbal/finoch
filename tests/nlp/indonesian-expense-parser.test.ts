@@ -8,14 +8,14 @@ describe("Expense Category Classifier", () => {
   it("classifies items into appropriate natural categories accurately", () => {
     expect(classifyExpenseCategory("Nasi Padang")).toBe("Food & Drinks");
     expect(classifyExpenseCategory("Bensin Motor")).toBe("Transportation");
-    expect(classifyExpenseCategory("Pulsa Telkomsel")).toBe("Housing & Bills");
-    expect(classifyExpenseCategory("Fotokopi Modul Kuliah")).toBe("Education & Career");
-    expect(classifyExpenseCategory("Obat Panadol")).toBe("Health & Personal Care");
+    expect(classifyExpenseCategory("Pulsa Telkomsel")).toBe("Bills & Utilities");
+    expect(classifyExpenseCategory("Fotokopi Modul Kuliah")).toBe("Other");
+    expect(classifyExpenseCategory("Obat Panadol")).toBe("Other");
     expect(classifyExpenseCategory("Beras 5kg")).toBe("Food & Drinks");
     expect(classifyExpenseCategory("Kopi Susu")).toBe("Food & Drinks");
-    expect(classifyExpenseCategory("Top Up Diamond ML")).toBe("Entertainment & Leisure");
-    expect(classifyExpenseCategory("Checkout Shopee")).toBe("Shopping & Clothing");
-    expect(classifyExpenseCategory("Kirim uang adik")).toBe("Social & Family");
+    expect(classifyExpenseCategory("Top Up Diamond ML")).toBe("Shopping & Lifestyle");
+    expect(classifyExpenseCategory("Checkout Shopee")).toBe("Shopping & Lifestyle");
+    expect(classifyExpenseCategory("Kirim uang adik")).toBe("Other");
   });
 });
 
@@ -60,7 +60,7 @@ describe("Indonesian Expense Parser Complete Pipeline", () => {
     expect(result[2].amount).toBe(25000);
     expect(result[0].category).toBe("Food & Drinks");
     expect(result[1].category).toBe("Transportation");
-    expect(result[2].category).toBe("Housing & Bills");
+    expect(result[2].category).toBe("Bills & Utilities");
   });
 
   it("handles empty or unparseable input gracefully", () => {

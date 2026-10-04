@@ -70,16 +70,12 @@ Ekstrak data dari teks OCR struk berikut ke dalam format JSON valid tanpa format
   "date": "2026-10-02",
   "items": [{"name": "Nama Item", "amount": 10000}]
 }
-Pilih category PERSIS dari salah satu 9 kategori berikut:
-- Food & Drinks (makan resto/warteg, jajan kopi, sembako)
-- Transportation (bensin, ojek online, tiket/parkir)
-- Housing & Bills (sewa kos, listrik, air, pulsa/internet)
-- Shopping & Clothing (baju, sepatu, skincare, belanja barang)
-- Entertainment & Leisure (bioskop, streaming, game, rekreasi)
-- Education & Career (kuliah, buku, print tugas, kursus)
-- Health & Personal Care (obat, dokter, perawatan diri)
-- Social & Family (kirim uang keluarga, kado, sedekah)
-- Other (biaya administrasi atau lainnya)
+Pilih category PERSIS dari salah satu 5 kategori berikut:
+- Food & Drinks (makan resto/warteg, jajan kopi, sembako harian)
+- Transportation (bensin, ojek online, tiket/parkir, tol)
+- Bills & Utilities (sewa kos, listrik, air, pulsa/internet)
+- Shopping & Lifestyle (baju, sepatu, skincare, belanja online, bioskop, game, hiburan)
+- Other (pendidikan/buku/print, obat/kesehatan, kirim uang keluarga, kado, sedekah, lainnya)
 
 Teks OCR Struk:
 ${rawText}`;
@@ -174,28 +170,39 @@ export async function POST(req: Request) {
 
     let ocrText = "";
 
-    // 1. Primary Engine: Tesseract.js in Node.js
+    // 1. Primary Engine: PaddleOCR via Python subprocess
     try {
-      const tessRes = await Tesseract.recognize(buffer, "eng");
-      if (tessRes?.data?.text && tessRes.data.text.trim().length > 0) {
-        ocrText = tessRes.data.text.trim();
+      const tempFileName = `receipt-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
+      tempFilePath = path.join(os.tmpdir(), tempFileName);
+      await fs.writeFile(tempFilePath, buffer);
+      const paddleText = await runPaddleOcrSubprocess(tempFilePath);
+      if (paddleText && paddleText.trim().length > 0) {
+        ocrText = paddleText.trim();
       }
-    } catch (tessErr) {
-      console.warn("Tesseract OCR notice:", tessErr);
+    } catch (paddleErr) {
+      console.warn("PaddleOCR notice:", paddleErr);
     }
 
-    // 2. Secondary fallback: PaddleOCR subprocess (if available)
+    // 2. Secondary Engine: Tesseract.js (Node.js fallback with safe explicit workerPath)
     if (!ocrText || ocrText.length < 5) {
       try {
-        const tempFileName = `receipt-${Date.now()}-${Math.random().toString(36).substring(2, 8)}.png`;
-        tempFilePath = path.join(os.tmpdir(), tempFileName);
-        await fs.writeFile(tempFilePath, buffer);
-        const paddleText = await runPaddleOcrSubprocess(tempFilePath);
-        if (paddleText && paddleText.trim().length > ocrText.length) {
-          ocrText = paddleText.trim();
+        const workerPath = path.join(
+          process.cwd(),
+          "node_modules",
+          "tesseract.js",
+          "src",
+          "worker-script",
+          "node",
+          "index.js"
+        );
+        const worker = await Tesseract.createWorker("eng", 1, { workerPath });
+        const tessRes = await worker.recognize(buffer);
+        await worker.terminate();
+        if (tessRes?.data?.text && tessRes.data.text.trim().length > ocrText.length) {
+          ocrText = tessRes.data.text.trim();
         }
-      } catch (paddleErr) {
-        console.warn("PaddleOCR notice:", paddleErr);
+      } catch (tessErr) {
+        console.warn("Tesseract OCR notice:", tessErr);
       }
     }
 

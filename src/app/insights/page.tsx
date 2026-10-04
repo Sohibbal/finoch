@@ -4,16 +4,15 @@ import React, { useState } from "react";
 import Link from "next/link";
 import {
   Sparkles,
-  TrendingUp,
-  AlertTriangle,
   Lightbulb,
-  ArrowRight,
   ShieldAlert,
-  Bot,
   CheckCircle,
 } from "lucide-react";
 import { detectSpendingPatterns } from "@/lib/insights/pattern-detector";
 import { AiInsightCard } from "@/types/financial-types";
+import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { BottomNav } from "@/components/layout/bottom-nav";
 
 export default function InsightsPage() {
   const [insights] = useState<AiInsightCard[]>(() =>
@@ -37,125 +36,122 @@ export default function InsightsPage() {
   );
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 pb-20">
-      {/* Top Header */}
-      <header className="sticky top-0 z-30 bg-white/85 dark:bg-[#091124]/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 px-4 sm:px-6 py-3.5">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-9 h-9 rounded-xl bg-[#0f274a] dark:bg-blue-600 flex items-center justify-center text-white font-bold shadow-md shadow-blue-900/20">
-                <Lightbulb className="w-5 h-5 text-amber-300 dark:text-amber-400" />
-              </div>
-              <div>
-                <span className="text-lg font-black tracking-tight text-slate-900 dark:text-white">
-                  FINRA
-                </span>
-                <span className="ml-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300">
-                  AI Insights
-                </span>
-              </div>
-            </Link>
-          </div>
-
-          <nav className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600 dark:text-slate-300">
-            <Link href="/dashboard" className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
-              Dashboard
-            </Link>
-            <Link href="/simulator" className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
-              What-If Simulator
-            </Link>
-            <Link href="/goals" className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors">
-              Goals
-            </Link>
-            <Link href="/copilot" className="hover:text-blue-700 dark:hover:text-blue-400 transition-colors flex items-center gap-1.5">
-              <Bot className="w-4 h-4 text-blue-500" />
-              AI Copilot
-            </Link>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
+      {/* Desktop Left Sidebar */}
+      <DashboardSidebar className="hidden md:flex" />
 
       {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-        <div>
-          <h1 className="text-2xl font-black text-slate-900 dark:text-white">
-            Wawasan & Deteksi Pola Finansial (AI Insights)
-          </h1>
-          <p className="text-sm text-slate-500 mt-1">
-            Bukan sekadar saran umum: Setiap wawasan didukung bukti angka konkret dan rencana aksi nyata.
-          </p>
-        </div>
-
-        {/* Insights Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {insights.map((card, idx) => (
-            <div
-              key={idx}
-              className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4 flex flex-col justify-between"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      card.type === "spending_increase"
-                        ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
-                        : card.type === "spending_decrease"
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                        : "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-300"
-                    }`}
-                  >
-                    {card.type === "spending_increase" ? (
-                      <ShieldAlert className="w-3.5 h-3.5" />
-                    ) : card.type === "spending_decrease" ? (
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    ) : (
-                      <Sparkles className="w-3.5 h-3.5" />
-                    )}
-                    {card.type.replace("_", " ")}
-                  </span>
-                  <span className="text-xs text-slate-400">
-                    Akurasi: {Math.round((card.confidence || 0.95) * 100)}%
-                  </span>
-                </div>
-
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                  {card.title}
-                </h3>
-                <p className="text-sm text-slate-600 dark:text-slate-300">
-                  {card.description}
-                </p>
-
-                {/* Evidence Box */}
-                <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 text-xs text-slate-600 dark:text-slate-300">
-                  <div className="font-semibold text-slate-700 dark:text-slate-200 mb-1">
-                    Bukti Angka (Evidence):
-                  </div>
-                  <pre className="text-[11px] font-mono text-slate-500 overflow-x-auto">
-                    {JSON.stringify(card.evidence, null, 2)}
-                  </pre>
-                </div>
-
-                {/* Impact Statement */}
-                <div className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                  <span className="font-bold text-slate-900 dark:text-white">Dampak: </span>
-                  {card.impact}
-                </div>
+      <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-12">
+        {/* Top Header */}
+        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="md:hidden flex items-center gap-1.5">
+                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
+                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+                </span>
               </div>
-
-              {/* Recommendation Action */}
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
-                <div className="p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-900 text-xs text-emerald-800 dark:text-emerald-300 flex items-start gap-2">
-                  <Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-emerald-600 dark:text-emerald-400" />
-                  <div>
-                    <span className="font-bold">Rekomendasi Aksi: </span>
-                    {card.recommendation}
-                  </div>
-                </div>
+              <div className="hidden md:block">
+                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
+                  Wawasan Finansial (AI Insights)
+                </h1>
+                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
+                  Setiap wawasan didukung bukti angka konkret dan rencana aksi nyata
+                </p>
               </div>
             </div>
-          ))}
-        </div>
-      </main>
+
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+            </div>
+          </div>
+        </header>
+
+        {/* Main Content */}
+        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
+          <div>
+            <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
+              Deteksi Pola & Rekomendasi Finansial
+            </h2>
+            <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
+              Evaluasi kebiasaan belanja untuk mencegah kebocoran kas bulanan secara cerdas.
+            </p>
+          </div>
+
+          {/* Insights Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {insights.map((card, idx) => (
+              <div
+                key={idx}
+                className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4 flex flex-col justify-between transition-colors"
+              >
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
+                        card.type === "spending_increase"
+                          ? "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
+                          : card.type === "spending_decrease"
+                          ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
+                          : "bg-cream-100 text-navy-800 dark:bg-navy-900 dark:text-cream-200"
+                      }`}
+                    >
+                      {card.type === "spending_increase" ? (
+                        <ShieldAlert className="w-3.5 h-3.5" />
+                      ) : card.type === "spending_decrease" ? (
+                        <CheckCircle className="w-3.5 h-3.5" />
+                      ) : (
+                        <Sparkles className="w-3.5 h-3.5" />
+                      )}
+                      {card.type.replace("_", " ")}
+                    </span>
+                    <span className="text-xs text-navy-400 dark:text-cream-400/60">
+                      Akurasi: {Math.round((card.confidence || 0.95) * 100)}%
+                    </span>
+                  </div>
+
+                  <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
+                    {card.title}
+                  </h3>
+                  <p className="text-xs text-navy-600 dark:text-cream-300/80 leading-relaxed">
+                    {card.description}
+                  </p>
+
+                  {/* Evidence Box */}
+                  <div className="p-3 rounded-xl bg-cream-50/70 dark:bg-navy-900/50 border border-cream-200 dark:border-navy-800/60 text-xs text-navy-700 dark:text-cream-300">
+                    <div className="font-semibold text-navy-950 dark:text-cream-50 mb-1">
+                      Bukti Angka:
+                    </div>
+                    <pre className="text-[11px] font-mono text-navy-500 dark:text-cream-400/70 overflow-x-auto">
+                      {JSON.stringify(card.evidence, null, 2)}
+                    </pre>
+                  </div>
+
+                  {/* Impact Statement */}
+                  <div className="text-xs font-medium text-navy-700 dark:text-cream-300">
+                    <span className="font-bold text-navy-950 dark:text-cream-50">Dampak: </span>
+                    {card.impact}
+                  </div>
+                </div>
+
+                {/* Recommendation Action */}
+                <div className="pt-3 border-t border-cream-200 dark:border-navy-800/80">
+                  <div className="p-3 rounded-xl bg-cream-100 dark:bg-navy-900 border border-cream-200 dark:border-navy-800 text-xs text-navy-900 dark:text-cream-100 flex items-start gap-2">
+                    <Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-navy-800 dark:text-cream-200" />
+                    <div>
+                      <span className="font-bold">Rekomendasi Aksi: </span>
+                      {card.recommendation}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile Bottom Navigation */}
+      <BottomNav onOpenVoice={() => {}} />
     </div>
   );
 }

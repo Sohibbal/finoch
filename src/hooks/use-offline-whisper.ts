@@ -18,23 +18,23 @@ export interface OfflineModelConfig {
 export const OFFLINE_MODEL_CONFIGS: Record<OfflineModelTier, OfflineModelConfig> = {
   base: {
     id: "base",
-    name: "Standar (Whisper-Base)",
+    name: "Mode Ringan",
     modelId: "Xenova/whisper-base",
     sizeLabel: "~77 MB",
     ramLabel: "~250 MB",
-    accuracyLabel: "Optimal & Seimbang",
-    badge: "Rekomendasi",
-    description: "Cepat dan hemat memori. Sangat akurat untuk kalimat belanja dan nominal rupiah harian.",
+    accuracyLabel: "Cepat & Hemat Memori",
+    badge: "Cepat & Ringan",
+    description: "Cepat, hemat memori (~77 MB). Sangat responsif untuk pencatatan pengeluaran harian.",
   },
   small: {
     id: "small",
-    name: "Akurasi Tinggi (Whisper-Small)",
+    name: "Mode Berat",
     modelId: "Xenova/whisper-small",
     sizeLabel: "~242 MB",
     ramLabel: "~750 MB",
-    accuracyLabel: "Maksimal (Mendekati Cloud)",
-    badge: "Akurasi Tinggi",
-    description: "Model lebih besar dengan pemahaman logat dan ucapan cepat bahasa Indonesia terbaik.",
+    accuracyLabel: "Presisi Tinggi",
+    badge: "Presisi Tinggi",
+    description: "Akurasi maksimal (~242 MB). Kosakata luas untuk ucapan panjang dan beragam logat.",
   },
 };
 

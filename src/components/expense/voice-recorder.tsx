@@ -65,8 +65,8 @@ export function VoiceRecorder({
         {/* Pulsing ring during listening */}
         {isListening && (
           <>
-            <div className="absolute w-24 h-24 rounded-full bg-blue-500/20 animate-ping" />
-            <div className="absolute w-28 h-28 rounded-full bg-blue-500/10 animate-pulse" />
+            <div className="absolute w-24 h-24 rounded-full bg-rose-500/25 animate-ping" />
+            <div className="absolute w-28 h-28 rounded-full bg-rose-500/15 animate-pulse" />
           </>
         )}
 
@@ -78,14 +78,14 @@ export function VoiceRecorder({
           aria-label={isListening ? "Hentikan rekaman" : "Mulai merekam suara"}
           className={`relative z-10 w-20 h-20 rounded-full flex items-center justify-center shadow-lg transition-all duration-200 active:scale-95 ${
             isListening
-              ? "bg-rose-500 text-white shadow-rose-500/30 scale-105"
+              ? "bg-rose-600 text-white shadow-rose-600/30 scale-105"
               : isProcessing
-              ? "bg-slate-700 text-slate-300 shadow-slate-700/20 cursor-wait"
+              ? "bg-cream-300 dark:bg-navy-800 text-navy-900 dark:text-cream-200 cursor-wait"
               : isSaved
-              ? "bg-blue-600 text-white shadow-blue-600/30"
+              ? "bg-emerald-600 text-white shadow-emerald-600/25"
               : isError
-              ? "bg-amber-600 text-white"
-              : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/30"
+              ? "bg-rose-600 text-white"
+              : "bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 shadow-md"
           }`}
         >
           {isProcessing ? (
@@ -95,21 +95,21 @@ export function VoiceRecorder({
           ) : isSaved ? (
             <CheckCircle2 className="w-8 h-8 text-white" />
           ) : !isSupported ? (
-            <MicOff className="w-8 h-8 text-slate-400" />
+            <MicOff className="w-8 h-8 text-navy-400 dark:text-cream-400" />
           ) : isError ? (
             <AlertCircle className="w-8 h-8 text-white" />
           ) : (
-            <Mic className="w-8 h-8 text-white" />
+            <Mic className="w-8 h-8" />
           )}
         </button>
       </div>
 
-      <p className="text-base font-semibold text-slate-900 dark:text-slate-100">
+      <p className="text-base font-bold text-navy-950 dark:text-cream-50">
         {getStatusLabel()}
       </p>
 
       {getSubLabel() && (
-        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 max-w-xs">
+        <p className="mt-1 text-xs text-navy-600 dark:text-cream-300/80 max-w-xs">
           {getSubLabel()}
         </p>
       )}

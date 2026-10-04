@@ -20,22 +20,22 @@ interface CategoryDonutChartProps {
 }
 
 const CATEGORY_COLORS = [
-  "#10b981", // Emerald - Food
-  "#3b82f6", // Blue - Groceries
-  "#f59e0b", // Amber - Transport
-  "#8b5cf6", // Purple - Housing
-  "#ec4899", // Pink - Entertainment
-  "#06b6d4", // Cyan - Bills
-  "#14b8a6", // Teal - Health
-  "#f97316", // Orange - Shopping
-  "#64748b", // Slate - Other
+  "#0B192C", // Deep Navy
+  "#1C3C68", // Navy
+  "#275490", // Royal Navy
+  "#BDAC8D", // Warm Sand
+  "#D6C9B0", // Light Sand
+  "#0F223B", // Navy Accent
+  "#10b981", // Emerald
+  "#f59e0b", // Amber
+  "#64748b", // Slate
 ];
 
 export function CategoryDonutChart({ data }: CategoryDonutChartProps) {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 text-center py-12">
-        <p className="text-sm text-slate-500">Belum ada pengeluaran berdasarkan kategori.</p>
+      <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 border border-cream-300 dark:border-navy-800 text-center py-12">
+        <p className="text-xs text-navy-500 dark:text-cream-400">Belum ada pengeluaran berdasarkan kategori.</p>
       </div>
     );
   }
@@ -43,13 +43,13 @@ export function CategoryDonutChart({ data }: CategoryDonutChartProps) {
   const total = data.reduce((acc, curr) => acc + curr.value, 0);
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+    <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+          <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
             Distribusi Kategori
           </h3>
-          <p className="text-xs text-slate-500">
+          <p className="text-xs text-navy-600 dark:text-cream-300/70">
             Total Pengeluaran: Rp {total.toLocaleString("id-ID")}
           </p>
         </div>
@@ -80,10 +80,10 @@ export function CategoryDonutChart({ data }: CategoryDonutChartProps) {
                 "Nominal",
               ]}
               contentStyle={{
-                backgroundColor: "rgba(15, 23, 42, 0.9)",
+                backgroundColor: "#070E1A",
                 borderRadius: "12px",
-                border: "none",
-                color: "#ffffff",
+                border: "1px solid #1E2D4A",
+                color: "#FAF8F5",
                 fontSize: "12px",
               }}
             />

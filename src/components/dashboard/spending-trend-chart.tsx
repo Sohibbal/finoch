@@ -12,22 +12,24 @@ import {
   CartesianGrid,
 } from "recharts";
 
-interface MonthlySpendingData {
+export interface MonthlyCategorySpendingData {
   month: string;
-  needs: number;
-  wants: number;
-  savings: number;
+  food: number;
+  transport: number;
+  bills: number;
+  shopping: number;
+  other: number;
 }
 
 interface SpendingTrendChartProps {
-  data: MonthlySpendingData[];
+  data: MonthlyCategorySpendingData[];
 }
 
 export function SpendingTrendChart({ data }: SpendingTrendChartProps) {
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 text-center py-12">
-        <p className="text-sm text-slate-500">Belum ada riwayat transaksi untuk tren belanja.</p>
+      <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 border border-cream-300 dark:border-navy-800 text-center py-12">
+        <p className="text-xs text-navy-500 dark:text-cream-400">Belum ada riwayat transaksi untuk tren belanja.</p>
       </div>
     );
   }
@@ -43,13 +45,13 @@ export function SpendingTrendChart({ data }: SpendingTrendChartProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 shadow-sm border border-slate-200 dark:border-slate-800 space-y-4">
+    <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-base font-bold text-slate-900 dark:text-white">
+          <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
             Tren Pengeluaran Finansial
           </h3>
-          <p className="text-xs text-slate-500">Histori alokasi pengeluaran dan tabungan per bulan</p>
+          <p className="text-xs text-navy-600 dark:text-cream-300/70">Histori pengeluaran berdasarkan kategori per bulan</p>
         </div>
       </div>
 
@@ -65,30 +67,43 @@ export function SpendingTrendChart({ data }: SpendingTrendChartProps) {
               tickFormatter={formatCurrency}
             />
             <Tooltip
-              formatter={(value: any) => [
-                `Rp ${Number(value).toLocaleString("id-ID")}`,
-                "",
-              ]}
+              formatter={(value: any, name: any) => {
+                const labelMap: Record<string, string> = {
+                  food: "Food & Drinks",
+                  transport: "Transportation",
+                  bills: "Bills & Utilities",
+                  shopping: "Shopping & Lifestyle",
+                  other: "Other",
+                };
+                return [
+                  `Rp ${Number(value).toLocaleString("id-ID")}`,
+                  labelMap[name] || name,
+                ];
+              }}
               contentStyle={{
-                backgroundColor: "rgba(15, 23, 42, 0.9)",
+                backgroundColor: "#070E1A",
                 borderRadius: "12px",
-                border: "none",
-                color: "#ffffff",
+                border: "1px solid #1E2D4A",
+                color: "#FAF8F5",
                 fontSize: "12px",
               }}
             />
             <Legend
-              wrapperStyle={{ fontSize: "12px", paddingTop: "8px" }}
+              wrapperStyle={{ fontSize: "11px", paddingTop: "8px" }}
               formatter={(value) => {
-                if (value === "needs") return "Biaya Pokok";
-                if (value === "wants") return "Biaya Fleksibel";
-                if (value === "savings") return "Tabungan Bersih";
+                if (value === "food") return "Food & Drinks";
+                if (value === "transport") return "Transportation";
+                if (value === "bills") return "Bills & Utilities";
+                if (value === "shopping") return "Shopping & Lifestyle";
+                if (value === "other") return "Other";
                 return value;
               }}
             />
-            <Bar dataKey="needs" fill="#3b82f6" radius={[4, 4, 0, 0]} name="needs" />
-            <Bar dataKey="wants" fill="#f59e0b" radius={[4, 4, 0, 0]} name="wants" />
-            <Bar dataKey="savings" fill="#10b981" radius={[4, 4, 0, 0]} name="savings" />
+            <Bar dataKey="food" stackId="a" fill="#1C3C68" name="food" />
+            <Bar dataKey="transport" stackId="a" fill="#D6C9B0" name="transport" />
+            <Bar dataKey="bills" stackId="a" fill="#275490" name="bills" />
+            <Bar dataKey="shopping" stackId="a" fill="#BDAC8D" name="shopping" />
+            <Bar dataKey="other" stackId="a" fill="#0B192C" radius={[4, 4, 0, 0]} name="other" />
           </BarChart>
         </ResponsiveContainer>
       </div>

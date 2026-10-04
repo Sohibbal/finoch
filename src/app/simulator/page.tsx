@@ -64,30 +64,27 @@ export default function SimulatorPage() {
       : Infinity;
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#080c16] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors">
+    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
       {/* Desktop Left Sidebar */}
-      <DashboardSidebar className="hidden md:flex min-h-screen sticky top-0" />
+      <DashboardSidebar className="hidden md:flex" />
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-12">
         {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-white/90 dark:bg-[#0c1322]/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800/80 px-4 sm:px-6 py-3.5 transition-colors">
+        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             {/* Left: Mobile Brand & Page Title */}
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-2">
-                <div className="w-8 h-8 rounded-xl bg-[#0f274a] dark:bg-blue-600 flex items-center justify-center text-white font-bold">
-                  <Compass className="w-4 h-4 text-blue-300 dark:text-white" />
-                </div>
-                <span className="text-base font-black tracking-tight text-slate-900 dark:text-white">
-                  FINRA
+              <div className="md:hidden flex items-center gap-1.5">
+                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
+                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
                 </span>
               </div>
               <div className="hidden md:block">
-                <h1 className="text-sm font-bold text-slate-900 dark:text-white">
-                  What-If Simulator
+                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
+                  Simulator Arus Kas
                 </h1>
-                <p className="text-[11px] text-slate-500">
+                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
                   Simulasikan dampak penyesuaian anggaran terhadap target finansial Anda
                 </p>
               </div>
@@ -99,7 +96,7 @@ export default function SimulatorPage() {
               <button
                 type="button"
                 onClick={() => applyPreset("default")}
-                className="px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-semibold text-xs flex items-center gap-1.5 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                className="px-3.5 py-2 rounded-full border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] text-navy-800 dark:text-cream-200 font-semibold text-xs flex items-center gap-1.5 hover:bg-cream-100 dark:hover:bg-navy-900 transition-colors"
               >
                 <RefreshCw className="w-3.5 h-3.5" />
                 <span className="hidden sm:inline">Reset Skenario</span>
@@ -111,51 +108,51 @@ export default function SimulatorPage() {
         {/* Main Content */}
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
           <div>
-            <h2 className="text-xl font-black text-slate-900 dark:text-white">
+            <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
               Simulator Keuangan Interaktif
             </h2>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
               Lihat proyeksi finansial Anda secara real-time. Geser kontrol untuk melihat dampak nyata terhadap waktu pencapaian target.
             </p>
           </div>
 
           {/* Quick Scenario Preset Buttons */}
           <div className="space-y-2">
-            <label className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+            <label className="text-[11px] font-bold uppercase tracking-wider text-navy-500 dark:text-cream-400">
               Skenario Cepat (Preset Templates)
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
               <button
                 type="button"
                 onClick={() => applyPreset("default")}
-                className="p-3 text-left rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-400 transition-all text-xs font-semibold"
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
               >
-                <div className="font-bold text-slate-900 dark:text-white">Pola Saat Ini</div>
-                <div className="text-slate-500 mt-0.5 text-[11px]">Tanpa penyesuaian</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50">Pola Saat Ini</div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Tanpa penyesuaian</div>
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset("cut_jajan")}
-                className="p-3 text-left rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-400 transition-all text-xs font-semibold"
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
               >
-                <div className="font-bold text-slate-900 dark:text-white">Pangkas Jajan 25%</div>
-                <div className="text-slate-500 mt-0.5 text-[11px]">Hemat Rp300.000/bln</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50">Pangkas Jajan 25%</div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Hemat Rp300.000/bln</div>
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset("income_drop")}
-                className="p-3 text-left rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-400 transition-all text-xs font-semibold"
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
               >
-                <div className="font-bold text-slate-900 dark:text-white">Penghasilan Turun 20%</div>
-                <div className="text-slate-500 mt-0.5 text-[11px]">Turun Rp700.000/bln</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50">Penghasilan Turun 20%</div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Turun Rp700.000/bln</div>
               </button>
               <button
                 type="button"
                 onClick={() => applyPreset("extra_rent")}
-                className="p-3 text-left rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:border-blue-500 dark:hover:border-blue-400 transition-all text-xs font-semibold"
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
               >
-                <div className="font-bold text-slate-900 dark:text-white">Kos Naik 500rb</div>
-                <div className="text-slate-500 mt-0.5 text-[11px]">Beban tetap meningkat</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50">Kos Naik 500rb</div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Beban tetap meningkat</div>
               </button>
             </div>
           </div>
@@ -164,8 +161,8 @@ export default function SimulatorPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Sliders Column */}
             <div className="lg:col-span-6 space-y-4">
-              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Sliders className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+              <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50 flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-navy-700 dark:text-cream-300" />
                 Variabel Simulasi Anggaran
               </h3>
 

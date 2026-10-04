@@ -32,19 +32,19 @@ export function ScenarioSlider({
     : `${value} ${unit}`;
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-slate-200 dark:border-slate-800 space-y-2">
+    <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-5 border border-cream-300 dark:border-navy-800 space-y-3 shadow-sm">
       <div className="flex items-center justify-between">
         <div>
-          <label className="text-sm font-bold text-slate-800 dark:text-slate-200">
+          <label className="text-xs sm:text-sm font-bold text-navy-950 dark:text-cream-50">
             {label}
           </label>
           {description && (
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-[11px] text-navy-600 dark:text-cream-300/70 mt-0.5">
               {description}
             </p>
           )}
         </div>
-        <div className="text-sm font-black text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-200 dark:border-emerald-900">
+        <div className="text-xs font-black text-navy-950 dark:text-cream-50 bg-cream-100 dark:bg-navy-900 px-3 py-1 rounded-full border border-cream-300 dark:border-navy-800">
           {displayVal}
         </div>
       </div>
@@ -56,10 +56,10 @@ export function ScenarioSlider({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500"
+        className="w-full h-2 bg-cream-200 dark:bg-navy-800 rounded-lg appearance-none cursor-pointer accent-navy-900 dark:accent-cream-100"
       />
 
-      <div className="flex justify-between text-[11px] text-slate-400">
+      <div className="flex justify-between text-[11px] text-navy-400 dark:text-cream-400/60 font-medium">
         <span>{formatValue ? formatValue(min) : min.toLocaleString("id-ID")}</span>
         <span>{formatValue ? formatValue(max) : max.toLocaleString("id-ID")}</span>
       </div>

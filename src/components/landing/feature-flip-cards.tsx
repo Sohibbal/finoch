@@ -249,7 +249,7 @@ export function FeatureFlipCards({
                       e.stopPropagation();
                       card.onAction();
                     }}
-                    className="w-full py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-md shadow-blue-900/40"
+                    className="w-full py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs transition-colors flex items-center justify-center gap-1.5 shadow-sm"
                   >
                     <Zap className="w-3.5 h-3.5" />
                     <span>{card.actionLabel}</span>

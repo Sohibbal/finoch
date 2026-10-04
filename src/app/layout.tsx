@@ -55,7 +55,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased select-none bg-slate-50 dark:bg-[#080c16] text-slate-900 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300">
+      <body className="antialiased bg-[#FAF8F5] dark:bg-[#0A1120] text-[#0B192C] dark:text-[#F6F4ED] min-h-screen font-sans transition-colors duration-300">
         {children}
 
         {/* Global Floating PWA Install Notification Button */}

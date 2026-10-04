@@ -22,9 +22,9 @@ export function DesktopFloatingActions({
         type="button"
         onClick={onOpenManual || onOpenVoice}
         aria-label="Catat pengeluaran secara manual"
-        className="group flex items-center gap-2.5 px-4 py-3 rounded-full bg-white/95 dark:bg-[#0e1526]/90 border border-slate-200 dark:border-blue-500/30 backdrop-blur-xl shadow-xl shadow-slate-900/10 dark:shadow-blue-950/50 text-slate-800 dark:text-slate-100 font-bold text-xs hover:border-blue-500/50 hover:bg-slate-50 dark:hover:bg-[#141f36] transition-all duration-200 active:scale-95"
+        className="group flex items-center gap-2.5 px-4 py-2.5 rounded-full bg-cream-50/95 dark:bg-navy-900/95 border border-cream-300 dark:border-navy-800 backdrop-blur-xl shadow-lg text-navy-950 dark:text-cream-50 font-bold text-xs hover:bg-cream-100 dark:hover:bg-navy-800 transition-all active:scale-95"
       >
-        <div className="w-7 h-7 rounded-full bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400 flex items-center justify-center group-hover:rotate-12 transition-transform">
+        <div className="w-7 h-7 rounded-full bg-cream-200/80 dark:bg-navy-800 text-navy-950 dark:text-cream-50 flex items-center justify-center group-hover:rotate-12 transition-transform">
           <PenLine className="w-3.5 h-3.5 stroke-[2.2]" />
         </div>
         <span>Catat Manual</span>
@@ -35,9 +35,9 @@ export function DesktopFloatingActions({
         type="button"
         onClick={onOpenVoice}
         aria-label="Catat pengeluaran dengan suara"
-        className="group flex items-center gap-2.5 px-5 py-3 rounded-full bg-gradient-to-r from-blue-600 via-indigo-600 to-sky-500 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs shadow-2xl shadow-blue-600/40 border border-blue-400/40 transition-all duration-200 active:scale-95"
+        className="group flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs shadow-xl border border-navy-800 dark:border-cream-200 transition-all active:scale-95"
       >
-        <div className="w-7 h-7 rounded-full bg-slate-950/40 text-white flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
+        <div className="w-7 h-7 rounded-full bg-navy-800 dark:bg-cream-200 text-cream-50 dark:text-navy-950 flex items-center justify-center shadow-sm group-hover:scale-110 transition-transform">
           <Mic className="w-4 h-4 stroke-[2.5]" />
         </div>
         <span>Catat Suara</span>

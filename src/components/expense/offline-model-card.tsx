@@ -54,32 +54,32 @@ export function OfflineModelCard({
   const isSelectedTierActive = activeModelTier === currentSelectedTier;
 
   return (
-    <div className="p-3.5 rounded-2xl bg-blue-50/70 dark:bg-[#0b1120]/90 border border-blue-200/80 dark:border-blue-500/25 text-xs space-y-3 transition-all">
+    <div className="p-3.5 sm:p-4 rounded-2xl bg-cream-100/70 dark:bg-navy-900/60 border border-cream-300 dark:border-navy-800 text-xs space-y-3 transition-all">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="p-1.5 rounded-xl bg-blue-100 dark:bg-blue-500/20 text-blue-700 dark:text-blue-400">
+        <div className="flex items-center gap-2.5">
+          <div className="p-1.5 rounded-xl bg-cream-200/80 dark:bg-navy-800 text-navy-950 dark:text-cream-50 border border-cream-300/80 dark:border-navy-700">
             <Sparkles className="w-3.5 h-3.5" />
           </div>
           <div>
-            <h4 className="font-bold text-slate-900 dark:text-white">
+            <h4 className="font-bold text-navy-950 dark:text-cream-50">
               Paket Suara Offline (Whisper AI)
             </h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Bicara dan catat pengeluaran tanpa koneksi internet
+            <p className="text-[11px] text-navy-700/80 dark:text-cream-300/80 leading-tight">
+              Whisper AI memproses suara 100% lokal di browser Anda tanpa kirim rekaman ke server.
             </p>
           </div>
         </div>
 
         {isModelDownloaded && !isDownloading && (
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-300/80 dark:border-emerald-500/30 flex items-center gap-1">
+          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cream-200/80 dark:bg-navy-800 text-navy-900 dark:text-cream-100 border border-cream-300 dark:border-navy-700 flex items-center gap-1 shrink-0">
             <CheckCircle2 className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
-            <span>{activeModelTier === "small" ? "Small Aktif" : "Base Aktif"}</span>
+            <span>{activeModelTier === "small" ? "Mode Berat Aktif" : "Mode Ringan Aktif"}</span>
           </span>
         )}
       </div>
 
-      {/* Model Tier Selector (Pilihan Fleksibel) */}
+      {/* Model Tier Selector (Pilihan Human-Friendly) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-0.5">
         {(Object.keys(OFFLINE_MODEL_CONFIGS) as OfflineModelTier[]).map((tierKey) => {
           const cfg = OFFLINE_MODEL_CONFIGS[tierKey];
@@ -94,30 +94,30 @@ export function OfflineModelCard({
               disabled={isDownloading}
               className={`p-2.5 rounded-xl border text-left transition-all relative ${
                 isSelected
-                  ? "bg-blue-100/60 dark:bg-blue-500/15 border-blue-500 shadow-sm"
-                  : "bg-white/70 dark:bg-white/[0.03] border-slate-200 dark:border-white/[0.08] hover:border-blue-300 dark:hover:border-blue-500/40"
+                  ? "bg-cream-50 dark:bg-navy-800 border-navy-900 dark:border-cream-100 shadow-sm ring-1 ring-navy-900/10"
+                  : "bg-white/70 dark:bg-navy-950/60 border-cream-300 dark:border-navy-800 hover:border-cream-400 dark:hover:border-navy-700"
               }`}
             >
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-navy-900 dark:text-cream-200">
                   {cfg.badge}
                 </span>
                 <div className="flex items-center gap-1">
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-100 dark:bg-white/[0.08] text-slate-700 dark:text-slate-300 font-semibold">
+                  <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-cream-200/60 dark:bg-navy-900 text-navy-800 dark:text-cream-200 font-semibold">
                     {cfg.sizeLabel}
                   </span>
                   {isInstalled && (
-                    <span className="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center">
-                      <Check className="w-2.5 h-2.5" />
+                    <span className="w-4 h-4 rounded-full bg-navy-900 dark:bg-cream-100 text-cream-50 dark:text-navy-950 flex items-center justify-center">
+                      <Check className="w-2.5 h-2.5 stroke-[3]" />
                     </span>
                   )}
                 </div>
               </div>
 
-              <div className="font-bold text-slate-900 dark:text-white text-xs">
+              <div className="font-bold text-navy-950 dark:text-cream-50 text-xs">
                 {cfg.name}
               </div>
-              <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-0.5 line-clamp-2 leading-tight">
+              <div className="text-[10px] text-navy-600 dark:text-cream-300/80 mt-0.5 line-clamp-2 leading-tight">
                 {cfg.description}
               </div>
             </button>
@@ -127,21 +127,21 @@ export function OfflineModelCard({
 
       {/* State 1: Sedang Mengunduh */}
       {isDownloading && (
-        <div className="space-y-1.5 pt-1 border-t border-blue-100 dark:border-white/[0.06]">
-          <div className="flex items-center justify-between text-[11px] font-semibold text-blue-700 dark:text-blue-300">
+        <div className="space-y-1.5 pt-1 border-t border-cream-200 dark:border-navy-800">
+          <div className="flex items-center justify-between text-[11px] font-semibold text-navy-900 dark:text-cream-100">
             <span className="flex items-center gap-1.5">
-              <Loader2 className="w-3 h-3 animate-spin" />
+              <Loader2 className="w-3 h-3 animate-spin text-navy-900 dark:text-cream-100" />
               <span>Mengunduh {selectedConfig.name}...</span>
             </span>
             <span className="font-mono">{downloadProgress}%</span>
           </div>
-          <div className="w-full h-2 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
+          <div className="w-full h-2 rounded-full bg-cream-200 dark:bg-navy-800 overflow-hidden">
             <div
-              className="h-full bg-blue-600 transition-all duration-300 rounded-full"
+              className="h-full bg-navy-900 dark:bg-cream-100 transition-all duration-300 rounded-full"
               style={{ width: `${downloadProgress}%` }}
             />
           </div>
-          <p className="text-[10px] text-slate-500 dark:text-slate-400">
+          <p className="text-[10px] text-navy-600 dark:text-cream-400">
             Tersimpan langsung di memori browser perangkat Anda untuk penggunaan offline.
           </p>
         </div>
@@ -149,9 +149,9 @@ export function OfflineModelCard({
 
       {/* State 2: Terinstal & Aktif */}
       {isSelectedTierActive && !isDownloading && (
-        <div className="flex items-center justify-between pt-1 border-t border-blue-100 dark:border-white/[0.06] text-[11px]">
-          <span className="text-emerald-700 dark:text-emerald-400 font-medium flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+        <div className="flex items-center justify-between pt-1 border-t border-cream-200 dark:border-navy-800 text-[11px]">
+          <span className="text-navy-900 dark:text-cream-100 font-medium flex items-center gap-1.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
             <span>Model {selectedConfig.name} aktif di perangkat</span>
           </span>
           <button
@@ -172,11 +172,11 @@ export function OfflineModelCard({
 
       {/* State 3: Model Dipilih Belum Diunduh (atau ganti kapasitas) */}
       {!isSelectedTierActive && !isDownloading && (
-        <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-blue-100 dark:border-white/[0.06]">
-          <span className="text-slate-600 dark:text-slate-300 text-[11px]">
+        <div className="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-t border-cream-200 dark:border-navy-800">
+          <span className="text-navy-700 dark:text-cream-300 text-[11px]">
             {isOnline
               ? isModelDownloaded
-                ? `Beralih ke model ${selectedConfig.name} (${selectedConfig.sizeLabel}).`
+                ? `Beralih ke ${selectedConfig.name} (${selectedConfig.sizeLabel}).`
                 : `Unduh ${selectedConfig.name} (${selectedConfig.sizeLabel}) untuk pemakaian offline.`
               : "Perangkat sedang offline. Sambungkan internet sekali untuk mengunduh."}
           </span>
@@ -185,7 +185,7 @@ export function OfflineModelCard({
             <button
               type="button"
               onClick={() => onDownload(currentSelectedTier)}
-              className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 shrink-0"
+              className="px-3.5 py-1.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 shrink-0"
             >
               <Download className="w-3.5 h-3.5" />
               <span>
@@ -193,7 +193,7 @@ export function OfflineModelCard({
               </span>
             </button>
           ) : (
-            <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1 shrink-0">
+            <span className="text-[11px] text-navy-600 dark:text-cream-400 font-semibold flex items-center gap-1 shrink-0">
               <WifiOff className="w-3.5 h-3.5" />
               <span>Perlu Internet 1x</span>
             </span>

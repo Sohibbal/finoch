@@ -174,22 +174,15 @@ export function parseReceiptText(rawText: string): TransactionCandidate {
     category = "Food & Drinks";
     spendingType = "needs";
   } else if (
-    lowerAll.includes("apotek") ||
-    lowerAll.includes("kimia farma") ||
-    lowerAll.includes("obat") ||
-    lowerAll.includes("dokter") ||
-    lowerAll.includes("klinik")
-  ) {
-    category = "Health & Personal Care";
-    spendingType = "needs";
-  } else if (
     lowerAll.includes("spbu") ||
     lowerAll.includes("pertamina") ||
     lowerAll.includes("shell") ||
     lowerAll.includes("grab") ||
     lowerAll.includes("gojek") ||
     lowerAll.includes("parkir") ||
-    lowerAll.includes("bensin")
+    lowerAll.includes("bensin") ||
+    lowerAll.includes("tol") ||
+    lowerAll.includes("kereta")
   ) {
     category = "Transportation";
     spendingType = "needs";
@@ -200,18 +193,25 @@ export function parseReceiptText(rawText: string): TransactionCandidate {
     lowerAll.includes("wifi") ||
     lowerAll.includes("indihome") ||
     lowerAll.includes("pulsa") ||
-    lowerAll.includes("kuota")
+    lowerAll.includes("kuota") ||
+    lowerAll.includes("kos") ||
+    lowerAll.includes("kost")
   ) {
-    category = "Housing & Bills";
+    category = "Bills & Utilities";
     spendingType = "needs";
   } else if (
     lowerAll.includes("baju") ||
     lowerAll.includes("celana") ||
     lowerAll.includes("sepatu") ||
     lowerAll.includes("shopee") ||
-    lowerAll.includes("tokopedia")
+    lowerAll.includes("tokopedia") ||
+    lowerAll.includes("bioskop") ||
+    lowerAll.includes("xxi") ||
+    lowerAll.includes("game") ||
+    lowerAll.includes("skincare") ||
+    lowerAll.includes("makeup")
   ) {
-    category = "Shopping & Clothing";
+    category = "Shopping & Lifestyle";
     spendingType = "wants";
   }
 

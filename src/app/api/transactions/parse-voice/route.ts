@@ -34,16 +34,12 @@ Ekstrak pengeluaran dari transkrip ucapan berikut ke dalam format JSON valid tan
 Aturan:
 1. Jika kalimat berisi lebih dari 1 pengeluaran (misal: "beli nasi padang 20 ribu sama bensin 15 ribu"), pisahkan menjadi beberapa objek di array items.
 2. Nominal amount harus berupa angka bulat Rupiah (contoh: 20000).
-3. Pilih category PERSIS dari salah satu 9 kategori berikut:
-- Food & Drinks (makanan, minuman, resto, warteg, kafe, jajan, sembako)
-- Transportation (bensin, ojol, tiket kereta/bus, parkir)
-- Housing & Bills (sewa kos, listrik, air, pulsa, kuota, paket data, internet)
-- Shopping & Clothing (baju, celana, sepatu, skincare, belanja olshop)
-- Entertainment & Leisure (game, bioskop, streaming, rekreasi, nonton)
-- Education & Career (kuliah, buku, print, kursus)
-- Health & Personal Care (obat, apotek, dokter, perawatan)
-- Social & Family (kirim uang ortu/keluarga, kado, sedekah, traktir)
-- Other (biaya administrasi atau lainnya)
+3. Pilih category PERSIS dari salah satu 5 kategori berikut:
+- Food & Drinks (makanan, minuman, resto, warteg, kafe, jajan, sembako harian)
+- Transportation (bensin, ojol, tiket kereta/bus, parkir, tol)
+- Bills & Utilities (sewa kos, listrik, air, pulsa, kuota, paket data, internet wifi)
+- Shopping & Lifestyle (baju, celana, sepatu, belanja olshop, skincare, game, bioskop, hiburan)
+- Other (kuliah/buku/print, obat/kesehatan, kirim uang keluarga, kado, sedekah, lainnya)
 
 Transkrip Ucapan:
 "${cleanTranscript}"`;

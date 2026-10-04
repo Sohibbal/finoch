@@ -112,11 +112,11 @@ export function MetricCards({ expenses, onOpenVoice, onOpenManual, onOpenPrivacy
             <button
               type="button"
               onClick={onOpenVoice}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-blue-600 hover:bg-blue-500 dark:bg-blue-950/70 dark:hover:bg-blue-900/80 border border-blue-600 dark:border-blue-500/40 text-white dark:text-blue-300 font-bold text-xs shadow-lg shadow-blue-600/20 dark:shadow-blue-950/50 transition active:scale-95"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs shadow-sm transition active:scale-95"
             >
-              <Mic className="w-4 h-4 text-white dark:text-blue-400 stroke-[2.2]" />
+              <Mic className="w-4 h-4 stroke-[2.2]" />
               <span>Bicara Suara</span>
-              <span className="w-5 h-5 rounded-lg bg-white/20 dark:bg-blue-500/20 text-white dark:text-blue-300 flex items-center justify-center text-xs font-black">
+              <span className="w-5 h-5 rounded-lg bg-navy-800 dark:bg-cream-200 text-cream-50 dark:text-navy-950 flex items-center justify-center text-xs font-black">
                 +
               </span>
             </button>
@@ -124,10 +124,10 @@ export function MetricCards({ expenses, onOpenVoice, onOpenManual, onOpenPrivacy
             <button
               type="button"
               onClick={onOpenManual || onOpenVoice}
-              className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200 dark:border-white/[0.08] text-slate-800 dark:text-slate-200 font-semibold text-xs transition active:scale-95"
+              className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-cream-200/70 hover:bg-cream-200 dark:bg-navy-900 dark:hover:bg-navy-800 border border-cream-300 dark:border-navy-800 text-navy-950 dark:text-cream-50 font-semibold text-xs transition active:scale-95"
             >
               <span>Manual</span>
-              <span className="w-5 h-5 rounded-lg bg-slate-200 dark:bg-white/10 text-slate-700 dark:text-slate-300 flex items-center justify-center text-xs font-bold">
+              <span className="w-5 h-5 rounded-lg bg-cream-300/80 dark:bg-navy-800 text-navy-900 dark:text-cream-100 flex items-center justify-center text-xs font-bold">
                 +
               </span>
             </button>
@@ -135,8 +135,8 @@ export function MetricCards({ expenses, onOpenVoice, onOpenManual, onOpenPrivacy
             <button
               type="button"
               onClick={onOpenPrivacy}
-              aria-label="Opsi lainnya"
-              className="w-10 h-10 rounded-2xl bg-slate-100 hover:bg-slate-200 dark:bg-white/[0.05] dark:hover:bg-white/[0.09] border border-slate-200 dark:border-white/[0.08] text-slate-600 dark:text-slate-300 flex items-center justify-center transition active:scale-95"
+              aria-label="Komitmen Privasi"
+              className="w-10 h-10 rounded-xl bg-cream-200/70 hover:bg-cream-200 dark:bg-navy-900 dark:hover:bg-navy-800 border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-300 flex items-center justify-center transition active:scale-95"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>

@@ -9,7 +9,6 @@ import {
   ArrowRight,
   ArrowLeft,
   CheckCircle2,
-  Sparkles,
   TrendingUp,
 } from "lucide-react";
 
@@ -71,36 +70,33 @@ export default function OnboardingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-xl">
-        <div className="flex justify-center items-center gap-2 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-500/20">
-            <Sparkles className="w-5 h-5" />
-          </div>
-          <span className="text-2xl font-black tracking-tight text-slate-900 dark:text-white">
-            FINRA
-          </span>
-        </div>
-        <h2 className="text-center text-2xl font-bold text-slate-900 dark:text-white">
+    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
+      <div className="sm:mx-auto sm:w-full sm:max-w-xl text-center space-y-2">
+        <span className="text-xl font-black tracking-tight text-navy-950 dark:text-cream-50">
+          voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+        </span>
+        <h1 className="text-2xl sm:text-3xl font-black text-navy-950 dark:text-cream-50 tracking-tight">
           Bangun Digital Twin Finansial Anda
-        </h2>
-        <p className="mt-1 text-center text-sm text-slate-600 dark:text-slate-400">
+        </h1>
+        <p className="text-xs sm:text-sm text-navy-600 dark:text-cream-300/70">
           Langkah {step} dari 3: Sesuaikan data awal untuk proyeksi otomatis
         </p>
 
         {/* Progress Bar */}
-        <div className="mt-4 w-full bg-slate-200 dark:bg-slate-800 h-2 rounded-full overflow-hidden">
-          <div
-            className="bg-emerald-500 h-full transition-all duration-300"
-            style={{ width: `${(step / 3) * 100}%` }}
-          />
+        <div className="pt-2 max-w-xs mx-auto">
+          <div className="w-full bg-cream-200 dark:bg-navy-900 h-2 rounded-full overflow-hidden">
+            <div
+              className="bg-navy-900 dark:bg-cream-100 h-full rounded-full transition-all duration-300"
+              style={{ width: `${(step / 3) * 100}%` }}
+            />
+          </div>
         </div>
       </div>
 
       <div className="mt-6 sm:mx-auto sm:w-full sm:max-w-xl">
-        <div className="bg-white dark:bg-slate-900 py-8 px-6 shadow-xl rounded-2xl border border-slate-200 dark:border-slate-800 sm:px-10">
+        <div className="bg-white dark:bg-[#070E1A] py-8 px-6 sm:px-10 rounded-3xl border border-cream-300 dark:border-navy-800 shadow-xl space-y-6 transition-colors">
           {errorMessage && (
-            <div className="mb-6 p-4 rounded-xl bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-900 text-sm text-red-700 dark:text-red-400">
+            <div className="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-xs font-semibold text-rose-800 dark:text-rose-300">
               {errorMessage}
             </div>
           )}
@@ -108,25 +104,25 @@ export default function OnboardingPage() {
           {step === 1 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-emerald-100 dark:bg-emerald-950 rounded-xl text-emerald-600">
-                  <Wallet className="w-6 h-6" />
+                <div className="p-3 bg-cream-100 dark:bg-navy-900 rounded-2xl text-navy-800 dark:text-cream-200">
+                  <Wallet className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
                     Penghasilan Bulanan
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-navy-500 dark:text-cream-400">
                     Berapa total pemasukan rutin Anda setiap bulan?
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
                   Nominal Penghasilan (IDR)
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 font-medium">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
                     Rp
                   </span>
                   <input
@@ -138,14 +134,14 @@ export default function OnboardingPage() {
                         monthlyIncome: Number(e.target.value),
                       })
                     }
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-bold text-base focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
                     placeholder="3500000"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-2">
                   Sumber Penghasilan Utama
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -156,14 +152,14 @@ export default function OnboardingPage() {
                       onClick={() =>
                         setFormData({ ...formData, incomeType: opt.id })
                       }
-                      className={`p-3 text-left rounded-xl border transition-all ${
+                      className={`p-3 text-left rounded-xl border transition-all text-xs ${
                         formData.incomeType === opt.id
-                          ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500"
-                          : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                          ? "border-navy-900 bg-navy-900 text-cream-50 dark:border-cream-100 dark:bg-cream-100 dark:text-navy-950 font-semibold shadow-sm"
+                          : "border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/30 text-navy-700 dark:text-cream-300 hover:border-navy-400"
                       }`}
                     >
-                      <div className="text-sm font-semibold">{opt.label}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                      <div className="font-bold">{opt.label}</div>
+                      <div className="text-[10px] opacity-75 mt-0.5">
                         {opt.desc}
                       </div>
                     </button>
@@ -176,25 +172,25 @@ export default function OnboardingPage() {
           {step === 2 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-blue-100 dark:bg-blue-950 rounded-xl text-blue-600">
-                  <PiggyBank className="w-6 h-6" />
+                <div className="p-3 bg-cream-100 dark:bg-navy-900 rounded-2xl text-navy-800 dark:text-cream-200">
+                  <PiggyBank className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
                     Tabungan & Komitmen Wajib
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-xs text-navy-500 dark:text-cream-400">
                     Posisi cadangan dana saat ini dan komitmen biaya hidup
                   </p>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
                   Total Tabungan Saat Ini (IDR)
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 font-medium">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
                     Rp
                   </span>
                   <input
@@ -206,21 +202,21 @@ export default function OnboardingPage() {
                         currentSavings: Number(e.target.value),
                       })
                     }
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-bold text-base focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
                     placeholder="1500000"
                   />
                 </div>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-[11px] text-navy-500 dark:text-cream-400">
                   Saldo rekening tabungan, dompet digital, atau uang tunai cadangan
                 </p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+                <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
                   Pengeluaran Wajib Bulanan (IDR)
                 </label>
                 <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500 font-medium">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
                     Rp
                   </span>
                   <input
@@ -232,11 +228,11 @@ export default function OnboardingPage() {
                         monthlyFixedExpenses: Number(e.target.value),
                       })
                     }
-                    className="w-full pl-12 pr-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-semibold text-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-10 pr-4 py-3 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-bold text-base focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
                     placeholder="1200000"
                   />
                 </div>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-[11px] text-navy-500 dark:text-cream-400">
                   Sewa kos/kontrakan, cicilan, listrik, pulsa data, dan kebutuhan pokok
                 </p>
               </div>
@@ -246,15 +242,15 @@ export default function OnboardingPage() {
           {step === 3 && (
             <div className="space-y-6">
               <div className="flex items-center gap-3">
-                <div className="p-3 bg-purple-100 dark:bg-purple-950 rounded-xl text-purple-600">
-                  <Target className="w-6 h-6" />
+                <div className="p-3 bg-cream-100 dark:bg-navy-900 rounded-2xl text-navy-800 dark:text-cream-200">
+                  <Target className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900 dark:text-white">
+                  <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
                     Prioritas Finansial Utama
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
-                    Fokus apa yang ingin Anda capai bersama FINRA?
+                  <p className="text-xs text-navy-500 dark:text-cream-400">
+                    Fokus apa yang ingin Anda capai bersama VoiCash?
                   </p>
                 </div>
               </div>
@@ -267,53 +263,53 @@ export default function OnboardingPage() {
                     onClick={() =>
                       setFormData({ ...formData, financialPriority: opt.id })
                     }
-                    className={`w-full p-3.5 text-left rounded-xl border flex items-center justify-between transition-all ${
+                    className={`w-full p-3.5 text-left rounded-xl border flex items-center justify-between transition-all text-xs ${
                       formData.financialPriority === opt.id
-                        ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 text-emerald-900 dark:text-emerald-300 ring-2 ring-emerald-500"
-                        : "border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600"
+                        ? "border-navy-900 bg-navy-900 text-cream-50 dark:border-cream-100 dark:bg-cream-100 dark:text-navy-950 font-semibold shadow-sm"
+                        : "border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/30 text-navy-700 dark:text-cream-300 hover:border-navy-400"
                     }`}
                   >
                     <div>
-                      <div className="text-sm font-semibold">{opt.label}</div>
-                      <div className="text-xs text-slate-500 dark:text-slate-400">
+                      <div className="font-bold">{opt.label}</div>
+                      <div className="text-[10px] opacity-75 mt-0.5">
                         {opt.desc}
                       </div>
                     </div>
                     {formData.financialPriority === opt.id && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      <CheckCircle2 className="w-4 h-4 text-cream-100 dark:text-navy-950" />
                     )}
                   </button>
                 ))}
               </div>
 
               {/* Digital Twin Baseline Preview */}
-              <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
-                <div className="flex items-center gap-2 mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  <TrendingUp className="w-4 h-4 text-emerald-500" />
+              <div className="p-4 rounded-2xl bg-cream-50/80 dark:bg-navy-900/60 border border-cream-200 dark:border-navy-800">
+                <div className="flex items-center gap-2 mb-2 text-[11px] font-bold uppercase tracking-wider text-navy-500 dark:text-cream-400">
+                  <TrendingUp className="w-3.5 h-3.5 text-navy-700 dark:text-cream-300" />
                   Ringkasan Estimasi Arus Kas
                 </div>
-                <div className="grid grid-cols-3 gap-2 text-center">
-                  <div className="p-2 rounded-lg bg-blue-100/50 dark:bg-blue-950/40">
-                    <div className="text-xs font-medium text-blue-800 dark:text-blue-300">
+                <div className="grid grid-cols-3 gap-2 text-center text-xs">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#070E1A] border border-cream-200 dark:border-navy-800">
+                    <div className="text-[10px] font-medium text-navy-500 dark:text-cream-400">
                       Penghasilan
                     </div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">
+                    <div className="text-xs sm:text-sm font-black text-navy-950 dark:text-cream-50 mt-0.5">
                       Rp {formData.monthlyIncome.toLocaleString("id-ID")}
                     </div>
                   </div>
-                  <div className="p-2 rounded-lg bg-amber-100/50 dark:bg-amber-950/40">
-                    <div className="text-xs font-medium text-amber-800 dark:text-amber-300">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#070E1A] border border-cream-200 dark:border-navy-800">
+                    <div className="text-[10px] font-medium text-navy-500 dark:text-cream-400">
                       Biaya Tetap
                     </div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">
+                    <div className="text-xs sm:text-sm font-black text-navy-950 dark:text-cream-50 mt-0.5">
                       Rp {formData.monthlyFixedExpenses.toLocaleString("id-ID")}
                     </div>
                   </div>
-                  <div className="p-2 rounded-lg bg-emerald-100/50 dark:bg-emerald-950/40">
-                    <div className="text-xs font-medium text-emerald-800 dark:text-emerald-300">
-                      Sisa Siap Kelola
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#070E1A] border border-cream-200 dark:border-navy-800">
+                    <div className="text-[10px] font-medium text-navy-500 dark:text-cream-400">
+                      Sisa Kas
                     </div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">
+                    <div className="text-xs sm:text-sm font-black text-navy-950 dark:text-cream-50 mt-0.5">
                       Rp {remainingCashflow.toLocaleString("id-ID")}
                     </div>
                   </div>
@@ -323,14 +319,14 @@ export default function OnboardingPage() {
           )}
 
           {/* Navigation Buttons */}
-          <div className="mt-8 flex items-center justify-between pt-4 border-t border-slate-100 dark:border-slate-800">
+          <div className="mt-8 flex items-center justify-between pt-4 border-t border-cream-200 dark:border-navy-800">
             {step > 1 ? (
               <button
                 type="button"
                 onClick={() => setStep(step - 1)}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full border border-cream-300 dark:border-navy-800 text-xs font-semibold text-navy-700 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-navy-900 transition-colors"
               >
-                <ArrowLeft className="w-4 h-4" />
+                <ArrowLeft className="w-3.5 h-3.5" />
                 Kembali
               </button>
             ) : (
@@ -341,20 +337,20 @@ export default function OnboardingPage() {
               <button
                 type="button"
                 onClick={() => setStep(step + 1)}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-xs font-bold text-cream-50 dark:text-navy-950 shadow-sm transition-all active:scale-[0.98]"
               >
                 Lanjutkan
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </button>
             ) : (
               <button
                 type="button"
                 disabled={isSubmitting}
                 onClick={handleSubmit}
-                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-sm font-semibold text-white shadow-lg shadow-emerald-600/20 transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 disabled:opacity-50 text-xs font-bold text-cream-50 dark:text-navy-950 shadow-sm transition-all active:scale-[0.98]"
               >
                 {isSubmitting ? "Menyimpan..." : "Mulai Digital Twin"}
-                <CheckCircle2 className="w-4 h-4" />
+                <CheckCircle2 className="w-3.5 h-3.5" />
               </button>
             )}
           </div>

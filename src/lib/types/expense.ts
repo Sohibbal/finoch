@@ -1,12 +1,8 @@
 export type ExpenseCategory =
   | "Food & Drinks"
   | "Transportation"
-  | "Housing & Bills"
-  | "Shopping & Clothing"
-  | "Entertainment & Leisure"
-  | "Education & Career"
-  | "Health & Personal Care"
-  | "Social & Family"
+  | "Bills & Utilities"
+  | "Shopping & Lifestyle"
   | "Other"
   | string;
 
