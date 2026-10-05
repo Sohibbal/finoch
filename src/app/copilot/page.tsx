@@ -31,7 +31,7 @@ export default function CopilotPage() {
     {
       id: "msg-1",
       sender: "copilot",
-      text: "Halo! Saya VoiCash AI Copilot. Saya menganalisis kondisi finansial riil Anda dengan model pengeluaran dan Digital Twin. Ada pertanyaan mengenai arus kas, simulasi anggaran, atau target tabungan Anda?",
+      text: "Halo! Saya Finoch AI Copilot untuk Mahasiswa & Anak Kost. Saya menganalisis kondisi finansial riil kamu berdasarkan catatan pengeluaran dan target tabungan. Mau cek jatah jajan harian, trik hemat anak kost, atau simulasi beli barang impian?",
       timestamp: "Baru saja",
       source: "facts_fallback",
     },
@@ -41,10 +41,10 @@ export default function CopilotPage() {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const quickPrompts = [
-    "Kenapa tabungan saya bulan ini turun?",
-    "Aman tidak kalau beli laptop sekarang?",
-    "Berapa total pengeluaran makanan saya?",
-    "Bagaimana cara mencapai rasio 20% tabungan?",
+    "Jatah jajan hari ini masih aman nggak?",
+    "Gimana trik hemat makan biar uang kiriman cukup sebulan?",
+    "Aman nggak kalau beli sepatu/baju baru minggu ini?",
+    "Kiat bertahan hidup saat krisis tanggal tua",
   ];
 
   const scrollToBottom = () => {
@@ -81,7 +81,7 @@ export default function CopilotPage() {
       });
 
       if (!res.ok) {
-        throw new Error("Gagal menghubungi VoiCash Copilot");
+        throw new Error("Gagal menghubungi Finoch Copilot");
       }
 
       const data = await res.json();
@@ -129,15 +129,15 @@ export default function CopilotPage() {
             <div className="flex items-center gap-3">
               <div className="md:hidden flex items-center gap-1.5">
                 <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
-                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+                  finoch<span className="text-navy-600 dark:text-cream-300">.id</span>
                 </span>
               </div>
               <div className="hidden md:block">
                 <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                  AI Financial Copilot
+                  Finoch AI Copilot
                 </h1>
                 <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
-                  Tanya jawab cerdas berbasis kondisi keuangan riil dan model Digital Twin Anda
+                  Teman finansial cerdas mahasiswa & anak kost berbasis kondisi keuangan riil
                 </p>
               </div>
             </div>
@@ -155,7 +155,7 @@ export default function CopilotPage() {
           <div className="mb-3 p-3 rounded-2xl bg-cream-100 dark:bg-navy-900/60 border border-cream-300 dark:border-navy-800 text-xs text-navy-800 dark:text-cream-200 flex items-center gap-2 shrink-0">
             <ShieldCheck className="w-4 h-4 shrink-0 text-navy-700 dark:text-cream-300" />
             <span>
-              Jawaban didasarkan pada data transaksi riil dan model Digital Twin Anda. Tidak ada halusinasi angka.
+              Jawaban didasarkan pada data transaksi riil kamu. Tanpa halusinasi angka.
             </span>
           </div>
 
@@ -227,7 +227,7 @@ export default function CopilotPage() {
                 </div>
                 <div className="bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-4 rounded-2xl rounded-tl-none text-xs sm:text-sm text-navy-600 dark:text-cream-300/70 flex items-center gap-2">
                   <Loader2 className="w-4 h-4 animate-spin text-navy-800 dark:text-cream-200" />
-                  <span>Menganalisis kondisi finansial Anda...</span>
+                  <span>Menganalisis kondisi finansial kamu...</span>
                 </div>
               </div>
             )}
@@ -266,7 +266,7 @@ export default function CopilotPage() {
               type="text"
               value={inputMessage}
               onChange={(e) => setInputMessage(e.target.value)}
-              placeholder="Tanyakan analisis keuangan Anda ke VoiCash..."
+              placeholder="Tanya jatah jajan, tips hemat, atau saran finansial ke Finoch..."
               className="flex-1 px-3 py-2 bg-transparent text-xs sm:text-sm text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 focus:outline-none"
             />
             <button

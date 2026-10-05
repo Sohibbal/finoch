@@ -17,33 +17,37 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 export default function SimulatorPage() {
   const router = useRouter();
 
-  // Baseline financial state
-  const baselineMonthlyIncome = 3500000;
-  const baselineMonthlyExpense = 2300000;
-  const baselineNetSavings = baselineMonthlyIncome - baselineMonthlyExpense; // 1.200.000
+  // Baseline financial state untuk mahasiswa / anak kost
+  const baselineMonthlyIncome = 2500000;
+  const baselineMonthlyExpense = 1750000;
+  const baselineNetSavings = baselineMonthlyIncome - baselineMonthlyExpense; // 750.000
 
   // Interactive scenario variables
-  const [expenseCuts, setExpenseCuts] = useState(200000); // hemat jajan 200rb
-  const [incomeAddition, setIncomeAddition] = useState(0); // lembur/freelance
-  const [goalAmount, setGoalAmount] = useState(12000000); // Dana darurat / Laptop
+  const [expenseCuts, setExpenseCuts] = useState(200000); // hemat jajan kopi/sore 200rb
+  const [incomeAddition, setIncomeAddition] = useState(0); // job magang/freelance
+  const [goalAmount, setGoalAmount] = useState(6000000); // Laptop Kuliah / Dana Darurat Kos
 
-  // Fast scenario presets
-  const applyPreset = (preset: "default" | "cut_jajan" | "income_drop" | "extra_rent") => {
+  // Fast scenario presets for students
+  const applyPreset = (preset: "default" | "cut_coffee" | "internship" | "delayed_allowance" | "rent_hike") => {
     switch (preset) {
       case "default":
         setExpenseCuts(0);
         setIncomeAddition(0);
         break;
-      case "cut_jajan":
-        setExpenseCuts(300000);
+      case "cut_coffee":
+        setExpenseCuts(200000);
         setIncomeAddition(0);
         break;
-      case "income_drop":
+      case "internship":
         setExpenseCuts(0);
-        setIncomeAddition(-700000);
+        setIncomeAddition(600000);
         break;
-      case "extra_rent":
-        setExpenseCuts(-500000); // Pengeluaran bertambah 500rb
+      case "delayed_allowance":
+        setExpenseCuts(0);
+        setIncomeAddition(-500000);
+        break;
+      case "rent_hike":
+        setExpenseCuts(-150000);
         setIncomeAddition(0);
         break;
     }
@@ -77,15 +81,15 @@ export default function SimulatorPage() {
             <div className="flex items-center gap-3">
               <div className="md:hidden flex items-center gap-1.5">
                 <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
-                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+                  finoch<span className="text-navy-600 dark:text-cream-300">.id</span>
                 </span>
               </div>
               <div className="hidden md:block">
                 <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                  Simulator Arus Kas
+                  Finoch What-If Simulator
                 </h1>
                 <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
-                  Simulasikan dampak penyesuaian anggaran terhadap target finansial Anda
+                  Simulasikan dampak uang kiriman, magang, dan pengeluaran kos mahasiswa
                 </p>
               </div>
             </div>
@@ -109,50 +113,66 @@ export default function SimulatorPage() {
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
           <div>
             <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
-              Simulator Keuangan Interaktif
+              Simulator Keuangan Mahasiswa & Anak Kost
             </h2>
             <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
-              Lihat proyeksi finansial Anda secara real-time. Geser kontrol untuk melihat dampak nyata terhadap waktu pencapaian target.
+              Simulasi cepat skenario riil mahasiswa: hemat nongkrong/kopi, pendapatan magang, hingga antisipasi kiriman ortu terlambat.
             </p>
           </div>
 
           {/* Quick Scenario Preset Buttons */}
           <div className="space-y-2">
             <label className="text-[11px] font-bold uppercase tracking-wider text-navy-500 dark:text-cream-400">
-              Skenario Cepat (Preset Templates)
+              Skenario Cepat Mahasiswa (Preset Templates)
             </label>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
               <button
                 type="button"
-                onClick={() => applyPreset("default")}
-                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
+                onClick={() => applyPreset("cut_coffee")}
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm group"
               >
-                <div className="font-bold text-navy-950 dark:text-cream-50">Pola Saat Ini</div>
-                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Tanpa penyesuaian</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50 group-hover:text-navy-700 dark:group-hover:text-cream-200">
+                  Pangkas Kopi & Jajanan Sore
+                </div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">
+                  Hemat Rp200.000/bln
+                </div>
               </button>
               <button
                 type="button"
-                onClick={() => applyPreset("cut_jajan")}
-                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
+                onClick={() => applyPreset("internship")}
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm group"
               >
-                <div className="font-bold text-navy-950 dark:text-cream-50">Pangkas Jajan 25%</div>
-                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Hemat Rp300.000/bln</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50 group-hover:text-navy-700 dark:group-hover:text-cream-200">
+                  Dapat Job Magang / Freelance
+                </div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">
+                  +Rp600.000/bln
+                </div>
               </button>
               <button
                 type="button"
-                onClick={() => applyPreset("income_drop")}
-                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
+                onClick={() => applyPreset("delayed_allowance")}
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm group"
               >
-                <div className="font-bold text-navy-950 dark:text-cream-50">Penghasilan Turun 20%</div>
-                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Turun Rp700.000/bln</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50 group-hover:text-navy-700 dark:group-hover:text-cream-200">
+                  Uang Kiriman Ortu Terlambat
+                </div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">
+                  Survive 1 Minggu (-Rp500rb)
+                </div>
               </button>
               <button
                 type="button"
-                onClick={() => applyPreset("extra_rent")}
-                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm"
+                onClick={() => applyPreset("rent_hike")}
+                className="p-3 text-left rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:border-navy-800 dark:hover:border-cream-300 transition-all text-xs font-semibold shadow-sm group"
               >
-                <div className="font-bold text-navy-950 dark:text-cream-50">Kos Naik 500rb</div>
-                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">Beban tetap meningkat</div>
+                <div className="font-bold text-navy-950 dark:text-cream-50 group-hover:text-navy-700 dark:group-hover:text-cream-200">
+                  Sewa Kos Naik / Iuran WiFi
+                </div>
+                <div className="text-navy-500 dark:text-cream-400 mt-0.5 text-[11px]">
+                  +Rp150.000/bln
+                </div>
               </button>
             </div>
           </div>
@@ -163,36 +183,36 @@ export default function SimulatorPage() {
             <div className="lg:col-span-6 space-y-4">
               <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50 flex items-center gap-2">
                 <Sliders className="w-4 h-4 text-navy-700 dark:text-cream-300" />
-                Variabel Simulasi Anggaran
+                Variabel Simulasi Anggaran Mahasiswa
               </h3>
 
               <ScenarioSlider
-                label="Efisiensi / Pemangkasan Pengeluaran"
-                description="Nominal pengeluaran yang dihemat (misal: kurangi jajan kafe atau langganan)"
+                label="Efisiensi / Penghematan Anak Kost"
+                description="Nominal pengeluaran yang dihemat (misal: kurangi jajan kopi atau masak di kos)"
                 value={expenseCuts}
-                min={-1000000}
-                max={1500000}
-                step={50000}
+                min={-500000}
+                max={1000000}
+                step={25000}
                 onChange={setExpenseCuts}
               />
 
               <ScenarioSlider
-                label="Penyesuaian Penghasilan Bulanan"
-                description="Pendapatan tambahan sampingan atau antisipasi penurunan income"
+                label="Penyesuaian Pemasukan Mahasiswa"
+                description="Pendapatan tambahan dari magang/freelance atau antisipasi kiriman ortu tersendat"
                 value={incomeAddition}
-                min={-1500000}
-                max={2500000}
-                step={100000}
+                min={-1000000}
+                max={2000000}
+                step={50000}
                 onChange={setIncomeAddition}
               />
 
               <ScenarioSlider
-                label="Target Nominal Goal Finansial"
-                description="Besar dana darurat atau barang yang ingin Anda capai"
+                label="Target Goal / Tabungan Impian"
+                description="Target nominal laptop kuliah, dana darurat kos, atau sertifikasi keahlian"
                 value={goalAmount}
-                min={1000000}
-                max={30000000}
-                step={500000}
+                min={500000}
+                max={20000000}
+                step={250000}
                 onChange={setGoalAmount}
               />
             </div>
