@@ -12,8 +12,8 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Finoch - Finansial Anak Kost",
-  description: "Asisten finansial cerdas anak kost berbasis AI & suara (PWA, Local-first, Offline-ready).",
+  title: "Finoch - Finansial Anak Kost Rapi Sekali Bicara",
+  description: "Asisten finansial cerdas anak kost berbasis AI & suara (PWA, Local-first, Offline-ready, 100% Gratis untuk Seluruh Mahasiswa Indonesia).",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
@@ -43,7 +43,7 @@ export default function RootLayout({
             __html: `
               (function() {
                 try {
-                  var saved = localStorage.getItem('voicash_theme');
+                  var saved = localStorage.getItem('finoch_theme') || localStorage.getItem('voicash_theme') || localStorage.getItem('finra_theme');
                   var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   if (saved === 'dark' || (!saved && prefersDark)) {
                     document.documentElement.classList.add('dark');
