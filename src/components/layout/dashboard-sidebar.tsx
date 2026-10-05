@@ -58,7 +58,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
         {/* Brand Header */}
         <Link href="/dashboard" className="flex items-center gap-2 px-2 py-1 group">
           <span className="text-lg font-black tracking-tight text-navy-950 dark:text-cream-50">
-            voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+            finoch<span className="text-emerald-500">.id</span>
           </span>
         </Link>
 

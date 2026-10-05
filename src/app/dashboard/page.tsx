@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,8 +16,10 @@ import {
   ShoppingBag,
   History,
   Loader2,
+  Lightbulb,
 } from "lucide-react";
 import { DigitalTwinCard } from "@/components/dashboard/digital-twin-card";
+import { DailySafeToSpendCard } from "@/components/dashboard/daily-safe-to-spend-card";
 import { SpendingTrendChart } from "@/components/dashboard/spending-trend-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { UnifiedConfirmationModal } from "@/components/transaction/unified-confirmation-modal";
@@ -31,6 +33,7 @@ import { syncManager } from "@/lib/sync/sync-manager";
 import {
   calculateCashflowSummary,
   calculateDigitalTwinSplit,
+  calculateDailySafeToSpend,
 } from "@/lib/financial/financial-engine";
 import {
   DigitalTwinMetrics,
@@ -76,6 +79,7 @@ export default function DashboardPage() {
               merchant: e.itemName,
               amount: e.amount,
               category: e.category || "Other",
+              spendingType: ["Food & Drinks", "Food", "Bills & Utilities", "Housing & Bills", "Bills", "Transportation"].includes(e.category) ? "needs" : "wants",
               date: e.createdAt
                 ? new Date(e.createdAt).toISOString().split("T")[0]
                 : new Date().toISOString().split("T")[0],
@@ -95,6 +99,7 @@ export default function DashboardPage() {
           merchant: e.itemName,
           amount: e.amount,
           category: e.category || "Other",
+          spendingType: ["Food & Drinks", "Food", "Bills & Utilities", "Housing & Bills", "Bills", "Transportation"].includes(e.category) ? "needs" : "wants",
           date: e.createdAt
             ? new Date(e.createdAt).toISOString().split("T")[0]
             : new Date().toISOString().split("T")[0],
@@ -159,16 +164,46 @@ export default function DashboardPage() {
     };
   }, [router, loadTransactions]);
 
+  const todayDateStr = useMemo(() => new Date().toISOString().split("T")[0], []);
+  const currentMonthPrefix = useMemo(() => todayDateStr.slice(0, 7), [todayDateStr]);
+
   // Compute live Digital Twin metrics
-  const totalNeeds = transactions
-    .filter((t) => t.spendingType === "needs")
-    .reduce((sum, t) => sum + t.amount, 0);
+  const totalNeeds = useMemo(() => {
+    return transactions
+      .filter((t) => t.spendingType === "needs")
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [transactions]);
 
-  const totalWants = transactions
-    .filter((t) => t.spendingType === "wants")
-    .reduce((sum, t) => sum + t.amount, 0);
+  const totalWants = useMemo(() => {
+    return transactions
+      .filter((t) => t.spendingType !== "needs")
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [transactions]);
 
-  const totalExpenses = totalNeeds + totalWants;
+  const totalExpensesThisMonth = useMemo(() => {
+    return transactions
+      .filter((t) => !t.date || t.date.startsWith(currentMonthPrefix))
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [transactions, currentMonthPrefix]);
+
+  const totalExpenses = totalExpensesThisMonth > 0 ? totalExpensesThisMonth : totalNeeds + totalWants;
+
+  // Compute today's spending
+  const todaySpent = useMemo(() => {
+    return transactions
+      .filter((t) => t.date === todayDateStr)
+      .reduce((sum, t) => sum + t.amount, 0);
+  }, [transactions, todayDateStr]);
+
+  // Daily Safe-to-Spend calculation for Anak Kost
+  const safeToSpendResult = useMemo(() => {
+    return calculateDailySafeToSpend({
+      monthlyIncome: profile.monthlyIncome,
+      totalExpensesThisMonth,
+      monthlyFixedExpenses: profile.monthlyFixedExpenses,
+      todaySpent,
+    });
+  }, [profile.monthlyIncome, totalExpensesThisMonth, profile.monthlyFixedExpenses, todaySpent]);
 
   const cashflow = calculateCashflowSummary({
     income: profile.monthlyIncome,
@@ -312,163 +347,212 @@ export default function DashboardPage() {
     value,
   }));
 
+  // Simulate an AI insight based on spending data
+  const smartInsight = useMemo(() => {
+    if (totalExpenses === 0) return "Mulailah mencatat pengeluaran Anda untuk melihat analisis cerdas di sini.";
+    if (currentFood > currentBills + currentShopping) {
+      return "Pengeluaran makan Anda mendominasi bulan ini. Mengurangi pesanan online bisa menambah surplus tabungan secara signifikan.";
+    }
+    if (cashflow.netSavings < 0) {
+      return "Anda berada di zona defisit. Tahan pengeluaran untuk 'Wants' (Keinginan) dalam minggu ini untuk memulihkan arus kas.";
+    }
+    return "Pola pengeluaran Anda cukup stabil. Anda berada pada jalur yang tepat menuju target finansial bulan ini.";
+  }, [totalExpenses, currentFood, currentBills, currentShopping, cashflow.netSavings]);
+
   return (
-    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
+    <div className="min-h-[100dvh] bg-cream-50 dark:bg-[#030712] text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors selection:bg-navy-900 selection:text-white">
       {/* Desktop Left Sidebar */}
       <DashboardSidebar className="hidden md:flex" />
 
       {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-10">
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
+      <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-12 h-screen overflow-y-auto custom-scrollbar">
+        {/* Top Header - Floating Glass Pill Style */}
+        <header className="sticky top-0 z-40 px-4 sm:px-6 pt-4 pb-2">
+          <div className="max-w-6xl mx-auto rounded-full bg-white/70 dark:bg-black/50 backdrop-blur-2xl border border-white/20 dark:border-white/10 px-4 py-2 sm:py-3 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex items-center justify-between transition-all">
             {/* Left: Mobile Brand & Page Title */}
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-1.5">
-                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
-                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+              <div className="md:hidden flex items-center gap-1.5 pl-2">
+                <span className="text-sm font-black tracking-tight text-navy-950 dark:text-white">
+                  finoch<span className="text-emerald-500">.id</span>
                 </span>
               </div>
-              <div className="hidden md:block">
-                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
+              <div className="hidden md:block pl-2">
+                <h1 className="text-sm font-bold text-navy-950 dark:text-white tracking-wide">
                   Dashboard Finansial
                 </h1>
-                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
-                  Pantau arus kas dan pencatatan pengeluaran Anda
-                </p>
               </div>
             </div>
 
             {/* Right: Actions */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <ThemeToggle />
-              <button
-                onClick={() => setIsVoiceOpen(true)}
-                className="px-3.5 py-2 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"
-              >
-                <Mic className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Bicara</span>
-              </button>
+              
               <button
                 onClick={() => setIsScannerOpen(true)}
-                className="px-3.5 py-2 rounded-full border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] text-navy-800 dark:text-cream-200 font-semibold text-xs flex items-center gap-1.5 hover:bg-cream-100 dark:hover:bg-navy-900 transition-colors"
+                className="w-10 h-10 sm:w-auto sm:px-4 sm:py-2.5 rounded-full border border-navy-900/10 dark:border-white/10 bg-white/50 dark:bg-white/5 hover:bg-navy-50 dark:hover:bg-white/10 text-navy-800 dark:text-cream-200 font-bold text-xs flex items-center justify-center gap-2 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.96] group"
+                aria-label="Scan Struk"
               >
-                <Camera className="w-3.5 h-3.5" />
+                <div className="w-6 h-6 rounded-full bg-navy-900/5 dark:bg-white/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Camera className="w-3.5 h-3.5" />
+                </div>
                 <span className="hidden sm:inline">Scan Struk</span>
               </button>
+              
               <button
-                onClick={handleOpenManualEntry}
-                className="px-3.5 py-2 rounded-full border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] text-navy-800 dark:text-cream-200 font-semibold text-xs flex items-center gap-1.5 hover:bg-cream-100 dark:hover:bg-navy-900 transition-colors"
+                onClick={() => setIsVoiceOpen(true)}
+                className="w-10 h-10 sm:w-auto sm:px-4 sm:py-2.5 rounded-full bg-navy-950 dark:bg-white hover:bg-navy-900 dark:hover:bg-cream-100 text-white dark:text-navy-950 font-bold text-xs flex items-center justify-center gap-2 shadow-[0_4px_14px_rgba(0,0,0,0.2)] transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.96] group"
+                aria-label="Bicara"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Catat Manual</span>
+                <div className="w-6 h-6 rounded-full bg-white/20 dark:bg-black/10 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Mic className="w-3.5 h-3.5" />
+                </div>
+                <span className="hidden sm:inline tracking-wide">Bicara</span>
               </button>
             </div>
           </div>
         </header>
 
-        {/* Main Container */}
-        <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Digital Twin Card */}
-        <DigitalTwinCard metrics={metrics} />
+        {/* Main Container - Macro Whitespace (py-8 to py-12) */}
+        <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] fill-mode-both">
+          
+          {/* Daily Safe-to-Spend Widget (Anak Kost Survival & Jatah Jajan) */}
+          <DailySafeToSpendCard
+            result={safeToSpendResult}
+            onOpenVoice={() => setIsVoiceOpen(true)}
+          />
 
-        {/* Charts Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <SpendingTrendChart data={trendData} />
-          <CategoryDonutChart data={categoryChartData} />
-        </div>
-
-        {/* Transaction History & Feed */}
-        <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800/80">
-            <div className="flex items-center gap-2">
-              <History className="w-4 h-4 text-navy-700 dark:text-cream-300" />
-              <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
-                Daftar Transaksi Terbaru
-              </h3>
+          {/* Smart Insight Banner */}
+          <div className="flex items-start sm:items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/20 text-emerald-900 dark:text-emerald-200">
+            <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+              <Lightbulb className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <span className="text-xs text-navy-500 dark:text-cream-400">
-              Total {transactions.length} transaksi tercatat
-            </span>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-widest text-emerald-600/70 dark:text-emerald-400/70 mb-0.5">Insight AI</p>
+              <p className="text-sm font-medium leading-relaxed">{smartInsight}</p>
+            </div>
           </div>
 
-          {transactions.length === 0 ? (
-            <div className="py-12 text-center text-navy-400 dark:text-cream-400/60 space-y-2">
-              <ShoppingBag className="w-8 h-8 mx-auto text-navy-300 dark:text-cream-400/40 opacity-60" />
-              <p className="text-sm font-semibold text-navy-950 dark:text-cream-50">
-                Belum ada transaksi tercatat
-              </p>
-              <p className="text-xs text-navy-600 dark:text-cream-300/70 max-w-sm mx-auto">
-                Gunakan tombol Bicara, Scan Struk, atau Catat Manual di atas untuk mulai mencatat pengeluaran Anda.
-              </p>
-            </div>
-          ) : (
-            <div className="divide-y divide-cream-100 dark:divide-navy-800/80">
-              {transactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="py-3.5 flex items-center justify-between hover:bg-cream-50/80 dark:hover:bg-navy-900/40 px-2 rounded-xl transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-cream-100 dark:bg-navy-900 text-navy-800 dark:text-cream-200">
-                      <ShoppingBag className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                        {tx.merchant}
-                      </div>
-                      <div className="flex items-center gap-2 mt-0.5">
-                        <span className="text-xs text-navy-500 dark:text-cream-400">{tx.date}</span>
-                        <span className="text-[11px] px-2 py-0.5 rounded-full font-medium bg-cream-100 dark:bg-navy-900 text-navy-700 dark:text-cream-300">
-                          {tx.category || "Lainnya"}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
+          {/* Digital Twin Card */}
+          <DigitalTwinCard metrics={metrics} />
 
-                  <div className="text-right">
-                    <div className="text-sm font-black text-navy-950 dark:text-cream-50">
-                      Rp {tx.amount.toLocaleString("id-ID")}
-                    </div>
-                    <div className="text-[11px] text-navy-400 dark:text-cream-400/60 capitalize">
-                      via {tx.source}
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {/* Charts Row - Asymmetrical Bento layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7 xl:col-span-8">
+              <SpendingTrendChart data={trendData} />
             </div>
-          )}
-        </div>
-      </main>
+            <div className="lg:col-span-5 xl:col-span-4">
+              <CategoryDonutChart data={categoryChartData} />
+            </div>
+          </div>
+
+          {/* Transaction History & Feed - Double Bezel Architecture */}
+          <div className="group relative">
+            <div className="p-1.5 rounded-[2rem] bg-black/[0.02] dark:bg-white/[0.02] ring-1 ring-black/5 dark:ring-white/10 transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] hover:bg-black/[0.04] dark:hover:bg-white/[0.04]">
+              <div className="bg-white dark:bg-[#070E1A] rounded-[calc(2rem-0.375rem)] p-6 sm:p-8 shadow-[inset_0_1px_1px_rgba(255,255,255,0.15),0_4px_24px_rgba(0,0,0,0.02)] dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.05),0_4px_24px_rgba(0,0,0,0.2)]">
+                
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-navy-900/5 dark:border-white/5">
+                  <div className="space-y-1">
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy-900/5 dark:bg-white/5 border border-navy-900/10 dark:border-white/10 text-[10px] uppercase tracking-[0.2em] font-bold text-navy-600 dark:text-cream-300">
+                      <History className="w-3 h-3" />
+                      <span>Log Aktivitas</span>
+                    </div>
+                    <h3 className="text-xl font-black text-navy-950 dark:text-white tracking-tight mt-2">
+                      Transaksi Terbaru
+                    </h3>
+                  </div>
+                  <button
+                    onClick={handleOpenManualEntry}
+                    className="self-start sm:self-auto px-4 py-2 rounded-full border border-navy-900/10 dark:border-white/10 bg-transparent hover:bg-navy-50 dark:hover:bg-white/5 text-navy-800 dark:text-cream-200 font-bold text-xs flex items-center gap-2 transition-all active:scale-[0.98]"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    <span>Catat Manual</span>
+                  </button>
+                </div>
+
+                <div className="mt-6">
+                  {transactions.length === 0 ? (
+                    <div className="py-16 text-center text-navy-400 dark:text-cream-400/60 space-y-3">
+                      <div className="w-16 h-16 mx-auto rounded-full bg-navy-50 dark:bg-white/5 flex items-center justify-center">
+                        <ShoppingBag className="w-8 h-8 text-navy-300 dark:text-cream-400/40 opacity-60" />
+                      </div>
+                      <p className="text-sm font-bold text-navy-950 dark:text-cream-50 tracking-wide">
+                        Belum ada transaksi
+                      </p>
+                      <p className="text-xs text-navy-600 dark:text-cream-300/70 max-w-xs mx-auto leading-relaxed">
+                        Gunakan tombol Bicara, Scan Struk, atau Catat Manual untuk merekam pengeluaran Anda.
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-2">
+                      {transactions.map((tx) => (
+                        <div
+                          key={tx.id}
+                          className="p-4 flex items-center justify-between hover:bg-navy-50 dark:hover:bg-white/[0.03] rounded-2xl transition-all duration-300 group/tx border border-transparent hover:border-navy-900/5 dark:hover:border-white/5"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-full bg-navy-100 dark:bg-white/10 text-navy-800 dark:text-white flex items-center justify-center shrink-0 group-hover/tx:scale-110 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]">
+                              <ShoppingBag className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <div className="text-sm font-bold text-navy-950 dark:text-white tracking-wide">
+                                {tx.merchant}
+                              </div>
+                              <div className="flex items-center gap-2 mt-1">
+                                <span className="text-xs font-medium text-navy-500 dark:text-cream-400/60">{tx.date}</span>
+                                <span className="w-1 h-1 rounded-full bg-navy-300 dark:bg-white/20" />
+                                <span className="text-[10px] font-bold uppercase tracking-wider text-navy-600 dark:text-cream-300/80">
+                                  {tx.category || "Lainnya"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="text-right">
+                            <div className="text-sm font-black text-navy-950 dark:text-white tracking-tight">
+                              Rp {tx.amount.toLocaleString("id-ID")}
+                            </div>
+                            <div className="text-[10px] font-medium uppercase tracking-wider text-navy-400 dark:text-cream-400/50 mt-1">
+                              via {tx.source}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
 
       {/* Mobile Bottom Navigation for screens < md */}
       <BottomNav onOpenVoice={() => setIsVoiceOpen(true)} />
+
+      {/* Voice Expense Sheet */}
+      <VoiceExpenseSheet
+        isOpen={isVoiceOpen}
+        onClose={() => setIsVoiceOpen(false)}
+        onExpenseSaved={() => {
+          setIsVoiceOpen(false);
+          loadTransactions();
+        }}
+      />
+
+      {/* Hybrid Receipt Scanner Modal */}
+      <ReceiptScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={handleOcrCandidateReceived}
+      />
+
+      {/* Unified Confirmation Modal */}
+      <UnifiedConfirmationModal
+        isOpen={isConfirmModalOpen}
+        candidate={currentCandidate}
+        onClose={() => setIsConfirmModalOpen(false)}
+        onConfirm={handleConfirmTransaction}
+      />
     </div>
-
-    {/* Voice Expense Sheet */}
-    <VoiceExpenseSheet
-      isOpen={isVoiceOpen}
-      onClose={() => setIsVoiceOpen(false)}
-      onExpenseSaved={() => {
-        setIsVoiceOpen(false);
-        loadTransactions();
-      }}
-    />
-
-    {/* Hybrid Receipt Scanner Modal */}
-    <ReceiptScannerModal
-      isOpen={isScannerOpen}
-      onClose={() => setIsScannerOpen(false)}
-      onScanSuccess={handleOcrCandidateReceived}
-    />
-
-    {/* Unified Confirmation Modal */}
-    <UnifiedConfirmationModal
-      isOpen={isConfirmModalOpen}
-      candidate={currentCandidate}
-      onClose={() => setIsConfirmModalOpen(false)}
-      onConfirm={handleConfirmTransaction}
-    />
-  </div>
   );
 }
