@@ -16,11 +16,14 @@ export function useAuth() {
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
+        syncManager.setAuthenticated(Boolean(data.user));
       } else {
         setUser(null);
+        syncManager.setAuthenticated(false);
       }
     } catch {
       setUser(null);
+      syncManager.setAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
@@ -47,10 +50,11 @@ export function useAuth() {
       }
 
       setUser(data.user);
+      syncManager.setAuthenticated(true);
 
       // Migrate any guest expenses to this authenticated user
       await expenseStorage.claimGuestExpenses(data.user.id);
-      syncManager.triggerSync();
+      syncManager.triggerSync(true);
 
       return true;
     } catch {
@@ -78,10 +82,11 @@ export function useAuth() {
       }
 
       setUser(data.user);
+      syncManager.setAuthenticated(true);
 
       // Migrate guest expenses
       await expenseStorage.claimGuestExpenses(data.user.id);
-      syncManager.triggerSync();
+      syncManager.triggerSync(true);
 
       return true;
     } catch {
@@ -98,6 +103,7 @@ export function useAuth() {
     } catch {
       // Ignore network errors on logout
     }
+    syncManager.setAuthenticated(false);
     setUser(null);
   };
 

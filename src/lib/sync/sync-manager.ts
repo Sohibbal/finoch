@@ -18,6 +18,7 @@ export function reconcileChanges(local: Expense, server: Expense): Expense {
 
 export class SyncManager {
   private isSyncing = false;
+  private isAuthenticated: boolean | null = null;
   private listeners = new Set<(status: "synced" | "syncing" | "pending" | "failed" | "offline") => void>();
 
   constructor() {
@@ -28,6 +29,13 @@ export class SyncManager {
           this.triggerSync();
         }
       });
+    }
+  }
+
+  setAuthenticated(status: boolean) {
+    this.isAuthenticated = status;
+    if (status) {
+      this.triggerSync(true);
     }
   }
 
@@ -50,9 +58,14 @@ export class SyncManager {
     await this.triggerSync();
   }
 
-  async triggerSync(): Promise<boolean> {
+  async triggerSync(force = false): Promise<boolean> {
     if (typeof navigator !== "undefined" && !navigator.onLine) {
       this.notify("offline");
+      return false;
+    }
+
+    if (this.isAuthenticated === false && !force) {
+      this.notify("pending");
       return false;
     }
 
@@ -87,12 +100,14 @@ export class SyncManager {
       if (!response.ok) {
         // If 401, user is guest/unauthenticated; local changes remain queued
         if (response.status === 401) {
+          this.isAuthenticated = false;
           this.notify("pending");
           return false;
         }
         throw new Error(`Sync failed with status ${response.status}`);
       }
 
+      this.isAuthenticated = true;
       const result: BatchSyncResponse = await response.json();
 
       // Remove applied items from sync queue

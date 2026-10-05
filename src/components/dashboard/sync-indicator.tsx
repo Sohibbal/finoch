@@ -21,7 +21,7 @@ export function SyncIndicator() {
   }, []);
 
   const handleManualSync = () => {
-    syncManager.triggerSync();
+    syncManager.triggerSync(true);
   };
 
   if (status === "offline") {
