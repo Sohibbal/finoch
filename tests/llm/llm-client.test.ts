@@ -75,4 +75,17 @@ describe("LLM Client Auto Configuration", () => {
     expect(config?.baseUrl).toBe("https://custom.endpoint.com/v1");
     expect(config?.model).toBe("custom-llama");
   });
+
+  it("normalizes custom base URL by trimming trailing slashes and appending /v1 if missing", () => {
+    process.env.OPENAI_API_KEY = "sk-0633ef3c6b7ae46f-1bem5s-a911b865";
+
+    process.env.OPENAI_BASE_URL = "https://ai.botku.id/";
+    expect(getLlmConfig()?.baseUrl).toBe("https://ai.botku.id/v1");
+
+    process.env.OPENAI_BASE_URL = "https://ai.botku.id";
+    expect(getLlmConfig()?.baseUrl).toBe("https://ai.botku.id/v1");
+
+    process.env.OPENAI_BASE_URL = "https://ai.botku.id/v1/";
+    expect(getLlmConfig()?.baseUrl).toBe("https://ai.botku.id/v1");
+  });
 });

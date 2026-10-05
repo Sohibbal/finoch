@@ -15,6 +15,18 @@ function sanitizeEnvVal(val: string | undefined): string | undefined {
   return cleaned || undefined;
 }
 
+export function normalizeBaseUrl(url: string): string {
+  let cleaned = url.trim();
+  if (cleaned.includes("generativelanguage.googleapis.com")) {
+    return cleaned.endsWith("/") ? cleaned : `${cleaned}/`;
+  }
+  cleaned = cleaned.replace(/\/+$/, "");
+  if (!cleaned.endsWith("/v1")) {
+    cleaned = `${cleaned}/v1`;
+  }
+  return cleaned;
+}
+
 export function getLlmConfig(): LlmConfig | null {
   const rawKey = sanitizeEnvVal(process.env.OPENAI_API_KEY);
   if (!rawKey) return null;
@@ -70,7 +82,7 @@ export function getLlmConfig(): LlmConfig | null {
 
   return {
     apiKey: rawKey,
-    baseUrl,
+    baseUrl: normalizeBaseUrl(baseUrl),
     model,
     fallbackModels: candidateModels,
     provider,
