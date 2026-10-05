@@ -10,6 +10,7 @@ import {
   Bot,
   User,
   LogOut,
+  Receipt,
 } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { ThemeToggle } from "./theme-toggle";
@@ -27,6 +28,11 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
       href: "/dashboard",
       label: "Dashboard",
       icon: LayoutDashboard,
+    },
+    {
+      href: "/split-bill",
+      label: "Split Bill Resto",
+      icon: Receipt,
     },
     {
       href: "/simulator",

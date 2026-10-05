@@ -17,6 +17,7 @@ import {
   History,
   Loader2,
   Lightbulb,
+  Receipt,
 } from "lucide-react";
 import { DigitalTwinCard } from "@/components/dashboard/digital-twin-card";
 import { DailySafeToSpendCard } from "@/components/dashboard/daily-safe-to-spend-card";
@@ -387,6 +388,18 @@ export default function DashboardPage() {
             <div className="flex items-center gap-1.5 sm:gap-2">
               <ThemeToggle />
               
+              <button
+                onClick={() => router.push("/split-bill")}
+                className="w-10 h-10 sm:w-auto sm:px-4 sm:py-2.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center justify-center gap-2 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.96] group"
+                aria-label="Split Bill Resto"
+                title="Kalkulator Split Bill & Talangan Resto"
+              >
+                <div className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <Receipt className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <span className="hidden sm:inline">Split Bill</span>
+              </button>
+
               <button
                 onClick={() => setIsScannerOpen(true)}
                 className="w-10 h-10 sm:w-auto sm:px-4 sm:py-2.5 rounded-full border border-navy-900/10 dark:border-white/10 bg-white/50 dark:bg-white/5 hover:bg-navy-50 dark:hover:bg-white/10 text-navy-800 dark:text-cream-200 font-bold text-xs flex items-center justify-center gap-2 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] active:scale-[0.96] group"
