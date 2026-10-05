@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { PwaInstallButton } from "@/components/layout/pwa-install-button";
+import { OfflineBanner } from "@/components/layout/offline-banner";
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   subsets: ["latin"],
@@ -11,13 +12,13 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "VoiCash - Catat Pengeluaran Kuliah Cukup dengan Bicara",
-  description: "Aplikasi manajemen keuangan mahasiswa berbasis suara (PWA, Local-first, Native Web Speech id-ID).",
+  title: "Finoch - Finansial Anak Kost",
+  description: "Asisten finansial cerdas anak kost berbasis AI & suara (PWA, Local-first, Offline-ready).",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "VoiCash",
+    title: "Finoch",
   },
 };
 
@@ -56,6 +57,9 @@ export default function RootLayout({
         />
       </head>
       <body className="antialiased bg-[#FAF8F5] dark:bg-[#0A1120] text-[#0B192C] dark:text-[#F6F4ED] min-h-screen font-sans transition-colors duration-300">
+        {/* Real-time Offline & Online Sync Banner */}
+        <OfflineBanner />
+
         {children}
 
         {/* Global Floating PWA Install Notification Button */}
@@ -70,10 +74,10 @@ export default function RootLayout({
                   navigator.serviceWorker.register('/sw.js').then(
                     function(registration) {
                       registration.update();
-                      console.log('VoiCash ServiceWorker registration successful:', registration.scope);
+                      console.log('Finoch ServiceWorker registration successful:', registration.scope);
                     },
                     function(err) {
-                      console.log('VoiCash ServiceWorker registration failed:', err);
+                      console.log('Finoch ServiceWorker registration failed:', err);
                     }
                   );
                 });
