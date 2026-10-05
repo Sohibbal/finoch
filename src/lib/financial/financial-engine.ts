@@ -139,3 +139,83 @@ export function simulateWhatIfScenario(params: {
     simulatedMonthsToGoal,
   };
 }
+
+export type { DailySafeToSpendResult } from "@/types/financial-types";
+
+export function calculateDailySafeToSpend(params: {
+  monthlyIncome: number;
+  totalExpensesThisMonth: number;
+  monthlyFixedExpenses: number;
+  todaySpent?: number;
+  currentDate?: Date;
+}): import("@/types/financial-types").DailySafeToSpendResult {
+  const todaySpent = Math.max(0, params.todaySpent ?? 0);
+  const date =
+    params.currentDate instanceof Date && !isNaN(params.currentDate.getTime())
+      ? params.currentDate
+      : new Date();
+
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const day = date.getDate();
+  const totalDaysInMonth = new Date(year, month + 1, 0).getDate();
+  const daysRemaining = Math.max(1, totalDaysInMonth - day + 1);
+
+  const netRemainingBudget =
+    params.monthlyIncome - params.monthlyFixedExpenses - params.totalExpensesThisMonth;
+
+  if (netRemainingBudget <= 0) {
+    return {
+      dailyBudget: 0,
+      todaySpent,
+      remainingToday: 0,
+      daysRemaining,
+      status: "danger",
+      headline: "Krisis Tanggal Tua!",
+      advice:
+        "Budget bulan ini sudah habis. Aktifkan mode survival: masak di kos, tahan pengeluaran non-esensial, dan prioritaskan kebutuhan primer sampai kiriman berikutnya tiba.",
+    };
+  }
+
+  const dailyBudget = Math.max(0, Math.round(netRemainingBudget / daysRemaining));
+  const remainingToday = Math.max(0, dailyBudget - todaySpent);
+
+  if (dailyBudget <= 0 || todaySpent > dailyBudget) {
+    return {
+      dailyBudget,
+      todaySpent,
+      remainingToday,
+      daysRemaining,
+      status: "danger",
+      headline: "Melampaui Jatah Harian!",
+      advice:
+        "Pengeluaran hari ini sudah melebihi batas aman harian. Rem pengeluaran dan tahan jajan di luar agar tidak membebani hari-hari berikutnya.",
+    };
+  }
+
+  const spendingRatio = dailyBudget > 0 ? todaySpent / dailyBudget : 0;
+
+  if (spendingRatio >= 0.8) {
+    return {
+      dailyBudget,
+      todaySpent,
+      remainingToday,
+      daysRemaining,
+      status: "warning",
+      headline: "Mendekati Batas Harian",
+      advice:
+        "Pengeluaran hari ini sudah mencapai 80%+ dari batas aman. Rem jajan sore dan nongkrong agar jatah hari ini tidak minus.",
+    };
+  }
+
+  return {
+    dailyBudget,
+    todaySpent,
+    remainingToday,
+    daysRemaining,
+    status: "safe",
+    headline: "Jatah Jajan Hari Ini Aman",
+    advice:
+      "Pengeluaran hari ini masih dalam batas aman terkendali. Tetap bijak dan sisihkan sisa jatah harian untuk tabungan.",
+  };
+}

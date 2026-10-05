@@ -4,6 +4,7 @@ import {
   calculateDigitalTwinSplit,
   calculateGoalProjection,
   simulateWhatIfScenario,
+  calculateDailySafeToSpend,
 } from "@/lib/financial/financial-engine";
 
 describe("Financial Calculation Engine", () => {
@@ -59,5 +60,91 @@ describe("Financial Calculation Engine", () => {
     expect(result.simulatedNetSavings).toBe(1050000);
     expect(result.deltaMonthlySavings).toBe(200000);
     expect(result.simulatedMonthsToGoal).toBe(10); // 9.5M / 1.05M = 9.04 -> 10 bulan
+  });
+
+  describe("calculateDailySafeToSpend", () => {
+    it("safe condition: calculates correct daily budget and status 'safe'", () => {
+      // Income 3.000.000, fixed bills 1.000.000, expenses 500.000
+      // Net remaining budget = 1.500.000
+      // October 16, 2026 -> 31 - 16 + 1 = 16 days left
+      // Daily budget = 1.500.000 / 16 = 93.750
+      const result = calculateDailySafeToSpend({
+        monthlyIncome: 3000000,
+        monthlyFixedExpenses: 1000000,
+        totalExpensesThisMonth: 500000,
+        todaySpent: 20000,
+        currentDate: new Date(2026, 9, 16),
+      });
+
+      expect(result.daysRemaining).toBe(16);
+      expect(result.dailyBudget).toBe(93750);
+      expect(result.todaySpent).toBe(20000);
+      expect(result.remainingToday).toBe(73750);
+      expect(result.status).toBe("safe");
+      expect(result.headline).toBeTruthy();
+      expect(result.advice).toBeTruthy();
+    });
+
+    it("warning condition: spending today reaches 85% of daily budget, status 'warning'", () => {
+      // Net remaining budget = 1.500.000, 15 days left (October 17, 2026) -> dailyBudget = 100.000
+      // todaySpent = 85.000 (85% of dailyBudget)
+      const result = calculateDailySafeToSpend({
+        monthlyIncome: 3000000,
+        monthlyFixedExpenses: 1000000,
+        totalExpensesThisMonth: 500000,
+        todaySpent: 85000,
+        currentDate: new Date(2026, 9, 17),
+      });
+
+      expect(result.dailyBudget).toBe(100000);
+      expect(result.todaySpent).toBe(85000);
+      expect(result.remainingToday).toBe(15000);
+      expect(result.status).toBe("warning");
+      expect(result.advice).toBeTruthy();
+    });
+
+    it("danger / tanggal tua condition: net remaining budget <= 0, status 'danger' with survival advice", () => {
+      // Income 3.000.000, fixed bills 1.000.000, expenses 2.200.000 -> net -200.000 <= 0
+      const result = calculateDailySafeToSpend({
+        monthlyIncome: 3000000,
+        monthlyFixedExpenses: 1000000,
+        totalExpensesThisMonth: 2200000,
+        todaySpent: 10000,
+        currentDate: new Date(2026, 9, 16),
+      });
+
+      expect(result.dailyBudget).toBe(0);
+      expect(result.remainingToday).toBe(0);
+      expect(result.status).toBe("danger");
+      expect(result.advice.toLowerCase()).toContain("survival");
+    });
+
+    it("danger condition: spending today exceeds daily budget", () => {
+      // Daily budget = 100.000, todaySpent = 120.000
+      const result = calculateDailySafeToSpend({
+        monthlyIncome: 3000000,
+        monthlyFixedExpenses: 1000000,
+        totalExpensesThisMonth: 500000,
+        todaySpent: 120000,
+        currentDate: new Date(2026, 9, 17),
+      });
+
+      expect(result.status).toBe("danger");
+      expect(result.remainingToday).toBe(0);
+    });
+
+    it("handles default optional parameters gracefully", () => {
+      const result = calculateDailySafeToSpend({
+        monthlyIncome: 3000000,
+        monthlyFixedExpenses: 1000000,
+        totalExpensesThisMonth: 500000,
+      });
+
+      expect(result.todaySpent).toBe(0);
+      expect(result.daysRemaining).toBeGreaterThanOrEqual(1);
+      expect(result.dailyBudget).toBeGreaterThan(0);
+      expect(result.remainingToday).toBe(result.dailyBudget);
+      expect(result.status).toBe("safe");
+    });
   });
 });

@@ -119,6 +119,16 @@ export interface AiInsightCard {
   createdAt?: string | Date;
 }
 
+export interface DailySafeToSpendResult {
+  dailyBudget: number;
+  todaySpent: number;
+  remainingToday: number;
+  daysRemaining: number;
+  status: "safe" | "warning" | "danger";
+  headline: string;
+  advice: string;
+}
+
 export function validateTransactionCandidate(c: Partial<TransactionCandidate>): {
   isValid: boolean;
   errors: string[];
