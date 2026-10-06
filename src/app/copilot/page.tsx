@@ -13,6 +13,7 @@ import {
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 
 interface ChatMessage {
   id: string;
@@ -133,6 +134,7 @@ export default function CopilotPage() {
                 </span>
               </div>
               <div className="hidden md:block">
+                <Breadcrumbs className="mb-1" />
                 <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                   Finoch AI Copilot
                 </h1>
