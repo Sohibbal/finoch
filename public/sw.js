@@ -1,9 +1,20 @@
-// Finoch PWA Service Worker (v2) - Resilient Offline Shell & Offline-Ready
-const CACHE_NAME = "finoch-shell-v2";
+// Finoch PWA Service Worker (v3) - Resilient Offline Shell & Full Route Precache
+const CACHE_NAME = "finoch-shell-v3";
 
 const STATIC_ASSETS = [
   "/",
   "/dashboard",
+  "/wallets",
+  "/budget",
+  "/streak",
+  "/audit",
+  "/debts",
+  "/bills",
+  "/split-bill",
+  "/wishlist",
+  "/reports",
+  "/meal-calc",
+  "/ukt-savings",
   "/simulator",
   "/goals",
   "/copilot",
@@ -96,6 +107,10 @@ self.addEventListener("fetch", (event) => {
           const pathnameMatch = await caches.match(url.pathname);
           if (pathnameMatch) {
             return pathnameMatch;
+          }
+          const dashFallback = await caches.match("/dashboard");
+          if (dashFallback) {
+            return dashFallback;
           }
           const rootFallback = await caches.match("/");
           if (rootFallback) {
