@@ -20,10 +20,12 @@ import {
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { useAuth } from "@/hooks/use-auth";
 
+import Link from "next/link";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 import { ParticipantManager } from "@/components/split-bill/participant-manager";
 import { BillItemEditor } from "@/components/split-bill/bill-item-editor";
@@ -213,22 +215,25 @@ export default function SplitBillPage() {
         <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             {/* Left: Mobile Brand & Page Title */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => router.push("/dashboard")}
-                className="md:hidden p-1.5 rounded-xl border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200"
+                className="md:hidden p-1.5 rounded-xl border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 shrink-0"
                 title="Kembali ke Dashboard"
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
-              <div>
+              <Link href="/dashboard" className="md:hidden shrink-0" aria-label="Finoch Beranda">
+                <BrandLogo variant="symbol" className="h-5 w-auto" />
+              </Link>
+              <div className="min-w-0">
                 <Breadcrumbs className="hidden md:flex mb-1" />
-                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50 flex items-center gap-1.5">
-                  <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <span>Kalkulator Split Bill & Talangan Resto</span>
+                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50 flex items-center gap-1.5 truncate">
+                  <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="truncate">Kalkulator Split Bill &amp; Talangan Resto</span>
                 </h1>
-                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
+                <p className="text-[11px] text-navy-600 dark:text-cream-300/70 hidden sm:block">
                   Hitung patungan makan, pajak PB1, service charge, dan salin ke WhatsApp
                 </p>
               </div>
