@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Lock, Mail, User, Loader2, LogOut, Sun, Moon } from "lucide-react";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { useAuth } from "@/hooks/use-auth";
 
 interface AuthSliderProps {
@@ -194,9 +195,9 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
           {/* Brand & Sliding Segmented Tab */}
           <div className="p-6 sm:p-7 pb-4 border-b border-cream-200 dark:border-navy-800/80 space-y-4">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-black tracking-tight text-navy-950 dark:text-cream-50">
-                voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
-              </span>
+              <Link href="/" className="hover:opacity-90 transition-opacity" aria-label="Finoch.id Beranda">
+                <BrandLogo variant="full" className="h-5 w-auto" />
+              </Link>
               <span className="text-[11px] font-medium text-navy-500 dark:text-cream-400">
                 {mode === "login" ? "Akses Akun" : "Registrasi Akun"}
               </span>
