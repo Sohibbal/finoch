@@ -30,8 +30,8 @@ describe("PWA Web App Manifest & Offline Engine", () => {
     const swPath = path.resolve(process.cwd(), "public/sw.js");
     const swCode = fs.readFileSync(swPath, "utf-8");
 
-    // Must use cache version finoch-shell-v2
-    expect(swCode).toContain('CACHE_NAME = "finoch-shell-v2"');
+    // Must use cache version finoch-shell-v3
+    expect(swCode).toContain('CACHE_NAME = "finoch-shell-v3"');
 
     // Must use non-blocking installation
     expect(swCode).toContain("Promise.allSettled");
