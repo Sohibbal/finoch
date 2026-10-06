@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" role="img">
+  <title>Finoch Favicon</title>
+  <style>
+    :root {
+      --bg: #FAF8F5;
+      --stem: #0B192C;
+      --top: #2563EB;
+      --mid: #0B192C;
+      --node: #0284C7;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0A1120;
+        --stem: #FFFFFF;
+        --top: #3B82F6;
+        --mid: #FFFFFF;
+        --node: #38BDF8;
+      }
+    }
+    .bg { fill: var(--bg); }
+    .stem { fill: var(--stem); }
+    .top { fill: var(--top); }
+    .mid { fill: var(--mid); }
+    .node { fill: var(--node); }
+  </style>
+  <rect class="bg" width="192" height="192" rx="42" />
+  <g transform="translate(31.56, 18.0) scale(0.8478)">
+    <path class="stem" d="M 0 23 L 40 0 V 184 H 0 Z" />
+    <path class="top" d="M 40 0 H 152 L 126 45 H 40 Z" />
+    <path class="mid" d="M 40 78 H 116 L 90 123 H 40 Z" />
+    <polygon class="node" points="126,78 152,78 126,123 100,123" />
+  </g>
+</svg>
