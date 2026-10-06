@@ -10,10 +10,12 @@ import {
   ShieldCheck,
   Loader2,
 } from "lucide-react";
+import Link from "next/link";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 interface ChatMessage {
   id: string;
@@ -128,10 +130,10 @@ export default function CopilotPage() {
           <div className="max-w-4xl mx-auto flex items-center justify-between">
             {/* Left: Mobile Brand & Page Title */}
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-1.5">
-                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
-                  finoch<span className="text-navy-600 dark:text-cream-300">.id</span>
-                </span>
+              <div className="md:hidden flex items-center">
+                <Link href="/dashboard" aria-label="Finoch Beranda">
+                  <BrandLogo variant="full" className="h-5 sm:h-6 w-auto" />
+                </Link>
               </div>
               <div className="hidden md:block">
                 <Breadcrumbs className="mb-1" />
