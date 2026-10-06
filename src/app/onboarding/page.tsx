@@ -2,6 +2,8 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import {
   Wallet,
   PiggyBank,
@@ -72,9 +74,11 @@ export default function OnboardingPage() {
   return (
     <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 transition-colors">
       <div className="sm:mx-auto sm:w-full sm:max-w-xl text-center space-y-2">
-        <span className="text-xl font-black tracking-tight text-navy-950 dark:text-cream-50">
-          voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
-        </span>
+        <div className="flex justify-center mb-1">
+          <Link href="/" className="hover:opacity-90 transition-opacity" aria-label="Finoch.id Beranda">
+            <BrandLogo variant="full" className="h-7 w-auto" />
+          </Link>
+        </div>
         <h1 className="text-2xl sm:text-3xl font-black text-navy-950 dark:text-cream-50 tracking-tight">
           Bangun Digital Twin Finansial Anda
         </h1>
@@ -250,7 +254,7 @@ export default function OnboardingPage() {
                     Prioritas Finansial Utama
                   </h3>
                   <p className="text-xs text-navy-500 dark:text-cream-400">
-                    Fokus apa yang ingin Anda capai bersama VoiCash?
+                    Fokus apa yang ingin Anda capai bersama Finoch?
                   </p>
                 </div>
               </div>
