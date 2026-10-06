@@ -23,6 +23,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 
 import { ParticipantManager } from "@/components/split-bill/participant-manager";
 import { BillItemEditor } from "@/components/split-bill/bill-item-editor";
@@ -222,6 +223,7 @@ export default function SplitBillPage() {
                 <ArrowLeft className="w-4 h-4" />
               </button>
               <div>
+                <Breadcrumbs className="hidden md:flex mb-1" />
                 <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50 flex items-center gap-1.5">
                   <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                   <span>Kalkulator Split Bill & Talangan Resto</span>
