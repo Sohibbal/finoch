@@ -20,7 +20,7 @@ export function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
               <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
             </div>
             <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
-              Komitmen Privasi VoiCash
+              Komitmen Privasi Finoch
             </h3>
           </div>
           <button
@@ -35,7 +35,7 @@ export function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
 
         <div className="py-4 space-y-4 text-xs sm:text-sm text-navy-700 dark:text-cream-200 leading-relaxed">
           <div className="p-4 rounded-2xl bg-cream-100 dark:bg-navy-900/60 border border-cream-300 dark:border-navy-800 text-navy-900 dark:text-cream-100 font-medium text-xs leading-relaxed">
-            &ldquo;VoiCash tidak menyimpan rekaman audio di cloud. Suara Anda diproses secara lokal di browser, dan data pengeluaran hanya tersimpan setelah Anda meninjau dan mengonfirmasi secara sadar.&rdquo;
+            &ldquo;Finoch tidak menyimpan rekaman audio di cloud. Suara Anda diproses secara lokal di browser, dan data pengeluaran hanya tersimpan setelah Anda meninjau dan mengonfirmasi secara sadar.&rdquo;
           </div>
 
           <div className="space-y-3.5">
