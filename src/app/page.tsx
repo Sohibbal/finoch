@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import {
   Mic,
   Camera,
@@ -35,6 +36,15 @@ import {
   DollarSign,
   HelpCircle,
   GraduationCap,
+  CreditCard,
+  Wallet,
+  CalendarClock,
+  Receipt,
+  Hourglass,
+  Utensils,
+  FileSpreadsheet,
+  Handshake,
+  Flame,
 } from "lucide-react";
 import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
@@ -150,13 +160,8 @@ export default function LandingPage() {
       <div className="fixed top-3 sm:top-4 inset-x-0 z-50 px-3 sm:px-4 flex justify-center pointer-events-none">
         <header className="pointer-events-auto glass-pill rounded-full px-4 sm:px-5 py-2.5 shadow-xl max-w-4xl w-full flex items-center justify-between transition-all duration-300">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group shrink-0">
-            <div className="w-7 h-7 rounded-full bg-[#0B192C] dark:bg-[#FAF8F5] flex items-center justify-center text-[#FAF8F5] dark:text-[#0B192C] transition-transform group-hover:scale-105">
-              <Mic className="w-3.5 h-3.5" />
-            </div>
-            <span className="text-base font-black tracking-tight text-[#0B192C] dark:text-[#FAF8F5]">
-              finoch<span className="text-[#3B82F6]">.id</span>
-            </span>
+          <Link href="/" className="flex items-center gap-2 group shrink-0" aria-label="Finoch.id Beranda">
+            <BrandLogo variant="full" className="h-6 sm:h-7 w-auto transition-transform group-hover:scale-105" />
           </Link>
 
           {/* Desktop Nav Links */}
@@ -309,10 +314,10 @@ export default function LandingPage() {
             {/* Hero Action Buttons - Full-width stacked on mobile */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 pt-1 sm:pt-2">
               <Link
-                href="/register"
+                href="/dashboard"
                 className="group px-6 py-3.5 rounded-full bg-[#0B192C] hover:bg-[#1E2D4A] dark:bg-[#FAF8F5] dark:hover:bg-white text-[#FAF8F5] dark:text-[#0B192C] text-xs sm:text-sm font-extrabold transition-all shadow-md active:scale-[0.98] flex items-center justify-center gap-2"
               >
-                <span>Mulai Gratis Sekarang</span>
+                <span>{userEmail ? "Buka Dashboard Aplikasi" : "Masuk ke Dashboard PWA"}</span>
                 <div className="w-5 h-5 rounded-full bg-white/20 dark:bg-black/10 flex items-center justify-center">
                   <ArrowRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5" />
                 </div>
@@ -711,6 +716,55 @@ export default function LandingPage() {
                   </p>
                 </div>
               </div>
+            </div>
+          </div>
+
+          {/* Student Special Modules Showcase */}
+          <div className="pt-8 space-y-4">
+            <div className="text-center space-y-1">
+              <span className="text-[10px] sm:text-xs uppercase tracking-[0.18em] font-bold text-blue-600 dark:text-blue-400">
+                Lengkap &amp; Praktis untuk Mahasiswa
+              </span>
+              <h3 className="text-xl sm:text-2xl font-black text-[#0B192C] dark:text-[#FAF8F5]">
+                10 Alat Finansial Khusus Anak Kost
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+              {[
+                { href: "/wallets", label: "Dompet Akun", desc: "Tunai, Bank, E-Wallet", icon: CreditCard },
+                { href: "/streak", label: "Streak Hemat", desc: "Puasa jajan &amp; kalender", icon: Zap },
+                { href: "/budget", label: "Amplop Pos", desc: "Pos makan, kos, bensin", icon: Wallet },
+                { href: "/audit", label: "Bocor Halus", desc: "Audit admin &amp; jajan kopi", icon: Flame },
+                { href: "/debts", label: "Buku Kasbon", desc: "Talangan teman &amp; utang", icon: Handshake },
+                { href: "/bills", label: "Tagihan Kost", desc: "Sewa kamar, WiFi, listrik", icon: CalendarClock },
+                { href: "/split-bill", label: "Split Bill", desc: "Bagi bill resto &amp; teks WA", icon: Receipt },
+                { href: "/wishlist", label: "Wishlist Tunda", desc: "Aturan cooling-off 7 hari", icon: Hourglass },
+                { href: "/meal-calc", label: "Masak vs Warteg", desc: "Kalkulator hemat &amp; hybrid", icon: Utensils },
+                { href: "/ukt-savings", label: "Tabungan UKT", desc: "Sinking fund semesteran", icon: GraduationCap },
+              ].map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={idx}
+                    href={item.href}
+                    className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-[#0B192C]/10 dark:border-white/10 shadow-sm hover:border-blue-500/50 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
+                  >
+                    <div className="w-8 h-8 rounded-xl bg-[#0B192C]/5 dark:bg-white/10 text-[#0B192C] dark:text-[#FAF8F5] flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
+                      <Icon className="w-4 h-4 stroke-[2.2]" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-xs text-[#0B192C] dark:text-[#FAF8F5] flex items-center justify-between">
+                        <span>{item.label}</span>
+                        <ArrowRight className="w-3 h-3 text-[#0B192C]/40 dark:text-white/40 group-hover:translate-x-0.5 transition-transform" />
+                      </h4>
+                      <p className="text-[10px] text-[#0B192C]/60 dark:text-[#F6F4ED]/60 mt-0.5 line-clamp-1">
+                        {item.desc}
+                      </p>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -1154,11 +1208,10 @@ export default function LandingPage() {
       {/* 11. FOOTER */}
       <footer className="border-t border-[#0B192C]/10 dark:border-white/10 py-10 sm:py-12 px-4 sm:px-8 text-xs text-[#0B192C]/60 dark:text-[#F6F4ED]/60">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 sm:gap-6 text-center sm:text-left">
-          <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-full bg-[#0B192C] dark:bg-[#FAF8F5] text-[#FAF8F5] dark:text-[#0B192C] flex items-center justify-center font-black text-[10px]">
-              F
-            </div>
-            <span className="font-extrabold text-[#0B192C] dark:text-[#FAF8F5]">finoch.id</span>
+          <div className="flex items-center gap-3">
+            <Link href="/" className="inline-block hover:opacity-90 transition-opacity" aria-label="Finoch.id Beranda">
+              <BrandLogo variant="full" className="h-5 sm:h-6 w-auto" />
+            </Link>
             <span>&copy; {new Date().getFullYear()} Finoch. All rights reserved.</span>
           </div>
 
