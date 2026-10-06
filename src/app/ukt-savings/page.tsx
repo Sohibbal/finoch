@@ -100,8 +100,8 @@ export default function UktSavingsPage() {
               >
                 <ArrowLeft className="w-4 h-4" />
               </button>
-              <Link href="/dashboard" className="md:hidden shrink-0" aria-label="Finoch Beranda">
-                <BrandLogo variant="symbol" className="h-5 w-auto" />
+              <Link href="/dashboard" className="md:hidden shrink-0 flex items-center" aria-label="Finoch Beranda">
+                <BrandLogo variant="symbol" className="w-5 h-5 shrink-0" />
               </Link>
               <div className="min-w-0">
                 <Breadcrumbs className="hidden md:flex mb-0.5" />
