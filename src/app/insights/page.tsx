@@ -10,10 +10,12 @@ import {
 } from "lucide-react";
 import { detectSpendingPatterns } from "@/lib/insights/pattern-detector";
 import { AiInsightCard } from "@/types/financial-types";
+import Link from "next/link";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 export default function InsightsPage() {
   const [insights] = useState<AiInsightCard[]>(() =>
@@ -47,10 +49,10 @@ export default function InsightsPage() {
         <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
           <div className="max-w-6xl mx-auto flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-1.5">
-                <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
-                  finoch<span className="text-emerald-500">.id</span>
-                </span>
+              <div className="md:hidden flex items-center">
+                <Link href="/dashboard" aria-label="Finoch Beranda">
+                  <BrandLogo variant="full" className="h-5 sm:h-6 w-auto" />
+                </Link>
               </div>
               <div className="hidden md:block">
                 <Breadcrumbs className="mb-1" />
