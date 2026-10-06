@@ -14,6 +14,7 @@ import {
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
+import { Breadcrumbs } from "@/components/layout/breadcrumbs";
 import { useAuth } from "@/hooks/use-auth";
 
 export default function ProfilePage() {
@@ -123,10 +124,11 @@ export default function ProfilePage() {
             <div className="flex items-center gap-3">
               <div className="md:hidden flex items-center gap-1.5">
                 <span className="text-base font-black tracking-tight text-navy-950 dark:text-cream-50">
-                  voicash<span className="text-navy-600 dark:text-cream-300">.id</span>
+                  finoch<span className="text-emerald-500">.id</span>
                 </span>
               </div>
               <div className="hidden md:block">
+                <Breadcrumbs className="mb-1" />
                 <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
                   Profil & Pengaturan Finansial
                 </h1>
