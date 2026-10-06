@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192" role="img">
+  <title>Finoch Sonic Prism Symbol (Dark)</title>
+  <g transform="translate(31.56, 18.00) scale(0.8478)">
+    
+    <!-- Anchor Monolith Stem -->
+    <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+    <!-- Top Cantilever Facet (60° chamfer) -->
+    <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+    <!-- Mid Cantilever Facet -->
+    <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+    <!-- Satellite Acoustic Node (0.3s Voice Trigger) -->
+    <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+
+  </g>
+</svg>

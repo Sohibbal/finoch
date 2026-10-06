@@ -1,0 +1,366 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800;900&amp;family=JetBrains+Mono:wght@500;700&amp;display=swap');
+      .hd-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 900; fill: #FFFFFF; font-size: 32px; letter-spacing: -0.5px; }
+      .hd-sub { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500; fill: #94A3B8; font-size: 14px; }
+      .sec-label { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 800; font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+      .body-t { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 500; font-size: 12px; fill: #94A3B8; line-height: 1.6; }
+      .mono-t { font-family: 'JetBrains Mono', monospace; font-size: 11px; fill: #38BDF8; }
+      .chip-t { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; }
+    </style>
+
+    <linearGradient id="bg-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#060B14" />
+      <stop offset="50%" stop-color="#0A1120" />
+      <stop offset="100%" stop-color="#0B132B" />
+    </linearGradient>
+
+    <linearGradient id="card-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" stop-opacity="0.85" />
+      <stop offset="100%" stop-color="#080E1A" stop-opacity="0.85" />
+    </linearGradient>
+    
+    <linearGradient id="card-grad-light" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#FAF8F5" />
+    </linearGradient>
+
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1E293B" stroke-width="0.75" opacity="0.35" />
+    </pattern>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1600" height="1200" fill="url(#bg-grad)" />
+  <rect width="1600" height="1200" fill="url(#grid)" />
+
+  <!-- Top Ambient Glow -->
+  <circle cx="800" cy="0" r="450" fill="#2563EB" opacity="0.12" filter="blur(80px)" />
+  <circle cx="200" cy="300" r="350" fill="#0284C7" opacity="0.08" filter="blur(60px)" />
+
+  <!-- Header Banner -->
+  <g transform="translate(60, 55)">
+    <rect x="0" y="0" width="5" height="42" rx="2.5" fill="#38BDF8" />
+    <text x="20" y="24" class="hd-title">FINOCH.ID — MASTER BRAND IDENTITY SYSTEM</text>
+    <text x="20" y="44" class="hd-sub">Identitas Resmi Terpilih: Sonic Prism Monolith × Bespoke Isometric Bevel Wordmark · 100% Vektor Murni</text>
+  </g>
+
+  <!-- Tag Pill -->
+  <g transform="translate(1330, 62)">
+    <rect width="210" height="34" rx="17" fill="#0284C7" fill-opacity="0.2" stroke="#38BDF8" stroke-width="1.2" />
+    <circle cx="18" cy="17" r="4.5" fill="#38BDF8" />
+    <text x="32" y="21" class="chip-t" fill="#38BDF8">FINAL APPROVED ARCH</text>
+  </g>
+
+  <!-- ================= ROW 1: MASTER LOCKUPS (LIGHT & DARK) ================= -->
+  <!-- 1. LIGHT THEME MASTER LOCKUP CARD -->
+  <g transform="translate(60, 130)">
+    <rect width="715" height="310" rx="20" fill="url(#card-grad-light)" stroke="#E2E8F0" stroke-width="1.5" />
+    <!-- Header of card -->
+    <rect x="24" y="20" width="130" height="24" rx="6" fill="#0B192C" fill-opacity="0.08" />
+    <text x="34" y="36" class="chip-t" fill="#0B192C">LIGHT THEME (#FAF8F5)</text>
+    <text x="170" y="36" class="body-t" fill="#64748B">Master Horizontal Lockup untuk Web Landing Page Light &amp; Dokumen</text>
+
+    <!-- Embedded Horizontal Light Logo (scaled to fit nicely) -->
+    <g transform="translate(48, 85) scale(0.86)">
+      <!-- Symbol -->
+      <g transform="translate(25.87, 16.0) scale(0.8043)">
+        <path fill="#0B192C" d="M 0 23 L 40 0 V 184 H 0 Z" />
+        <path fill="#2563EB" d="M 40 0 H 152 L 126 45 H 40 Z" />
+        <path fill="#0B192C" d="M 40 78 H 116 L 90 123 H 40 Z" />
+        <polygon points="126,78 152,78 126,123 100,123" fill="#0284C7" />
+      </g>
+      <!-- Wordmark -->
+      <g transform="translate(184.15, 50.0)">
+        <path fill="#0B192C" d="M 0 80 V 0 H 60 L 42 24 H 22 V 36 H 50 L 36 56 H 22 V 80 Z" />
+        <rect x="74" y="0" width="22" height="80" rx="3" fill="#0B192C" />
+        <path fill="#0B192C" d="M 110 80 V 0 H 130 L 158 50 V 0 H 178 V 80 H 158 L 130 30 V 80 Z" />
+        <path fill="#0B192C" fill-rule="evenodd" d="M 214 0 H 248 C 268 0 278 10 278 40 C 278 70 268 80 248 80 H 214 C 194 80 184 70 184 40 C 184 10 194 0 214 0 Z M 216 22 H 246 C 254 22 258 28 258 40 C 258 52 254 58 246 58 H 216 C 208 58 204 52 204 40 C 204 28 208 22 216 22 Z" />
+        <path fill="#0B192C" fill-rule="evenodd" d="M 312 0 H 346 L 332 22 H 314 C 306 22 302 28 302 40 C 302 52 306 58 314 58 H 332 L 346 80 H 312 C 292 80 282 70 282 40 C 282 10 292 0 312 0 Z" />
+        <path fill="#0B192C" d="M 360 80 V 0 H 382 V 30 H 406 V 0 H 428 V 80 H 406 V 50 H 382 V 80 Z" />
+        <polygon points="444,64 458,64 448,80 434,80" fill="#2563EB" />
+        <rect x="466" y="18" width="44" height="26" rx="6" fill="#2563EB" />
+        <path fill="#FFFFFF" d="M 476 36 V 26 H 480 V 36 Z M 486 36 V 26 H 492 C 498 26 500 28 500 31 C 500 34 498 36 492 36 Z M 490 28 V 34 H 492 C 494 34 495 33 495 31 C 495 29 494 28 492 28 Z" />
+      </g>
+    </g>
+
+    <!-- Specs Footer -->
+    <line x1="24" y1="265" x2="691" y2="265" stroke="#E2E8F0" stroke-width="1" />
+    <text x="24" y="290" class="mono-t" fill="#64748B">Stem: #0B192C | Top Cantilever: #2563EB | Acoustic Node: #0284C7 | Badge: #2563EB (White Text)</text>
+  </g>
+
+  <!-- 2. DARK THEME MASTER LOCKUP CARD -->
+  <g transform="translate(825, 130)">
+    <rect width="715" height="310" rx="20" fill="url(#card-grad)" stroke="#1E293B" stroke-width="1.5" />
+    <rect x="24" y="20" width="130" height="24" rx="6" fill="#1E293B" />
+    <text x="34" y="36" class="chip-t" fill="#38BDF8">DARK THEME (#0A1120)</text>
+    <text x="170" y="36" class="body-t" fill="#94A3B8">Master Horizontal Lockup untuk Aplikasi PWA Dark, Header, &amp; CLI</text>
+
+    <!-- Embedded Horizontal Dark Logo -->
+    <g transform="translate(48, 85) scale(0.86)">
+      <!-- Symbol -->
+      <g transform="translate(25.87, 16.0) scale(0.8043)">
+        <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+        <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+        <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+        <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+      </g>
+      <!-- Wordmark -->
+      <g transform="translate(184.15, 50.0)">
+        <path fill="#FFFFFF" d="M 0 80 V 0 H 60 L 42 24 H 22 V 36 H 50 L 36 56 H 22 V 80 Z" />
+        <rect x="74" y="0" width="22" height="80" rx="3" fill="#FFFFFF" />
+        <path fill="#FFFFFF" d="M 110 80 V 0 H 130 L 158 50 V 0 H 178 V 80 H 158 L 130 30 V 80 Z" />
+        <path fill="#FFFFFF" fill-rule="evenodd" d="M 214 0 H 248 C 268 0 278 10 278 40 C 278 70 268 80 248 80 H 214 C 194 80 184 70 184 40 C 184 10 194 0 214 0 Z M 216 22 H 246 C 254 22 258 28 258 40 C 258 52 254 58 246 58 H 216 C 208 58 204 52 204 40 C 204 28 208 22 216 22 Z" />
+        <path fill="#FFFFFF" fill-rule="evenodd" d="M 312 0 H 346 L 332 22 H 314 C 306 22 302 28 302 40 C 302 52 306 58 314 58 H 332 L 346 80 H 312 C 292 80 282 70 282 40 C 282 10 292 0 312 0 Z" />
+        <path fill="#FFFFFF" d="M 360 80 V 0 H 382 V 30 H 406 V 0 H 428 V 80 H 406 V 50 H 382 V 80 Z" />
+        <polygon points="444,64 458,64 448,80 434,80" fill="#38BDF8" />
+        <rect x="466" y="18" width="44" height="26" rx="6" fill="#38BDF8" />
+        <path fill="#0A1120" d="M 476 36 V 26 H 480 V 36 Z M 486 36 V 26 H 492 C 498 26 500 28 500 31 C 500 34 498 36 492 36 Z M 490 28 V 34 H 492 C 494 34 495 33 495 31 C 495 29 494 28 492 28 Z" />
+      </g>
+    </g>
+
+    <!-- Specs Footer -->
+    <line x1="24" y1="265" x2="691" y2="265" stroke="#1E293B" stroke-width="1" />
+    <text x="24" y="290" class="mono-t" fill="#94A3B8">Stem: #FFFFFF | Top Cantilever: #3B82F6 | Acoustic Node: #38BDF8 | Badge: #38BDF8 (Navy Text)</text>
+  </g>
+
+  <!-- ================= ROW 2: ANATOMY & GEOMETRY (60° CUTS) ================= -->
+  <!-- 3. GEOMETRY & ANATOMY CARD -->
+  <g transform="translate(60, 465)">
+    <rect width="470" height="420" rx="20" fill="url(#card-grad)" stroke="#1E293B" stroke-width="1.5" />
+    <text x="24" y="38" class="sec-label" fill="#38BDF8">ANATOMI SIMBOL · SONIC PRISM</text>
+    <text x="24" y="60" class="body-t">Konstruksi 60° Isometrik &amp; Satellite Acoustic Node</text>
+
+    <!-- Large Symbol Display with guide lines -->
+    <g transform="translate(130, 95) scale(1.15)">
+      <!-- Symbol -->
+      <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+      <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+      <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+      <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+
+      <!-- Isometric 60° Angle Callout -->
+      <line x1="152" y1="0" x2="195" y2="0" stroke="#38BDF8" stroke-dasharray="3,3" stroke-width="1" />
+      <line x1="152" y1="0" x2="126" y2="45" stroke="#38BDF8" stroke-width="2" />
+      <text x="165" y="32" class="mono-t" font-size="10" fill="#38BDF8">60° Cut</text>
+
+      <!-- Satellite Node Callout -->
+      <circle cx="126" cy="100" r="3" fill="#38BDF8" />
+      <line x1="126" y1="100" x2="185" y2="100" stroke="#38BDF8" stroke-dasharray="3,3" stroke-width="1" />
+      <text x="190" y="104" class="mono-t" font-size="9" fill="#38BDF8">0.3s Voice Trigger</text>
+    </g>
+
+    <!-- Description -->
+    <g transform="translate(24, 330)">
+      <text x="0" y="16" class="body-t" fill="#E2E8F0">1. Monolith Anchor: Keamanan finansial kokoh (zero-cloud leak).</text>
+      <text x="0" y="38" class="body-t" fill="#E2E8F0">2. Cantilever Facet: Kecepatan pemrosesan suara isometrik 60°.</text>
+      <text x="0" y="60" class="body-t" fill="#E2E8F0">3. Acoustic Node: Trigger AI lokal instan (0.3s latency).</text>
+    </g>
+  </g>
+
+  <!-- 4. PWA APP ICON SUITE CARD -->
+  <g transform="translate(555, 465)">
+    <rect width="490" height="420" rx="20" fill="url(#card-grad)" stroke="#1E293B" stroke-width="1.5" />
+    <text x="24" y="38" class="sec-label" fill="#38BDF8">PWA APP ICON SUITE (TERPASANG DI PUBLIC/)</text>
+    <text x="24" y="60" class="body-t">Standar W3C PWA, Android Maskable Safe-Zone, &amp; iOS Safari</text>
+
+    <!-- Mockup Display 1: Master Dark Titanium (512x512 scaled) -->
+    <g transform="translate(40, 100)">
+      <!-- Phone App Icon Frame -->
+      <rect width="140" height="140" rx="30" fill="#0A1120" stroke="#1E293B" stroke-width="2" />
+      <g transform="translate(14, 14) scale(0.218)">
+        <defs>
+          <linearGradient id="pwa-g" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#0F172A" />
+            <stop offset="100%" stop-color="#060B14" />
+          </linearGradient>
+        </defs>
+        <rect width="512" height="512" rx="112" fill="url(#pwa-g)" />
+        <rect x="2" y="2" width="508" height="508" rx="110" fill="none" stroke="#38BDF8" stroke-opacity="0.5" stroke-width="3" />
+        <g transform="translate(134.4, 108.8) scale(1.6)">
+          <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+          <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+          <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+          <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+        </g>
+      </g>
+      <text x="70" y="165" text-anchor="middle" class="mono-t" fill="#94A3B8">icon-512.png</text>
+      <text x="70" y="180" text-anchor="middle" class="body-t" font-size="10">Master Launcher</text>
+    </g>
+
+    <!-- Mockup Display 2: Maskable Android (Safe zone preview) -->
+    <g transform="translate(210, 100)">
+      <!-- Circle Safe Zone overlay -->
+      <circle cx="70" cy="70" r="70" fill="#060B14" stroke="#38BDF8" stroke-width="2" />
+      <circle cx="70" cy="70" r="56" fill="none" stroke="#38BDF8" stroke-dasharray="3,3" stroke-width="1" opacity="0.6" />
+      <g transform="translate(28, 22) scale(0.164)">
+        <g transform="translate(153.4, 131.8) scale(1.35)">
+          <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+          <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+          <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+          <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+        </g>
+      </g>
+      <text x="70" y="165" text-anchor="middle" class="mono-t" fill="#38BDF8">icon-maskable.png</text>
+      <text x="70" y="180" text-anchor="middle" class="body-t" font-size="10">80% W3C Safe Circle</text>
+    </g>
+
+    <!-- Mockup Display 3: Favicon & Apple Touch -->
+    <g transform="translate(370, 110)">
+      <!-- Apple Touch -->
+      <rect width="64" height="64" rx="14" fill="#0A1120" stroke="#38BDF8" stroke-width="1.5" />
+      <g transform="translate(10, 8) scale(0.086)">
+        <g transform="translate(134.4, 108.8) scale(1.6)">
+          <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+          <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+          <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+          <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+        </g>
+      </g>
+      <text x="32" y="86" text-anchor="middle" class="mono-t" font-size="9" fill="#94A3B8">apple-touch</text>
+
+      <!-- Favicon -->
+      <g transform="translate(12, 105)">
+        <rect width="36" height="36" rx="8" fill="#0A1120" stroke="#1E293B" stroke-width="1" />
+        <g transform="translate(6, 4) scale(0.05)">
+          <g transform="translate(134.4, 108.8) scale(1.6)">
+            <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+            <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+            <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+            <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+          </g>
+        </g>
+        <text x="18" y="50" text-anchor="middle" class="mono-t" font-size="9" fill="#94A3B8">favicon.ico</text>
+      </g>
+    </g>
+
+    <!-- Checklist -->
+    <g transform="translate(24, 325)">
+      <rect width="442" height="70" rx="10" fill="#0A1120" stroke="#1E293B" stroke-width="1" />
+      <text x="16" y="24" class="mono-t" fill="#38BDF8">✓ public/icons/icon-512.png &amp; 192.png</text>
+      <text x="16" y="42" class="mono-t" fill="#38BDF8">✓ public/icons/icon-maskable-512.png &amp; 192.png</text>
+      <text x="16" y="60" class="mono-t" fill="#38BDF8">✓ public/favicon.ico (16/32/48) &amp; apple-touch-icon.png</text>
+    </g>
+  </g>
+
+  <!-- 5. COLOR SYSTEM & CONTRAST CARD -->
+  <g transform="translate(1070, 465)">
+    <rect width="470" height="420" rx="20" fill="url(#card-grad)" stroke="#1E293B" stroke-width="1.5" />
+    <text x="24" y="38" class="sec-label" fill="#38BDF8">PALET WARNA &amp; SISTEM KONTRAST</text>
+    <text x="24" y="60" class="body-t">Kalibrasi WCAG AAA untuk Dark &amp; Light UI</text>
+
+    <!-- Swatches -->
+    <g transform="translate(24, 90)">
+      <!-- Swatch 1: Titanium Obsidian -->
+      <g transform="translate(0, 0)">
+        <rect width="90" height="80" rx="12" fill="#0A1120" stroke="#1E293B" stroke-width="1.5" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#FFFFFF">#0A1120</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#94A3B8">Dark Canvas</text>
+      </g>
+      <!-- Swatch 2: Cream White -->
+      <g transform="translate(108, 0)">
+        <rect width="90" height="80" rx="12" fill="#FAF8F5" stroke="#CBD5E1" stroke-width="1.5" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#0B192C">#FAF8F5</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#64748B">Light Canvas</text>
+      </g>
+      <!-- Swatch 3: Deep Navy -->
+      <g transform="translate(216, 0)">
+        <rect width="90" height="80" rx="12" fill="#0B192C" stroke="#1E293B" stroke-width="1.5" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#FFFFFF">#0B192C</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#94A3B8">Light Brand</text>
+      </g>
+      <!-- Swatch 4: Electric Blue -->
+      <g transform="translate(324, 0)">
+        <rect width="90" height="80" rx="12" fill="#2563EB" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#FFFFFF">#2563EB</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#DBEAFE">Cobalt Blue</text>
+      </g>
+    </g>
+
+    <!-- Swatches Row 2 -->
+    <g transform="translate(24, 195)">
+      <!-- Swatch 5: Acoustic Cyan -->
+      <g transform="translate(0, 0)">
+        <rect width="90" height="80" rx="12" fill="#38BDF8" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#0A1120">#38BDF8</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#0369A1">Acoustic Cyan</text>
+      </g>
+      <!-- Swatch 6: Vivid Azure -->
+      <g transform="translate(108, 0)">
+        <rect width="90" height="80" rx="12" fill="#3B82F6" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#FFFFFF">#3B82F6</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#DBEAFE">Dark Primary</text>
+      </g>
+      <!-- Swatch 7: Pure White -->
+      <g transform="translate(216, 0)">
+        <rect width="90" height="80" rx="12" fill="#FFFFFF" stroke="#334155" stroke-width="1.5" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#0A1120">#FFFFFF</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#64748B">Pure White</text>
+      </g>
+      <!-- Swatch 8: Emerald Accent -->
+      <g transform="translate(324, 0)">
+        <rect width="90" height="80" rx="12" fill="#10B981" />
+        <text x="10" y="50" class="mono-t" font-size="11" fill="#FFFFFF">#10B981</text>
+        <text x="10" y="66" class="body-t" font-size="9" fill="#D1FAE5">Money Status</text>
+      </g>
+    </g>
+
+    <!-- Contrast Matrix Notes -->
+    <g transform="translate(24, 305)">
+      <rect width="422" height="90" rx="10" fill="#0A1120" stroke="#1E293B" stroke-width="1" />
+      <text x="16" y="24" class="mono-t" fill="#E2E8F0">Rasio Kontras Terkalibrasi:</text>
+      <text x="16" y="44" class="body-t" fill="#94A3B8">• Dark Mode: #FFFFFF pada #0A1120 = 18.2:1 (AAA)</text>
+      <text x="16" y="62" class="body-t" fill="#94A3B8">• Light Mode: #0B192C pada #FAF8F5 = 15.6:1 (AAA)</text>
+      <text x="16" y="80" class="body-t" fill="#94A3B8">• Pill Badge: #0A1120 pada #38BDF8 = 10.4:1 (AAA)</text>
+    </g>
+  </g>
+
+  <!-- ================= ROW 3: STACKED / VERTICAL MASTER LOCKUP ================= -->
+  <g transform="translate(60, 910)">
+    <rect width="1480" height="235" rx="20" fill="url(#card-grad)" stroke="#1E293B" stroke-width="1.5" />
+    <text x="28" y="36" class="sec-label" fill="#38BDF8">LOCKUP ALTERNATIF · STACKED VERTICAL &amp; STANDALONE WORDMARK</text>
+    <text x="28" y="58" class="body-t">Digunakan untuk Splash Screen PWA, Presentation Slide Deck, Card Banner, dan Social Media Assets</text>
+
+    <!-- Display Stacked Dark (Left) -->
+    <g transform="translate(400, 75) scale(0.24)">
+      <!-- Symbol -->
+      <g transform="translate(213.6, 60) scale(1.15)">
+        <path fill="#FFFFFF" d="M 0 23 L 40 0 V 184 H 0 Z" />
+        <path fill="#3B82F6" d="M 40 0 H 152 L 126 45 H 40 Z" />
+        <path fill="#FFFFFF" d="M 40 78 H 116 L 90 123 H 40 Z" />
+        <polygon points="126,78 152,78 126,123 100,123" fill="#38BDF8" />
+      </g>
+      <!-- Wordmark -->
+      <g transform="translate(90.9, 317.6) scale(0.82)">
+        <path fill="#FFFFFF" d="M 0 80 V 0 H 60 L 42 24 H 22 V 36 H 50 L 36 56 H 22 V 80 Z" />
+        <rect x="74" y="0" width="22" height="80" rx="3" fill="#FFFFFF" />
+        <path fill="#FFFFFF" d="M 110 80 V 0 H 130 L 158 50 V 0 H 178 V 80 H 158 L 130 30 V 80 Z" />
+        <path fill="#FFFFFF" fill-rule="evenodd" d="M 214 0 H 248 C 268 0 278 10 278 40 C 278 70 268 80 248 80 H 214 C 194 80 184 70 184 40 C 184 10 194 0 214 0 Z M 216 22 H 246 C 254 22 258 28 258 40 C 258 52 254 58 246 58 H 216 C 208 58 204 52 204 40 C 204 28 208 22 216 22 Z" />
+        <path fill="#FFFFFF" fill-rule="evenodd" d="M 312 0 H 346 L 332 22 H 314 C 306 22 302 28 302 40 C 302 52 306 58 314 58 H 332 L 346 80 H 312 C 292 80 282 70 282 40 C 282 10 292 0 312 0 Z" />
+        <path fill="#FFFFFF" d="M 360 80 V 0 H 382 V 30 H 406 V 0 H 428 V 80 H 406 V 50 H 382 V 80 Z" />
+        <polygon points="444,64 458,64 448,80 434,80" fill="#38BDF8" />
+        <rect x="466" y="18" width="44" height="26" rx="6" fill="#38BDF8" />
+        <path fill="#0A1120" d="M 476 36 V 26 H 480 V 36 Z M 486 36 V 26 H 492 C 498 26 500 28 500 31 C 500 34 498 36 492 36 Z M 490 28 V 34 H 492 C 494 34 495 33 495 31 C 495 29 494 28 492 28 Z" />
+      </g>
+    </g>
+    <text x="470" y="215" text-anchor="middle" class="mono-t" fill="#94A3B8">Stacked Lockup (Dark)</text>
+
+    <!-- Display Standalone Wordmark (Right) -->
+    <g transform="translate(740, 105) scale(0.9)">
+      <path fill="#FFFFFF" d="M 0 80 V 0 H 60 L 42 24 H 22 V 36 H 50 L 36 56 H 22 V 80 Z" />
+      <rect x="74" y="0" width="22" height="80" rx="3" fill="#FFFFFF" />
+      <path fill="#FFFFFF" d="M 110 80 V 0 H 130 L 158 50 V 0 H 178 V 80 H 158 L 130 30 V 80 Z" />
+      <path fill="#FFFFFF" fill-rule="evenodd" d="M 214 0 H 248 C 268 0 278 10 278 40 C 278 70 268 80 248 80 H 214 C 194 80 184 70 184 40 C 184 10 194 0 214 0 Z M 216 22 H 246 C 254 22 258 28 258 40 C 258 52 254 58 246 58 H 216 C 208 58 204 52 204 40 C 204 28 208 22 216 22 Z" />
+      <path fill="#FFFFFF" fill-rule="evenodd" d="M 312 0 H 346 L 332 22 H 314 C 306 22 302 28 302 40 C 302 52 306 58 314 58 H 332 L 346 80 H 312 C 292 80 282 70 282 40 C 282 10 292 0 312 0 Z" />
+      <path fill="#FFFFFF" d="M 360 80 V 0 H 382 V 30 H 406 V 0 H 428 V 80 H 406 V 50 H 382 V 80 Z" />
+      <polygon points="444,64 458,64 448,80 434,80" fill="#38BDF8" />
+      <rect x="466" y="18" width="44" height="26" rx="6" fill="#38BDF8" />
+      <path fill="#0A1120" d="M 476 36 V 26 H 480 V 36 Z M 486 36 V 26 H 492 C 498 26 500 28 500 31 C 500 34 498 36 492 36 Z M 490 28 V 34 H 492 C 494 34 495 33 495 31 C 495 29 494 28 492 28 Z" />
+    </g>
+    <text x="990" y="215" text-anchor="middle" class="mono-t" fill="#94A3B8">Standalone Wordmark (Bespoke Bevel)</text>
+  </g>
+
+  <!-- Bottom Brand Signature -->
+  <text x="60" y="1175" class="mono-t" fill="#64748B">FINOCH BRAND IDENTITY SYSTEM V2 · DIRECTION C (SONIC PRISM × BESPOKE ISOMETRIC BEVEL) · SEMUA FILE TERSIMPAN DI PUBLIC/ &amp; LOGO-DESIGN/BRAND/</text>
+</svg>
