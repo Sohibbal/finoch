@@ -18,22 +18,9 @@ import {
   Loader2,
   Lightbulb,
   Receipt,
-  CalendarClock,
-  Wallet,
-  Hourglass,
-  Flame,
-  Handshake,
-  CreditCard,
-  Zap,
-  Utensils,
-  GraduationCap,
-  FileSpreadsheet,
 } from "lucide-react";
 import { DigitalTwinCard } from "@/components/dashboard/digital-twin-card";
 import { DailySafeToSpendCard } from "@/components/dashboard/daily-safe-to-spend-card";
-import { FinancialRunwayCard } from "@/components/dashboard/financial-runway-card";
-import { SurvivalModeCard } from "@/components/dashboard/survival-mode-card";
-import { calculateFinancialRunway } from "@/lib/financial/runway-engine";
 import { SpendingTrendChart } from "@/components/dashboard/spending-trend-chart";
 import { CategoryDonutChart } from "@/components/dashboard/category-donut-chart";
 import { UnifiedConfirmationModal } from "@/components/transaction/unified-confirmation-modal";
@@ -42,11 +29,7 @@ import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
-import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { BrandLogo } from "@/components/brand/brand-logo";
 import { expenseStorage } from "@/lib/storage/expense-storage";
-import { getBillSummary } from "@/lib/storage/bill-storage";
-import { formatRupiah } from "@/lib/financial/split-bill-engine";
 import { syncManager } from "@/lib/sync/sync-manager";
 import {
   calculateCashflowSummary,
@@ -213,34 +196,15 @@ export default function DashboardPage() {
       .reduce((sum, t) => sum + t.amount, 0);
   }, [transactions, todayDateStr]);
 
-  // Recurring bills state
-  const [billSummary, setBillSummary] = useState(() => getBillSummary());
-
-  useEffect(() => {
-    setBillSummary(getBillSummary());
-  }, []);
-
   // Daily Safe-to-Spend calculation for Anak Kost
   const safeToSpendResult = useMemo(() => {
-    const effectiveFixedExpenses = Math.max(
-      profile.monthlyFixedExpenses,
-      billSummary.unpaidAmountThisMonth
-    );
     return calculateDailySafeToSpend({
       monthlyIncome: profile.monthlyIncome,
       totalExpensesThisMonth,
-      monthlyFixedExpenses: effectiveFixedExpenses,
+      monthlyFixedExpenses: profile.monthlyFixedExpenses,
       todaySpent,
     });
-  }, [profile.monthlyIncome, totalExpensesThisMonth, profile.monthlyFixedExpenses, billSummary.unpaidAmountThisMonth, todaySpent]);
-
-  // Financial Runway calculation (Hari Bertahan Anak Kost)
-  const financialRunway = useMemo(() => {
-    return calculateFinancialRunway({
-      totalIncome: profile.monthlyIncome,
-      totalExpensesThisMonth,
-    });
-  }, [profile.monthlyIncome, totalExpensesThisMonth]);
+  }, [profile.monthlyIncome, totalExpensesThisMonth, profile.monthlyFixedExpenses, todaySpent]);
 
   const cashflow = calculateCashflowSummary({
     income: profile.monthlyIncome,
@@ -408,13 +372,15 @@ export default function DashboardPage() {
           <div className="max-w-6xl mx-auto rounded-full bg-white/70 dark:bg-black/50 backdrop-blur-2xl border border-white/20 dark:border-white/10 px-4 py-2 sm:py-3 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex items-center justify-between transition-all">
             {/* Left: Mobile Brand & Page Title */}
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center pl-1">
-                <Link href="/dashboard" aria-label="Finoch Beranda">
-                  <BrandLogo variant="full" className="h-5 sm:h-6 w-auto" />
-                </Link>
+              <div className="md:hidden flex items-center gap-1.5 pl-2">
+                <span className="text-sm font-black tracking-tight text-navy-950 dark:text-white">
+                  finoch<span className="text-emerald-500">.id</span>
+                </span>
               </div>
-              <div className="hidden md:flex items-center pl-2">
-                <Breadcrumbs />
+              <div className="hidden md:block pl-2">
+                <h1 className="text-sm font-bold text-navy-950 dark:text-white tracking-wide">
+                  Dashboard Finansial
+                </h1>
               </div>
             </div>
 
@@ -460,294 +426,13 @@ export default function DashboardPage() {
         </header>
 
         {/* Main Container - Macro Whitespace (py-8 to py-12) */}
-        <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6 sm:space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] fill-mode-both">
+        <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12 space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] fill-mode-both">
           
-          {/* MOBILE ONLY: Rapid Input Bar (Input-First Focus) */}
-          <div className="md:hidden rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-4 shadow-sm space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-navy-500 dark:text-cream-400">
-                Pusat Input Cepat (PWA)
-              </span>
-              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold">
-                1-Tap Langsung Catat
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsVoiceOpen(true)}
-                className="min-h-[48px] py-3 px-3 rounded-xl bg-navy-950 dark:bg-cream-100 text-white dark:text-navy-950 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all shadow-sm"
-              >
-                <Mic className="w-4 h-4 text-emerald-400 dark:text-emerald-600" />
-                <span>Bicara Suara</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsScannerOpen(true)}
-                className="min-h-[48px] py-3 px-3 rounded-xl bg-cream-100 dark:bg-navy-900 border border-cream-300 dark:border-navy-800 text-navy-800 dark:text-cream-200 font-bold text-xs flex items-center justify-center gap-2 active:scale-95 transition-all"
-              >
-                <Camera className="w-4 h-4 text-navy-600 dark:text-cream-400" />
-                <span>Foto Struk</span>
-              </button>
-            </div>
-          </div>
-
           {/* Daily Safe-to-Spend Widget (Anak Kost Survival & Jatah Jajan) */}
           <DailySafeToSpendCard
             result={safeToSpendResult}
             onOpenVoice={() => setIsVoiceOpen(true)}
           />
-
-          {/* Mode Darurat Akhir Bulan (Survival Mode) */}
-          <SurvivalModeCard
-            currentBalance={cashflow.netSavings}
-            daysLeftInMonth={financialRunway.daysRemainingInMonth}
-          />
-
-          {/* Fixed Expense Shield Alert (Beban Kost Guard) */}
-          {billSummary.unpaidCount > 0 && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-950 dark:text-amber-100 transition-all">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center shrink-0 text-amber-600 dark:text-amber-400">
-                  <CalendarClock className="w-4 h-4" />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-amber-950 dark:text-amber-100">
-                    Fixed Expense Shield: {billSummary.unpaidCount} Tagihan Kost Bulan Ini Belum Dibayar
-                  </p>
-                  <p className="text-[11px] text-amber-800/80 dark:text-amber-200/70">
-                    Uang {formatRupiah(billSummary.unpaidAmountThisMonth)} otomatis dikunci agar tidak terpakai jajan harian.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => router.push("/bills")}
-                className="self-end sm:self-center px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs shadow-sm transition-all shrink-0 active:scale-95"
-              >
-                Lihat Tagihan
-              </button>
-            </div>
-          )}
-
-          {/* Financial Runway & Burn Rate (Hari Bertahan Anak Kost) */}
-          <FinancialRunwayCard runway={financialRunway} />
-
-          {/* Student Hub: Complete 10-Item Feature Hub Grid */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <h2 className="text-xs sm:text-sm font-bold text-navy-950 dark:text-cream-50 uppercase tracking-wider flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-500" />
-                <span>Pusat Fitur Mahasiswa &amp; Anak Kost</span>
-              </h2>
-              <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
-                10 Modul Siap Pakai
-              </span>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-              {/* 1. Dompet Akun */}
-              <button
-                type="button"
-                onClick={() => router.push("/wallets")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-emerald-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <CreditCard className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Dompet Akun</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-emerald-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Tunai, Bank, E-Wallet
-                  </p>
-                </div>
-              </button>
-
-              {/* 2. Streak Hemat */}
-              <button
-                type="button"
-                onClick={() => router.push("/streak")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-amber-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <Zap className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Streak Hemat</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-amber-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Puasa jajan &amp; kalender
-                  </p>
-                </div>
-              </button>
-
-              {/* 3. Amplop Anggaran */}
-              <button
-                type="button"
-                onClick={() => router.push("/budget")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-teal-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <Wallet className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Amplop Pos</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-teal-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Pos makan, kos, bensin
-                  </p>
-                </div>
-              </button>
-
-              {/* 4. Bocor Halus */}
-              <button
-                type="button"
-                onClick={() => router.push("/audit")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-rose-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <Flame className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Bocor Halus</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-rose-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Audit admin &amp; jajan kopi
-                  </p>
-                </div>
-              </button>
-
-              {/* 5. Buku Kasbon */}
-              <button
-                type="button"
-                onClick={() => router.push("/debts")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-blue-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <Handshake className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Buku Kasbon</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-blue-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Talangan teman &amp; utang
-                  </p>
-                </div>
-              </button>
-
-              {/* 6. Tagihan Kost */}
-              <button
-                type="button"
-                onClick={() => router.push("/bills")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-indigo-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <CalendarClock className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Tagihan Kost</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-indigo-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Sewa kost, WiFi, listrik
-                  </p>
-                </div>
-              </button>
-
-              {/* 7. Split Bill Resto */}
-              <button
-                type="button"
-                onClick={() => router.push("/split-bill")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-emerald-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <Receipt className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Split Bill</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-emerald-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Bagi bill resto &amp; teks WA
-                  </p>
-                </div>
-              </button>
-
-              {/* 8. Wishlist Tunda */}
-              <button
-                type="button"
-                onClick={() => router.push("/wishlist")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-purple-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <Hourglass className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Wishlist Tunda</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-purple-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Aturan cooling-off 7 hari
-                  </p>
-                </div>
-              </button>
-
-              {/* 9. Masak vs Warteg */}
-              <button
-                type="button"
-                onClick={() => router.push("/meal-calc")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-orange-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-orange-500/10 text-orange-600 dark:text-orange-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <Utensils className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Masak vs Warteg</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-orange-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Kalkulator hemat &amp; hybrid
-                  </p>
-                </div>
-              </button>
-
-              {/* 10. Tabungan UKT */}
-              <button
-                type="button"
-                onClick={() => router.push("/ukt-savings")}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm hover:border-cyan-500/40 hover:shadow-md transition-all text-left flex flex-col justify-between group active:scale-[0.98]"
-              >
-                <div className="w-8 h-8 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center mb-2 group-hover:scale-105 transition-transform">
-                  <GraduationCap className="w-4 h-4 stroke-[2.2]" />
-                </div>
-                <div>
-                  <h3 className="font-bold text-xs text-navy-950 dark:text-cream-50 flex items-center justify-between">
-                    <span>Tabungan UKT</span>
-                    <ArrowUpRight className="w-3 h-3 text-navy-400 group-hover:text-cyan-500" />
-                  </h3>
-                  <p className="text-[10px] text-navy-600 dark:text-cream-400 mt-0.5 line-clamp-1">
-                    Sinking fund semesteran
-                  </p>
-                </div>
-              </button>
-            </div>
-          </div>
 
           {/* Smart Insight Banner */}
           <div className="flex items-start sm:items-center gap-3 p-4 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/5 border border-emerald-500/20 text-emerald-900 dark:text-emerald-200">
@@ -763,8 +448,8 @@ export default function DashboardPage() {
           {/* Digital Twin Card */}
           <DigitalTwinCard metrics={metrics} />
 
-          {/* Desktop Only: Heavy Analytical Charts Row */}
-          <div className="hidden md:grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Charts Row - Asymmetrical Bento layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             <div className="lg:col-span-7 xl:col-span-8">
               <SpendingTrendChart data={trendData} />
             </div>
