@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Download, X } from "lucide-react";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -104,8 +105,8 @@ export function PwaInstallButton() {
     <div className="fixed bottom-20 left-4 right-4 sm:right-auto sm:max-w-sm md:bottom-6 md:left-6 z-40 animate-fade-in">
       <div className="p-3.5 rounded-2xl bg-cream-50/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 backdrop-blur-xl shadow-2xl flex items-center justify-between gap-3 text-navy-950 dark:text-cream-50">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 flex items-center justify-center font-black text-sm shrink-0 shadow-sm">
-            FN
+          <div className="w-10 h-10 rounded-xl bg-navy-900 dark:bg-cream-100 flex items-center justify-center p-2 shrink-0 shadow-sm">
+            <BrandLogo variant="symbol" className="w-6 h-6" theme="auto" />
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-1.5">
