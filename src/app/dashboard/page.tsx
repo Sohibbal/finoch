@@ -43,6 +43,7 @@ import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
 import { Breadcrumbs } from "@/components/layout/breadcrumbs";
+import { BrandLogo } from "@/components/brand/brand-logo";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { getBillSummary } from "@/lib/storage/bill-storage";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
@@ -407,10 +408,10 @@ export default function DashboardPage() {
           <div className="max-w-6xl mx-auto rounded-full bg-white/70 dark:bg-black/50 backdrop-blur-2xl border border-white/20 dark:border-white/10 px-4 py-2 sm:py-3 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex items-center justify-between transition-all">
             {/* Left: Mobile Brand & Page Title */}
             <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center gap-1.5 pl-2">
-                <span className="text-sm font-black tracking-tight text-navy-950 dark:text-white">
-                  finoch<span className="text-emerald-500">.id</span>
-                </span>
+              <div className="md:hidden flex items-center pl-1">
+                <Link href="/dashboard" aria-label="Finoch Beranda">
+                  <BrandLogo variant="full" className="h-5 sm:h-6 w-auto" />
+                </Link>
               </div>
               <div className="hidden md:flex items-center pl-2">
                 <Breadcrumbs />
