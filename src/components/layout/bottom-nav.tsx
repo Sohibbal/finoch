@@ -71,7 +71,7 @@ export function BottomNav({ onOpenVoice, userEmail }: BottomNavProps) {
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
               <div className="flex items-center gap-2.5">
-                <BrandLogo variant="symbol" className="h-6 w-auto shrink-0" />
+                <BrandLogo variant="symbol" className="w-6 h-6 shrink-0" />
                 <div>
                   <h3 className="font-extrabold text-sm text-navy-950 dark:text-cream-50">
                     Semua Fitur Mahasiswa &amp; Anak Kost
