@@ -5,6 +5,7 @@ import { Printer, Download, CheckCircle2, ShieldCheck } from "lucide-react";
 import { MonthlyReportSummary } from "@/types/report-types";
 import { ExpenseRecord } from "@/lib/financial/report-engine";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 interface ReportPrintableDocumentProps {
   summary: MonthlyReportSummary;
@@ -67,10 +68,8 @@ export function ReportPrintableDocument({
         {/* Document Header */}
         <div className="border-b-2 border-navy-900 pb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-black tracking-tight text-navy-950">
-                finoch<span className="text-emerald-600">.id</span>
-              </span>
+            <div className="flex items-center gap-2.5">
+              <BrandLogo variant="full" className="h-6 w-auto" theme="light" />
               <span className="text-[10px] uppercase font-bold tracking-widest bg-navy-100 text-navy-800 px-2 py-0.5 rounded">
                 Official Statement
               </span>
