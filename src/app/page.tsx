@@ -185,15 +185,6 @@ export default function LandingPage() {
 
           {/* Controls & Mobile Hamburger */}
           <div className="flex items-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label={isDark ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
-              className="w-8 h-8 rounded-full bg-[#0B192C]/5 dark:bg-white/10 hover:bg-[#0B192C]/10 dark:hover:bg-white/20 flex items-center justify-center text-[#0B192C] dark:text-[#FAF8F5] transition-colors"
-            >
-              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4" />}
-            </button>
-
             {userEmail ? (
               <Link
                 href="/dashboard"
@@ -221,6 +212,17 @@ export default function LandingPage() {
               </div>
             )}
 
+            {/* Menu Tema (Theme Toggle) - Diletakkan paling kanan di sebelah button login/dashboard */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={isDark ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
+              className="w-8 h-8 rounded-full bg-[#0B192C]/5 dark:bg-white/10 hover:bg-[#0B192C]/10 dark:hover:bg-white/20 flex items-center justify-center text-[#0B192C] dark:text-[#FAF8F5] transition-colors"
+              title={isDark ? "Mode Terang" : "Mode Gelap"}
+            >
+              {isDark ? <Sun className="w-4 h-4 text-amber-300" /> : <Moon className="w-4 h-4" />}
+            </button>
+
             {/* Mobile Hamburger Toggle */}
             <button
               type="button"
@@ -237,6 +239,10 @@ export default function LandingPage() {
       {/* Mobile Menu Dropdown Modal */}
       {isMobileMenuOpen && (
         <div className="fixed inset-x-4 top-20 z-40 md:hidden glass-pill rounded-3xl p-5 shadow-2xl space-y-4 animate-fade-in border border-[#0B192C]/10 dark:border-white/10">
+          <div className="flex items-center justify-between pb-2 border-b border-[#0B192C]/5 dark:border-white/5">
+            <BrandLogo variant="full" className="h-5 w-auto" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-blue-600 dark:text-blue-400">Navigasi</span>
+          </div>
           <nav className="flex flex-col gap-3 text-sm font-bold text-[#0B192C] dark:text-[#FAF8F5]">
             <a
               href="#fitur"
