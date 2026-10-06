@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { BrandLogo } from "@/components/brand/brand-logo";
 
 interface BottomNavProps {
   onOpenVoice: () => void;
@@ -69,18 +70,21 @@ export function BottomNav({ onOpenVoice, userEmail }: BottomNavProps) {
           <div className="w-full bg-white dark:bg-[#070E1A] rounded-t-3xl border-t border-cream-200 dark:border-navy-800 p-5 space-y-4 max-h-[82vh] overflow-y-auto custom-scrollbar">
             {/* Drawer Header */}
             <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
-              <div>
-                <h3 className="font-extrabold text-sm text-navy-950 dark:text-cream-50">
-                  Semua Fitur Mahasiswa &amp; Anak Kost
-                </h3>
-                <p className="text-[11px] text-navy-500 dark:text-cream-400">
-                  Pilih modul finansial yang ingin Anda buka
-                </p>
+              <div className="flex items-center gap-2.5">
+                <BrandLogo variant="symbol" className="h-6 w-auto shrink-0" />
+                <div>
+                  <h3 className="font-extrabold text-sm text-navy-950 dark:text-cream-50">
+                    Semua Fitur Mahasiswa &amp; Anak Kost
+                  </h3>
+                  <p className="text-[11px] text-navy-500 dark:text-cream-400">
+                    Pilih modul finansial yang ingin Anda buka
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(false)}
-                className="w-8 h-8 rounded-full bg-cream-100 dark:bg-navy-800 text-navy-700 dark:text-cream-200 flex items-center justify-center"
+                className="w-8 h-8 rounded-full bg-cream-100 dark:bg-navy-800 text-navy-700 dark:text-cream-200 flex items-center justify-center shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
