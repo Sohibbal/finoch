@@ -6,6 +6,7 @@ export interface BrandLogoProps {
   variant?: "full" | "symbol" | "wordmark" | "stacked";
   theme?: "auto" | "light" | "dark";
   className?: string;
+  style?: React.CSSProperties;
   ariaLabel?: string;
 }
 
@@ -13,6 +14,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   variant = "full",
   theme = "auto",
   className = "h-7 w-auto",
+  style,
   ariaLabel = "finoch.id",
 }) => {
   // Color styling logic
@@ -73,6 +75,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <svg
         viewBox="0 0 192 192"
+        width="192"
+        height="192"
+        style={{ aspectRatio: "1 / 1", ...style }}
         className={className}
         role="img"
         aria-label={ariaLabel}
@@ -95,6 +100,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <svg
         viewBox="0 0 550 100"
+        width="550"
+        height="100"
+        style={{ aspectRatio: "550 / 100", ...style }}
         className={className}
         role="img"
         aria-label={ariaLabel}
@@ -165,6 +173,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <svg
         viewBox="0 0 600 500"
+        width="600"
+        height="500"
+        style={{ aspectRatio: "6 / 5", ...style }}
         className={className}
         role="img"
         aria-label={ariaLabel}
@@ -234,6 +245,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <svg
       viewBox="0 0 720 180"
+      width="720"
+      height="180"
+      style={{ aspectRatio: "720 / 180", ...style }}
       className={className}
       role="img"
       aria-label={ariaLabel}
