@@ -30,3 +30,6 @@ next-env.d.ts
 .superpowers/
 *.traineddata
 
+# AI Agents & Local Skills
+.agents/
+
