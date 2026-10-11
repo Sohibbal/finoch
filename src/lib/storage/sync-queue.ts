@@ -17,7 +17,8 @@ export class SyncQueueManager {
       retryCount: 0,
     };
 
-    await db.put("sync_queue", item);
+    // Demo-mode rows (userId "<scope>::demo") are sample data and must never reach the server.
+    if (!expense.userId.endsWith("::demo")) await db.put("sync_queue", item);
     return item;
   }
 

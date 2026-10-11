@@ -37,7 +37,39 @@ export function getStorageScope(): string {
   }
 }
 
-export function scopedKey(key: string, scope = getStorageScope()): string {
+/**
+ * Demo mode (sample data for presentations) is a per-user flag. It switches feature data to a
+ * separate `<scope>::demo` namespace, so real data is never touched and turning demo off brings
+ * it back. Sync keeps using the real scope and only uploads rows whose userId matches it, so
+ * demo expenses (userId `<scope>::demo`) never reach the server.
+ */
+const DEMO_MODE_KEY = "finoch_demo_mode";
+
+export function isDemoMode(): boolean {
+  try {
+    return getRawStorage()?.getItem(`${DEMO_MODE_KEY}::${getStorageScope()}`) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function setDemoMode(on: boolean): void {
+  try {
+    const key = `${DEMO_MODE_KEY}::${getStorageScope()}`;
+    if (on) getRawStorage()?.setItem(key, "1");
+    else getRawStorage()?.removeItem(key);
+  } catch (err) {
+    console.error("Gagal mengubah mode demo:", err);
+  }
+}
+
+/** Owner of feature data and local expenses: the storage scope, or its demo namespace. */
+export function getDataScope(): string {
+  const scope = getStorageScope();
+  return isDemoMode() ? `${scope}::demo` : scope;
+}
+
+export function scopedKey(key: string, scope = getDataScope()): string {
   return `${key}::${scope}`;
 }
 

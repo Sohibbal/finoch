@@ -1,6 +1,6 @@
 import { getDatabase } from "./indexed-db";
 import { syncQueue } from "./sync-queue";
-import { GUEST_SCOPE, getStorageScope } from "./local-storage";
+import { GUEST_SCOPE, getDataScope } from "./local-storage";
 import type { Expense, ExpenseCategory } from "../types/expense";
 
 export interface CreateExpenseParams {
@@ -18,7 +18,7 @@ export class ExpenseStorage {
 
     const expense: Expense = {
       id: `exp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      userId: params.userId || getStorageScope(),
+      userId: params.userId || getDataScope(),
       itemName: params.itemName.trim(),
       amount: Math.round(params.amount),
       category: params.category,
@@ -44,7 +44,7 @@ export class ExpenseStorage {
   }
 
   // Defaults to the current storage scope so a shared device never lists another user's rows.
-  async getExpenses(userId: string = getStorageScope()): Promise<Expense[]> {
+  async getExpenses(userId: string = getDataScope()): Promise<Expense[]> {
     const db = await getDatabase();
     const all = await db.getAllFromIndex("expenses", "by-user", userId);
 
