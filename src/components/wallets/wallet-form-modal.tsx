@@ -14,12 +14,12 @@ interface WalletFormModalProps {
 }
 
 const PRESETS = [
-  { name: "Dompet Tunai Fisik", type: "cash" as WalletType, color: "emerald", icon: "wallet", notes: "Uang kertas & koin di saku/dompet" },
+  { name: "Dompet Tunai Fisik", type: "cash" as WalletType, color: "teal", icon: "wallet", notes: "Uang kertas & koin di saku/dompet" },
   { name: "BCA Tabungan", type: "bank" as WalletType, color: "blue", icon: "landmark", notes: "Rekening transfer uang saku" },
   { name: "Bank BRI / Mandiri", type: "bank" as WalletType, color: "blue", icon: "landmark", notes: "Rekening beasiswa / tabungan" },
-  { name: "Bank Jago / SeaBank", type: "bank" as WalletType, color: "amber", icon: "landmark", notes: "Bank digital bunga cair harian" },
-  { name: "GoPay", type: "ewallet" as WalletType, color: "emerald", icon: "smartphone", notes: "Ojek online & pesan makanan" },
-  { name: "ShopeePay", type: "ewallet" as WalletType, color: "amber", icon: "smartphone", notes: "Belanja online & diskon merchant" },
+  { name: "Bank Jago / SeaBank", type: "bank" as WalletType, color: "slate", icon: "landmark", notes: "Bank digital bunga cair harian" },
+  { name: "GoPay", type: "ewallet" as WalletType, color: "teal", icon: "smartphone", notes: "Ojek online & pesan makanan" },
+  { name: "ShopeePay", type: "ewallet" as WalletType, color: "slate", icon: "smartphone", notes: "Belanja online & diskon merchant" },
   { name: "DANA / OVO", type: "ewallet" as WalletType, color: "purple", icon: "smartphone", notes: "Bayar QRIS & transfer bebas biaya" },
 ];
 
@@ -177,7 +177,7 @@ export function WalletFormModal({
                     onClick={() => setType(item.id)}
                     className={`min-h-[48px] p-3 rounded-sm border text-center flex flex-col items-center justify-center gap-1 transition-all ${
                       isSelected
-                        ? "border-aman-ink/40 bg-aman/10 text-aman-ink font-bold"
+                        ? "border-ink bg-ink/5 text-ink font-bold"
                         : "border-ink/20 text-ink-soft hover:bg-ink/5"
                     }`}
                   >

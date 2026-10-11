@@ -137,7 +137,7 @@ export function DebtSlip({ debt, justPaid, onTogglePaid, onDelete }: DebtSlipPro
     );
   }
   return (
-    <DenomSheet as="li" denom={receivable ? "green" : "ochre"} seed={seedOf(debt.id)} aria-labelledby={titleId} className="list-none">
+    <DenomSheet as="li" denom={receivable ? "teal" : "slate"} seed={seedOf(debt.id)} aria-labelledby={titleId} className="list-none">
       {body}
     </DenomSheet>
   );

@@ -146,7 +146,7 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
                 onClick={() => setType("payable")}
                 className={`py-2 px-3 rounded-sm text-xs font-bold transition-all border flex items-center justify-center gap-1.5 ${
                   type === "payable"
-                    ? "bg-mepet-ink text-paper-sheet border-transparent"
+                    ? "bg-ink text-paper-sheet border-transparent"
                     : "bg-paper-sheet border-ink/20 text-ink"
                 }`}
               >

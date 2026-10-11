@@ -33,7 +33,15 @@ const config: Config = {
         aman: { DEFAULT: channel("aman"), ink: channel("aman-ink") },
         mepet: { DEFAULT: channel("mepet"), ink: channel("mepet-ink") },
         habis: { DEFAULT: channel("habis"), ink: channel("habis-ink") },
-        denom: { blue: channel("denom-blue"), violet: channel("denom-violet") },
+        // Teal and slate are fixed per theme (light, then "-dark"); never status green/ochre/red.
+        denom: {
+          blue: channel("denom-blue"),
+          violet: channel("denom-violet"),
+          teal: "#1D6B73",
+          "teal-dark": "#5FB3B9",
+          slate: "#4A5568",
+          "slate-dark": "#AEB8C6",
+        },
         cream: {
           50: "#FBF8F1",
           100: "#F5EFE0",

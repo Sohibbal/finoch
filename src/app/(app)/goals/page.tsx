@@ -23,12 +23,12 @@ function monthsUntil(targetDate: string | Date): number {
 
 /** Each kind of goal is printed in its own note colour, with a one-line personality in anak-kost voice. */
 const GOAL_KIND: Record<string, { denom: Denom; label: string; personality: string }> = {
-  emergency_fund: { denom: "green", label: "Dana darurat", personality: "penjaga tanggal tua, jangan dicolek buat jajan" },
+  emergency_fund: { denom: "teal", label: "Dana darurat", personality: "penjaga tanggal tua, jangan dicolek buat jajan" },
   gadget: { denom: "blue", label: "Gadget", personality: "sabar dulu, HP lama masih bisa buat absen" },
   travel: { denom: "violet", label: "Liburan", personality: "healing-nya nanti, nabungnya sekarang" },
-  vehicle: { denom: "ochre", label: "Kendaraan", personality: "biar nggak nebeng teman kos terus" },
-  education: { denom: "red", label: "Pendidikan", personality: "satu-satunya tabungan yang nggak bisa dicuri maling kos" },
-  other: { denom: "violet", label: "Impian", personality: "pelan-pelan asal kelakon" },
+  vehicle: { denom: "slate", label: "Kendaraan", personality: "biar nggak nebeng teman kos terus" },
+  education: { denom: "teal", label: "Pendidikan", personality: "satu-satunya tabungan yang nggak bisa dicuri maling kos" },
+  other: { denom: "slate", label: "Impian", personality: "pelan-pelan asal kelakon" },
 };
 
 const STATUS: Record<string, { label: string; tone: CapTone }> = {

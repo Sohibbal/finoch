@@ -6,6 +6,7 @@ import { formatSerial } from "@/components/press/serial";
 import { rosetteFamilies } from "@/components/press/guilloche";
 import { Stub, stubStateLabel } from "@/components/press/stub";
 import { StatusStamp } from "@/components/press/status-stamp";
+import { DENOM, DENOMS, DENOM_FIELD, DENOM_CHOICES, denomOf, type Denom } from "@/components/press/denom";
 
 describe("format helpers", () => {
   it("shows the five stored categories in Indonesian", () => {
@@ -59,5 +60,24 @@ describe("press primitives", () => {
     for (const [status, word] of [["aman", "Aman"], ["mepet", "Mepet"], ["habis", "Habis"], ["tertunda", "Tertunda sinkron"]] as const) {
       expect(renderToString(React.createElement(StatusStamp, { status }))).toContain(word);
     }
+  });
+});
+
+describe("denominations", () => {
+  const STATUS_HUE = /aman|mepet|habis/;
+
+  it("never prints a wallet, envelope or goal in a status hue", () => {
+    for (const d of Object.keys(DENOM) as Denom[]) {
+      expect(DENOM_FIELD[d]).not.toMatch(STATUS_HUE);
+      expect(DENOMS[d].soft).not.toMatch(STATUS_HUE);
+    }
+    expect(DENOM_CHOICES.map((c) => c.denom)).toEqual(["blue", "violet", "teal", "slate"]);
+  });
+
+  it("reads legacy stored colors as non-status notes", () => {
+    expect(["emerald", "amber", "rose", "cyan", "purple", "blue"].map(denomOf)).toEqual(["teal", "slate", "violet", "blue", "violet", "blue"]);
+    expect(denomOf(undefined)).toBe("slate");
+    expect(denomOf("green")).toBe("slate");
+    for (const c of DENOM_CHOICES) expect(denomOf(c.id)).toBe(c.denom);
   });
 });

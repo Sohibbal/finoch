@@ -21,9 +21,9 @@ interface UktPlanNoteProps {
 export const UKT_DENOM: Record<UktCategory, Denom> = {
   ukt: "blue",
   praktikum: "violet",
-  kkn: "green",
-  skripsi: "ochre",
-  wisuda: "violet",
+  kkn: "teal",
+  skripsi: "slate",
+  wisuda: "teal",
 };
 
 // One line of personality per plan, from its category (plans have no free-text field for it).
