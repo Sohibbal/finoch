@@ -3,25 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
-  ChevronRight,
-  GraduationCap,
-  Wallet,
-  Compass,
-  Bot,
-  User,
-  Utensils,
-  Receipt,
-  Handshake,
-  Hourglass,
-  Flame,
-  CreditCard,
-  CalendarClock,
-  Zap,
-  FileSpreadsheet,
-  Target,
-} from "lucide-react";
+import { NAV_GROUPS } from "./nav-items";
+import { LayoutDashboard, ChevronRight } from "lucide-react";
 
 export interface BreadcrumbCustomItem {
   label: string;
@@ -37,117 +20,17 @@ export interface BreadcrumbRouteConfig {
   icon?: React.ComponentType<{ className?: string }>;
 }
 
-export const ROUTE_BREADCRUMB_MAP: Record<string, BreadcrumbRouteConfig> = {
-  "/dashboard": {
-    label: "Dashboard",
-    icon: LayoutDashboard,
-  },
-  "/copilot": {
-    label: "AI Copilot Finansial",
-    parentLabel: "Asisten Cerdas",
-    parentHref: "/dashboard",
-    parentIcon: Bot,
-    icon: Bot,
-  },
-  "/simulator": {
-    label: "Simulator Arus Kas",
-    parentLabel: "Analisis & Rencana",
-    parentHref: "/dashboard",
-    parentIcon: Compass,
-    icon: Compass,
-  },
-  "/goals": {
-    label: "Target Finansial",
-    parentLabel: "Analisis & Rencana",
-    parentHref: "/dashboard",
-    parentIcon: Compass,
-    icon: Target,
-  },
-  "/reports": {
-    label: "Laporan & LPJ Beasiswa",
-    parentLabel: "Analisis & Rencana",
-    parentHref: "/dashboard",
-    parentIcon: Compass,
-    icon: FileSpreadsheet,
-  },
-  "/wallets": {
-    label: "Multi-Dompet Akun",
-    parentLabel: "Kas & Anggaran",
-    parentHref: "/dashboard",
-    parentIcon: Wallet,
-    icon: CreditCard,
-  },
-  "/budget": {
-    label: "Amplop Anggaran",
-    parentLabel: "Kas & Anggaran",
-    parentHref: "/dashboard",
-    parentIcon: Wallet,
-    icon: Wallet,
-  },
-  "/bills": {
-    label: "Tagihan Kost & Rutin",
-    parentLabel: "Kas & Anggaran",
-    parentHref: "/dashboard",
-    parentIcon: Wallet,
-    icon: CalendarClock,
-  },
-  "/audit": {
-    label: "Audit Bocor Halus",
-    parentLabel: "Kas & Anggaran",
-    parentHref: "/dashboard",
-    parentIcon: Wallet,
-    icon: Zap,
-  },
-  "/ukt-savings": {
-    label: "Sinking Fund UKT & Kampus",
-    parentLabel: "Mahasiswa & Kost",
-    parentHref: "/dashboard",
-    parentIcon: GraduationCap,
-    icon: GraduationCap,
-  },
-  "/meal-calc": {
-    label: "Masak vs Warteg",
-    parentLabel: "Mahasiswa & Kost",
-    parentHref: "/dashboard",
-    parentIcon: GraduationCap,
-    icon: Utensils,
-  },
-  "/split-bill": {
-    label: "Split Bill & Talangan",
-    parentLabel: "Mahasiswa & Kost",
-    parentHref: "/dashboard",
-    parentIcon: GraduationCap,
-    icon: Receipt,
-  },
-  "/debts": {
-    label: "Buku Kasbon & Hutang",
-    parentLabel: "Mahasiswa & Kost",
-    parentHref: "/dashboard",
-    parentIcon: GraduationCap,
-    icon: Handshake,
-  },
-  "/wishlist": {
-    label: "Wishlist Anti-Impulsif",
-    parentLabel: "Mahasiswa & Kost",
-    parentHref: "/dashboard",
-    parentIcon: GraduationCap,
-    icon: Hourglass,
-  },
-  "/streak": {
-    label: "Streak Hemat",
-    parentLabel: "Mahasiswa & Kost",
-    parentHref: "/dashboard",
-    parentIcon: GraduationCap,
-    icon: Flame,
-  },
-  "/profile": {
-    label: "Profil Pengguna",
-    parentLabel: "Pengaturan",
-    parentHref: "/dashboard",
-    parentIcon: User,
-    icon: User,
-  },
-};
+// Names come from the shared navigation, so the breadcrumb, sidebar and menu never disagree.
+export const ROUTE_BREADCRUMB_MAP: Record<string, BreadcrumbRouteConfig> = Object.fromEntries(
+  NAV_GROUPS.flatMap((group) =>
+    group.items.map((item) => [
+      item.href,
+      group.label === "Utama" && item.href === "/dashboard"
+        ? { label: item.label, icon: item.icon }
+        : { label: item.label, icon: item.icon, parentLabel: group.label, parentHref: "/dashboard" },
+    ])
+  )
+);
 
 export interface BreadcrumbsProps {
   items?: BreadcrumbCustomItem[];
@@ -221,7 +104,7 @@ export function Breadcrumbs({
               className="font-bold text-ink flex items-center gap-1.5"
             >
               {showHomeIcon && <LayoutDashboard className="w-3.5 h-3.5" />}
-              <span>Dashboard</span>
+              <span>Beranda</span>
             </span>
           ) : (
             <Link
@@ -229,7 +112,7 @@ export function Breadcrumbs({
               className="hover:text-ink hover:underline underline-offset-2 transition-colors flex items-center gap-1.5"
             >
               {showHomeIcon && <LayoutDashboard className="w-3.5 h-3.5" />}
-              <span>Dashboard</span>
+              <span>Beranda</span>
             </Link>
           )}
         </li>
