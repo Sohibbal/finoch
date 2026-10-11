@@ -9,7 +9,6 @@ import { localDateKey } from "@/lib/date";
 import { categoryLabel, rupiah } from "@/lib/format";
 import { LABEL_CLASS, PaperDialog, PRIMARY_CLASS, SECONDARY_CLASS } from "@/components/press/kampus-press";
 import { SaveReceipt } from "@/components/press/receipt-stub";
-import { WalletPicker } from "@/components/wallets/wallet-picker";
 import { CATEGORIES, INPUT_CLASS } from "@/components/expense/expense-editor";
 
 interface UnifiedConfirmationModalProps {
@@ -41,7 +40,6 @@ export function UnifiedConfirmationModal({
 }: UnifiedConfirmationModalProps) {
   const [formData, setFormData] = useState<TransactionCandidate | null>(null);
   const [validationError, setValidationError] = useState<string>("");
-  const [walletId, setWalletId] = useState<string | undefined>(undefined);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<Expense[] | null>(null);
   const [undoing, setUndoing] = useState(false);
@@ -61,7 +59,6 @@ export function UnifiedConfirmationModal({
         date: candidate.date || localDateKey(new Date()),
       });
       setValidationError("");
-      setWalletId(undefined);
       setSaved(null);
       setSaving(false);
       setUndoError(null);
@@ -84,7 +81,7 @@ export function UnifiedConfirmationModal({
     const opening = openingRef.current;
     setSaving(true);
     try {
-      const result = await onConfirm(formData, walletId);
+      const result = await onConfirm(formData, undefined);
       if (opening === openingRef.current && Array.isArray(result) && result.length > 0) setSaved(result);
     } catch {
       setValidationError("Belum tersimpan: penyimpanan HP-mu menolak. Coba Simpan lagi.");
@@ -188,8 +185,6 @@ export function UnifiedConfirmationModal({
               />
             </div>
           </div>
-
-          <WalletPicker value={walletId} onChange={setWalletId} />
 
           {formData.items && formData.items.length > 0 && (
             <details className="border-t border-dotted border-ink/40 pt-2">

@@ -10,7 +10,6 @@ import { rupiah } from "@/lib/format";
 import type { Expense, ParsedVoiceItem } from "@/lib/types/expense";
 import { PaperDialog, PRIMARY_CLASS } from "@/components/press/kampus-press";
 import { SaveReceipt } from "@/components/press/receipt-stub";
-import { WalletPicker } from "@/components/wallets/wallet-picker";
 import { VoiceRecorder, type VoiceState } from "./voice-recorder";
 import { TranscriptPreview } from "./transcript-preview";
 import { ParsedExpenseList } from "./parsed-expense-list";
@@ -61,7 +60,6 @@ export function VoiceExpenseSheet({ isOpen, onClose, userId, onExpenseSaved, sis
   const [parsedItems, setParsedItems] = useState<ParsedVoiceItem[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
-  const [walletId, setWalletId] = useState<string | undefined>(undefined);
   const [saved, setSaved] = useState<Expense[] | null>(null);
   const [undoing, setUndoing] = useState(false);
   const [undoError, setUndoError] = useState<string | null>(null);
@@ -158,7 +156,6 @@ export function VoiceExpenseSheet({ isOpen, onClose, userId, onExpenseSaved, sis
       setEditingId(null);
       setVoiceState("idle");
       setStatusMessage(null);
-      setWalletId(undefined);
       setSaved(null);
       setUndoError(null);
     }
@@ -203,7 +200,7 @@ export function VoiceExpenseSheet({ isOpen, onClose, userId, onExpenseSaved, sis
           amount: item.amount,
           category: item.category,
           userId,
-          walletId,
+          walletId: null,
         }))
       );
     } catch {
@@ -324,8 +321,6 @@ export function VoiceExpenseSheet({ isOpen, onClose, userId, onExpenseSaved, sis
                   onDelete={handleDeleteItem}
                 />
               )}
-
-              <WalletPicker value={walletId} onChange={setWalletId} />
 
               {/* Pinned to the sheet's bottom edge so the one action is always in thumb reach. */}
               <div className="sticky bottom-0 -mx-5 px-5 py-3 bg-paper-sheet border-t border-ink/15">

@@ -1,7 +1,10 @@
 import type { RecurringBill } from "@/types/bill-types";
 import type { TransactionCandidate } from "@/types/financial-types";
-import { getMonthlyBillAmount } from "@/lib/storage/bill-storage";
 import { localDateKey } from "@/lib/date";
+
+export function getMonthlyBillAmount(bill: RecurringBill, _now?: Date): number {
+  return bill.amount || 0;
+}
 
 /** Item name prefix of the expense Tagihan records when a bill is marked paid. */
 export const BILL_PAYMENT_PREFIX = "Bayar Tagihan: ";

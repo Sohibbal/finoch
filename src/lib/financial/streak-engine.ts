@@ -1,6 +1,7 @@
 import { DailyCashflowPoint, StreakBadge, StreakSummary, DayStatus } from "@/types/streak-types";
-import { WANTS_CATEGORIES } from "@/lib/financial/report-engine";
 import { localDateKey, parseDate } from "@/lib/date";
+
+export const WANTS_CATEGORIES = ["shopping", "entertainment", "hiburan", "jajan", "leisure", "lifestyle"];
 
 export interface StreakExpenseCandidate {
   id?: string;
