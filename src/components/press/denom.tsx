@@ -1,39 +1,36 @@
 "use client";
 
 import React from "react";
-import { Check } from "lucide-react";
+import { Check, type LucideIcon } from "lucide-react";
 import { Guilloche } from "./guilloche";
 
+/**
+ * Note denominations, the one table every page prints from. Fields use the darker ink shade of
+ * green/ochre/red so paper-colored type stays AA in both themes, like blue and violet.
+ */
 export type Denom = "blue" | "violet" | "green" | "ochre" | "red";
 
-/**
- * Denomination fields. Each pairs a printed color with paper-colored type that passes AA
- * in both themes (green, ochre and red use their darker ink shade so cream text stays legible).
- */
-export const DENOM_FIELD: Record<Denom, string> = {
-  blue: "bg-denom-blue text-paper-sheet",
-  violet: "bg-denom-violet text-paper-sheet",
-  green: "bg-aman-ink text-paper-sheet",
-  ochre: "bg-mepet-ink text-paper-sheet",
-  red: "bg-habis-ink text-paper-sheet",
+const TABLE: Record<Denom, { field: string; border: string; tint: string; onPaper: string; label: string }> = {
+  blue: { field: "bg-denom-blue", border: "border-denom-blue", tint: "bg-denom-blue/20", onPaper: "text-denom-blue", label: "Biru" },
+  violet: { field: "bg-denom-violet", border: "border-denom-violet", tint: "bg-denom-violet/20", onPaper: "text-denom-violet", label: "Ungu" },
+  green: { field: "bg-aman-ink", border: "border-aman-ink", tint: "bg-aman/20", onPaper: "text-aman-ink", label: "Hijau" },
+  ochre: { field: "bg-mepet-ink", border: "border-mepet-ink", tint: "bg-mepet/20", onPaper: "text-mepet-ink", label: "Cokelat" },
+  red: { field: "bg-habis-ink", border: "border-habis-ink", tint: "bg-habis/20", onPaper: "text-habis-ink", label: "Merah" },
 };
 
-/** Ink-on-paper accents for the same denominations (rules, plates, swatches). */
-export const DENOM_INK: Record<Denom, string> = {
-  blue: "text-denom-blue border-denom-blue",
-  violet: "text-denom-violet border-denom-violet",
-  green: "text-aman-ink border-aman-ink",
-  ochre: "text-mepet-ink border-mepet-ink",
-  red: "text-habis-ink border-habis-ink",
-};
+const DENOM_KEYS = Object.keys(TABLE) as Denom[];
+const mapDenoms = <T,>(fn: (d: (typeof TABLE)[Denom]) => T) =>
+  Object.fromEntries(DENOM_KEYS.map((k) => [k, fn(TABLE[k])])) as Record<Denom, T>;
 
-export const DENOM_LABEL: Record<Denom, string> = {
-  blue: "Biru",
-  violet: "Ungu",
-  green: "Hijau",
-  ochre: "Cokelat",
-  red: "Merah",
-};
+/** Color field plus paper-colored type: a whole printed note. */
+export const DENOM_FIELD = mapDenoms((d) => `${d.field} text-paper-sheet`);
+/** The denomination as ink on paper (rules, plates, swatches). */
+export const DENOM_INK = mapDenoms((d) => `${d.onPaper} ${d.border}`);
+export const DENOM_LABEL = mapDenoms((d) => d.label);
+/** Pieces of a note for layouts that compose them: field, type on the field, edge. */
+export const DENOM = mapDenoms((d) => ({ field: d.field, ink: "text-paper-sheet", soft: "text-paper-sheet/85", border: d.border }));
+/** Pieces for ink-on-paper layouts: field band, soft fill (progress), edge, ink. */
+export const DENOMS = mapDenoms((d) => ({ field: d.field, soft: d.tint, edge: d.border, ink: d.onPaper }));
 
 // Stored color names predate the press palette; they keep working and print as the nearest note.
 const LEGACY: Record<string, Denom> = {
@@ -58,28 +55,40 @@ export function seedOf(id: string): number {
 }
 
 export type CapTone = "aman" | "mepet" | "habis" | "ink" | "paper";
+export type StampTone = CapTone;
 
-// Like StatusStamp, tones differ by outline form too: single, double, filled.
+// Tones differ by outline form as well as hue (single, double, dashed), like StatusStamp.
 const CAP_TONE: Record<CapTone, string> = {
   aman: "border-2 border-aman-ink text-aman-ink",
   mepet: "border-[3px] border-double border-mepet-ink text-mepet-ink",
-  habis: "border-2 border-habis-ink bg-habis-ink text-paper-sheet",
+  habis: "border-2 border-dashed border-habis-ink text-habis-ink",
   ink: "border-2 border-ink text-ink",
   paper: "border-2 border-paper-sheet text-paper-sheet",
 };
 
+// Ink pressed hard: reserved for final states like LUNAS.
+const CAP_SOLID: Record<CapTone, string> = {
+  aman: "border-2 border-aman-ink bg-aman-ink text-paper-sheet",
+  mepet: "border-2 border-mepet-ink bg-mepet-ink text-paper-sheet",
+  habis: "border-2 border-habis-ink bg-habis-ink text-paper-sheet",
+  ink: "border-2 border-ink bg-ink text-paper-sheet",
+  paper: "border-2 border-paper-sheet bg-paper-sheet text-ink",
+};
+
 interface CapProps {
   children: React.ReactNode;
-  tone: CapTone;
+  tone?: CapTone;
   /** Degrees; stamps never land straight. */
   tilt?: number;
+  solid?: boolean;
+  icon?: LucideIcon;
   /** Thump the stamp down when it first appears (e.g. right after Tandai lunas). */
   press?: boolean;
   className?: string;
 }
 
-/** A rubber stamp (cap) with a word on it: LUNAS, TELAT, MEPET... */
-export function Cap({ children, tone, tilt = -6, press = false, className = "" }: CapProps) {
+/** A rubber stamp (cap) with a word on it: LUNAS, TELAT, MEPET, Tunda 3 hari... */
+export function Cap({ children, tone = "ink", tilt = -6, solid = false, icon: Icon, press = false, className = "" }: CapProps) {
   const [down, setDown] = React.useState(!press);
   React.useEffect(() => {
     if (!press) return;
@@ -89,10 +98,22 @@ export function Cap({ children, tone, tilt = -6, press = false, className = "" }
   return (
     <span
       style={{ transform: `rotate(${tilt}deg) scale(${down ? 1 : 1.6})`, opacity: down ? 1 : 0 }}
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm text-meta font-bold uppercase tracking-[0.08em] whitespace-nowrap motion-safe:transition-[transform,opacity] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ${CAP_TONE[tone]} ${className}`}
+      className={`inline-flex items-center gap-1 shrink-0 px-2 py-0.5 rounded-sm text-meta font-bold uppercase tracking-[0.08em] whitespace-nowrap motion-safe:transition-[transform,opacity] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ${
+        solid ? CAP_SOLID[tone] : CAP_TONE[tone]
+      } ${className}`}
     >
+      {Icon && <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />}
       {children}
     </span>
+  );
+}
+
+/** Label-prop form of Cap used by the kampus pages; same stamp, slightly less tilt. */
+export function Stamp({ label, fresh = false, tilt = -3, ...rest }: Omit<CapProps, "children" | "press"> & { label: React.ReactNode; fresh?: boolean }) {
+  return (
+    <Cap {...rest} tilt={tilt} press={fresh}>
+      {label}
+    </Cap>
   );
 }
 

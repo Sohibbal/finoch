@@ -20,7 +20,7 @@ import { WalletNote, WALLET_TYPE_LABEL, walletTotals } from "@/components/wallet
 import { WalletFormModal } from "@/components/wallets/wallet-form-modal";
 import { WalletTransferModal } from "@/components/wallets/wallet-transfer-modal";
 import { PageHeader } from "@/components/layout/page-header";
-import { Cap } from "@/components/press/uang-denom";
+import { Cap } from "@/components/press/denom";
 import { formatSerial } from "@/components/press/serial";
 
 const FILTERS: { id: "all" | WalletType; label: string }[] = [

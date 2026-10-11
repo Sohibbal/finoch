@@ -4,7 +4,7 @@ import React from "react";
 import { ArrowRightLeft, Pencil, Trash2 } from "lucide-react";
 import { WalletType, WalletWithBalance } from "@/types/wallet-types";
 import { rupiah } from "@/lib/format";
-import { Cap, DenomSheet, denomOf, seedOf } from "@/components/press/uang-denom";
+import { Cap, DenomSheet, denomOf, seedOf } from "@/components/press/denom";
 import { formatSerial } from "@/components/press/serial";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 

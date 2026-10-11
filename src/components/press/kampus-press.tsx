@@ -9,67 +9,8 @@ import { X, type LucideIcon } from "lucide-react";
  * option buttons, form fields and the paper dialog.
  */
 
-export type Denom = "blue" | "violet" | "green" | "ochre";
-
-// Ink on each field passes AA in both themes: cream on blue/violet, fixed navy on green/ochre.
-export const DENOM: Record<Denom, { field: string; ink: string; soft: string; border: string }> = {
-  blue: { field: "bg-denom-blue", ink: "text-paper-sheet", soft: "text-paper-sheet/85", border: "border-denom-blue" },
-  violet: { field: "bg-denom-violet", ink: "text-paper-sheet", soft: "text-paper-sheet/85", border: "border-denom-violet" },
-  green: { field: "bg-aman", ink: "text-navy-900", soft: "text-navy-900/80", border: "border-aman" },
-  ochre: { field: "bg-mepet", ink: "text-navy-900", soft: "text-navy-900/80", border: "border-mepet" },
-};
-
-export type StampTone = "aman" | "mepet" | "habis" | "ink";
-
-// Tones differ by outline form as well as hue, like the dashboard's status stamps.
-const STAMP_TONE: Record<StampTone, string> = {
-  aman: "border-2 border-aman-ink text-aman-ink",
-  mepet: "border-[3px] border-double border-mepet-ink text-mepet-ink",
-  habis: "border-2 border-dashed border-habis-ink text-habis-ink",
-  ink: "border-2 border-ink text-ink",
-};
-
-interface StampProps {
-  label: React.ReactNode;
-  tone?: StampTone;
-  icon?: LucideIcon;
-  /** Filled stamp (ink pressed hard): reserved for final states like Lunas. */
-  solid?: boolean;
-  /** Presses the stamp in when it first appears; never on the first paint of a page. */
-  fresh?: boolean;
-  className?: string;
-}
-
-/** A rubber stamp with any label, slightly rotated: Lunas, Tunda 3 hari, Diselamatkan. */
-export function Stamp({ label, tone = "ink", icon: Icon, solid = false, fresh = false, className = "" }: StampProps) {
-  const [pressed, setPressed] = useState(!fresh);
-  useEffect(() => {
-    if (!fresh) return;
-    const frame = requestAnimationFrame(() => setPressed(true));
-    return () => cancelAnimationFrame(frame);
-  }, [fresh]);
-
-  const form = solid
-    ? tone === "ink"
-      ? "border-2 border-ink bg-ink text-paper-sheet"
-      : tone === "aman"
-        ? "border-2 border-aman-ink bg-aman-ink text-paper-sheet"
-        : tone === "mepet"
-          ? "border-2 border-mepet-ink bg-mepet-ink text-paper-sheet"
-          : "border-2 border-habis-ink bg-habis-ink text-paper-sheet"
-    : STAMP_TONE[tone];
-
-  return (
-    <span
-      className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-sm -rotate-3 text-meta font-bold uppercase tracking-[0.08em] whitespace-nowrap motion-safe:transition-[transform,opacity] motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ${
-        pressed ? "" : "motion-safe:scale-150 motion-safe:opacity-0"
-      } ${form} ${className}`}
-    >
-      {Icon && <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />}
-      {label}
-    </span>
-  );
-}
+// Denominations and stamps come from the shared press table so every page prints the same notes.
+export { DENOM, Stamp, type Denom, type StampTone } from "./denom";
 
 /** Torn edge across a sheet: a dashed perforation with a half-moon notch at each end. */
 export function Perforation({ className = "" }: { className?: string }) {

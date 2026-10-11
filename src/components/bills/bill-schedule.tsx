@@ -5,7 +5,7 @@ import { Check, Pencil, Trash2 } from "lucide-react";
 import { BillCategory, RecurringBill } from "@/types/bill-types";
 import { getEffectiveDueDay } from "@/lib/storage/bill-storage";
 import { rupiah } from "@/lib/format";
-import { Cap } from "@/components/press/uang-denom";
+import { Cap } from "@/components/press/denom";
 
 export const BILL_CATEGORY_LABEL: Record<BillCategory, string> = {
   kos: "Kamar kos",

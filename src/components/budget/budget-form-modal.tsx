@@ -13,7 +13,7 @@ import {
   Sparkles,
   Check,
 } from "lucide-react";
-import { DenomPicker } from "@/components/press/uang-denom";
+import { DenomPicker } from "@/components/press/denom";
 import { BudgetEnvelope } from "@/types/budget-types";
 
 interface BudgetFormModalProps {

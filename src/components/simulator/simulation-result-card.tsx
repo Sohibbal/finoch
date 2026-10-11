@@ -5,7 +5,7 @@ import type { DailyJatah } from "@/components/dashboard/dashboard-data";
 import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
 import { Guilloche } from "@/components/press/guilloche";
-import { Cap } from "@/components/press/analisis-press";
+import { Cap } from "@/components/press/denom";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 import { rupiah } from "@/lib/format";
 

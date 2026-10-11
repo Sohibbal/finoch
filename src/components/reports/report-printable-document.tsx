@@ -4,7 +4,7 @@ import { ExpenseRecord } from "@/lib/financial/report-engine";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Note } from "@/components/press/note";
 import { Serial, formatSerial } from "@/components/press/serial";
-import { Cap } from "@/components/press/analisis-press";
+import { Cap } from "@/components/press/denom";
 import { categoryLabel, rupiah } from "@/lib/format";
 import { localDateKey, parseDate } from "@/lib/date";
 

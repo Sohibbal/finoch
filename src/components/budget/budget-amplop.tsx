@@ -17,7 +17,7 @@ import {
 import { BudgetEnvelope } from "@/types/budget-types";
 import { calculateEnvelopeProgress } from "@/lib/financial/budget-engine";
 import { categoryLabel, rupiah } from "@/lib/format";
-import { Cap, DenomSheet, denomOf, seedOf } from "@/components/press/uang-denom";
+import { Cap, DenomSheet, denomOf, seedOf } from "@/components/press/denom";
 
 const ICON_MAP: Record<string, React.ElementType> = {
   utensils: Utensils,

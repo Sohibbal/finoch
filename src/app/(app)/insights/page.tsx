@@ -8,7 +8,7 @@ import { AiInsightCard } from "@/types/financial-types";
 import { EMPTY_ACTION_CLASS, EmptyState, PageHeader } from "@/components/layout/page-header";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { getBills } from "@/lib/storage/bill-storage";
-import { Cap, type CapTone } from "@/components/press/analisis-press";
+import { Cap, type CapTone } from "@/components/press/denom";
 import { formatSerial } from "@/components/press/serial";
 import { categoryLabel, rupiah } from "@/lib/format";
 import { localDateKey } from "@/lib/date";

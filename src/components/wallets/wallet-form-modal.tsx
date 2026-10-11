@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Wallet, Landmark, Smartphone, Check } from "lucide-react";
-import { DenomPicker } from "@/components/press/uang-denom";
+import { DenomPicker } from "@/components/press/denom";
 import { StudentWallet, WalletType, WalletWithBalance } from "@/types/wallet-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
 

@@ -1,5 +1,5 @@
 import React from "react";
-import { Cap } from "@/components/press/analisis-press";
+import { Cap } from "@/components/press/denom";
 import { Serial, formatSerial } from "@/components/press/serial";
 import { rupiah, shortDate } from "@/lib/format";
 import { localDateKey, parseDate } from "@/lib/date";

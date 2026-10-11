@@ -10,7 +10,7 @@ import { addGoal, deleteGoal, getGoals } from "@/lib/storage/goal-storage";
 import { localDateKey, localDateKeyFromNow, parseDate } from "@/lib/date";
 import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
-import { Cap, DENOMS, type CapTone, type Denom } from "@/components/press/analisis-press";
+import { Cap, DENOMS, type CapTone, type Denom } from "@/components/press/denom";
 import { rupiah, shortDate } from "@/lib/format";
 
 const DAY_MS = 86400000;

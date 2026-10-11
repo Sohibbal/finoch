@@ -6,7 +6,7 @@ import { DebtItem } from "@/types/debt-types";
 import { generateWhatsAppDebtReminder } from "@/lib/financial/debt-engine";
 import { localDateKey } from "@/lib/date";
 import { rupiah, shortDate } from "@/lib/format";
-import { Cap, DenomSheet, seedOf } from "@/components/press/uang-denom";
+import { Cap, DenomSheet, seedOf } from "@/components/press/denom";
 import { formatSerial } from "@/components/press/serial";
 
 /** wa.me link for a reminder; Indonesian 08xx numbers become 628xx. */

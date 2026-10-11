@@ -11,7 +11,7 @@ import { resetDemoData, seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { Note } from "@/components/press/note";
 import { Guilloche } from "@/components/press/guilloche";
 import { formatSerial } from "@/components/press/serial";
-import { Cap } from "@/components/press/analisis-press";
+import { Cap } from "@/components/press/denom";
 
 export default function ProfilePage() {
   const router = useRouter();
