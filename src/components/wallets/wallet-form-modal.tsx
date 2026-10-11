@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Wallet, Landmark, Smartphone, Check } from "lucide-react";
+import { DenomPicker } from "@/components/press/uang-denom";
 import { StudentWallet, WalletType, WalletWithBalance } from "@/types/wallet-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
 
@@ -17,17 +18,9 @@ const PRESETS = [
   { name: "BCA Tabungan", type: "bank" as WalletType, color: "blue", icon: "landmark", notes: "Rekening transfer uang saku" },
   { name: "Bank BRI / Mandiri", type: "bank" as WalletType, color: "blue", icon: "landmark", notes: "Rekening beasiswa / tabungan" },
   { name: "Bank Jago / SeaBank", type: "bank" as WalletType, color: "amber", icon: "landmark", notes: "Bank digital bunga cair harian" },
-  { name: "GoPay", type: "ewallet" as WalletType, color: "cyan", icon: "smartphone", notes: "Ojek online & pesan makanan" },
+  { name: "GoPay", type: "ewallet" as WalletType, color: "emerald", icon: "smartphone", notes: "Ojek online & pesan makanan" },
   { name: "ShopeePay", type: "ewallet" as WalletType, color: "amber", icon: "smartphone", notes: "Belanja online & diskon merchant" },
   { name: "DANA / OVO", type: "ewallet" as WalletType, color: "purple", icon: "smartphone", notes: "Bayar QRIS & transfer bebas biaya" },
-];
-
-const COLORS = [
-  { id: "emerald", label: "Emerald", bg: "bg-emerald-500" },
-  { id: "blue", label: "Blue", bg: "bg-blue-500" },
-  { id: "purple", label: "Purple", bg: "bg-purple-500" },
-  { id: "amber", label: "Amber", bg: "bg-amber-500" },
-  { id: "cyan", label: "Cyan", bg: "bg-cyan-500" },
 ];
 
 export function WalletFormModal({
@@ -115,21 +108,21 @@ export function WalletFormModal({
   const parsedBalance = parseFloat(balance.replace(/[^0-9]/g, "")) || 0;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-cream-200 dark:border-navy-800 overflow-hidden max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
+      <div className="relative w-full max-w-lg bg-paper-sheet rounded-sm border border-ink/20 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-cream-200 dark:border-navy-800 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-ink/20 flex items-center justify-between">
           <div>
-            <h2 className="text-lg font-bold text-navy-950 dark:text-cream-50">
+            <h2 className="text-lg font-bold text-ink">
               {initialWallet ? "Ubah Akun / Dompet" : "Tambah Dompet Baru"}
             </h2>
-            <p className="text-xs text-navy-500 dark:text-cream-400">
+            <p className="text-xs text-ink-soft">
               Kelola saldo tunai, rekening bank, atau dompet digital
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-cream-100 dark:bg-navy-800 text-navy-600 dark:text-cream-300 flex items-center justify-center hover:bg-cream-200 dark:hover:bg-navy-700 transition-colors"
+            className="w-9 h-9 rounded-full bg-paper-deep text-ink-soft flex items-center justify-center hover:bg-ink/5 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -138,7 +131,7 @@ export function WalletFormModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-5">
           {error && (
-            <div className="p-3 text-xs rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold border border-rose-200 dark:border-rose-900">
+            <div className="p-3 text-xs rounded-sm bg-habis/10 text-habis-ink font-semibold border border-habis-ink/40">
               {error}
             </div>
           )}
@@ -146,7 +139,7 @@ export function WalletFormModal({
           {/* Quick Presets for New Wallets */}
           {!initialWallet && (
             <div>
-              <label className="text-[11px] font-bold text-navy-700 dark:text-cream-300 uppercase tracking-wider block mb-2">
+              <label className="text-meta font-bold text-ink block mb-2">
                 Pilih Cepat Rekening Mahasiswa:
               </label>
               <div className="flex gap-2 overflow-x-auto pb-1.5 scrollbar-none">
@@ -155,7 +148,7 @@ export function WalletFormModal({
                     key={idx}
                     type="button"
                     onClick={() => handlePresetSelect(p)}
-                    className="shrink-0 text-xs px-3 py-1.5 rounded-xl border border-cream-200 dark:border-navy-700 bg-cream-50 dark:bg-navy-800/60 hover:border-emerald-500 font-medium text-navy-800 dark:text-cream-200 transition-colors"
+                    className="shrink-0 text-xs px-3 py-1.5 rounded-sm border border-ink/20 bg-paper-sheet hover:border-aman-ink/40 font-medium text-ink transition-colors"
                   >
                     {p.name}
                   </button>
@@ -166,7 +159,7 @@ export function WalletFormModal({
 
           {/* Wallet Type */}
           <div>
-            <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-2">
+            <label className="text-xs font-bold text-ink block mb-2">
               Kategori Dompet
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -182,10 +175,10 @@ export function WalletFormModal({
                     key={item.id}
                     type="button"
                     onClick={() => setType(item.id)}
-                    className={`min-h-[48px] p-3 rounded-2xl border text-center flex flex-col items-center justify-center gap-1 transition-all ${
+                    className={`min-h-[48px] p-3 rounded-sm border text-center flex flex-col items-center justify-center gap-1 transition-all ${
                       isSelected
-                        ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-bold shadow-sm"
-                        : "border-cream-200 dark:border-navy-800 text-navy-600 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-navy-800"
+                        ? "border-aman-ink/40 bg-aman/10 text-aman-ink font-bold"
+                        : "border-ink/20 text-ink-soft hover:bg-ink/5"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -198,15 +191,15 @@ export function WalletFormModal({
 
           {/* Name */}
           <div>
-            <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-1">
-              Nama Dompet / Akun <span className="text-rose-500">*</span>
+            <label className="text-xs font-bold text-ink block mb-1">
+              Nama Dompet / Akun <span className="text-habis-ink">*</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: BCA Tabungan Kost, GoPay Kuliah, Dompet Saku"
-              className="w-full min-h-[48px] px-4 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink"
               required
             />
           </div>
@@ -214,11 +207,11 @@ export function WalletFormModal({
           {/* Current Balance */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-bold text-navy-900 dark:text-cream-100">
-                Saldo Saat Ini (Rp) <span className="text-rose-500">*</span>
+              <label className="text-xs font-bold text-ink">
+                Saldo Saat Ini (Rp) <span className="text-habis-ink">*</span>
               </label>
               {parsedBalance > 0 && (
-                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                <span className="text-xs font-bold text-aman-ink">
                   {formatRupiah(parsedBalance)}
                 </span>
               )}
@@ -230,7 +223,7 @@ export function WalletFormModal({
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
               placeholder="0"
-              className="w-full min-h-[48px] px-4 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ink"
               required
             />
           </div>
@@ -238,7 +231,7 @@ export function WalletFormModal({
           {/* Account Number (Optional for bank & ewallet) */}
           {type !== "cash" && (
             <div>
-              <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-1">
+              <label className="text-xs font-bold text-ink block mb-1">
                 Nomor Rekening / No. HP E-Wallet (Opsional)
               </label>
               <input
@@ -246,36 +239,22 @@ export function WalletFormModal({
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
                 placeholder="Contoh: 1234567890 / 08123456789"
-                className="w-full min-h-[48px] px-4 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ink"
               />
             </div>
           )}
 
           {/* Color Selection */}
           <div>
-            <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-2">
-              Tema Kartu Dompet
+            <label className="text-xs font-bold text-ink block mb-2">
+              Warna lembar
             </label>
-            <div className="flex items-center gap-3">
-              {COLORS.map((c) => (
-                <button
-                  key={c.id}
-                  type="button"
-                  onClick={() => setColor(c.id)}
-                  className={`w-9 h-9 rounded-full ${c.bg} flex items-center justify-center transition-transform ${
-                    color === c.id ? "scale-110 ring-4 ring-emerald-400/40" : "opacity-80 hover:opacity-100"
-                  }`}
-                  aria-label={c.label}
-                >
-                  {color === c.id && <Check className="w-4 h-4 text-white" />}
-                </button>
-              ))}
-            </div>
+            <DenomPicker value={color} onChange={setColor} />
           </div>
 
           {/* Notes */}
           <div>
-            <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-1">
+            <label className="text-xs font-bold text-ink block mb-1">
               Catatan / Peruntukan (Opsional)
             </label>
             <input
@@ -283,7 +262,7 @@ export function WalletFormModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Khusus jajan mingguan atau beasiswa"
-              className="w-full min-h-[44px] px-4 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full min-h-[44px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
             />
           </div>
 
@@ -293,9 +272,9 @@ export function WalletFormModal({
               type="checkbox"
               checked={isPrimary}
               onChange={(e) => setIsPrimary(e.target.checked)}
-              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-cream-300 dark:border-navy-700"
+              className="w-4 h-4 rounded text-aman-ink focus:ring-ink border-ink/20"
             />
-            <span className="text-xs font-medium text-navy-800 dark:text-cream-200">
+            <span className="text-xs font-medium text-ink">
               Jadikan akun utama (default penerimaan uang bulanan)
             </span>
           </label>
@@ -306,25 +285,25 @@ export function WalletFormModal({
               type="checkbox"
               checked={isDefault}
               onChange={(e) => setIsDefault(e.target.checked)}
-              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-cream-300 dark:border-navy-700"
+              className="w-4 h-4 rounded text-aman-ink focus:ring-ink border-ink/20"
             />
-            <span className="text-xs font-medium text-navy-800 dark:text-cream-200">
+            <span className="text-xs font-medium text-ink">
               Jadikan dompet default untuk mencatat pengeluaran
             </span>
           </label>
 
           {/* Action Buttons */}
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-cream-200 dark:border-navy-800">
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-ink/20">
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[48px] px-5 py-2.5 rounded-xl border border-cream-300 dark:border-navy-700 text-xs font-bold text-navy-700 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-navy-800 transition-colors"
+              className="min-h-[48px] px-5 py-2.5 rounded-sm border border-ink/20 text-xs font-bold text-ink hover:bg-ink/5 transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="min-h-[48px] px-6 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-lg shadow-emerald-600/25 active:scale-95 transition-all"
+              className="min-h-[48px] px-6 py-2.5 rounded-sm bg-ink hover:bg-ink/90 text-paper-sheet text-xs font-bold active:scale-95 transition-all"
             >
               {initialWallet ? "Simpan Perubahan" : "Tambah Dompet"}
             </button>

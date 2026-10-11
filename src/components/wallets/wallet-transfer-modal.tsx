@@ -101,26 +101,26 @@ export function WalletTransferModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="relative w-full max-w-lg bg-white dark:bg-navy-900 rounded-3xl shadow-2xl border border-cream-200 dark:border-navy-800 overflow-hidden max-h-[90vh] flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
+      <div className="relative w-full max-w-lg bg-paper-sheet rounded-sm border border-ink/20 overflow-hidden max-h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="px-6 py-4 border-b border-cream-200 dark:border-navy-800 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-ink/20 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-sm bg-aman/10 text-aman-ink flex items-center justify-center">
               <ArrowRightLeft className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-navy-950 dark:text-cream-50">
+              <h2 className="text-lg font-bold text-ink">
                 Pindah Saldo Antar Dompet
               </h2>
-              <p className="text-xs text-navy-500 dark:text-cream-400">
+              <p className="text-xs text-ink-soft">
                 Tarik tunai ATM atau top-up e-wallet bebas ribet
               </p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="w-9 h-9 rounded-full bg-cream-100 dark:bg-navy-800 text-navy-600 dark:text-cream-300 flex items-center justify-center hover:bg-cream-200 dark:hover:bg-navy-700 transition-colors"
+            className="w-9 h-9 rounded-full bg-paper-deep text-ink-soft flex items-center justify-center hover:bg-ink/5 transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
@@ -129,7 +129,7 @@ export function WalletTransferModal({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="overflow-y-auto p-6 space-y-4">
           {error && (
-            <div className="p-3 text-xs rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 font-semibold border border-rose-200 dark:border-rose-900 flex items-start gap-2">
+            <div className="p-3 text-xs rounded-sm bg-habis/10 text-habis-ink font-semibold border border-habis-ink/40 flex items-start gap-2">
               <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
               <span>{error}</span>
             </div>
@@ -139,13 +139,13 @@ export function WalletTransferModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {/* From Wallet */}
             <div>
-              <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-1">
+              <label className="text-xs font-bold text-ink block mb-1">
                 Dari Dompet / Rekening
               </label>
               <select
                 value={fromId}
                 onChange={(e) => setFromId(e.target.value)}
-                className="w-full min-h-[48px] px-3 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                className="w-full min-h-[48px] px-3 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:ring-2 focus:ring-ink"
               >
                 {wallets.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -157,13 +157,13 @@ export function WalletTransferModal({
 
             {/* To Wallet */}
             <div>
-              <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-1">
+              <label className="text-xs font-bold text-ink block mb-1">
                 Ke Dompet Tujuan
               </label>
               <select
                 value={toId}
                 onChange={(e) => setToId(e.target.value)}
-                className="w-full min-h-[48px] px-3 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-xs font-medium focus:ring-2 focus:ring-emerald-500"
+                className="w-full min-h-[48px] px-3 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:ring-2 focus:ring-ink"
               >
                 {wallets.map((w) => (
                   <option key={w.id} value={w.id} disabled={w.id === fromId}>
@@ -177,11 +177,11 @@ export function WalletTransferModal({
           {/* Amount Input */}
           <div>
             <div className="flex items-center justify-between mb-1">
-              <label className="text-xs font-bold text-navy-900 dark:text-cream-100">
-                Nominal Pindah (Rp) <span className="text-rose-500">*</span>
+              <label className="text-xs font-bold text-ink">
+                Nominal Pindah (Rp) <span className="text-habis-ink">*</span>
               </label>
               {numericAmount > 0 && (
-                <span className="text-xs font-black text-emerald-600 dark:text-emerald-400">
+                <span className="text-xs font-bold text-aman-ink">
                   {formatRupiah(numericAmount)}
                 </span>
               )}
@@ -193,14 +193,14 @@ export function WalletTransferModal({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Contoh: 100000"
-              className="w-full min-h-[48px] px-4 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ink"
               required
             />
           </div>
 
           {/* Admin Fee Options */}
           <div>
-            <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-1.5">
+            <label className="text-xs font-bold text-ink block mb-1.5">
               Biaya Admin / Transfer
             </label>
             <div className="grid grid-cols-2 gap-2 mb-2">
@@ -209,10 +209,10 @@ export function WalletTransferModal({
                   key={idx}
                   type="button"
                   onClick={() => setAdminFee(fee.value)}
-                  className={`min-h-[44px] px-3 py-2 rounded-xl text-xs font-medium border text-left flex items-center justify-between transition-all ${
+                  className={`min-h-[44px] px-3 py-2 rounded-sm text-xs font-medium border text-left flex items-center justify-between transition-all ${
                     adminFee === fee.value
-                      ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-400 font-bold"
-                      : "border-cream-200 dark:border-navy-800 text-navy-700 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-navy-800"
+                      ? "border-aman-ink/40 bg-aman/10 text-aman-ink font-bold"
+                      : "border-ink/20 text-ink hover:bg-ink/5"
                   }`}
                 >
                   <span>{fee.label}</span>
@@ -224,7 +224,7 @@ export function WalletTransferModal({
 
           {/* Reason / Notes */}
           <div>
-            <label className="text-xs font-bold text-navy-900 dark:text-cream-100 block mb-1">
+            <label className="text-xs font-bold text-ink block mb-1">
               Alasan / Keterangan Transaksi
             </label>
             <input
@@ -232,33 +232,33 @@ export function WalletTransferModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Contoh: Tarik tunai ATM kampus untuk makan siang seminggu"
-              className="w-full min-h-[44px] px-4 rounded-xl border border-cream-300 dark:border-navy-700 bg-cream-50/50 dark:bg-navy-800 text-navy-900 dark:text-cream-50 text-xs focus:ring-2 focus:ring-emerald-500"
+              className="w-full min-h-[44px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:ring-2 focus:ring-ink"
             />
           </div>
 
           {/* Breakdown / Cost Summary */}
           {numericAmount > 0 && fromWallet && (
-            <div className="p-4 rounded-2xl bg-cream-50 dark:bg-navy-800/80 border border-cream-200 dark:border-navy-700 space-y-2 text-xs">
-              <div className="flex justify-between text-navy-600 dark:text-cream-400">
+            <div className="p-4 rounded-sm bg-paper-sheet border border-ink/20 space-y-2 text-xs">
+              <div className="flex justify-between text-ink-soft">
                 <span>Saldo {fromWallet.name} saat ini:</span>
                 <span className="font-semibold">{formatRupiah(fromWallet.balance)}</span>
               </div>
-              <div className="flex justify-between text-navy-600 dark:text-cream-400">
+              <div className="flex justify-between text-ink-soft">
                 <span>Nominal ditransfer:</span>
                 <span className="font-semibold">{formatRupiah(numericAmount)}</span>
               </div>
-              <div className="flex justify-between text-navy-600 dark:text-cream-400">
+              <div className="flex justify-between text-ink-soft">
                 <span>Biaya admin:</span>
                 <span className="font-semibold">{formatRupiah(adminFee)}</span>
               </div>
-              <div className="pt-2 border-t border-cream-200 dark:border-navy-700 flex justify-between font-bold text-navy-950 dark:text-cream-50">
+              <div className="pt-2 border-t border-ink/20 flex justify-between font-bold text-ink">
                 <span>Total dipotong dari dompet asal:</span>
-                <span className={isInsufficient ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}>
+                <span className={isInsufficient ? "text-habis-ink" : "text-aman-ink"}>
                   {formatRupiah(totalDeduction)}
                 </span>
               </div>
               {isInsufficient && (
-                <div className="text-[11px] font-bold text-rose-500 pt-1">
+                <div className="text-meta font-bold text-habis-ink pt-1">
                   Saldo dompet asal tidak mencukupi untuk memproses transfer ini!
                 </div>
               )}
@@ -266,21 +266,21 @@ export function WalletTransferModal({
           )}
 
           {/* Buttons */}
-          <div className="pt-4 flex items-center justify-end gap-3 border-t border-cream-200 dark:border-navy-800">
+          <div className="pt-4 flex items-center justify-end gap-3 border-t border-ink/20">
             <button
               type="button"
               onClick={onClose}
-              className="min-h-[48px] px-5 py-2.5 rounded-xl border border-cream-300 dark:border-navy-700 text-xs font-bold text-navy-700 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-navy-800 transition-colors"
+              className="min-h-[48px] px-5 py-2.5 rounded-sm border border-ink/20 text-xs font-bold text-ink hover:bg-ink/5 transition-colors"
             >
               Batal
             </button>
             <button
               type="submit"
               disabled={isInsufficient || numericAmount <= 0}
-              className={`min-h-[48px] px-6 py-2.5 rounded-xl text-xs font-bold shadow-lg transition-all ${
+              className={`min-h-[48px] px-6 py-2.5 rounded-sm text-xs font-bold transition-all ${
                 isInsufficient || numericAmount <= 0
-                  ? "bg-navy-300 dark:bg-navy-800 text-navy-500 cursor-not-allowed opacity-60"
-                  : "bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/25 active:scale-95"
+                  ? "bg-ink/5 text-ink-soft cursor-not-allowed opacity-60"
+                  : "bg-ink hover:bg-ink/90 text-paper-sheet active:scale-95"
               }`}
             >
               Eksekusi Pindah Saldo
