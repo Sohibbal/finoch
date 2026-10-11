@@ -4,17 +4,48 @@ import { getStorage, readArray } from "@/lib/storage/local-storage";
 
 const ENVELOPES_STORAGE_KEY = "finoch_budget_envelopes_v1";
 const TRANSFERS_STORAGE_KEY = "finoch_budget_transfers_v1";
+/** Allowance the stored allocations were sized for, so they can follow the profile when it changes. */
+const ALLOWANCE_STORAGE_KEY = "finoch_budget_allowance_v1";
+
+function saveAllowanceBase(monthlyAllowance: number | undefined): void {
+  if (!monthlyAllowance) return;
+  try {
+    getStorage()?.setItem(ALLOWANCE_STORAGE_KEY, String(monthlyAllowance));
+  } catch (err) {
+    console.error("Error saving budget allowance:", err);
+  }
+}
 
 /**
- * Loads budget envelopes from localStorage, initializing with student defaults if empty.
+ * Loads budget envelopes, seeding the student template sized from `monthlyAllowance` on first use.
+ * Envelopes are a template, not data: when the allowance differs from the one they were sized for,
+ * every allocation is rescaled proportionally. Without an argument (mutations) nothing is rescaled.
  */
-export function getEnvelopes(monthlyAllowance: number = 2000000): BudgetEnvelope[] {
+export function getEnvelopes(monthlyAllowance?: number): BudgetEnvelope[] {
   // Defaults only when nothing was ever stored; an emptied list stays empty.
   const stored = readArray<BudgetEnvelope>(ENVELOPES_STORAGE_KEY);
-  if (stored) return stored;
-  const defaults = getDefaultStudentEnvelopes(monthlyAllowance);
-  saveEnvelopes(defaults);
-  return defaults;
+  if (!stored) {
+    const defaults = getDefaultStudentEnvelopes(monthlyAllowance);
+    saveEnvelopes(defaults);
+    saveAllowanceBase(monthlyAllowance);
+    return defaults;
+  }
+  if (!monthlyAllowance || monthlyAllowance <= 0 || stored.length === 0) return stored;
+
+  // Envelopes from before the allowance was recorded: their total is the allowance they were sized for.
+  const recorded = Number(getStorage()?.getItem(ALLOWANCE_STORAGE_KEY));
+  const base = recorded > 0 ? recorded : stored.reduce((sum, e) => sum + e.allocatedAmount, 0);
+  if (base <= 0 || base === monthlyAllowance) {
+    saveAllowanceBase(monthlyAllowance);
+    return stored;
+  }
+
+  const ratio = monthlyAllowance / base;
+  const now = new Date().toISOString();
+  const rescaled = stored.map((e) => ({ ...e, allocatedAmount: Math.round(e.allocatedAmount * ratio), updatedAt: now }));
+  saveEnvelopes(rescaled);
+  saveAllowanceBase(monthlyAllowance);
+  return rescaled;
 }
 
 /**
@@ -150,8 +181,9 @@ export function getTransferHistory(): EnvelopeTransferRecord[] {
 /**
  * Resets envelopes to student defaults.
  */
-export function resetEnvelopesToDefault(monthlyAllowance: number = 2000000): BudgetEnvelope[] {
+export function resetEnvelopesToDefault(monthlyAllowance?: number): BudgetEnvelope[] {
   const defaults = getDefaultStudentEnvelopes(monthlyAllowance);
   saveEnvelopes(defaults);
+  saveAllowanceBase(monthlyAllowance);
   return defaults;
 }
