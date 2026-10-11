@@ -5,7 +5,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1145
+    "textLen": 953
   },
   {
     "file": "wallets-mobile.png",
@@ -149,7 +149,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1151
+    "textLen": 959
   },
   {
     "file": "wallets-desktop.png",
@@ -305,7 +305,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 462
+    "textLen": 449
   },
   {
     "file": "onboarding-desktop.png",
@@ -313,7 +313,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 462
+    "textLen": 449
   },
   {
     "file": "(profile POST)",
@@ -325,7 +325,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 480
+    "textLen": 299
   },
   {
     "file": "wallets-empty-mobile.png",
@@ -389,7 +389,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 486
+    "textLen": 305
   },
   {
     "file": "wallets-empty-desktop.png",
