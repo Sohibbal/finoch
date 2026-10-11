@@ -1,12 +1,23 @@
 import { NextResponse } from "next/server";
+import { getSessionFromRequest } from "@/lib/auth/jwt";
+import { EXPENSE_CATEGORIES } from "../../validation";
 import { getLlmConfig } from "@/lib/llm/llm-client";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
 import type { ParsedVoiceItem } from "@/lib/types/expense";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const session = await getSessionFromRequest(req);
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "JSON tidak valid." }, { status: 400 });
+    }
     const { transcript } = body;
+
+    if (typeof transcript === "string" && transcript.length > 1000) {
+      return NextResponse.json({ error: "Transkrip maksimal 1000 karakter." }, { status: 400 });
+    }
 
     if (!transcript || typeof transcript !== "string" || !transcript.trim()) {
       return NextResponse.json({ items: [], source: "empty" });
@@ -61,8 +72,7 @@ Transkrip Ucapan:
           });
 
           if (!res.ok) {
-            if (res.status === 404) continue;
-            break;
+            continue;
           }
 
           const data = await res.json();
@@ -73,13 +83,13 @@ Transkrip Ucapan:
           const parsed = JSON.parse(cleaned);
 
           if (Array.isArray(parsed.items) && parsed.items.length > 0) {
-            const mappedItems: ParsedVoiceItem[] = parsed.items.map(
+            const mappedItems: ParsedVoiceItem[] = parsed.items.filter((it: { amount?: unknown } | null) => it && typeof it.amount === "number" && Number.isFinite(it.amount) && it.amount > 0).map(
               (it: { itemName: string; amount: number; category: string }, idx: number) => ({
                 id: `voice-llm-${Date.now()}-${idx}`,
                 rawText: cleanTranscript,
-                itemName: it.itemName || "Pengeluaran",
+                itemName: typeof it.itemName === "string" ? it.itemName.slice(0, 200) : "Pengeluaran",
                 amount: Number(it.amount) || 0,
-                category: it.category || "Other",
+                category: EXPENSE_CATEGORIES.includes(it.category) ? it.category : "Other",
                 confidence: 0.95,
               })
             );
