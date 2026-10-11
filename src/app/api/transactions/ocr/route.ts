@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { jakartaDate } from "../../validation";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
 import { getLlmConfig } from "@/lib/llm/llm-client";
 import { parseReceiptText } from "@/lib/ocr/receipt-parser";
@@ -84,7 +85,7 @@ ${rawText}`;
       new Set([llmConfig.model, ...(llmConfig.fallbackModels || [])])
     );
 
-    for (const candidateModel of candidateModels) {
+    for (const candidateModel of candidateModels.slice(0, 3)) {
       try {
         const res = await fetch(`${llmConfig.baseUrl}/chat/completions`, {
           method: "POST",
@@ -101,8 +102,7 @@ ${rawText}`;
         });
 
         if (!res.ok) {
-          if (res.status === 404) continue;
-          return null;
+          continue;
         }
 
         const data = await res.json();
@@ -117,7 +117,7 @@ ${rawText}`;
           amount: Number(parsed.amount) || 0,
           category: parsed.category || "Other",
           spendingType: parsed.spendingType || "wants",
-          date: parsed.date || new Date().toISOString().split("T")[0],
+          date: parsed.date || jakartaDate(),
           source: "ocr",
           confidence: 0.95,
           items: Array.isArray(parsed.items) ? parsed.items : [],
@@ -141,9 +141,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const formData = await req.formData();
+    if (Number(req.headers.get("content-length")) > MAX_FILE_SIZE) {
+      return NextResponse.json({ error: "Ukuran berkas struk maksimal 10 MB." }, { status: 413 });
+    }
+    const formData = await req.formData().catch(() => null);
+    if (!formData) return NextResponse.json({ error: "Form tidak valid." }, { status: 400 });
     const file = formData.get("image") as File | null;
     const directText = formData.get("text") as string | null;
+
+    if (directText !== null && (typeof directText !== "string" || directText.length > 20000)) {
+      return NextResponse.json({ error: "Teks struk maksimal 20000 karakter." }, { status: 400 });
+    }
 
     // Handle direct text payload (e.g. from client-side OCR worker)
     if (directText) {
@@ -151,7 +159,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ candidate, source: "client_ocr" }, { status: 200 });
     }
 
-    if (!file) {
+    if (!file || typeof file === "string") {
       return NextResponse.json(
         { error: "Gambar struk tidak ditemukan dalam permintaan." },
         { status: 400 }
@@ -185,6 +193,7 @@ export async function POST(req: Request) {
 
     // 2. Secondary Engine: Tesseract.js (Node.js fallback with safe explicit workerPath)
     if (!ocrText || ocrText.length < 5) {
+      let worker: Awaited<ReturnType<typeof Tesseract.createWorker>> | undefined;
       try {
         const workerPath = path.join(
           process.cwd(),
@@ -195,14 +204,15 @@ export async function POST(req: Request) {
           "node",
           "index.js"
         );
-        const worker = await Tesseract.createWorker("eng", 1, { workerPath });
+        worker = await Tesseract.createWorker("eng", 1, { workerPath });
         const tessRes = await worker.recognize(buffer);
-        await worker.terminate();
         if (tessRes?.data?.text && tessRes.data.text.trim().length > ocrText.length) {
           ocrText = tessRes.data.text.trim();
         }
       } catch (tessErr) {
         console.warn("Tesseract OCR notice:", tessErr);
+      } finally {
+        await worker?.terminate().catch((error) => console.warn("Tesseract cleanup:", error));
       }
     }
 

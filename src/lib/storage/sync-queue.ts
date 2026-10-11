@@ -2,6 +2,9 @@ import { getDatabase } from "./indexed-db";
 import type { SyncAction, SyncQueueItem } from "../types/sync";
 import type { Expense } from "../types/expense";
 
+/** After this many failed attempts an item is dropped so one poisoned change can't wedge the queue. */
+export const MAX_SYNC_RETRIES = 5;
+
 export class SyncQueueManager {
   async enqueue(action: SyncAction, expense: Expense): Promise<SyncQueueItem> {
     const db = await getDatabase();
@@ -14,7 +17,8 @@ export class SyncQueueManager {
       retryCount: 0,
     };
 
-    await db.put("sync_queue", item);
+    // Demo-mode rows (userId "<scope>::demo") are sample data and must never reach the server.
+    if (!expense.userId.endsWith("::demo")) await db.put("sync_queue", item);
     return item;
   }
 
@@ -37,24 +41,29 @@ export class SyncQueueManager {
     await tx.done;
   }
 
-  async markFailed(id: string, errorMessage: string): Promise<void> {
+  /** Counts a failed attempt; returns true when the item hit MAX_SYNC_RETRIES and was dropped. */
+  async markFailed(id: string, errorMessage: string): Promise<boolean> {
     const db = await getDatabase();
     const item = await db.get("sync_queue", id);
-    if (item) {
-      item.retryCount += 1;
-      item.errorMessage = errorMessage;
-      await db.put("sync_queue", item);
+    if (!item) return false;
+    item.retryCount += 1;
+    item.errorMessage = errorMessage;
+    if (item.retryCount >= MAX_SYNC_RETRIES) {
+      await db.delete("sync_queue", id);
+      return true;
     }
+    await db.put("sync_queue", item);
+    return false;
   }
 
-  async removeGuestItems(): Promise<void> {
+  async removeUserItems(userId: string): Promise<void> {
     const db = await getDatabase();
     const all = await db.getAll("sync_queue");
-    const guestItemIds = all
-      .filter((item) => item.payload.userId === "guest")
+    const userItemIds = all
+      .filter((item) => item.payload.userId === userId)
       .map((item) => item.id);
-    if (guestItemIds.length > 0) {
-      await this.removeItems(guestItemIds);
+    if (userItemIds.length > 0) {
+      await this.removeItems(userItemIds);
     }
   }
 

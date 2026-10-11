@@ -7,6 +7,7 @@ import {
   deleteWishlistItem,
   getWishlistSummary,
 } from "@/lib/storage/wishlist-storage";
+import { setDemoMode } from "@/lib/storage/local-storage";
 
 describe("Wishlist Anti-Impulsive Storage Engine", () => {
   let mockStore: Record<string, string> = {};
@@ -43,6 +44,8 @@ describe("Wishlist Anti-Impulsive Storage Engine", () => {
         configurable: true,
       });
     }
+    // Sample data is demo-only; these cases exercise the seeded defaults.
+    setDemoMode(true);
   });
 
   it("loads pre-populated student wishlist items when storage is empty", () => {

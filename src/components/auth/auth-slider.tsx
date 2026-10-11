@@ -1,11 +1,13 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Lock, Mail, User, Loader2, LogOut, Sun, Moon } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
+import { safeNextPath } from "@/lib/auth/safe-next";
 
 interface AuthSliderProps {
   initialMode?: "login" | "register";
@@ -35,27 +37,7 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
   const [regError, setRegError] = useState<string | null>(null);
   const [isRegSubmitting, setIsRegSubmitting] = useState(false);
 
-  // Theme state
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const isDarkTheme = document.documentElement.classList.contains("dark");
-    setIsDark(isDarkTheme);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("voicash_theme", "dark");
-      localStorage.setItem("finra_theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("voicash_theme", "light");
-      localStorage.setItem("finra_theme", "light");
-    }
-  };
+  const { isDark, toggleTheme } = useTheme();
 
   const handleSwitchMode = (newMode: "login" | "register") => {
     setMode(newMode);
@@ -88,7 +70,7 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
         if (res.ok) {
           const data = await res.json();
           if (data?.profile) {
-            router.push("/dashboard");
+            router.push(safeNextPath(searchParams.get("next")));
             return;
           }
         }
@@ -108,8 +90,8 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
       return;
     }
 
-    if (regPassword.length < 6) {
-      setRegError("Password minimal 6 karakter.");
+    if (regPassword.length < 8) {
+      setRegError("Password minimal 8 karakter.");
       return;
     }
 
@@ -372,7 +354,7 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
 
                   <div>
                     <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                      Password (minimal 6 karakter)
+                      Password (minimal 8 karakter)
                     </label>
                     <div className="relative">
                       <input

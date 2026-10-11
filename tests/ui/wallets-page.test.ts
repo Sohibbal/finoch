@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/wallets",
 }));
 
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test-user-123", email: "student@finoch.id" },
     logout: vi.fn(),
   }),
@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Student Wallets & Multi-Account Components", () => {
   it("exports WalletsPage component successfully", async () => {
-    const WalletsPageModule = await import("@/app/wallets/page");
+    const WalletsPageModule = await import("@/app/(app)/wallets/page");
     expect(WalletsPageModule.default).toBeDefined();
     expect(typeof WalletsPageModule.default).toBe("function");
   });

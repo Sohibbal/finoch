@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { jakartaDate } from "../validation";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
 import { getLlmConfig } from "@/lib/llm/llm-client";
@@ -7,10 +8,14 @@ import { buildCopilotSystemPrompt, FinancialFacts } from "./prompt-builder";
 export async function POST(req: Request) {
   try {
     const session = await getSessionFromRequest(req);
-    const body = await req.json();
-    const { message, facts } = body;
+    if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "JSON tidak valid." }, { status: 400 });
+    }
+    const { message } = body;
 
-    if (!message || typeof message !== "string") {
+    if (typeof message !== "string" || !message.trim() || message.length > 2000) {
       return NextResponse.json(
         { error: "Pesan tidak boleh kosong" },
         { status: 400 }
@@ -18,26 +23,29 @@ export async function POST(req: Request) {
     }
 
     const defaultFacts: FinancialFacts = {
-      monthlyIncome: 3500000,
-      monthlyExpense: 2300000,
-      netSavings: 1200000,
-      topCategory: "Food (Rp920.000)",
-      goalName: "Beli Laptop Kerja",
+      monthlyIncome: 0,
+      monthlyExpense: 0,
+      netSavings: 0,
+      topCategory: "Belum ada pengeluaran",
+      goalName: "Belum ada target",
       goalStatus: "on_track",
     };
 
-    let activeFacts: FinancialFacts = facts || defaultFacts;
+    let activeFacts: FinancialFacts = defaultFacts;
 
-    // Load real facts from user profile & database if authenticated and facts not explicitly passed
-    if (session?.userId && !facts) {
+    // Only server-owned facts may enter the system prompt.
+    if (session.userId) {
       try {
+        const [year, month] = jakartaDate().split("-").map(Number);
+        const monthStart = new Date(Date.UTC(year, month - 1, 1) - 7 * 60 * 60 * 1000);
+        const nextMonth = new Date(Date.UTC(year, month, 1) - 7 * 60 * 60 * 1000);
         const [profile, expenses, goals] = await Promise.all([
           prisma.financialProfile.findUnique({ where: { userId: session.userId } }),
-          prisma.expense.findMany({ where: { userId: session.userId, isDeleted: false } }),
-          prisma.financialGoal.findMany({ where: { userId: session.userId } }),
+          prisma.expense.findMany({ where: { userId: session.userId, isDeleted: false, createdAt: { gte: monthStart, lt: nextMonth } } }),
+          prisma.financialGoal.findMany({ where: { userId: session.userId }, orderBy: [{ targetDate: "asc" }, { id: "asc" }] }),
         ]);
 
-        if (profile) {
+        {
           const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
           const catMap = expenses.reduce((acc, e) => {
             acc[e.category] = (acc[e.category] || 0) + e.amount;
@@ -49,9 +57,9 @@ export async function POST(req: Request) {
             : "Konsumsi Harian";
 
           activeFacts = {
-            monthlyIncome: profile.monthlyIncome,
+            monthlyIncome: profile?.monthlyIncome ?? 0,
             monthlyExpense: totalExpense,
-            netSavings: Math.max(0, profile.monthlyIncome - totalExpense),
+            netSavings: Math.max(0, (profile?.monthlyIncome ?? 0) - totalExpense),
             topCategory: topCatLabel,
             goalName: goals[0]?.name || "Tabungan Impian",
             goalStatus: goals[0]?.status || "on_track",
@@ -64,7 +72,6 @@ export async function POST(req: Request) {
 
     const systemPrompt = buildCopilotSystemPrompt(activeFacts);
     const llmConfig = getLlmConfig();
-    let llmErrorMessage: string | null = null;
 
     if (llmConfig) {
       const candidateModels = Array.from(
@@ -107,7 +114,6 @@ export async function POST(req: Request) {
               `[Copilot LLM ${candidateModel} Error ${res.status}]`,
               errorText
             );
-            llmErrorMessage = `HTTP ${res.status}: ${errorText.slice(0, 150)}`;
             // If model does not exist (404), continue trying next candidate
             if (res.status === 404 || errorText.includes("does not exist")) {
               continue;
@@ -118,12 +124,9 @@ export async function POST(req: Request) {
           const errorMsg =
             err instanceof Error ? err.message : "Network/Timeout error";
           console.error(`[Copilot LLM ${candidateModel} Exception]`, errorMsg);
-          llmErrorMessage = errorMsg;
           break;
         }
       }
-    } else {
-      llmErrorMessage = "OPENAI_API_KEY belum terdeteksi. Pastikan file .env ada dan restart npm run dev.";
     }
 
     // Deterministic fallback response based on financial facts
@@ -141,7 +144,6 @@ export async function POST(req: Request) {
     return NextResponse.json({
       reply,
       source: "facts_fallback",
-      llmDiagnostic: llmErrorMessage,
     });
   } catch (error) {
     return NextResponse.json(

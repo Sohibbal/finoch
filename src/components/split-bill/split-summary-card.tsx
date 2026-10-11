@@ -236,7 +236,7 @@ export function SplitSummaryCard({
           {isSaved ? (
             <>
               <Check className="w-4 h-4 text-emerald-600" />
-              <span>Tersimpan di Pengeluaran & Buku Talangan!</span>
+              <span>Tersimpan di Pengeluaran & Buku Kasbon!</span>
             </>
           ) : (
             <>

@@ -1,18 +1,12 @@
 import { WishlistItem, WishlistSummary } from "@/types/wishlist-types";
+import { getStorage, isDemoMode, readArray } from "@/lib/storage/local-storage";
 
 const WISHLIST_STORAGE_KEY = "finoch_student_wishlist";
 
-function getStorage(): Storage | null {
-  if (typeof window !== "undefined" && window.localStorage) {
-    return window.localStorage;
-  }
-  if (typeof localStorage !== "undefined") {
-    return localStorage;
-  }
-  return null;
-}
+const daysFromNow = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
 
-const DEFAULT_WISHLIST_ITEMS: WishlistItem[] = [
+// Built per call: demo dates stay relative to today and callers can mutate freely.
+const createDefaultWishlistItems = (): WishlistItem[] => [
   {
     id: "wish_sneakers",
     name: "Sepatu Sneakers Kuliah",
@@ -20,9 +14,8 @@ const DEFAULT_WISHLIST_ITEMS: WishlistItem[] = [
     category: "Fashion",
     priority: "high",
     coolingDays: 7,
-    createdAt: "2026-10-02T10:00:00.000Z",
-    // Cooling ends 7 days from Oct 2 = Oct 9
-    coolingEndDate: "2026-10-09T10:00:00.000Z",
+    createdAt: daysFromNow(-2),
+    coolingEndDate: daysFromNow(5),
     status: "cooling",
     note: "Sepatu lama solnya sudah mulai tipis",
     linkUrl: "https://shopee.co.id",
@@ -34,8 +27,8 @@ const DEFAULT_WISHLIST_ITEMS: WishlistItem[] = [
     category: "Gadget",
     priority: "medium",
     coolingDays: 7,
-    createdAt: "2026-09-25T14:00:00.000Z",
-    coolingEndDate: "2026-10-02T14:00:00.000Z", // Ended -> ready
+    createdAt: daysFromNow(-10),
+    coolingEndDate: daysFromNow(-3), // Ended -> ready
     status: "ready",
     note: "Untuk belajar di kos biar nggak keganggu suara motor",
   },
@@ -46,8 +39,8 @@ const DEFAULT_WISHLIST_ITEMS: WishlistItem[] = [
     category: "Fashion",
     priority: "low",
     coolingDays: 7,
-    createdAt: "2026-09-20T08:00:00.000Z",
-    coolingEndDate: "2026-09-27T08:00:00.000Z",
+    createdAt: daysFromNow(-15),
+    coolingEndDate: daysFromNow(-8),
     status: "saved_money",
     note: "Ternyata cuma FOMO lihat konten TikTok, dibatalkan!",
   },
@@ -55,14 +48,16 @@ const DEFAULT_WISHLIST_ITEMS: WishlistItem[] = [
 
 export function getWishlist(): WishlistItem[] {
   const storage = getStorage();
-  if (!storage) return DEFAULT_WISHLIST_ITEMS;
+  if (!storage) return [];
   try {
-    const raw = storage.getItem(WISHLIST_STORAGE_KEY);
-    if (!raw) {
-      storage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(DEFAULT_WISHLIST_ITEMS));
-      return DEFAULT_WISHLIST_ITEMS;
+    const items = readArray<WishlistItem>(WISHLIST_STORAGE_KEY);
+    if (!items) {
+      // Sample items only in demo mode; a real user starts with an empty wishlist.
+      if (!isDemoMode()) return [];
+      const defaults = createDefaultWishlistItems();
+      storage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(defaults));
+      return defaults;
     }
-    const items: WishlistItem[] = JSON.parse(raw);
 
     // Auto-update status from 'cooling' to 'ready' if coolingEndDate has passed
     const now = new Date();
@@ -82,7 +77,7 @@ export function getWishlist(): WishlistItem[] {
     return updated;
   } catch (err) {
     console.error("Gagal membaca storage wishlist:", err);
-    return DEFAULT_WISHLIST_ITEMS;
+    return [];
   }
 }
 

@@ -7,6 +7,7 @@ import {
   markBillAsPaid,
   getBillSummary,
 } from "@/lib/storage/bill-storage";
+import { setDemoMode } from "@/lib/storage/local-storage";
 
 describe("Bill Storage Engine", () => {
   let mockStore: Record<string, string> = {};
@@ -43,6 +44,8 @@ describe("Bill Storage Engine", () => {
         configurable: true,
       });
     }
+    // Sample data is demo-only; these cases exercise the seeded defaults.
+    setDemoMode(true);
   });
 
   it("loads default student bills when storage is empty", () => {

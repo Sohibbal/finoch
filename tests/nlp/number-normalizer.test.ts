@@ -51,4 +51,35 @@ describe("Indonesian Number Normalizer", () => {
   it("returns null for non-numeric sentences", () => {
     expect(parseIndonesianNumber("halo selamat pagi kawan")).toBeNull();
   });
+
+  it.each([
+    ["seratus lima puluh ribu", 150000],
+    ["tiga ratus lima puluh ribu", 350000],
+    ["seratus dua puluh ribu", 120000],
+    ["seratus lima puluh", 150],
+    ["seribu lima ratus", 1500],
+    ["sejuta lima ratus ribu", 1500000],
+    ["dua setengah juta", 2500000],
+    ["satu setengah juta", 1500000],
+    ["2 juta setengah", 2500000],
+    ["2 ribu 500", 2500],
+    ["beli 3 nasi rp 45.000", 45000],
+    ["fotokopi 100 lembar 15000", 15000],
+    ["rp 12,500", 12500],
+    ["1,5 juta", 1500000],
+    ["goceng", 5000],
+    ["ceban", 10000],
+    ["gocap", 50000],
+    ["goban", 50000],
+    ["seceng", 1000],
+    ["nopek", 200000],
+    ["es teh duaribu", 2000],
+    ["lima puluh rebu", 50000],
+  ])("parses %s as %d", (input, expected) => {
+    expect(parseIndonesianNumber(input)?.amount).toBe(expected);
+  });
+
+  it("does not treat a bare small number word as a price", () => {
+    expect(parseIndonesianNumber("es teh dua")).toBeNull();
+  });
 });

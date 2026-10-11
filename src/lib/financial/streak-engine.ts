@@ -1,4 +1,6 @@
 import { DailyCashflowPoint, StreakBadge, StreakSummary, DayStatus } from "@/types/streak-types";
+import { WANTS_CATEGORIES } from "@/lib/financial/report-engine";
+import { localDateKey, parseDate } from "@/lib/date";
 
 export interface StreakExpenseCandidate {
   id?: string;
@@ -7,15 +9,6 @@ export interface StreakExpenseCandidate {
   category?: string;
   createdAt?: string;
 }
-
-const WANTS_CATEGORIES = [
-  "shopping & lifestyle",
-  "shopping",
-  "entertainment & leisure",
-  "entertainment",
-  "social & family",
-  "other",
-];
 
 const DAY_NAMES_ID = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
@@ -33,31 +26,32 @@ export function calculateStreakMetrics(
 
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Map expenses by day number (1 - 31)
-  const dayMap: Record<number, { total: number; wants: number; count: number }> = {};
-  for (let i = 1; i <= daysInMonth; i++) {
-    dayMap[i] = { total: 0, wants: 0, count: 0 };
-  }
+  // Map expenses by local day key (YYYY-MM-DD), across all months so streaks can span them
+  const dayMap: Record<string, { total: number; wants: number; count: number }> = {};
+  let earliestDay: string | null = null;
 
   for (const exp of expenses) {
-    if (!exp.createdAt) continue;
-    const d = new Date(exp.createdAt);
-    if (isNaN(d.getTime())) continue;
+    const d = parseDate(exp.createdAt);
+    if (!d) continue;
 
-    if (d.getFullYear() === year && d.getMonth() === month) {
-      const dayNum = d.getDate();
-      if (dayMap[dayNum]) {
-        dayMap[dayNum].total += exp.amount || 0;
-        dayMap[dayNum].count += 1;
+    const key = localDateKey(d);
+    if (!dayMap[key]) dayMap[key] = { total: 0, wants: 0, count: 0 };
+    if (!earliestDay || key < earliestDay) earliestDay = key;
 
-        const cat = (exp.category || "").toLowerCase();
-        const isWant = WANTS_CATEGORIES.some((c) => cat.includes(c));
-        if (isWant) {
-          dayMap[dayNum].wants += exp.amount || 0;
-        }
-      }
+    dayMap[key].total += exp.amount || 0;
+    dayMap[key].count += 1;
+
+    const cat = (exp.category || "").toLowerCase();
+    const isWant = WANTS_CATEGORIES.some((c) => cat.includes(c));
+    if (isWant) {
+      dayMap[key].wants += exp.amount || 0;
     }
   }
+
+  const emptyDay = { total: 0, wants: 0, count: 0 };
+  // Green only for a true no-spend day; any spending is judged against the daily limit
+  const statusOf = (total: number): DayStatus =>
+    total === 0 ? "no_spend" : total <= dailySafeLimit ? "disciplined" : "overspent";
 
   const monthlyPoints: DailyCashflowPoint[] = [];
   let greenDaysCount = 0;
@@ -68,12 +62,12 @@ export function calculateStreakMetrics(
   for (let day = 1; day <= daysInMonth; day++) {
     const dObj = new Date(year, month, day);
     const dayName = DAY_NAMES_ID[dObj.getDay()] || "Sen";
-    const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+    const dateStr = localDateKey(dObj);
 
     const isToday = day === todayDateNumber;
     const isFuture = day > todayDateNumber;
 
-    const data = dayMap[day];
+    const data = dayMap[dateStr] || emptyDay;
 
     let status: DayStatus = "no_spend";
 
@@ -81,16 +75,10 @@ export function calculateStreakMetrics(
       status = "disciplined";
     } else {
       evaluatedDays += 1;
-      if (data.total === 0 || data.wants === 0) {
-        status = "no_spend"; // No-spend day / zero wants
-        greenDaysCount += 1;
-      } else if (data.total <= dailySafeLimit) {
-        status = "disciplined"; // Within safe daily allowance
-        yellowDaysCount += 1;
-      } else {
-        status = "overspent"; // Exceeded daily allowance
-        redDaysCount += 1;
-      }
+      status = statusOf(data.total);
+      if (status === "no_spend") greenDaysCount += 1;
+      else if (status === "disciplined") yellowDaysCount += 1;
+      else redDaysCount += 1;
     }
 
     monthlyPoints.push({
@@ -106,15 +94,15 @@ export function calculateStreakMetrics(
     });
   }
 
-  // Calculate current streak backwards from today
+  // Calculate current streak backwards from today. It continues into previous months
+  // (so it doesn't reset on the 1st) but stops before the first recorded expense.
   let currentStreak = 0;
-  for (let day = todayDateNumber; day >= 1; day--) {
-    const pt = monthlyPoints[day - 1];
-    if (pt && (pt.status === "no_spend" || pt.status === "disciplined")) {
-      currentStreak += 1;
-    } else {
-      break;
-    }
+  const monthStartKey = localDateKey(new Date(year, month, 1));
+  for (let offset = 0; offset < 3660; offset++) {
+    const key = localDateKey(new Date(year, month, todayDateNumber - offset));
+    if (key < monthStartKey && (!earliestDay || key < earliestDay)) break;
+    if (statusOf((dayMap[key] || emptyDay).total) === "overspent") break;
+    currentStreak += 1;
   }
 
   // Calculate longest streak in evaluated days
@@ -129,6 +117,7 @@ export function calculateStreakMetrics(
       tempStreak = 0;
     }
   }
+  longestStreak = Math.max(longestStreak, currentStreak);
 
   // Assign gamified badge
   let badge: StreakBadge = {

@@ -13,6 +13,7 @@ import { ParsedExpenseList } from "./parsed-expense-list";
 import { ExpenseEditor } from "./expense-editor";
 import { ManualExpenseInput } from "./manual-expense-input";
 import { OfflineModelCard } from "./offline-model-card";
+import { WalletPicker } from "@/components/wallets/wallet-picker";
 
 interface VoiceExpenseSheetProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ interface VoiceExpenseSheetProps {
 export function VoiceExpenseSheet({
   isOpen,
   onClose,
-  userId = "guest",
+  userId,
   onExpenseSaved,
 }: VoiceExpenseSheetProps) {
   const {
@@ -53,6 +54,13 @@ export function VoiceExpenseSheet({
   const [parsedItems, setParsedItems] = useState<ParsedVoiceItem[]>([]);
   const [editingItem, setEditingItem] = useState<ParsedVoiceItem | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [walletId, setWalletId] = useState<string | undefined>(undefined);
+  const closeTimerGenerationRef = useRef(0);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => () => {
+    closeTimerGenerationRef.current += 1;
+    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+  }, [isOpen]);
   const wasOpenRef = useRef(isOpen);
 
   // 1. Sync state saat merekam
@@ -141,6 +149,7 @@ export function VoiceExpenseSheet({
       setParsedItems([]);
       setVoiceState("idle");
       setStatusMessage(null);
+      setWalletId(undefined);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, stopListening, resetTranscript]);
@@ -204,6 +213,7 @@ export function VoiceExpenseSheet({
 
   const handleConfirmAndSave = async () => {
     if (parsedItems.length === 0) return;
+    const closeTimerGeneration = closeTimerGenerationRef.current;
 
     setVoiceState("processing");
 
@@ -214,6 +224,7 @@ export function VoiceExpenseSheet({
           amount: item.amount,
           category: item.category,
           userId,
+          walletId,
         }))
       );
 
@@ -222,7 +233,9 @@ export function VoiceExpenseSheet({
 
       setVoiceState("saved");
 
-      setTimeout(() => {
+      if (closeTimerGeneration !== closeTimerGenerationRef.current) return;
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
+      closeTimerRef.current = setTimeout(() => {
         if (onExpenseSaved) onExpenseSaved();
         onClose();
       }, 1200);
@@ -300,12 +313,15 @@ export function VoiceExpenseSheet({
 
           {/* Review stage: detected transactions */}
           {voiceState === "review" && (
-            <ParsedExpenseList
-              items={parsedItems}
-              onToggleCategory={handleToggleCategory}
-              onEdit={(item) => setEditingItem(item)}
-              onDelete={handleDeleteItem}
-            />
+            <>
+              <ParsedExpenseList
+                items={parsedItems}
+                onToggleCategory={handleToggleCategory}
+                onEdit={(item) => setEditingItem(item)}
+                onDelete={handleDeleteItem}
+              />
+              <WalletPicker value={walletId} onChange={setWalletId} />
+            </>
           )}
 
           {/* Offline Model Manager Card */}

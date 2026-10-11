@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React from "react";
+import { useTheme } from "@/hooks/use-theme";
 import { Sun, Moon } from "lucide-react";
 
 interface ThemeToggleProps {
@@ -9,28 +10,7 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ className = "", showLabel = false }: ThemeToggleProps) {
-  const [isDark, setIsDark] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const isDarkTheme = document.documentElement.classList.contains("dark");
-    setIsDark(isDarkTheme);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("voicash_theme", "dark");
-      localStorage.setItem("finra_theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("voicash_theme", "light");
-      localStorage.setItem("finra_theme", "light");
-    }
-  };
+  const { isDark, mounted, toggleTheme } = useTheme();
 
   if (!mounted) {
     return (

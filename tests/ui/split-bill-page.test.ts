@@ -11,8 +11,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock hooks
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test_user", name: "Diki", email: "diki@finoch.id" },
     logout: vi.fn(),
   }),
@@ -20,7 +20,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Split Bill Page Components", () => {
   it("exports SplitBillPage component successfully", async () => {
-    const mod = await import("@/app/split-bill/page");
+    const mod = await import("@/app/(app)/split-bill/page");
     expect(mod.default).toBeDefined();
     expect(typeof mod.default).toBe("function");
   });
@@ -30,14 +30,12 @@ describe("Split Bill Page Components", () => {
     const { BillItemEditor } = await import("@/components/split-bill/bill-item-editor");
     const { TaxDiscountConfig } = await import("@/components/split-bill/tax-discount-config");
     const { SplitSummaryCard } = await import("@/components/split-bill/split-summary-card");
-    const { TalanganHistoryModal } = await import("@/components/split-bill/talangan-history-modal");
     const { ReceiptOcrButton } = await import("@/components/split-bill/receipt-ocr-button");
 
     expect(ParticipantManager).toBeDefined();
     expect(BillItemEditor).toBeDefined();
     expect(TaxDiscountConfig).toBeDefined();
     expect(SplitSummaryCard).toBeDefined();
-    expect(TalanganHistoryModal).toBeDefined();
     expect(ReceiptOcrButton).toBeDefined();
   });
 });

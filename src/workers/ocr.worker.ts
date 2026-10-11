@@ -23,9 +23,12 @@ self.onmessage = async (e: MessageEvent<OcrWorkerMessage>) => {
       try {
         const { createWorker } = await import("tesseract.js");
         const worker = await createWorker("ind");
-        const ret = await worker.recognize(payload.image);
-        recognizedText = ret.data.text;
-        await worker.terminate();
+        try {
+          const ret = await worker.recognize(payload.image);
+          recognizedText = ret.data.text;
+        } finally {
+          await worker.terminate();
+        }
       } catch (err: unknown) {
         // Fallback when tesseract offline wasm worker is unavailable
         const message = err instanceof Error ? err.message : "Tesseract unavailable";

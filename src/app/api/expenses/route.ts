@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { normalizeExpenseCategory } from "../validation";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
 
@@ -30,10 +31,17 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
-    const { id, itemName, amount, category, createdAt } = body;
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "JSON tidak valid." }, { status: 400 });
+    }
+    const { id, itemName, amount, category, createdAt, walletId } = body;
 
-    if (!itemName || !amount || !category) {
+    if (typeof itemName !== "string" || !itemName.trim() || itemName.length > 200
+      || typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0 || amount > 2_000_000_000
+      || (createdAt !== undefined && (typeof createdAt !== "string" || !/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(createdAt)
+        || !Number.isFinite(Date.parse(createdAt)) || new Date(createdAt.slice(0, 10)).toISOString().slice(0, 10) !== createdAt.slice(0, 10)))
+      || (walletId !== undefined && walletId !== null && (typeof walletId !== "string" || !walletId || walletId.length > 100))) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
@@ -41,9 +49,10 @@ export async function POST(req: Request) {
       data: {
         id: id || `exp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
         userId: session.userId,
-        itemName,
-        amount: Math.round(amount),
-        category,
+        itemName: itemName.trim(),
+        amount,
+        category: normalizeExpenseCategory(category),
+        walletId: walletId ?? null,
         createdAt: createdAt ? new Date(createdAt) : new Date(),
         updatedAt: new Date(),
       },

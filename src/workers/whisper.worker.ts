@@ -16,7 +16,7 @@ if (env.backends?.onnx?.wasm) {
   env.backends.onnx.wasm.numThreads = 1;
 }
 
-class PipelineSingleton {
+export class PipelineSingleton {
   static task = "automatic-speech-recognition" as const;
   static currentModel = "Xenova/whisper-base";
   static instance: any = null;
@@ -28,17 +28,21 @@ class PipelineSingleton {
     const targetModel = modelId || this.currentModel;
     if (this.instance === null || this.currentModel !== targetModel) {
       this.currentModel = targetModel;
-      this.instance = await pipeline(this.task, targetModel, {
+      const loading = pipeline(this.task, targetModel, {
         progress_callback,
         quantized: true,
+      }).catch((error: unknown) => {
+        if (this.instance === loading) this.instance = null;
+        throw error;
       });
+      this.instance = loading;
     }
     return this.instance;
   }
 }
 
 self.addEventListener("message", async (event: MessageEvent) => {
-  const { type, audio, model, tier } = event.data || {};
+  const { type, audio, model, tier, requestId } = event.data || {};
 
   if (type === "load") {
     try {
@@ -52,6 +56,7 @@ self.addEventListener("message", async (event: MessageEvent) => {
     } catch (err: any) {
       self.postMessage({
         status: "error",
+        requestId,
         error: err?.message || String(err),
       });
     }
@@ -65,7 +70,7 @@ self.addEventListener("message", async (event: MessageEvent) => {
   } else if (type === "transcribe") {
     try {
       const transcriber = await PipelineSingleton.getInstance(model);
-      self.postMessage({ status: "transcribing" });
+      self.postMessage({ status: "transcribing", requestId });
 
       const output = await transcriber(audio, {
         language: "indonesian",
@@ -78,10 +83,11 @@ self.addEventListener("message", async (event: MessageEvent) => {
         output?.text || (typeof output === "string" ? output : "") || "";
       // Bersihkan special tokens seperti [BLANK_AUDIO] atau noise
       const cleanText = rawText.replace(/\[.*?\]/g, "").trim();
-      self.postMessage({ status: "complete", output: cleanText });
+      self.postMessage({ status: "complete", output: cleanText, requestId });
     } catch (err: any) {
       self.postMessage({
         status: "error",
+        requestId,
         error: err?.message || String(err),
       });
     }

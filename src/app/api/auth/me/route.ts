@@ -25,6 +25,8 @@ export async function GET(req: Request) {
 
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
-    return NextResponse.json({ user: null }, { status: 200 });
+    // A DB outage is not "logged out": 503 lets the client keep the session instead of clearing it.
+    console.error("Session lookup failed:", error);
+    return NextResponse.json({ error: "Layanan sedang tidak tersedia." }, { status: 503 });
   }
 }

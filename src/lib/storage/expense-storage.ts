@@ -1,11 +1,16 @@
 import { getDatabase } from "./indexed-db";
 import { syncQueue } from "./sync-queue";
+import { GUEST_SCOPE, getDataScope } from "./local-storage";
+import { getWallets } from "./wallet-storage";
+import { getDefaultWalletId } from "../financial/wallet-engine";
 import type { Expense, ExpenseCategory } from "../types/expense";
 
 export interface CreateExpenseParams {
   itemName: string;
   amount: number;
   category: ExpenseCategory;
+  /** Omitted: charged to the default wallet. null: no wallet. */
+  walletId?: string | null;
   userId?: string;
   createdAt?: string;
 }
@@ -17,10 +22,11 @@ export class ExpenseStorage {
 
     const expense: Expense = {
       id: `exp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
-      userId: params.userId || "guest",
+      userId: params.userId || getDataScope(),
       itemName: params.itemName.trim(),
       amount: Math.round(params.amount),
       category: params.category,
+      walletId: params.walletId !== undefined ? params.walletId : getDefaultWalletId(getWallets()),
       createdAt: params.createdAt || now,
       updatedAt: now,
       syncStatus: "pending",
@@ -42,17 +48,10 @@ export class ExpenseStorage {
     return results;
   }
 
-  async getExpenses(userId?: string): Promise<Expense[]> {
+  // Defaults to the current storage scope so a shared device never lists another user's rows.
+  async getExpenses(userId: string = getDataScope()): Promise<Expense[]> {
     const db = await getDatabase();
-    let all: Expense[] = [];
-
-    if (userId) {
-      const tx = db.transaction("expenses", "readonly");
-      const index = tx.store.index("by-user");
-      all = await index.getAll(userId);
-    } else {
-      all = await db.getAll("expenses");
-    }
+    const all = await db.getAllFromIndex("expenses", "by-user", userId);
 
     // Filter out soft-deleted items and sort newest first
     return all
@@ -114,10 +113,12 @@ export class ExpenseStorage {
     const db = await getDatabase();
     const tx = db.transaction("expenses", "readwrite");
     const index = tx.store.index("by-user");
-    const guestExpenses = await index.getAll("guest");
+    const guestExpenses = await index.getAll(GUEST_SCOPE);
 
     const migratedList: Expense[] = [];
     for (const exp of guestExpenses) {
+      // Deleted guest rows never reached the server; claiming them would re-create them there.
+      if (exp.isDeleted) continue;
       const migrated: Expense = {
         ...exp,
         userId: newUserId,
@@ -131,7 +132,7 @@ export class ExpenseStorage {
     await tx.done;
 
     // Clean up legacy guest queue items to prevent duplication
-    await syncQueue.removeGuestItems();
+    await syncQueue.removeUserItems(GUEST_SCOPE);
 
     // Enqueue migrated items for authenticated cloud sync
     for (const migrated of migratedList) {

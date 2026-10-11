@@ -1,4 +1,5 @@
 import { AiInsightCard } from "@/types/financial-types";
+import { isSameLocalMonth, parseDate } from "@/lib/date";
 
 export interface PatternDetectorInput {
   currentCategoryTotals: Record<string, number>;
@@ -11,7 +12,10 @@ export function detectSpendingPatterns(input: PatternDetectorInput): AiInsightCa
   const { currentCategoryTotals, previousCategoryTotals, recurringExpenses = [] } = input;
 
   // 1. Detect Category Spending Jumps or Drops (> 20%)
-  for (const [category, currentVal] of Object.entries(currentCategoryTotals)) {
+  // Union of both periods so a category that dropped to 0 (absent now) is still reported
+  const categories = new Set([...Object.keys(currentCategoryTotals), ...Object.keys(previousCategoryTotals)]);
+  for (const category of categories) {
+    const currentVal = currentCategoryTotals[category] || 0;
     const previousVal = previousCategoryTotals[category];
     if (previousVal && previousVal > 0) {
       const changePercent = ((currentVal - previousVal) / previousVal) * 100;
@@ -75,4 +79,27 @@ export function detectSpendingPatterns(input: PatternDetectorInput): AiInsightCa
   }
 
   return insights;
+}
+
+/** Per-category spending of the local month containing `now` and of the month before it. */
+export function getMonthlyCategoryTotals(
+  expenses: Array<{ category?: string; amount: number; createdAt?: string | Date }>,
+  now: Date = new Date()
+): Pick<PatternDetectorInput, "currentCategoryTotals" | "previousCategoryTotals"> {
+  const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const currentCategoryTotals: Record<string, number> = {};
+  const previousCategoryTotals: Record<string, number> = {};
+  for (const e of expenses) {
+    const at = e.createdAt instanceof Date ? e.createdAt : parseDate(e.createdAt);
+    if (!at || !(e.amount > 0)) continue;
+    const bucket = isSameLocalMonth(at, now)
+      ? currentCategoryTotals
+      : isSameLocalMonth(at, previousMonth)
+        ? previousCategoryTotals
+        : null;
+    if (!bucket) continue;
+    const category = e.category || "Other";
+    bucket[category] = (bucket[category] || 0) + e.amount;
+  }
+  return { currentCategoryTotals, previousCategoryTotals };
 }

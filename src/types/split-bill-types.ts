@@ -49,17 +49,6 @@ export interface SplitBillResult {
   totalService: number;
   totalDiscount: number;
   grandTotal: number;
+  roundingSurplus: number; // Sum of finalAmounts minus grandTotal (> 0 only with a rounding step)
   shares: ParticipantShare[];
-}
-
-export interface TalanganRecord {
-  id: string;
-  restaurantName: string;
-  date: string;
-  friendName: string;
-  amount: number;
-  itemsSummary: string;
-  isPaid: boolean;
-  paidAt?: string;
-  createdAt: string;
 }
