@@ -8,155 +8,84 @@ datasource db {
 }
 
 model User {
-  id                String             @id @default(uuid())
-  email             String             @unique
-  password          String             // bcrypt hashed
-  name              String
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  profile           FinancialProfile?
-  expenses          Expense[]
-  transactions      Transaction[]
-  goals             FinancialGoal[]
-  recurringExpenses RecurringExpense[]
-  insights          AiInsight[]
-  simulations       Simulation[]
-  documents         UserDocument[]
+  id           String        @id @default(uuid())
+  email        String        @unique
+  password     String
+  name         String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  profile      Profile?
+  transactions Transaction[]
+  wishlists    Wishlist[]
+  expenses     Expense[]
 
   @@map("users")
 }
 
-model Expense {
+model Profile {
+  id        String   @id @default(uuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nickname  String   @default("Teman")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("profiles")
+}
+
+model Transaction {
   id              String   @id // Client-generated UUID v4
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String   // "income" | "expense"
+  itemName        String
+  amount          Int
+  category        String
+  source          String   @default("manual") // "manual" | "voice" | "ocr"
+  transactionDate DateTime @default(now())
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  serverUpdatedAt DateTime @default(now()) @updatedAt
+
+  @@index([userId, transactionDate])
+  @@index([userId, type])
+  @@index([userId, serverUpdatedAt])
+  @@map("transactions")
+}
+
+model Wishlist {
+  id              String   @id // Client-generated UUID v4
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  targetPrice     Int
+  savedAmount     Int      @default(0)
+  priority        Int      @default(1)
+  isAchieved      Boolean  @default(false)
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  serverUpdatedAt DateTime @default(now()) @updatedAt
+
+  @@index([userId, isAchieved])
+  @@index([userId, serverUpdatedAt])
+  @@map("wishlists")
+}
+
+model Expense {
+  id              String   @id
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   itemName        String
   amount          Int
-  walletId        String?  // Client-side wallet the money came out of; null when the user has no wallets
-  category        String   // "Food & Drinks", "Transportation", "Housing & Bills", "Shopping & Clothing", "Entertainment & Leisure", "Education & Career", "Health & Personal Care", "Social & Family", "Other"
-  isDeleted       Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt // Client edit time, used only for last-write-wins
-  serverUpdatedAt DateTime @default(now()) @updatedAt // Server clock; sync pulls filter on this
-
-  @@index([userId, serverUpdatedAt])
-  @@map("expenses")
-}
-
-/// One synced localStorage feature key per user (wallets, debts, bills, ...); the whole JSON value is one row.
-model UserDocument {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  key             String
-  data            Json
-  isDeleted       Boolean  @default(false)
-  clientUpdatedAt DateTime // Client edit time (clamped), used only for last-write-wins
-  serverUpdatedAt DateTime @default(now()) @updatedAt // Server clock; sync pulls filter on this
-
-  @@unique([userId, key])
-  @@index([userId, serverUpdatedAt])
-  @@map("user_documents")
-}
-
-model FinancialProfile {
-  id                   String   @id @default(uuid())
-  userId               String   @unique
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  monthlyIncome        Int      // Dalam IDR
-  incomeType           String   // "salary" | "freelance" | "business" | "allowance" | "other"
-  currentSavings       Int      // Total tabungan saat ini
-  monthlyFixedExpenses Int      // Pengeluaran tetap bulanan (sewa kos, tagihan wajib)
-  financialPriority    String   // "saving" | "emergency_fund" | "buy_item" | "education" | "travel" | "debt_repayment" | "other"
-  currency             String   @default("IDR")
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-
-  @@map("financial_profiles")
-}
-
-model Transaction {
-  id              String   @id // Client UUID (mendukung local-first & offline sync)
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type            String   // "income" | "expense"
-  amount          Int      // Nominal dalam Rupiah
-  category        String   // "Food & Drinks", "Transportation", "Housing & Bills", "Shopping & Clothing", "Entertainment & Leisure", "Education & Career", "Health & Personal Care", "Social & Family", "Other"
-  spendingType    String?  @default("expense")
-  merchant        String?  // Contoh: "Mie Gacoan", "Indomaret"
-  description     String?
-  transactionDate DateTime @default(now())
-  paymentMethod   String   @default("Cash") // "Cash", "Bank Transfer", "Debit Card", "Credit Card", "E-Wallet", "Other"
-  source          String   // "manual" | "ocr" | "voice"
-  metadata        Json?    // Menyimpan OCR confidence, item breakdown, atau raw transcript suara
+  walletId        String?
+  category        String
   isDeleted       Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+  serverUpdatedAt DateTime @default(now()) @updatedAt
 
-  @@index([userId, transactionDate])
-  @@index([userId, category])
-  @@map("transactions")
-}
-
-model FinancialGoal {
-  id            String   @id @default(uuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name          String   // Contoh: "Beli Laptop Kerja"
-  targetAmount  Int      // Target nominal Rupiah
-  currentAmount Int      @default(0) // Tabungan teralokasi
-  targetDate    DateTime // Tenggat target
-  category      String   // "gadget", "emergency_fund", "vehicle", "travel", "education", "other"
-  status        String   @default("on_track") // "on_track" | "at_risk" | "behind_target" | "achieved"
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  @@index([userId, status])
-  @@map("financial_goals")
-}
-
-model RecurringExpense {
-  id        String    @id @default(uuid())
-  userId    String
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name      String    // Contoh: "Netflix", "Kost Bulanan", "Spotify"
-  amount    Int
-  category  String
-  frequency String    @default("monthly") // "monthly" | "weekly" | "yearly"
-  nextDate  DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  @@index([userId])
-  @@map("recurring_expenses")
-}
-
-model AiInsight {
-  id             String   @id @default(uuid())
-  userId         String
-  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  type           String   // "spending_increase" | "spending_decrease" | "recurring" | "unusual_spending" | "goal_projection"
-  title          String
-  description    String
-  evidence       Json     // Bukti angka: { "current": 920000, "previous": 720000, "changePercent": 27.78 }
-  impact         String   // Dampak finansial
-  recommendation String   // Rekomendasi tindakan nyata
-  confidence     Float?   @default(0.95)
-  createdAt      DateTime @default(now())
-
-  @@index([userId, createdAt])
-  @@map("ai_insights")
-}
-
-model Simulation {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name            String
-  inputParameters Json
-  result          Json
-  createdAt       DateTime @default(now())
-
-  @@index([userId])
-  @@map("simulations")
+  @@index([userId, serverUpdatedAt])
+  @@map("expenses")
 }
