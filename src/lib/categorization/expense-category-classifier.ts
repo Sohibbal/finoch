@@ -8,12 +8,13 @@ const CATEGORY_RULES: Array<{
     category: "Food & Drinks",
     keywords: [
       "makan", "nasi", "beras", "lauk", "sayur", "ayam", "telur", "tempe", "tahu",
-      "daging", "ikan", "warteg", "mie", "indomie", "sarapan", "siang", "malam",
-      "galon", "air", "minum", "sembako", "roti", "gacoan", "bakso", "sate",
+      "daging", "ikan", "warteg", "mie", "indomie", "sarapan", "makan siang", "makan malam",
+      "galon", "air mineral", "aqua", "minum", "sembako", "roti", "gacoan", "bakso", "sate",
       "kopi", "coffee", "cafe", "kafe", "starbucks", "janji jiwa", "point coffee",
       "kopi kenangan", "fore", "boba", "chatime", "mixue", "es teh", "jus",
       "minuman", "snack", "ciki", "cemilan", "keripik", "es krim", "biskuit",
-      "martabak", "donat", "cilok", "seblak", "gorengan", "baso aci", "croissant"
+      "martabak", "donat", "cilok", "seblak", "gorengan", "baso aci", "croissant",
+      "teh", "es jeruk", "kerupuk", "soto", "bakmi", "gofood"
     ],
   },
   {
@@ -21,13 +22,13 @@ const CATEGORY_RULES: Array<{
     keywords: [
       "bensin", "pertalite", "pertamax", "spbu", "ojol", "gojek", "grab", "maxim",
       "angkot", "bus", "transjakarta", "krl", "kereta", "mrt", "lrt", "parkir",
-      "tambal ban", "tol", "tiket kereta", "tiket pesawat"
+      "tambal ban", "tol", "tiket kereta", "tiket pesawat", "ojek", "taksi"
     ],
   },
   {
     category: "Bills & Utilities",
     keywords: [
-      "kos", "kost", "kontrakan", "listrik", "token", "pdam", "laundry",
+      "kos", "kost", "kosan", "kontrakan", "listrik", "token", "pdam", "laundry",
       "pulsa", "kuota", "paket data", "internet", "wifi", "indihome"
     ],
   },
@@ -37,7 +38,7 @@ const CATEGORY_RULES: Array<{
       "checkout", "shopee", "tokopedia", "tiktok shop", "olshop", "baju",
       "sepatu", "skincare", "parfum", "makeup", "celana", "kaos", "jaket",
       "tas", "sandal", "sabun", "odol", "shampoo", "deterjen", "tisu",
-      "game", "top up", "diamond", "mobile legends", "ml", "steam", "valorant",
+      "game", "top up", "diamond", "mobile legends", "steam", "valorant",
       "genshin", "netflix", "spotify", "youtube premium", "bioskop", "nonton",
       "cinema", "xxi", "karaoke", "wisata", "liburan"
     ],
@@ -45,7 +46,7 @@ const CATEGORY_RULES: Array<{
   {
     category: "Other",
     keywords: [
-      "kuliah", "fotokopi", "print", "jilid", "buku", "pulpen", "alat tulis",
+      "kuliah", "fotokopi", "fotocopy", "print", "jilid", "buku", "pulpen", "alat tulis",
       "kertas", "modul", "praktikum", "ukt", "spp", "almamater", "kursus",
       "obat", "apotek", "dokter", "vitamin", "klinik", "rumah sakit",
       "perban", "minyak kayu putih", "salon", "barbershop", "cukur",
@@ -56,10 +57,10 @@ const CATEGORY_RULES: Array<{
 ];
 
 /**
- * Classifies an expense item name into one of 5 natural categories.
+ * Returns the category whose keyword matches the item name as a whole word, or null if none match.
  */
-export function classifyExpenseCategory(itemName: string): ExpenseCategory {
-  if (!itemName) return "Other";
+export function findExpenseCategory(itemName: string): ExpenseCategory | null {
+  if (!itemName) return null;
 
   const lower = itemName.toLowerCase();
 
@@ -72,5 +73,12 @@ export function classifyExpenseCategory(itemName: string): ExpenseCategory {
     }
   }
 
-  return "Other";
+  return null;
+}
+
+/**
+ * Classifies an expense item name into one of 5 natural categories.
+ */
+export function classifyExpenseCategory(itemName: string): ExpenseCategory {
+  return findExpenseCategory(itemName) ?? "Other";
 }
