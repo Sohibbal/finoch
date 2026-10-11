@@ -10,16 +10,22 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const expenses = await prisma.expense.findMany({
+    const target = (prisma as any).transaction ?? (prisma as any).expense;
+    if (!target) {
+      return NextResponse.json({ expenses: [] }, { status: 200 });
+    }
+
+    const rows = await target.findMany({
       where: {
         userId: session.userId,
         isDeleted: false,
+        ...((prisma as any).transaction ? { type: "expense" } : {}),
       },
       orderBy: { createdAt: "desc" },
     });
 
-    return NextResponse.json({ expenses }, { status: 200 });
-  } catch (error) {
+    return NextResponse.json({ expenses: rows }, { status: 200 });
+  } catch {
     return NextResponse.json({ error: "Failed to fetch expenses" }, { status: 500 });
   }
 }
@@ -45,17 +51,32 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    const expense = await prisma.expense.create({
-      data: {
-        id: id || `exp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-        userId: session.userId,
-        itemName: itemName.trim(),
-        amount,
-        category: normalizeExpenseCategory(category),
-        walletId: walletId ?? null,
-        createdAt: createdAt ? new Date(createdAt) : new Date(),
-        updatedAt: new Date(),
-      },
+    const target = (prisma as any).transaction ?? (prisma as any).expense;
+    const isTx = Boolean((prisma as any).transaction);
+    const expense = await target.create({
+      data: isTx
+        ? {
+            id: id || `exp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            userId: session.userId,
+            type: "expense",
+            itemName: itemName.trim(),
+            amount,
+            category: normalizeExpenseCategory(category),
+            source: "manual",
+            transactionDate: createdAt ? new Date(createdAt) : new Date(),
+            createdAt: createdAt ? new Date(createdAt) : new Date(),
+            updatedAt: new Date(),
+          }
+        : {
+            id: id || `exp-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+            userId: session.userId,
+            itemName: itemName.trim(),
+            amount,
+            category: normalizeExpenseCategory(category),
+            walletId: walletId ?? null,
+            createdAt: createdAt ? new Date(createdAt) : new Date(),
+            updatedAt: new Date(),
+          },
     });
 
     return NextResponse.json({ expense }, { status: 201 });

@@ -26,7 +26,18 @@ export async function POST(req: Request) {
     }
 
     // Grounding on live database snapshot
-    const facts: UserFinancialSnapshot = await buildUserFinancialSnapshot(session.userId);
+    let facts: UserFinancialSnapshot = await buildUserFinancialSnapshot(session.userId);
+    if (body.clientFacts && facts.monthlyIncome === 0 && facts.monthlyExpense === 0 && facts.netBalance === 0) {
+      facts = {
+        ...facts,
+        netBalance: typeof body.clientFacts.netBalance === "number" ? body.clientFacts.netBalance : facts.netBalance,
+        monthlyIncome: typeof body.clientFacts.monthlyIncome === "number" ? body.clientFacts.monthlyIncome : facts.monthlyIncome,
+        monthlyExpense: typeof body.clientFacts.monthlyExpense === "number" ? body.clientFacts.monthlyExpense : facts.monthlyExpense,
+        topExpenseCategory: body.clientFacts.topExpenseCategory || facts.topExpenseCategory,
+        wishlistSummary: body.clientFacts.wishlistSummary || facts.wishlistSummary,
+        streakDays: typeof body.clientFacts.streakDays === "number" ? body.clientFacts.streakDays : facts.streakDays,
+      };
+    }
     const systemPrompt = buildCopilotSystemPrompt(facts);
     const llmConfig = getLlmConfig();
 
@@ -92,7 +103,11 @@ export async function POST(req: Request) {
 
     let reply = `Halo ${name}! Nih rangkuman cepat dari database lo: Saldo bersih saat ini ${rupiah(facts.netBalance)}, pemasukan bulan ini ${rupiah(facts.monthlyIncome)}, dan pengeluaran ${rupiah(facts.monthlyExpense)}.`;
 
-    if (lower.includes("boros") || lower.includes("kategori") || lower.includes("makan") || lower.includes("jajan")) {
+    if (lower.includes("masuk") || lower.includes("income") || lower.includes("gaji") || lower.includes("pendapatan")) {
+      reply = `Total pemasukan lo bulan ini tercatat sebesar ${rupiah(facts.monthlyIncome)}. Dengan pengeluaran ${rupiah(facts.monthlyExpense)}, sisa saldo bersih lo saat ini ${rupiah(facts.netBalance)}. Mantap, kawal terus tabungan lo!`;
+    } else if (lower.includes("keluar") || lower.includes("expense") || (lower.includes("pengeluaran") && !lower.includes("pemasukan"))) {
+      reply = `Total pengeluaran lo bulan ini tercatat ${rupiah(facts.monthlyExpense)}. Pos pengeluaran terbanyak ada di ${facts.topExpenseCategory || "pengeluaran harian"}. Selalu pantau jatah harian lo ya!`;
+    } else if (lower.includes("boros") || lower.includes("kategori") || lower.includes("makan") || lower.includes("jajan")) {
       reply = `Berdasarkan database lo nih ${name}, pos yang paling banyak menyedot pengeluaran ada di ${facts.topExpenseCategory || "pengeluaran harian"}. Biar gak boncos, rem dulu nongkrong gak penting ya!`;
     } else if (lower.includes("wishlist") || lower.includes("beli") || lower.includes("target")) {
       reply = `Buat wishlist lo (${facts.wishlistSummary || "belum ada wishlist"}), saldo bersih lo sekarang ${rupiah(facts.netBalance)}. Selalu pastiin ada sisa buat dana darurat sebelum checkout barang incaran lo!`;

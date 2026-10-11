@@ -252,18 +252,35 @@ export class SyncManager {
 
       // Reconcile incoming server changes into local IndexedDB
       if (result.serverChanges && result.serverChanges.length > 0) {
-        const tx = db.transaction("expenses", "readwrite");
-        for (const remote of result.serverChanges) {
-          const existing = await tx.store.get(remote.id);
-          if (existing) {
-            const winner = reconcileChanges(existing, remote);
-            winner.syncStatus = "synced";
-            await tx.store.put(winner);
-          } else {
-            await tx.store.put({ ...remote, syncStatus: "synced" });
+        if (db.objectStoreNames.contains("transactions")) {
+          const tx = db.transaction("transactions", "readwrite");
+          for (const remote of result.serverChanges) {
+            const existing = await tx.store.get(remote.id);
+            if (existing) {
+              const winner = reconcileChanges(existing as any, remote as any);
+              winner.syncStatus = "synced";
+              await tx.store.put(winner as any);
+            } else {
+              await tx.store.put({ ...remote, syncStatus: "synced" } as any);
+            }
           }
+          await tx.done;
         }
-        await tx.done;
+
+        if (db.objectStoreNames.contains("expenses")) {
+          const tx = db.transaction("expenses", "readwrite");
+          for (const remote of result.serverChanges) {
+            const existing = await tx.store.get(remote.id);
+            if (existing) {
+              const winner = reconcileChanges(existing, remote);
+              winner.syncStatus = "synced";
+              await tx.store.put(winner);
+            } else {
+              await tx.store.put({ ...remote, syncStatus: "synced" });
+            }
+          }
+          await tx.done;
+        }
       }
 
       // Update last sync timestamp

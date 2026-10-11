@@ -17,8 +17,6 @@ model User {
   profile      Profile?
   transactions Transaction[]
   wishlists    Wishlist[]
-  expenses     Expense[]
-  documents    UserDocument[]
 
   @@map("users")
 }
@@ -72,36 +70,4 @@ model Wishlist {
   @@index([userId, isAchieved])
   @@index([userId, serverUpdatedAt])
   @@map("wishlists")
-}
-
-model Expense {
-  id              String   @id
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  itemName        String
-  amount          Int
-  walletId        String?
-  category        String
-  isDeleted       Boolean  @default(false)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  serverUpdatedAt DateTime @default(now()) @updatedAt
-
-  @@index([userId, serverUpdatedAt])
-  @@map("expenses")
-}
-
-model UserDocument {
-  id              String   @id @default(uuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  key             String
-  data            Json
-  isDeleted       Boolean  @default(false)
-  clientUpdatedAt DateTime
-  serverUpdatedAt DateTime @default(now()) @updatedAt
-
-  @@unique([userId, key])
-  @@index([userId, serverUpdatedAt])
-  @@map("user_documents")
 }

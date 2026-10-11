@@ -64,17 +64,17 @@ export async function buildUserFinancialSnapshot(userId: string): Promise<UserFi
     }
 
     // 3. Fallback to legacy models if unified table has no rows
-    if (txList.length === 0 && prisma.expense) {
+    if (txList.length === 0 && (prisma as any).expense) {
       const [year, month] = jakartaDate().split("-").map(Number);
       const monthStart = new Date(Date.UTC(year, month - 1, 1) - 7 * 60 * 60 * 1000);
       const nextMonth = new Date(Date.UTC(year, month, 1) - 7 * 60 * 60 * 1000);
 
-      const legacyExpenses = await prisma.expense.findMany({
+      const legacyExpenses = await (prisma as any).expense.findMany({
         where: { userId, isDeleted: false, createdAt: { gte: monthStart, lt: nextMonth } },
       }).catch(() => []);
 
       txList = legacyExpenses.map((e: any) => ({
-        type: "expense",
+        type: e.type || "expense",
         amount: e.amount,
         itemName: e.itemName,
         category: e.category,

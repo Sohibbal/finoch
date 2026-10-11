@@ -3,6 +3,9 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Bot, Send, Loader2, Sparkles, ArrowUpRight } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { getTransactions } from "@/lib/storage/transaction-storage";
+import { getWishlistItems } from "@/lib/storage/wishlist-storage";
+import { syncManager } from "@/lib/sync/sync-manager";
 
 interface ChatMessage {
   id: string;
@@ -62,10 +65,49 @@ export default function CopilotPage() {
     setIsLoading(true);
 
     try {
+      // Trigger background sync to server
+      syncManager.triggerSync().catch(() => {});
+
+      let clientFacts: any = undefined;
+      try {
+        const [txList, wList] = await Promise.all([
+          getTransactions(),
+          getWishlistItems(),
+        ]);
+        let inc = 0;
+        let exp = 0;
+        let topCategory = "Pengeluaran Harian";
+        const catMap: Record<string, number> = {};
+        for (const t of txList) {
+          if (t.type === "income") inc += t.amount;
+          else if (t.type === "expense") {
+            exp += t.amount;
+            catMap[t.category] = (catMap[t.category] || 0) + t.amount;
+          }
+        }
+        let maxCatAmount = 0;
+        for (const [c, a] of Object.entries(catMap)) {
+          if (a > maxCatAmount) {
+            maxCatAmount = a;
+            topCategory = c;
+          }
+        }
+        const activeW = wList.filter((w) => !w.isAchieved);
+        clientFacts = {
+          monthlyIncome: inc,
+          monthlyExpense: exp,
+          netBalance: inc - exp,
+          topExpenseCategory: topCategory,
+          wishlistSummary: activeW.length > 0 ? activeW.map((w, idx) => `${idx + 1}. ${w.name}`).join(", ") : undefined,
+        };
+      } catch {
+        // ignore
+      }
+
       const res = await fetch("/api/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text.trim() }),
+        body: JSON.stringify({ message: text.trim(), clientFacts }),
       });
 
       if (!res.ok) {

@@ -55,6 +55,9 @@ export async function POST(req: Request) {
     const rejectedIds: SyncRejection[] = [];
     const now = new Date();
 
+    const isTransaction = Boolean((prisma as any).transaction);
+    const targetModel = isTransaction ? (prisma as any).transaction : (prisma as any).expense;
+
     // Each change stands alone: one bad item must not roll back the rest of the batch.
     // Items that throw unexpectedly are neither applied nor rejected, so the client retries them.
     for (const change of clientChanges) {
@@ -66,7 +69,7 @@ export async function POST(req: Request) {
 
       const { id: queueId, action, payload } = change;
       try {
-        const existing = await prisma.expense.findUnique({ where: { id: payload.id } });
+        const existing = await targetModel.findUnique({ where: { id: payload.id } });
         if (existing && existing.userId !== session.userId) {
           rejectedIds.push({ id: queueId, reason: "forbidden" });
           continue;
@@ -74,23 +77,37 @@ export async function POST(req: Request) {
 
         if (action === "delete") {
           if (existing) {
-            await prisma.expense.update({
+            await targetModel.update({
               where: { id: payload.id },
               data: { isDeleted: true, updatedAt: now },
             });
           }
         } else {
           const clientUpdatedAt = clampClientTime(payload.updatedAt, now);
-          const data = {
-            itemName: payload.itemName.trim(),
-            amount: payload.amount,
-            category: normalizeExpenseCategory(payload.category),
-            walletId: payload.walletId,
-            isDeleted: !!payload.isDeleted,
-            updatedAt: clientUpdatedAt,
-          };
+          const data: any = isTransaction
+            ? {
+                itemName: payload.itemName.trim(),
+                amount: payload.amount,
+                type: payload.type || "expense",
+                category: payload.category || "Lainnya",
+                source: payload.source || "manual",
+                transactionDate: payload.transactionDate
+                  ? new Date(payload.transactionDate)
+                  : clampClientTime(payload.createdAt, now),
+                isDeleted: !!payload.isDeleted,
+                updatedAt: clientUpdatedAt,
+              }
+            : {
+                itemName: payload.itemName.trim(),
+                amount: payload.amount,
+                category: normalizeExpenseCategory(payload.category),
+                walletId: payload.walletId,
+                isDeleted: !!payload.isDeleted,
+                updatedAt: clientUpdatedAt,
+              };
+
           if (!existing) {
-            await prisma.expense.create({
+            await targetModel.create({
               data: {
                 ...data,
                 id: payload.id,
@@ -100,7 +117,7 @@ export async function POST(req: Request) {
             });
           } else if (clientUpdatedAt.getTime() >= existing.updatedAt.getTime()) {
             // Last-write-wins on the (clamped) client time; serverUpdatedAt is bumped by Prisma.
-            await prisma.expense.update({ where: { id: payload.id }, data });
+            await targetModel.update({ where: { id: payload.id }, data });
           }
         }
         appliedIds.push(queueId);
@@ -114,23 +131,26 @@ export async function POST(req: Request) {
     const cursor = isValidDate(lastSyncTimestamp)
       ? new Date(new Date(lastSyncTimestamp).getTime() - PULL_OVERLAP_MS)
       : null;
-    const serverExpenses = await prisma.expense.findMany({
+    const serverRows = await targetModel.findMany({
       where: {
         userId: session.userId,
         ...(cursor ? { serverUpdatedAt: { gt: cursor } } : {}),
       },
     });
 
-    const serverChanges: Expense[] = serverExpenses.map(exp => ({
-      id: exp.id,
-      userId: exp.userId,
-      itemName: exp.itemName,
-      amount: exp.amount,
-      category: exp.category,
-      walletId: exp.walletId,
-      isDeleted: exp.isDeleted,
-      createdAt: exp.createdAt.toISOString(),
-      updatedAt: exp.updatedAt.toISOString(),
+    const serverChanges: any[] = serverRows.map((row: any) => ({
+      id: row.id,
+      userId: row.userId,
+      type: row.type || "expense",
+      itemName: row.itemName,
+      amount: row.amount,
+      category: row.category,
+      source: row.source || "manual",
+      transactionDate: row.transactionDate ? row.transactionDate.toISOString() : row.createdAt.toISOString(),
+      walletId: row.walletId ?? null,
+      isDeleted: row.isDeleted,
+      createdAt: row.createdAt.toISOString(),
+      updatedAt: row.updatedAt.toISOString(),
     }));
 
     const response: BatchSyncResponse = {

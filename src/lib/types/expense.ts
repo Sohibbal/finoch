@@ -16,6 +16,9 @@ export interface Expense {
   category: ExpenseCategory;
   /** Wallet the money came out of; null/undefined when the user has no wallets. */
   walletId?: string | null;
+  type?: "income" | "expense" | string;
+  source?: "manual" | "voice" | "ocr" | string;
+  transactionDate?: string;
   createdAt: string;
   updatedAt: string;
   syncStatus?: SyncStatus;

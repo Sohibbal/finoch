@@ -1,6 +1,7 @@
 import { getDatabase } from "./indexed-db";
 import { syncQueue } from "./sync-queue";
 import { getDataScope } from "./local-storage";
+import { syncManager } from "../sync/sync-manager";
 
 export interface LocalTransaction {
   id: string;
@@ -45,6 +46,9 @@ export async function saveTransaction(
 
   await db.put("transactions", fullTx);
   await syncQueue.enqueue("create", fullTx as any);
+  if (typeof window !== "undefined") {
+    syncManager.triggerSync().catch(() => {});
+  }
   return fullTx;
 }
 
@@ -74,4 +78,7 @@ export async function deleteTransaction(id: string, userId: string = getDataScop
 
   await db.put("transactions", updated);
   await syncQueue.enqueue("delete", updated as any);
+  if (typeof window !== "undefined") {
+    syncManager.triggerSync().catch(() => {});
+  }
 }
