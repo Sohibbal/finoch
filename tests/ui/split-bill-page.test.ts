@@ -39,3 +39,24 @@ describe("Split Bill Page Components", () => {
     expect(ReceiptOcrButton).toBeDefined();
   });
 });
+
+describe("initialSplitBill", () => {
+  it("opens an empty nota for a real account: only Saya, no made-up menu or resto", async () => {
+    const { initialSplitBill } = await import("@/components/split-bill/initial-bill");
+    const bill = initialSplitBill(false, new Date(2026, 9, 11));
+    expect(bill.items).toEqual([]);
+    expect(bill.participants).toEqual([{ id: "p_user", name: "Saya", isUser: true }]);
+    expect(bill.config.restaurantName).toBe("");
+    expect(bill.config.paymentNote).toBe("");
+    // Local day, not the UTC date from toISOString.
+    expect(bill.config.date).toBe("2026-10-11");
+  });
+
+  it("gives Mode Demo the sample bill to present with", async () => {
+    const { initialSplitBill } = await import("@/components/split-bill/initial-bill");
+    const bill = initialSplitBill(true);
+    expect(bill.items.length).toBeGreaterThan(0);
+    expect(bill.participants.length).toBeGreaterThan(1);
+    expect(bill.config.restaurantName).not.toBe("");
+  });
+});
