@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
-import { readArray } from "@/lib/storage/local-storage";
+import { readArray, setDemoMode } from "@/lib/storage/local-storage";
 import { getWallets, saveWallets, addWallet, transferWalletFunds } from "@/lib/storage/wallet-storage";
 import { getDebts, saveDebts, addDebt } from "@/lib/storage/debt-storage";
 import { getUktPlans, saveUktPlans, addUktPlan, depositToUktPlan } from "@/lib/storage/ukt-storage";
@@ -91,16 +91,22 @@ describe("#3 corrupt JSON does not crash", () => {
 });
 
 describe("#4 defaults are fresh copies with relative dates", () => {
-  it("mutating returned default bills does not affect later reads without storage", () => {
+  it("mutating returned default bills does not affect later reads", () => {
+    setDemoMode(true);
+    const first = getBills();
+    first[0].amount = 1;
+    first.push({ ...first[0], id: "x" });
+    const second = getBills();
+    expect(second[0].amount).not.toBe(1);
+    expect(second.some((b) => b.id === "x")).toBe(false);
+  });
+
+  it("without storage there is no sample data to leak", () => {
     const saved = globalThis.localStorage;
     Object.defineProperty(globalThis, "localStorage", { value: undefined, writable: true, configurable: true });
     try {
-      const first = getBills();
-      first[0].amount = 1;
-      first.push({ ...first[0], id: "x" });
-      const second = getBills();
-      expect(second[0].amount).not.toBe(1);
-      expect(second.some((b) => b.id === "x")).toBe(false);
+      expect(getBills()).toEqual([]);
+      expect(getWishlist()).toEqual([]);
     } finally {
       Object.defineProperty(globalThis, "localStorage", { value: saved, writable: true, configurable: true });
     }
@@ -110,6 +116,8 @@ describe("#4 defaults are fresh copies with relative dates", () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date(2027, 5, 1));
     const today = "2027-06-01";
+    setDemoMode(true);
+    expect(getUktPlans().length).toBeGreaterThan(0);
     for (const plan of getUktPlans()) {
       expect(plan.deadline > today).toBe(true);
     }

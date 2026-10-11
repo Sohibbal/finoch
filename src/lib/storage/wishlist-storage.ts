@@ -1,5 +1,5 @@
 import { WishlistItem, WishlistSummary } from "@/types/wishlist-types";
-import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { getStorage, isDemoMode, readArray } from "@/lib/storage/local-storage";
 
 const WISHLIST_STORAGE_KEY = "finoch_student_wishlist";
 
@@ -48,10 +48,12 @@ const createDefaultWishlistItems = (): WishlistItem[] => [
 
 export function getWishlist(): WishlistItem[] {
   const storage = getStorage();
-  if (!storage) return createDefaultWishlistItems();
+  if (!storage) return [];
   try {
     const items = readArray<WishlistItem>(WISHLIST_STORAGE_KEY);
     if (!items) {
+      // Sample items only in demo mode; a real user starts with an empty wishlist.
+      if (!isDemoMode()) return [];
       const defaults = createDefaultWishlistItems();
       storage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(defaults));
       return defaults;

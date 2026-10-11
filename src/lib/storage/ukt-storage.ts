@@ -1,5 +1,5 @@
 import { UktPlan, UktDepositRecord } from "@/types/ukt-types";
-import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { getStorage, isDemoMode, readArray } from "@/lib/storage/local-storage";
 import { localDateKeyFromNow } from "@/lib/date";
 
 const UKT_STORAGE_KEY = "finoch_student_ukt_plans_v1";
@@ -49,9 +49,10 @@ const createDefaultPlans = (): UktPlan[] => [
 ];
 
 export function getUktPlans(): UktPlan[] {
-  // Defaults only when nothing was ever stored; an emptied list stays empty.
+  // Demo defaults only when nothing was ever stored; an emptied list stays empty.
   const stored = readArray<UktPlan>(UKT_STORAGE_KEY);
   if (stored) return stored;
+  if (!isDemoMode()) return [];
   const defaults = createDefaultPlans();
   saveUktPlans(defaults);
   return defaults;

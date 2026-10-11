@@ -5,6 +5,7 @@ import {
   depositToUktPlan,
   deleteUktPlan,
 } from "@/lib/storage/ukt-storage";
+import { setDemoMode } from "@/lib/storage/local-storage";
 
 describe("Student UKT Storage Engine", () => {
   let mockStore: Record<string, string> = {};
@@ -41,6 +42,8 @@ describe("Student UKT Storage Engine", () => {
         configurable: true,
       });
     }
+    // Sample data is demo-only; these cases exercise the seeded defaults.
+    setDemoMode(true);
   });
 
   it("loads default student UKT plans when storage is empty", () => {
