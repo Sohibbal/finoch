@@ -52,7 +52,7 @@ export default function BudgetPage() {
   const { user } = useAuth();
 
   const [rawEnvelopes, setRawEnvelopes] = useState<BudgetEnvelope[]>([]);
-  const [expenses, setExpenses] = useState<Array<{ category?: string; amount: number }>>([]);
+  const [expenses, setExpenses] = useState<Array<{ category?: string; amount: number; createdAt?: string }>>([]);
   const [transfers, setTransfers] = useState<EnvelopeTransferRecord[]>([]);
 
   // Modals state
@@ -87,9 +87,10 @@ export default function BudgetPage() {
         const data = await res.json();
         if (Array.isArray(data.expenses) && data.expenses.length > 0) {
           setExpenses(
-            data.expenses.map((e: { category?: string; amount: number }) => ({
+            data.expenses.map((e: { category?: string; amount: number; createdAt?: string }) => ({
               category: e.category,
               amount: e.amount,
+              createdAt: e.createdAt,
             }))
           );
           return;
@@ -102,6 +103,7 @@ export default function BudgetPage() {
           local.map((e) => ({
             category: e.category,
             amount: e.amount,
+            createdAt: e.createdAt,
           }))
         );
       }

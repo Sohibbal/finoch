@@ -85,6 +85,17 @@ export function BillShieldCard({
         </div>
       </div>
 
+      {summary.overdueBills.length > 0 && (
+        <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/30 flex items-start gap-2.5">
+          <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+          <div className="text-[11px] text-red-200 leading-relaxed">
+            <span className="font-bold">Lewat Jatuh Tempo: </span>
+            Ada <strong>{summary.overdueBills.length} tagihan</strong> yang belum dibayar (
+            {summary.overdueBills.map((b) => b.name).join(", ")}). Segera lunasi agar tidak kena denda.
+          </div>
+        </div>
+      )}
+
       {/* Critical Banner if any bill is due <= 3 days */}
       {summary.criticalUpcomingBills.length > 0 && (
         <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-start gap-2.5">
