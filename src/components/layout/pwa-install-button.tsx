@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Download, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { FLOATING_PILL_BOTTOM } from "./insets";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -87,7 +88,7 @@ export function PwaInstallButton() {
 
   if (isDismissed) {
     return (
-      <div className="fixed bottom-20 left-4 md:bottom-6 md:left-6 z-40">
+      <div className={`fixed ${FLOATING_PILL_BOTTOM} left-4 md:bottom-6 md:left-6 z-40`}>
         <button
           type="button"
           onClick={handleInstallClick}
@@ -102,7 +103,8 @@ export function PwaInstallButton() {
   }
 
   return (
-    <div className="fixed bottom-20 left-4 right-4 sm:right-auto sm:max-w-sm md:bottom-6 md:left-6 z-40 animate-fade-in">
+    // Mobile: top banner, so it never covers the bottom nav or page action bars until dismissed.
+    <div className="fixed top-[calc(0.75rem+env(safe-area-inset-top))] left-4 right-4 sm:right-auto sm:max-w-sm md:top-auto md:bottom-6 md:left-6 z-50 animate-fade-in">
       <div className="p-3.5 rounded-2xl bg-cream-50/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 backdrop-blur-xl shadow-2xl flex items-center justify-between gap-3 text-navy-950 dark:text-cream-50">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-navy-900 dark:bg-cream-100 flex items-center justify-center p-2 shrink-0 shadow-sm">

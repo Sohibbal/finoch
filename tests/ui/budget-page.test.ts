@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/budget",
 }));
 
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test-student-123", email: "student@finoch.id" },
     logout: vi.fn(),
   }),
@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Budget Envelopes Page & Components", () => {
   it("exports BudgetPage component successfully", async () => {
-    const BudgetPageModule = await import("@/app/budget/page");
+    const BudgetPageModule = await import("@/app/(app)/budget/page");
     expect(BudgetPageModule.default).toBeDefined();
     expect(typeof BudgetPageModule.default).toBe("function");
   });

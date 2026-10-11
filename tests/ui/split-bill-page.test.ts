@@ -11,8 +11,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock hooks
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test_user", name: "Diki", email: "diki@finoch.id" },
     logout: vi.fn(),
   }),
@@ -20,7 +20,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Split Bill Page Components", () => {
   it("exports SplitBillPage component successfully", async () => {
-    const mod = await import("@/app/split-bill/page");
+    const mod = await import("@/app/(app)/split-bill/page");
     expect(mod.default).toBeDefined();
     expect(typeof mod.default).toBe("function");
   });

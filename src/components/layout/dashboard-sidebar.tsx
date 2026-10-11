@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import {
   LayoutDashboard,
@@ -29,7 +29,7 @@ import {
   Sparkles,
   Wifi,
 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuthContext } from "./auth-provider";
 import { ThemeToggle } from "./theme-toggle";
 
 interface DashboardSidebarProps {
@@ -63,7 +63,8 @@ interface NavSingleItem {
 
 export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
   const pathname = usePathname();
-  const { user, logout } = useAuth();
+  const router = useRouter();
+  const { user, logout } = useAuthContext();
   const [searchQuery, setSearchQuery] = useState("");
 
   // Navigation Items Hierarchy
@@ -484,7 +485,10 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
 
             <button
               type="button"
-              onClick={() => logout()}
+              onClick={async () => {
+                await logout();
+                router.replace("/login");
+              }}
               title="Keluar Akun"
               aria-label="Keluar Akun"
               className="p-1.5 rounded-lg text-navy-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors shrink-0"

@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/debts",
 }));
 
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test-user-123", email: "student@finoch.id" },
     logout: vi.fn(),
   }),
@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Student Debts Page & Components", () => {
   it("exports DebtsPage component successfully", async () => {
-    const DebtsPageModule = await import("@/app/debts/page");
+    const DebtsPageModule = await import("@/app/(app)/debts/page");
     expect(DebtsPageModule.default).toBeDefined();
     expect(typeof DebtsPageModule.default).toBe("function");
   });

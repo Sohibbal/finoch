@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/ukt-savings",
 }));
 
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test-user-123", email: "student@finoch.id" },
     logout: vi.fn(),
   }),
@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("UKT Sinking Fund Components", () => {
   it("exports UktSavingsPage component successfully", async () => {
-    const UktModule = await import("@/app/ukt-savings/page");
+    const UktModule = await import("@/app/(app)/ukt-savings/page");
     expect(UktModule.default).toBeDefined();
     expect(typeof UktModule.default).toBe("function");
   });

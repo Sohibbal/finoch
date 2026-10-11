@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/streak",
 }));
 
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test-user-123", email: "student@finoch.id" },
     logout: vi.fn(),
   }),
@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Streak & No-Spend Challenge Components", () => {
   it("exports StreakPage component successfully", async () => {
-    const StreakPageModule = await import("@/app/streak/page");
+    const StreakPageModule = await import("@/app/(app)/streak/page");
     expect(StreakPageModule.default).toBeDefined();
     expect(typeof StreakPageModule.default).toBe("function");
   });
