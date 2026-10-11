@@ -17,6 +17,16 @@ export function PwaInstallButton() {
   const [isDismissed, setIsDismissed] = useState(false);
   // The big banner only fits the landing page: in the app it covered page headers and modals.
   const isLanding = usePathname() === "/";
+  // On the landing the banner waits until the visitor has scrolled past the first screen,
+  // so it never sits on top of the hero and the live demo.
+  const [pastHero, setPastHero] = useState(false);
+  useEffect(() => {
+    if (!isLanding) return;
+    const onScroll = () => setPastHero(window.scrollY > window.innerHeight * 0.8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, [isLanding]);
 
   useEffect(() => {
     // Check if already running in standalone mode (installed PWA)
@@ -107,45 +117,35 @@ export function PwaInstallButton() {
     );
   }
 
+  if (!pastHero) return null;
+
   return (
-    // Landing only: bottom banner (the landing has no bottom nav; its navbar is fixed at the top).
-    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 sm:right-auto sm:max-w-sm md:bottom-6 md:left-6 z-40 animate-fade-in">
-      <div className="p-3.5 rounded-2xl bg-cream-50/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 backdrop-blur-xl shadow-2xl flex items-center justify-between gap-3 text-navy-950 dark:text-cream-50">
+    // Landing only, after the first screen: a printed slip anchored to the bottom.
+    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 sm:right-auto sm:max-w-sm md:bottom-6 md:left-6 z-40">
+      <div className="p-3 bg-paper-sheet border border-ink/30 flex items-center justify-between gap-3 text-ink">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-xl bg-navy-900 dark:bg-cream-100 flex items-center justify-center p-2 shrink-0 shadow-sm">
-            <BrandLogo variant="symbol" className="w-6 h-6" theme="auto" />
-          </div>
+          <BrandLogo variant="symbol" className="w-8 h-8 shrink-0" theme="auto" />
           <div className="min-w-0">
-            <div className="flex items-center gap-1.5">
-              <span className="text-xs font-bold text-navy-950 dark:text-cream-50 truncate">
-                Pasang Finoch
-              </span>
-              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">
-                PWA
-              </span>
-            </div>
-            <p className="text-[11px] text-navy-600 dark:text-cream-300/80 truncate">
-              Akses cepat layar utama &amp; luring
-            </p>
+            <p className="text-body font-semibold truncate">Pasang Finoch di HP</p>
+            <p className="text-meta text-ink-soft truncate">Buka dari layar utama, tetap jalan tanpa sinyal</p>
           </div>
         </div>
-
-        <div className="flex items-center gap-1.5 shrink-0">
+        <div className="flex items-center gap-1 shrink-0">
           <button
             type="button"
             onClick={handleInstallClick}
-            className="px-3.5 py-1.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center gap-1 shadow-sm transition active:scale-95"
+            className="min-h-11 px-3 bg-ink text-paper-sheet text-meta font-semibold flex items-center gap-1.5 hover:bg-ink/90 transition-colors"
           >
-            <Download className="w-3.5 h-3.5 stroke-[2.2]" />
+            <Download className="w-4 h-4" aria-hidden="true" />
             <span>Pasang</span>
           </button>
           <button
             type="button"
             onClick={handleDismiss}
             aria-label="Tutup rekomendasi pasang"
-            className="p-1.5 rounded-lg text-navy-400 hover:text-navy-950 dark:text-cream-400 dark:hover:text-cream-50 hover:bg-cream-200 dark:hover:bg-navy-900 transition"
+            className="w-11 h-11 flex items-center justify-center text-ink-soft hover:text-ink transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4" aria-hidden="true" />
           </button>
         </div>
       </div>

@@ -1,110 +1,62 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, X, MicOff, Lock, Database, Smartphone } from "lucide-react";
+import { PaperDialog } from "@/components/press/kampus-press";
 
 interface PrivacyDialogProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
+// Each line states what really happens to the data, including where it leaves the phone.
+const LINES: { title: string; body: string }[] = [
+  {
+    title: "Suara",
+    body: "Saat online, suara diubah jadi teks oleh layanan suara bawaan browser (misalnya Google di Chrome). Saat offline, Whisper mengolahnya langsung di HP. Finoch tidak menyimpan rekaman audio.",
+  },
+  {
+    title: "Teks catatan",
+    body: "Kalimat yang kamu ucapkan dibaca parser di HP. Kalau kamu login, teksnya (bukan audio) bisa dikirim ke server Finoch supaya dibantu AI membaca item dan nominal.",
+  },
+  {
+    title: "Foto struk",
+    body: "Struk bisa dibaca di HP, atau diunggah ke server Finoch untuk dibaca lebih teliti. Foto tidak disimpan setelah dibaca.",
+  },
+  {
+    title: "Tempat data",
+    body: "Catatan tersimpan dulu di HP, jadi tetap jalan tanpa sinyal. Kalau kamu login, catatan dan data fitur disinkron ke akunmu supaya aman saat ganti HP.",
+  },
+  {
+    title: "Kamu yang memutuskan",
+    body: "Tidak ada yang tersimpan sebelum kamu cek dan konfirmasi. Mode Demo memakai data contoh yang terpisah dan tidak pernah disinkron.",
+  },
+];
+
 export function PrivacyDialog({ isOpen, onClose }: PrivacyDialogProps) {
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md rounded-3xl bg-cream-50 dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-6 shadow-2xl overflow-y-auto max-h-[90vh] text-navy-950 dark:text-cream-50 transition-colors">
-        <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cream-200/80 dark:bg-navy-900 text-navy-950 dark:text-cream-50 border border-cream-300 dark:border-navy-800">
-              <ShieldCheck className="w-5 h-5 stroke-[2.2]" />
+    <PaperDialog isOpen={isOpen} onClose={onClose} title="Privasi di Finoch" subtitle="Apa yang terjadi pada suara, struk, dan catatanmu">
+      <ol className="px-5 py-4 space-y-4">
+        {LINES.map((line, i) => (
+          <li key={line.title} className="grid grid-cols-[2rem_1fr] gap-x-2 border-b border-ink/10 pb-4 last:border-0 last:pb-0">
+            <span aria-hidden="true" className="font-display text-head text-ink-soft leading-none">
+              {i + 1}
+            </span>
+            <div>
+              <h3 className="text-body font-semibold text-ink">{line.title}</h3>
+              <p className="text-body text-ink-soft mt-1">{line.body}</p>
             </div>
-            <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
-              Komitmen Privasi Finoch
-            </h3>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Tutup"
-            className="p-1.5 rounded-full text-navy-500 hover:text-navy-950 dark:text-cream-400 dark:hover:text-cream-50 hover:bg-cream-200 dark:hover:bg-navy-800 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        <div className="py-4 space-y-4 text-xs sm:text-sm text-navy-700 dark:text-cream-200 leading-relaxed">
-          <div className="p-4 rounded-2xl bg-cream-100 dark:bg-navy-900/60 border border-cream-300 dark:border-navy-800 text-navy-900 dark:text-cream-100 font-medium text-xs leading-relaxed">
-            &ldquo;Finoch tidak menyimpan rekaman audio di cloud. Suara Anda diproses secara lokal di browser, dan data pengeluaran hanya tersimpan setelah Anda meninjau dan mengonfirmasi secara sadar.&rdquo;
-          </div>
-
-          <div className="space-y-3.5">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-cream-200/70 dark:bg-navy-900 border border-cream-300 dark:border-navy-800 text-navy-900 dark:text-cream-100 shrink-0 mt-0.5">
-                <MicOff className="w-4 h-4" />
-              </div>
-              <div>
-                <strong className="block text-navy-950 dark:text-cream-50 font-bold text-xs sm:text-sm">
-                  Tanpa Rekaman Audio di Server
-                </strong>
-                <p className="text-xs text-navy-600 dark:text-cream-300/80 mt-0.5">
-                  Mikrofon Anda tidak pernah diunggah dalam format berkas audio ke server cloud eksternal.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-cream-200/70 dark:bg-navy-900 border border-cream-300 dark:border-navy-800 text-navy-900 dark:text-cream-100 shrink-0 mt-0.5">
-                <Smartphone className="w-4 h-4" />
-              </div>
-              <div>
-                <strong className="block text-navy-950 dark:text-cream-50 font-bold text-xs sm:text-sm">
-                  Pemrosesan AI &amp; NLP Lokal
-                </strong>
-                <p className="text-xs text-navy-600 dark:text-cream-300/80 mt-0.5">
-                  Whisper on-device dan parsing rupiah berjalan 100% langsung di mesin browser Anda.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-cream-200/70 dark:bg-navy-900 border border-cream-300 dark:border-navy-800 text-navy-900 dark:text-cream-100 shrink-0 mt-0.5">
-                <Database className="w-4 h-4" />
-              </div>
-              <div>
-                <strong className="block text-navy-950 dark:text-cream-50 font-bold text-xs sm:text-sm">
-                  Penyimpanan Lokal Offline
-                </strong>
-                <p className="text-xs text-navy-600 dark:text-cream-300/80 mt-0.5">
-                  Seluruh catatan pengeluaran tersimpan aman di IndexedDB perangkat, siap dipakai tanpa internet.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-cream-200/70 dark:bg-navy-900 border border-cream-300 dark:border-navy-800 text-navy-900 dark:text-cream-100 shrink-0 mt-0.5">
-                <Lock className="w-4 h-4" />
-              </div>
-              <div>
-                <strong className="block text-navy-950 dark:text-cream-50 font-bold text-xs sm:text-sm">
-                  100% Kendali di Tangan Anda
-                </strong>
-                <p className="text-xs text-navy-600 dark:text-cream-300/80 mt-0.5">
-                  Tidak ada pencatatan tersembunyi. Anda selalu melihat dan menyetujui detail transaksi.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
+          </li>
+        ))}
+      </ol>
+      <div className="px-5 pb-5">
         <button
           type="button"
           onClick={onClose}
-          className="w-full py-3 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs transition active:scale-95 shadow-sm"
+          className="w-full min-h-11 bg-ink text-paper-sheet text-body font-semibold hover:bg-ink/90 transition-colors"
         >
-          Saya Mengerti
+          Mengerti
         </button>
       </div>
-    </div>
+    </PaperDialog>
   );
 }
