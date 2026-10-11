@@ -1,11 +1,30 @@
 import { openDB, type IDBPDatabase } from "idb";
 import type { Expense } from "../types/expense";
 import type { SyncQueueItem } from "../types/sync";
+import type { LocalTransaction } from "./transaction-storage";
+import type { LocalWishlist } from "./wishlist-storage";
 
-export const DB_NAME = "voicash_db";
-export const DB_VERSION = 1;
+export const DB_NAME = "finoch_db";
+export const DB_VERSION = 2;
 
-export interface VoiCashDBSchema {
+export interface FinochDBSchema {
+  transactions: {
+    key: string;
+    value: LocalTransaction;
+    indexes: {
+      "by-user": string;
+      "by-type": string;
+      "by-date": string;
+    };
+  };
+  wishlists: {
+    key: string;
+    value: LocalWishlist;
+    indexes: {
+      "by-user": string;
+      "by-achieved": number; // 0 or 1 for indexing
+    };
+  };
   expenses: {
     key: string;
     value: Expense;
@@ -29,12 +48,25 @@ export interface VoiCashDBSchema {
   };
 }
 
-let dbPromise: Promise<IDBPDatabase<VoiCashDBSchema>> | null = null;
+let dbPromise: Promise<IDBPDatabase<FinochDBSchema>> | null = null;
 
-export function getDatabase(): Promise<IDBPDatabase<VoiCashDBSchema>> {
+export function getDatabase(): Promise<IDBPDatabase<FinochDBSchema>> {
   if (!dbPromise) {
-    dbPromise = openDB<VoiCashDBSchema>(DB_NAME, DB_VERSION, {
+    dbPromise = openDB<FinochDBSchema>(DB_NAME, DB_VERSION, {
       upgrade(db) {
+        if (!db.objectStoreNames.contains("transactions")) {
+          const txStore = db.createObjectStore("transactions", { keyPath: "id" });
+          txStore.createIndex("by-user", "userId");
+          txStore.createIndex("by-type", "type");
+          txStore.createIndex("by-date", "transactionDate");
+        }
+
+        if (!db.objectStoreNames.contains("wishlists")) {
+          const wishStore = db.createObjectStore("wishlists", { keyPath: "id" });
+          wishStore.createIndex("by-user", "userId");
+          wishStore.createIndex("by-achieved", "isAchieved");
+        }
+
         if (!db.objectStoreNames.contains("expenses")) {
           const expenseStore = db.createObjectStore("expenses", { keyPath: "id" });
           expenseStore.createIndex("by-user", "userId");

@@ -1,11 +1,12 @@
 import { WishlistItem, WishlistSummary } from "@/types/wishlist-types";
-import { getStorage, isDemoMode, readArray } from "@/lib/storage/local-storage";
+import { getStorage, isDemoMode, readArray, getDataScope } from "@/lib/storage/local-storage";
+import { getDatabase } from "./indexed-db";
+import { syncQueue } from "./sync-queue";
 
 const WISHLIST_STORAGE_KEY = "finoch_student_wishlist";
 
 const daysFromNow = (days: number) => new Date(Date.now() + days * 86400000).toISOString();
 
-// Built per call: demo dates stay relative to today and callers can mutate freely.
 const createDefaultWishlistItems = (): WishlistItem[] => [
   {
     id: "wish_sneakers",
@@ -28,7 +29,7 @@ const createDefaultWishlistItems = (): WishlistItem[] => [
     priority: "medium",
     coolingDays: 7,
     createdAt: daysFromNow(-10),
-    coolingEndDate: daysFromNow(-3), // Ended -> ready
+    coolingEndDate: daysFromNow(-3),
     status: "ready",
     note: "Untuk belajar di kos biar nggak keganggu suara motor",
   },
@@ -52,14 +53,12 @@ export function getWishlist(): WishlistItem[] {
   try {
     const items = readArray<WishlistItem>(WISHLIST_STORAGE_KEY);
     if (!items) {
-      // Sample items only in demo mode; a real user starts with an empty wishlist.
       if (!isDemoMode()) return [];
       const defaults = createDefaultWishlistItems();
       storage.setItem(WISHLIST_STORAGE_KEY, JSON.stringify(defaults));
       return defaults;
     }
 
-    // Auto-update status from 'cooling' to 'ready' if coolingEndDate has passed
     const now = new Date();
     let hasChanges = false;
     const updated = items.map((item) => {
@@ -171,4 +170,76 @@ export function getWishlistSummary(): WishlistSummary {
     purchasedCount,
     totalMoneySaved,
   };
+}
+
+// ==================== Local-First IndexedDB Core Engine ====================
+
+export interface LocalWishlist {
+  id: string;
+  userId: string;
+  name: string;
+  targetPrice: number;
+  savedAmount: number;
+  priority: number;
+  isAchieved: boolean;
+  isDeleted: boolean;
+  createdAt: string;
+  updatedAt: string;
+  syncStatus?: "pending" | "synced" | "failed";
+}
+
+export async function saveWishlistItem(
+  item: Omit<LocalWishlist, "id" | "userId" | "createdAt" | "updatedAt" | "isDeleted"> & {
+    id?: string;
+    userId?: string;
+    createdAt?: string;
+    updatedAt?: string;
+    isDeleted?: boolean;
+  }
+): Promise<LocalWishlist> {
+  const db = await getDatabase();
+  const now = new Date().toISOString();
+  const fullItem: LocalWishlist = {
+    id: item.id || `wish-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    userId: item.userId || getDataScope(),
+    name: item.name.trim(),
+    targetPrice: Math.round(item.targetPrice),
+    savedAmount: Math.round(item.savedAmount || 0),
+    priority: item.priority || 1,
+    isAchieved: item.isAchieved ?? false,
+    isDeleted: item.isDeleted ?? false,
+    createdAt: item.createdAt || now,
+    updatedAt: item.updatedAt || now,
+    syncStatus: "pending",
+  };
+
+  await db.put("wishlists", fullItem);
+  await syncQueue.enqueue("create", fullItem as any);
+  return fullItem;
+}
+
+export async function getWishlistItems(userId: string = getDataScope()): Promise<LocalWishlist[]> {
+  const db = await getDatabase();
+  const all = await db.getAllFromIndex("wishlists", "by-user", userId);
+
+  return all
+    .filter((w) => !w.isDeleted)
+    .sort((a, b) => b.priority - a.priority || new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+}
+
+export async function toggleWishlistAchieved(id: string, userId: string = getDataScope()): Promise<LocalWishlist | null> {
+  const db = await getDatabase();
+  const existing = await db.get("wishlists", id);
+  if (!existing || existing.userId !== userId) return null;
+
+  const updated: LocalWishlist = {
+    ...existing,
+    isAchieved: !existing.isAchieved,
+    updatedAt: new Date().toISOString(),
+    syncStatus: "pending",
+  };
+
+  await db.put("wishlists", updated);
+  await syncQueue.enqueue("update", updated as any);
+  return updated;
 }
