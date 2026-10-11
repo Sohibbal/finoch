@@ -1,20 +1,17 @@
 import { UktPlan, UktDepositRecord } from "@/types/ukt-types";
+import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { localDateKeyFromNow } from "@/lib/date";
 
 const UKT_STORAGE_KEY = "finoch_student_ukt_plans_v1";
 
-function getStorage(): Storage | null {
-  if (typeof window !== "undefined" && window.localStorage) return window.localStorage;
-  if (typeof localStorage !== "undefined") return localStorage;
-  return null;
-}
-
-const DEFAULT_PLANS: UktPlan[] = [
+// Built per call: deadlines stay in the future relative to today.
+const createDefaultPlans = (): UktPlan[] => [
   {
     id: "ukt-default-1",
     name: "UKT Semester Ganjil / Genap",
     targetAmount: 3500000,
     currentSaved: 1400000,
-    deadline: "2026-08-20",
+    deadline: localDateKeyFromNow(120),
     category: "ukt",
     deposits: [
       {
@@ -37,7 +34,7 @@ const DEFAULT_PLANS: UktPlan[] = [
     name: "Biaya KKN / Praktikum Lapangan",
     targetAmount: 1200000,
     currentSaved: 450000,
-    deadline: "2026-07-15",
+    deadline: localDateKeyFromNow(75),
     category: "kkn",
     deposits: [
       {
@@ -52,21 +49,19 @@ const DEFAULT_PLANS: UktPlan[] = [
 ];
 
 export function getUktPlans(): UktPlan[] {
-  const storage = getStorage();
-  if (!storage) return DEFAULT_PLANS;
+  // Defaults only when nothing was ever stored; an emptied list stays empty.
+  const stored = readArray<UktPlan>(UKT_STORAGE_KEY);
+  if (stored) return stored;
+  const defaults = createDefaultPlans();
+  saveUktPlans(defaults);
+  return defaults;
+}
 
-  try {
-    const raw = storage.getItem(UKT_STORAGE_KEY);
-    if (!raw) {
-      storage.setItem(UKT_STORAGE_KEY, JSON.stringify(DEFAULT_PLANS));
-      return DEFAULT_PLANS;
-    }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_PLANS;
-  } catch (err) {
-    console.error("Error reading UKT plans:", err);
-    return DEFAULT_PLANS;
+function generateId(prefix: string): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return `${prefix}-${crypto.randomUUID()}`;
   }
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 10)}`;
 }
 
 export function saveUktPlans(plans: UktPlan[]): void {
@@ -102,14 +97,14 @@ export function depositToUktPlan(
   amount: number,
   note: string = "Setoran mandiri"
 ): UktPlan | null {
-  if (amount <= 0) return null;
+  if (!Number.isFinite(amount) || amount <= 0) return null;
   const plans = getUktPlans();
   const index = plans.findIndex((p) => p.id === planId);
   if (index === -1) return null;
 
   const targetPlan = plans[index];
   const newDeposit: UktDepositRecord = {
-    id: `dep-${Date.now()}`,
+    id: generateId("dep"),
     amount,
     note,
     createdAt: new Date().toISOString(),

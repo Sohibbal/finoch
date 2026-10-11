@@ -1,16 +1,12 @@
 import { StudentWallet, WalletTransferRecord, WalletSummary } from "@/types/wallet-types";
 import { calculateWalletSummary } from "@/lib/financial/wallet-engine";
+import { getStorage, readArray } from "@/lib/storage/local-storage";
 
 const WALLETS_STORAGE_KEY = "finoch_student_wallets_v1";
 const WALLET_TRANSFERS_STORAGE_KEY = "finoch_student_wallet_transfers_v1";
 
-function getStorage(): Storage | null {
-  if (typeof window !== "undefined" && window.localStorage) return window.localStorage;
-  if (typeof localStorage !== "undefined") return localStorage;
-  return null;
-}
-
-const DEFAULT_WALLETS: StudentWallet[] = [
+// Built per call so callers mutating the result never corrupt the defaults.
+const createDefaultWallets = (): StudentWallet[] => [
   {
     id: "wallet-cash-1",
     name: "Dompet Tunai Fisik",
@@ -51,21 +47,12 @@ const DEFAULT_WALLETS: StudentWallet[] = [
  * Loads wallets from localStorage or defaults.
  */
 export function getWallets(): StudentWallet[] {
-  const storage = getStorage();
-  if (!storage) return DEFAULT_WALLETS;
-
-  try {
-    const raw = storage.getItem(WALLETS_STORAGE_KEY);
-    if (!raw) {
-      storage.setItem(WALLETS_STORAGE_KEY, JSON.stringify(DEFAULT_WALLETS));
-      return DEFAULT_WALLETS;
-    }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_WALLETS;
-  } catch (err) {
-    console.error("Error reading wallets from storage:", err);
-    return DEFAULT_WALLETS;
-  }
+  // Defaults only when nothing was ever stored; an emptied list stays empty.
+  const stored = readArray<StudentWallet>(WALLETS_STORAGE_KEY);
+  if (stored) return stored;
+  const defaults = createDefaultWallets();
+  saveWallets(defaults);
+  return defaults;
 }
 
 /**
@@ -88,6 +75,9 @@ export function saveWallets(wallets: StudentWallet[]): void {
 export function addWallet(
   data: Omit<StudentWallet, "id" | "updatedAt">
 ): StudentWallet {
+  if (!Number.isFinite(data.balance) || data.balance < 0) {
+    throw new Error("Saldo awal dompet tidak valid");
+  }
   const wallets = getWallets();
   const newWallet: StudentWallet = {
     ...data,
@@ -140,8 +130,11 @@ export function transferWalletFunds(
   adminFee: number = 0,
   reason: string = "Pindah saldo dompet"
 ): WalletTransferRecord {
-  if (amount <= 0) {
+  if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error("Nominal transfer harus lebih dari Rp 0");
+  }
+  if (!Number.isFinite(adminFee) || adminFee < 0) {
+    throw new Error("Biaya admin tidak boleh negatif");
   }
   if (fromId === toId) {
     throw new Error("Tidak bisa transfer ke dompet yang sama");
@@ -192,16 +185,7 @@ export function transferWalletFunds(
  * Retrieves transfer history log.
  */
 export function getWalletTransferHistory(): WalletTransferRecord[] {
-  const storage = getStorage();
-  if (!storage) return [];
-
-  try {
-    const raw = storage.getItem(WALLET_TRANSFERS_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (err) {
-    console.error("Error reading wallet transfers:", err);
-    return [];
-  }
+  return readArray<WalletTransferRecord>(WALLET_TRANSFERS_STORAGE_KEY) ?? [];
 }
 
 /**
