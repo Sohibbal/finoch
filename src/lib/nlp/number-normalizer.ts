@@ -6,18 +6,15 @@ export interface ParsedNumberResult {
 }
 
 const SLANG_MAP: Record<string, number> = {
-  seceng: 1000,
-  gopek: 500,
   cepek: 100,
+  gopek: 500,
+  seceng: 1000,
+  goceng: 5000,
   ceban: 10000,
   noban: 20000,
   gocap: 50000,
-  "setengah juta": 500000,
-  sejuta: 1000000,
-  seribu: 1000,
-  seratus: 100,
-  sepuluh: 10,
-  sebelas: 11,
+  goban: 50000,
+  nopek: 200000,
 };
 
 const BASE_WORDS: Record<string, number> = {
@@ -31,12 +28,62 @@ const BASE_WORDS: Record<string, number> = {
   tujuh: 7,
   delapan: 8,
   sembilan: 9,
-  sepuluh: 10,
-  sebelas: 11,
-  seratus: 100,
-  seribu: 1000,
-  sejuta: 1000000,
 };
+
+// "se-" prefixed words are shorthand for "satu <scale>" and must go through the scale logic
+const SE_WORDS: Record<string, string> = {
+  sebelas: "belas",
+  sepuluh: "puluh",
+  seratus: "ratus",
+  seribu: "ribu",
+  sejuta: "juta",
+};
+
+const SCALE_ALIASES: Record<string, string> = {
+  rebu: "ribu",
+  rb: "ribu",
+  k: "ribu",
+  jt: "juta",
+};
+
+const CURRENCY_WORDS = new Set(["rupiah", "perak"]);
+const SCALE_WORDS = new Set(["belas", "puluh", "ratus", "ribu", "rebu", "juta"]);
+// Abbreviations only count as a scale right after a number (e.g. "15k", "20 rb")
+const ABBREVIATIONS = new Set(["rb", "k", "jt"]);
+
+function isNumberWord(word: string): boolean {
+  return (
+    BASE_WORDS[word] !== undefined ||
+    SE_WORDS[word] !== undefined ||
+    SLANG_MAP[word] !== undefined ||
+    SCALE_WORDS.has(word) ||
+    word === "setengah"
+  );
+}
+
+/**
+ * Splits glued spoken numbers such as "duaribu" or "limapuluh" into separate words.
+ */
+function splitGluedWord(word: string): string[] {
+  if (isNumberWord(word)) return [word];
+  const glued = word.match(/^([a-z]+?)(belas|puluh|ratus|ribu|rebu|juta)$/);
+  if (glued) {
+    const head = splitGluedWord(glued[1]);
+    if (head.every(isNumberWord)) return [...head, glued[2]];
+  }
+  return [word];
+}
+
+/**
+ * Parses a digit token: "45.000" / "12,500" use thousands separators,
+ * while "2.5" / "1,5" are decimals.
+ */
+function parseDigitToken(token: string): number {
+  if (/^\d{1,3}(?:[.,]\d{3})+$/.test(token)) {
+    return parseInt(token.replace(/[.,]/g, ""), 10);
+  }
+  return parseFloat(token.replace(",", "."));
+}
 
 /**
  * Converts a sequence of Indonesian number words (e.g. "dua puluh lima ribu") into a numeric value.
@@ -44,71 +91,79 @@ const BASE_WORDS: Record<string, number> = {
 export function wordsToNumber(words: string[]): number | null {
   if (words.length === 0) return null;
 
-  let total = 0;
-  let current = 0;
+  let total = 0; // value already scaled by ribu/juta
+  let chunk = 0; // current group below one thousand (e.g. "seratus lima puluh")
+  let pending = 0; // last unit digit not yet attached to puluh/belas/ratus
+  let lastScale = 0;
   let matchedAny = false;
 
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i].toLowerCase();
-
-    if (word === "rupiah" || word === "perak" || word === "rp") {
-      continue;
-    }
-
-    if (SLANG_MAP[word] !== undefined) {
-      current += SLANG_MAP[word];
-      matchedAny = true;
-      continue;
-    }
-
-    if (BASE_WORDS[word] !== undefined) {
-      const val = BASE_WORDS[word];
-      if (val === 1000 || val === 1000000) {
-        current = current === 0 ? val : current * val;
-        total += current;
-        current = 0;
-      } else {
-        current += val;
-      }
-      matchedAny = true;
-    } else if (word === "belas") {
-      current += 10;
-      matchedAny = true;
-    } else if (word === "puluh") {
-      current = (current === 0 ? 1 : current) * 10;
-      matchedAny = true;
-    } else if (word === "ratus") {
-      current = (current === 0 ? 1 : current) * 100;
-      matchedAny = true;
-    } else if (word === "ribu") {
-      current = (current === 0 ? 1 : current) * 1000;
-      total += current;
-      current = 0;
-      matchedAny = true;
-    } else if (word === "juta") {
-      current = (current === 0 ? 1 : current) * 1000000;
-      total += current;
-      current = 0;
-      matchedAny = true;
+  const applyScale = (scale: string) => {
+    if (scale === "ribu" || scale === "juta") {
+      const multiplier = scale === "ribu" ? 1000 : 1000000;
+      total += (chunk + pending || 1) * multiplier;
+      chunk = 0;
+      lastScale = multiplier;
     } else {
-      // Check if it's a numeric string like "15" or "15.000"
-      const cleanNum = word.replace(/\./g, "").replace(/,/g, ".");
-      const parsedNum = parseFloat(cleanNum);
-      if (!isNaN(parsedNum)) {
-        current += parsedNum;
-        matchedAny = true;
-      } else {
-        return null;
-      }
+      const unit = pending || 1;
+      if (scale === "belas") chunk += unit + 10;
+      else if (scale === "puluh") chunk += unit * 10;
+      else chunk += unit * 100;
     }
+    pending = 0;
+  };
+
+  const expanded = words.flatMap((w) => splitGluedWord(w.toLowerCase()));
+
+  for (const raw of expanded) {
+    const word = SCALE_ALIASES[raw] ?? raw;
+
+    if (word === "rp" || CURRENCY_WORDS.has(word)) continue;
+
+    if (SE_WORDS[word] !== undefined) {
+      pending = 1;
+      applyScale(SE_WORDS[word]);
+    } else if (BASE_WORDS[word] !== undefined) {
+      pending += BASE_WORDS[word];
+    } else if (SLANG_MAP[word] !== undefined) {
+      pending += SLANG_MAP[word];
+    } else if (word === "setengah") {
+      // "2 juta setengah" -> half of the last scale; "dua setengah juta" -> 2.5 juta
+      if (chunk === 0 && pending === 0 && lastScale > 0) {
+        total += lastScale / 2;
+      } else {
+        pending += 0.5;
+      }
+    } else if (SCALE_WORDS.has(word)) {
+      applyScale(word);
+    } else if (/^\d+(?:[.,]\d+)*$/.test(word)) {
+      pending += parseDigitToken(word);
+    } else {
+      return null;
+    }
+    matchedAny = true;
   }
 
-  total += current;
-  return matchedAny ? total : null;
+  return matchedAny ? Math.round(total + chunk + pending) : null;
+}
+
+interface Token {
+  text: string;
+  start: number;
+  end: number;
+}
+
+interface Candidate {
+  amount: number;
+  start: number;
+  end: number;
+  hasUnit: boolean;
 }
 
 /**
  * Scans input text for Indonesian currency/number representations and extracts the best match.
+ *
+ * Every run of number tokens is evaluated; amounts carrying a currency marker
+ * (rp, ribu, juta, slang, rupiah...) win, otherwise the last plain amount >= 100 is used.
  */
 export function parseIndonesianNumber(input: string): ParsedNumberResult | null {
   if (!input || typeof input !== "string") return null;
@@ -116,115 +171,85 @@ export function parseIndonesianNumber(input: string): ParsedNumberResult | null 
   const raw = input.trim();
   const lower = raw.toLowerCase();
 
-  // Pattern 1: Multi-word slang like "setengah juta"
-  const multiSlang = lower.match(/\bsetengah\s+juta\b/);
-  if (multiSlang && multiSlang.index !== undefined) {
-    return {
-      amount: 500000,
-      matchedText: multiSlang[0],
-      startIndex: multiSlang.index,
-      endIndex: multiSlang.index + multiSlang[0].length,
-    };
-  }
-
-  // Pattern 2: Digits with decimal and suffixes like "2.5jt", "2,5 juta", "15rb", "15k", "20 rb", "25 k"
-  const hybridRegex = /\b(\d+(?:[.,]\d+)?)\s*(k|rb|ribu|jt|juta)\b/i;
-  const hybridMatch = lower.match(hybridRegex);
-  if (hybridMatch && hybridMatch.index !== undefined) {
-    const rawVal = parseFloat(hybridMatch[1].replace(",", "."));
-    const unit = hybridMatch[2].toLowerCase();
-    let multiplier = 1;
-    if (unit === "k" || unit === "rb" || unit === "ribu") multiplier = 1000;
-    if (unit === "jt" || unit === "juta") multiplier = 1000000;
-
-    const amount = Math.round(rawVal * multiplier);
-    return {
-      amount,
-      matchedText: hybridMatch[0],
-      startIndex: hybridMatch.index,
-      endIndex: hybridMatch.index + hybridMatch[0].length,
-    };
-  }
-
-  // Pattern 3: Explicit standard currency numbers like "rp. 15.000", "rp 20.000", or raw digits "50000"
-  const directCurrencyRegex = /(?:rp\.?\s*)?(\d{1,3}(?:\.\d{3})+|\d+)\s*(?:rupiah|perak)?\b/i;
-  const directMatch = lower.match(directCurrencyRegex);
-  if (directMatch && directMatch.index !== undefined && directMatch[1]) {
-    const cleanDigits = directMatch[1].replace(/\./g, "");
-    const amount = parseInt(cleanDigits, 10);
-    // Only accept if preceded by rp or followed by currency, or value >= 100
-    const matchedSegment = directMatch[0].trim();
-    if (
-      amount >= 100 ||
-      matchedSegment.toLowerCase().startsWith("rp") ||
-      matchedSegment.toLowerCase().includes("rupiah") ||
-      matchedSegment.toLowerCase().includes("perak")
-    ) {
-      return {
-        amount,
-        matchedText: directMatch[0],
-        startIndex: directMatch.index,
-        endIndex: directMatch.index + directMatch[0].length,
-      };
-    }
-  }
-
-  // Pattern 4: Spoken words sequence (e.g. "dua puluh lima ribu", "ceban", "lima belas ribu perak")
-  const validTokens = new Set([
-    "nol", "satu", "dua", "tiga", "empat", "lima", "enam", "tujuh", "delapan", "sembilan",
-    "sepuluh", "sebelas", "seratus", "seribu", "sejuta",
-    "belas", "puluh", "ratus", "ribu", "juta",
-    "seceng", "gopek", "cepek", "ceban", "noban", "gocap",
-    "rupiah", "perak"
-  ]);
-
-  const wordsWithIndices: { word: string; start: number; end: number }[] = [];
-  const tokenRegex = /[a-zA-Z]+/g;
+  const tokens: Token[] = [];
+  const tokenRegex = /\d+(?:[.,]\d+)*|[a-z]+/g;
   let match: RegExpExecArray | null;
-
   while ((match = tokenRegex.exec(lower)) !== null) {
-    wordsWithIndices.push({
-      word: match[0],
-      start: match.index,
-      end: match.index + match[0].length,
-    });
+    tokens.push({ text: match[0], start: match.index, end: match.index + match[0].length });
   }
 
-  // Find contiguous sequence of number tokens
-  let bestSequence: { word: string; start: number; end: number }[] = [];
-  let currentSeq: { word: string; start: number; end: number }[] = [];
+  const candidates: Candidate[] = [];
+  let run: Token[] = [];
+  let rpStart: number | null = null;
 
-  for (const item of wordsWithIndices) {
-    if (validTokens.has(item.word)) {
-      currentSeq.push(item);
+  const flush = () => {
+    const numberTokens = run.filter((t) => !CURRENCY_WORDS.has(t.text));
+    if (numberTokens.length > 0) {
+      const amount = wordsToNumber(run.map((t) => t.text));
+      if (amount !== null && amount > 0) {
+        const hasUnit =
+          rpStart !== null ||
+          run.flatMap((t) => splitGluedWord(t.text)).some((w) => {
+            const scale = SE_WORDS[w] ?? SCALE_ALIASES[w] ?? w;
+            return scale === "ribu" || scale === "juta" || CURRENCY_WORDS.has(w) || SLANG_MAP[w] !== undefined;
+          });
+        candidates.push({
+          amount,
+          start: rpStart ?? run[0].start,
+          end: run[run.length - 1].end,
+          hasUnit,
+        });
+      }
+    }
+    run = [];
+    rpStart = null;
+  };
+
+  for (const token of tokens) {
+    const word = token.text;
+    const prev = run[run.length - 1]?.text;
+    const prevIsDigit = prev !== undefined && /^\d/.test(prev);
+    const prevIsScale = prev !== undefined && /(?:ribu|rebu|juta|^rb|^k|^jt)$/.test(prev);
+    const isDigit = /^\d/.test(word);
+
+    if (word === "rp") {
+      flush();
+      rpStart = token.start;
+      continue;
+    }
+
+    let belongs = false;
+    if (isDigit) {
+      // A new digit only continues a run after a scale word ("2 ribu 500")
+      if (run.length > 0 && !prevIsScale) flush();
+      belongs = true;
+    } else if (ABBREVIATIONS.has(word)) {
+      belongs = prevIsDigit || (prev !== undefined && isNumberWord(prev));
+    } else if (CURRENCY_WORDS.has(word)) {
+      belongs = run.length > 0;
+    } else if (splitGluedWord(word).every(isNumberWord)) {
+      if (prevIsDigit && !SCALE_WORDS.has(word) && word !== "setengah") flush();
+      belongs = true;
+    }
+
+    if (belongs) {
+      run.push(token);
     } else {
-      if (currentSeq.length > bestSequence.length) {
-        bestSequence = currentSeq;
-      }
-      currentSeq = [];
+      flush();
     }
   }
-  if (currentSeq.length > bestSequence.length) {
-    bestSequence = currentSeq;
-  }
+  flush();
 
-  if (bestSequence.length > 0) {
-    // Exclude if only "rupiah" or "perak" alone
-    const nonCurrencyWords = bestSequence.filter(w => w.word !== "rupiah" && w.word !== "perak");
-    if (nonCurrencyWords.length > 0) {
-      const calculatedAmount = wordsToNumber(bestSequence.map(w => w.word));
-      if (calculatedAmount !== null && calculatedAmount > 0) {
-        const start = bestSequence[0].start;
-        const end = bestSequence[bestSequence.length - 1].end;
-        return {
-          amount: calculatedAmount,
-          matchedText: raw.slice(start, end),
-          startIndex: start,
-          endIndex: end,
-        };
-      }
-    }
-  }
+  // A bare small number ("es teh dua") is a quantity, not a price
+  const best =
+    candidates.find((c) => c.hasUnit) ??
+    [...candidates].reverse().find((c) => c.amount >= 100);
+  if (!best) return null;
 
-  return null;
+  return {
+    amount: best.amount,
+    matchedText: raw.slice(best.start, best.end),
+    startIndex: best.start,
+    endIndex: best.end,
+  };
 }
