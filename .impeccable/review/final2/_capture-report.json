@@ -5,7 +5,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1260
+    "textLen": 1288
   },
   {
     "file": "wallets-mobile.png",
@@ -21,7 +21,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1982
+    "textLen": 1983
   },
   {
     "file": "bills-mobile.png",
@@ -93,7 +93,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 2163
+    "textLen": 2576
   },
   {
     "file": "insights-mobile.png",
@@ -101,7 +101,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 342
+    "textLen": 1317
   },
   {
     "file": "simulator-mobile.png",
@@ -149,7 +149,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1266
+    "textLen": 1294
   },
   {
     "file": "wallets-desktop.png",
@@ -165,7 +165,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1982
+    "textLen": 1983
   },
   {
     "file": "bills-desktop.png",
@@ -221,7 +221,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 720
+    "textLen": 723
   },
   {
     "file": "audit-desktop.png",
@@ -237,7 +237,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 2416
+    "textLen": 2848
   },
   {
     "file": "insights-desktop.png",
@@ -245,7 +245,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 342
+    "textLen": 1317
   },
   {
     "file": "simulator-desktop.png",
