@@ -42,6 +42,26 @@ export const DEFAULT_OFFLINE_TIER: OfflineModelTier = "base";
 export const WHISPER_STORAGE_KEY = "voicash_offline_whisper_ready";
 export const WHISPER_TIER_STORAGE_KEY = "voicash_offline_whisper_tier";
 
+// Transformers.js v2 uses this cache and Hugging Face URL as its browser cache key.
+export const WHISPER_CACHE_NAME = "transformers-cache";
+export const WHISPER_WASM_CACHE_NAME = "finoch-whisper-wasm";
+export const WHISPER_MODEL_FILES = [
+  "config.json", "tokenizer.json", "tokenizer_config.json", "preprocessor_config.json",
+  "onnx/encoder_model_quantized.onnx", "onnx/decoder_model_merged_quantized.onnx",
+];
+
+export async function isWhisperModelCached(modelId: string): Promise<boolean> {
+  try {
+    if (typeof caches === "undefined" || !(await caches.has(WHISPER_CACHE_NAME))) return false;
+    const cache = await caches.open(WHISPER_CACHE_NAME);
+    const files = await Promise.all(WHISPER_MODEL_FILES.map(file =>
+      cache.match(`https://huggingface.co/${modelId}/resolve/main/${file}`)));
+    return files.every(response => response?.ok);
+  } catch {
+    return false;
+  }
+}
+
 export interface UseOfflineWhisperReturn {
   isModelDownloaded: boolean;
   activeModelTier: OfflineModelTier | null;
@@ -89,6 +109,8 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
   const workerRef = useRef<Worker | null>(null);
   const pendingTranscribeResolve = useRef<((text: string) => void) | null>(null);
   const pendingTranscribeReject = useRef<((err: Error) => void) | null>(null);
+  const transcribeRequestId = useRef(0);
+  const pendingLoadReject = useRef<((err: Error) => void) | null>(null);
   const pendingLoadResolve = useRef<((success: boolean) => void) | null>(null);
   const activeLoadingTierRef = useRef<OfflineModelTier>(selectedModelTier);
 
@@ -104,8 +126,26 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
           { type: "module" }
         );
 
+        worker.onerror = (event) => {
+          event.preventDefault();
+          const failure = new Error(event.message || "Worker suara offline berhenti tiba-tiba.");
+          setError(failure.message);
+          setIsDownloading(false);
+          setIsTranscribing(false);
+          setDownloadProgress(0);
+          pendingLoadReject.current?.(failure);
+          pendingTranscribeReject.current?.(failure);
+          pendingLoadResolve.current = null;
+          pendingLoadReject.current = null;
+          pendingTranscribeResolve.current = null;
+          pendingTranscribeReject.current = null;
+          worker.terminate();
+          workerRef.current = null;
+        };
+
         worker.onmessage = (event: MessageEvent) => {
-          const { status, data, output, error: workerErr } = event.data || {};
+          const { status, data, output, error: workerErr, requestId } = event.data || {};
+          if (requestId !== undefined && requestId !== transcribeRequestId.current) return;
 
           if (status === "progress") {
             if (data?.progress) {
@@ -124,6 +164,7 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
             if (pendingLoadResolve.current) {
               pendingLoadResolve.current(true);
               pendingLoadResolve.current = null;
+              pendingLoadReject.current = null;
             }
           } else if (status === "transcribing") {
             setIsTranscribing(true);
@@ -132,6 +173,7 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
             if (pendingTranscribeResolve.current) {
               pendingTranscribeResolve.current(output || "");
               pendingTranscribeResolve.current = null;
+              pendingTranscribeReject.current = null;
             }
           } else if (status === "error") {
             setIsDownloading(false);
@@ -140,10 +182,12 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
             if (pendingLoadResolve.current) {
               pendingLoadResolve.current(false);
               pendingLoadResolve.current = null;
+              pendingLoadReject.current = null;
             }
             if (pendingTranscribeReject.current) {
               pendingTranscribeReject.current(new Error(workerErr));
               pendingTranscribeReject.current = null;
+              pendingTranscribeResolve.current = null;
             }
           } else if (status === "deleted") {
             setActiveModelTier(null);
@@ -166,18 +210,32 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
 
   // Warmup model saat komponen dimuat jika model sudah tersimpan
   useEffect(() => {
+    let cancelled = false;
     if (activeModelTier) {
-      const worker = getOrCreateWorker();
-      if (worker) {
-        const modelId = OFFLINE_MODEL_CONFIGS[activeModelTier].modelId;
-        worker.postMessage({ type: "warmup", model: modelId, tier: activeModelTier });
-      }
+      const modelId = OFFLINE_MODEL_CONFIGS[activeModelTier].modelId;
+      void isWhisperModelCached(modelId).then(cached => {
+        if (cancelled) return;
+        if (!cached) {
+          setActiveModelTier(null);
+          try { localStorage.removeItem(WHISPER_STORAGE_KEY); } catch {}
+          return;
+        }
+        getOrCreateWorker()?.postMessage({ type: "warmup", model: modelId, tier: activeModelTier });
+      });
     }
+    return () => { cancelled = true; };
   }, [activeModelTier, getOrCreateWorker]);
 
   // Cleanup worker saat unmount
   useEffect(() => {
     return () => {
+      const failure = new Error("Worker suara offline ditutup.");
+      pendingLoadReject.current?.(failure);
+      pendingTranscribeReject.current?.(failure);
+      pendingLoadResolve.current = null;
+      pendingLoadReject.current = null;
+      pendingTranscribeResolve.current = null;
+      pendingTranscribeReject.current = null;
       if (workerRef.current) {
         workerRef.current.terminate();
         workerRef.current = null;
@@ -198,7 +256,7 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
       // Pastikan file WebAssembly runtime lokal ikut tersimpan di cache PWA
       try {
         if (typeof window !== "undefined" && typeof caches !== "undefined") {
-          const cache = await caches.open("voicash-shell-v2");
+          const cache = await caches.open(WHISPER_WASM_CACHE_NAME);
           await cache.addAll(["/wasm/ort-wasm-simd.wasm", "/wasm/ort-wasm.wasm"]);
         }
       } catch (e) {
@@ -212,7 +270,9 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
         return false;
       }
 
-      return new Promise<boolean>((resolve) => {
+      return new Promise<boolean>((resolve, reject) => {
+        pendingLoadReject.current?.(new Error("Unduhan model digantikan permintaan baru."));
+        pendingLoadReject.current = reject;
         pendingLoadResolve.current = resolve;
         worker.postMessage({
           type: "load",
@@ -249,12 +309,15 @@ export function useOfflineWhisper(): UseOfflineWhisperReturn {
       const activeTier = activeModelTier || selectedModelTier;
       const modelId = OFFLINE_MODEL_CONFIGS[activeTier].modelId;
 
+      pendingTranscribeReject.current?.(new Error("Transkripsi digantikan permintaan baru."));
+      const requestId = ++transcribeRequestId.current;
       setIsTranscribing(true);
       return new Promise<string>((resolve, reject) => {
         pendingTranscribeResolve.current = resolve;
         pendingTranscribeReject.current = reject;
         worker.postMessage({
           type: "transcribe",
+          requestId,
           audio,
           model: modelId,
           tier: activeTier,

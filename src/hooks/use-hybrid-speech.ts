@@ -17,11 +17,12 @@ export type SpeechEngineMode = "online" | "offline-whisper" | "offline-unready";
 
 export interface DetermineEngineModeParams {
   isOnline: boolean;
+  isOnlineSpeechSupported?: boolean;
   isModelDownloaded: boolean;
 }
 
 export function determineEngineMode(params: DetermineEngineModeParams): SpeechEngineMode {
-  if (params.isOnline) {
+  if (params.isOnline && params.isOnlineSpeechSupported !== false) {
     return "online";
   }
   if (params.isModelDownloaded) {
@@ -60,6 +61,7 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
     return true;
   });
 
+  const [speechNetworkFailed, setSpeechNetworkFailed] = useState(false);
   const [offlineTranscript, setOfflineTranscript] = useState("");
   const [offlineError, setOfflineError] = useState<string | null>(null);
   const [isOfflineRecording, setIsOfflineRecording] = useState(false);
@@ -93,7 +95,9 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
   // Otomatis beralih ke offline jika Web Speech API mengembalikan error network
   useEffect(() => {
     if (onlineSpeech.error === "network") {
-      setIsOnline(false);
+      setSpeechNetworkFailed(true);
+      const timer = setTimeout(() => setSpeechNetworkFailed(false), 30000);
+      return () => clearTimeout(timer);
     }
   }, [onlineSpeech.error]);
 
@@ -101,7 +105,7 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
   useEffect(() => {
     if (typeof window === "undefined") return;
 
-    const handleOnline = () => setIsOnline(true);
+    const handleOnline = () => { setIsOnline(true); setSpeechNetworkFailed(false); };
     const handleOffline = () => setIsOnline(false);
 
     window.addEventListener("online", handleOnline);
@@ -114,7 +118,8 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
   }, []);
 
   const engineMode = determineEngineMode({
-    isOnline,
+    isOnline: isOnline && !speechNetworkFailed,
+    isOnlineSpeechSupported: onlineSpeech.isSupported,
     isModelDownloaded: offlineWhisper.isModelDownloaded,
   });
 
@@ -167,7 +172,8 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
   const startListening = useCallback(async () => {
     setOfflineError(null);
 
-    if (engineMode === "online") {
+    if (isOnline && onlineSpeech.isSupported) {
+      setSpeechNetworkFailed(false);
       onlineResetTranscript();
       onlineStartListening();
       return;
@@ -274,12 +280,19 @@ export function useHybridSpeech(): UseHybridSpeechReturn {
       } catch (e) {
         console.warn("Silence detector initialization warning:", e);
       }
-    } catch {
-      setOfflineError("Izin mikrofon diperlukan untuk merekam suara.");
+    } catch (err) {
+      cleanupOfflineAudio();
+      mediaRecorderRef.current = null;
+      setOfflineError(err instanceof DOMException && err.name === "NotAllowedError"
+        ? "Izin mikrofon diperlukan untuk merekam suara."
+        : "Tidak dapat memulai perekam suara pada browser ini.");
       setIsOfflineRecording(false);
     }
   }, [
     engineMode,
+    isOnline,
+    onlineSpeech.isSupported,
+    cleanupOfflineAudio,
     onlineResetTranscript,
     onlineStartListening,
     offlineTranscribe,

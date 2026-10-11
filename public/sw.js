@@ -21,7 +21,7 @@ const STATIC_ASSETS = [
   "/insights",
   "/profile",
   "/onboarding",
-  "/manifest.json",
+  "/manifest.webmanifest",
   "/favicon.ico",
   "/icons/icon-192.png",
   "/icons/icon-512.png"
@@ -55,7 +55,7 @@ self.addEventListener("activate", (event) => {
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
-          if (key !== CACHE_NAME) {
+          if (shouldDeleteCache(key)) {
             console.log(`[Finoch SW] Removing old cache: ${key}`);
             return caches.delete(key);
           }
@@ -66,100 +66,49 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
-// Fetch Event
+// Keep model/runtime caches and unrelated applications intact.
+function shouldDeleteCache(name) {
+  return /^(finoch|voicash)-shell-v\d+$/.test(name) && name !== CACHE_NAME;
+}
+
+function getFetchStrategy(request, origin) {
+  const url = new URL(request.url);
+  if (request.method !== "GET" || url.origin !== origin ||
+      url.pathname === "/api" || url.pathname.startsWith("/api/")) return "bypass";
+  if (request.mode === "navigate" || url.searchParams.has("_rsc") ||
+      request.headers.get("RSC") === "1") return "network-first";
+  if (["/_next/static/", "/icons/", "/fonts/", "/wasm/"].some(prefix => url.pathname.startsWith(prefix)) ||
+      url.pathname === "/favicon.ico") return "cache-first";
+  return "bypass";
+}
+
 self.addEventListener("fetch", (event) => {
-  // Only handle GET requests
-  if (event.request.method !== "GET") {
-    return;
-  }
-
-  const url = new URL(event.request.url);
-
-  // Skip non-http/https requests (e.g. chrome-extension://)
-  if (!url.protocol.startsWith("http")) {
-    return;
-  }
-
-  // Skip API routes from service worker cache (handled by IndexedDB + sync queue)
-  if (url.pathname.startsWith("/api/")) {
-    return;
-  }
-
-  // 1. Navigation requests: Network-first, fall back to cached page or root shell "/"
-  if (event.request.mode === "navigate") {
-    event.respondWith(
-      fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.ok) {
-            const responseClone = networkResponse.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(event.request, responseClone);
-            });
-          }
-          return networkResponse;
-        })
-        .catch(async () => {
-          // Offline fallback
-          const cachedResponse = await caches.match(event.request);
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          const pathnameMatch = await caches.match(url.pathname);
-          if (pathnameMatch) {
-            return pathnameMatch;
-          }
-          const dashFallback = await caches.match("/dashboard");
-          if (dashFallback) {
-            return dashFallback;
-          }
-          const rootFallback = await caches.match("/");
-          if (rootFallback) {
-            return rootFallback;
-          }
-          return new Response("Aplikasi sedang offline. Silakan buka kembali saat terhubung.", {
-            status: 503,
-            headers: { "Content-Type": "text/plain; charset=utf-8" },
-          });
-        })
-    );
-    return;
-  }
-
-  // 2. Static assets & media (JS, CSS, images, fonts): Stale-while-revalidate
-  event.respondWith(
-    caches.open(CACHE_NAME).then(async (cache) => {
-      const cachedResponse = await cache.match(event.request);
-
-      const fetchPromise = fetch(event.request)
-        .then((networkResponse) => {
-          if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, networkResponse.clone());
-          }
-          return networkResponse;
-        })
-        .catch(() => null);
-
-      // Return cached version immediately if available (stale-while-revalidate)
-      if (cachedResponse) {
-        return cachedResponse;
+  const strategy = getFetchStrategy(event.request, self.location.origin);
+  if (strategy === "bypass") return;
+  event.respondWith((async () => {
+    const cache = await caches.open(CACHE_NAME);
+    const isNavigation = event.request.mode === "navigate";
+    const isWasm = new URL(event.request.url).pathname.startsWith("/wasm/");
+    const assetCache = isWasm ? await caches.open("finoch-whisper-wasm") : cache;
+    if (strategy === "cache-first") {
+      const cached = await assetCache.match(event.request);
+      if (cached) return cached;
+    }
+    try {
+      const response = await fetch(event.request);
+      // RSC payloads are deployment-specific: never persist them or use HTML fallbacks.
+      if (response.ok && (strategy === "cache-first" || isNavigation)) {
+        await assetCache.put(event.request, response.clone());
       }
-
-      // If not cached, await the network response
-      const networkResponse = await fetchPromise;
-      if (networkResponse) {
-        return networkResponse;
+      return response;
+    } catch {
+      if (isNavigation) {
+        for (const key of [event.request, new URL(event.request.url).pathname, "/dashboard", "/"]) {
+          const cached = await cache.match(key);
+          if (cached) return cached;
+        }
       }
-
-      // Fallback matching by URL pathname
-      const fallbackResponse = await cache.match(url.pathname);
-      if (fallbackResponse) {
-        return fallbackResponse;
-      }
-
-      return new Response("Resource offline tidak tersedia", {
-        status: 504,
-        headers: { "Content-Type": "text/plain; charset=utf-8" },
-      });
-    })
-  );
+      return new Response("Resource offline tidak tersedia", { status: 503 });
+    }
+  })());
 });
