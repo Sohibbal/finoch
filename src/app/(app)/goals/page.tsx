@@ -7,6 +7,9 @@ import { FinancialGoal } from "@/types/financial-types";
 import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { addGoal, deleteGoal, getGoals } from "@/lib/storage/goal-storage";
+import { getBills } from "@/lib/storage/bill-storage";
+import { monthLedger } from "@/lib/financial/month-ledger";
+import type { RecurringBill } from "@/types/bill-types";
 import { localDateKey, localDateKeyFromNow, parseDate } from "@/lib/date";
 import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
@@ -62,13 +65,23 @@ const emptyGoalForm = () => ({
 export default function GoalsPage() {
   const profile = useFinancialProfile();
   const [goals, setGoals] = useState<FinancialGoal[]>([]);
-  useEffect(() => setGoals(getGoals()), []);
+  const [bills, setBills] = useState<RecurringBill[]>([]);
+  useEffect(() => {
+    setGoals(getGoals());
+    setBills(getBills());
+  }, []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newGoal, setNewGoal] = useState(emptyGoalForm);
 
-  // What is left of the allowance after fixed costs; the status of every goal is measured against it.
-  const monthlySavingCapacity = (profile.monthlyIncome ?? 0) - (profile.fixedExpenses ?? 0);
+  // What is left of the allowance after fixed costs, from the same month ledger as every other page;
+  // the status of every goal is measured against it.
+  const monthlySavingCapacity = monthLedger({
+    monthlyIncome: profile.monthlyIncome ?? 0,
+    profileFixedCosts: profile.fixedExpenses ?? 0,
+    bills,
+    transactions: [],
+  }).spendable;
 
   const projectStatus = (goal: Pick<FinancialGoal, "targetAmount" | "currentAmount" | "targetDate">) =>
     calculateGoalProjection({
