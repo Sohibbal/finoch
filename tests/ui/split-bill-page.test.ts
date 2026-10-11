@@ -11,8 +11,8 @@ vi.mock("next/navigation", () => ({
 }));
 
 // Mock hooks
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test_user", name: "Diki", email: "diki@finoch.id" },
     logout: vi.fn(),
   }),

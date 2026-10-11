@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import {
   Receipt,
   HandCoins,
-  ArrowLeft,
   Sparkles,
 } from "lucide-react";
 import { Participant, SplitItem, SplitBillConfig } from "@/types/split-bill-types";
@@ -18,14 +16,7 @@ import {
   getTalanganSummary,
 } from "@/lib/storage/talangan-storage";
 import { expenseStorage } from "@/lib/storage/expense-storage";
-import { useAuth } from "@/hooks/use-auth";
-
-import Link from "next/link";
-import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { BrandLogo } from "@/components/brand/brand-logo";
+import { useAuthContext } from "@/components/layout/auth-provider";
 
 import { ParticipantManager } from "@/components/split-bill/participant-manager";
 import { BillItemEditor } from "@/components/split-bill/bill-item-editor";
@@ -33,10 +24,10 @@ import { TaxDiscountConfig } from "@/components/split-bill/tax-discount-config";
 import { SplitSummaryCard } from "@/components/split-bill/split-summary-card";
 import { TalanganHistoryModal } from "@/components/split-bill/talangan-history-modal";
 import { ReceiptOcrButton } from "@/components/split-bill/receipt-ocr-button";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default function SplitBillPage() {
-  const router = useRouter();
-  const { user } = useAuth();
+  const { user } = useAuthContext();
 
   // 1. Initial State
   const [participants, setParticipants] = useState<Participant[]>([
@@ -205,117 +196,84 @@ export default function SplitBillPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
-      {/* Desktop Left Sidebar */}
-      <DashboardSidebar className="hidden md:flex" />
+    <>
+      <PageHeader
+        title="Kalkulator Split Bill & Talangan Resto"
+        subtitle="Hitung patungan makan, pajak PB1, service charge, dan salin ke WhatsApp"
+        actions={
+          <>
+            <ReceiptOcrButton onItemsExtracted={handleOcrExtracted} />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-12">
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
-            {/* Left: Mobile Brand & Page Title */}
-            <div className="flex items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => router.push("/dashboard")}
-                className="md:hidden p-1.5 rounded-xl border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 shrink-0"
-                title="Kembali ke Dashboard"
-              >
-                <ArrowLeft className="w-4 h-4" />
-              </button>
-              <Link href="/dashboard" className="md:hidden shrink-0 flex items-center" aria-label="Finoch Beranda">
-                <BrandLogo variant="symbol" className="w-5 h-5 shrink-0" />
-              </Link>
-              <div className="min-w-0">
-                <Breadcrumbs className="hidden md:flex mb-1" />
-                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50 flex items-center gap-1.5 truncate">
-                  <Receipt className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-                  <span className="truncate">Kalkulator Split Bill &amp; Talangan Resto</span>
-                </h1>
-                <p className="text-[11px] text-navy-600 dark:text-cream-300/70 hidden sm:block">
-                  Hitung patungan makan, pajak PB1, service charge, dan salin ke WhatsApp
-                </p>
-              </div>
+            {/* Button to open Talangan Modal */}
+            <button
+              type="button"
+              onClick={() => setIsTalanganModalOpen(true)}
+              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-xs font-bold transition-all active:scale-95"
+            >
+              <HandCoins className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Buku Talangan</span>
+              {talanganSummary.countUnpaid > 0 && (
+                <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
+                  {talanganSummary.countUnpaid}
+                </span>
+              )}
+            </button>
+          </>
+        }
+      />
+
+      {/* Main Body */}
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 space-y-5">
+        {/* Hero Banner Alert */}
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
+              <Sparkles className="w-4 h-4" />
             </div>
-
-            {/* Right: Actions */}
-            <div className="flex items-center gap-2">
-              <ReceiptOcrButton onItemsExtracted={handleOcrExtracted} />
-
-              {/* Button to open Talangan Modal */}
-              <button
-                type="button"
-                onClick={() => setIsTalanganModalOpen(true)}
-                className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-xs font-bold transition-all active:scale-95"
-              >
-                <HandCoins className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Buku Talangan</span>
-                {talanganSummary.countUnpaid > 0 && (
-                  <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
-                    {talanganSummary.countUnpaid}
-                  </span>
-                )}
-              </button>
-
-              <ThemeToggle />
+            <div>
+              <h3 className="text-xs sm:text-sm font-bold text-navy-950 dark:text-cream-50">
+                Bagi Rata atau Bagi per Menu + Pajak Resto (PB1) Adil
+              </h3>
+              <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
+                Pajak & service charge dialokasikan secara proporsional. Selesai hitung, langsung kirim rincian ke WhatsApp grup!
+              </p>
             </div>
           </div>
-        </header>
+        </div>
 
-        {/* Main Body */}
-        <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 space-y-5">
-          {/* Hero Banner Alert */}
-          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
-                <Sparkles className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="text-xs sm:text-sm font-bold text-navy-950 dark:text-cream-50">
-                  Bagi Rata atau Bagi per Menu + Pajak Resto (PB1) Adil
-                </h3>
-                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
-                  Pajak & service charge dialokasikan secara proporsional. Selesai hitung, langsung kirim rincian ke WhatsApp grup!
-                </p>
-              </div>
-            </div>
+        {/* Grid Layout: Config/Items on Left, Result Summary on Right */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+          {/* Left Column: Form & Inputs (7 cols) */}
+          <div className="lg:col-span-7 space-y-4">
+            <TaxDiscountConfig config={config} onChange={handleConfigChange} />
+            <ParticipantManager
+              participants={participants}
+              onAddParticipant={handleAddParticipant}
+              onRemoveParticipant={handleRemoveParticipant}
+            />
+            <BillItemEditor
+              items={items}
+              participants={participants}
+              mode={config.mode}
+              onAddItem={handleAddItem}
+              onUpdateItem={handleUpdateItem}
+              onDeleteItem={handleDeleteItem}
+            />
           </div>
 
-          {/* Grid Layout: Config/Items on Left, Result Summary on Right */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-            {/* Left Column: Form & Inputs (7 cols) */}
-            <div className="lg:col-span-7 space-y-4">
-              <TaxDiscountConfig config={config} onChange={handleConfigChange} />
-              <ParticipantManager
-                participants={participants}
-                onAddParticipant={handleAddParticipant}
-                onRemoveParticipant={handleRemoveParticipant}
-              />
-              <BillItemEditor
-                items={items}
-                participants={participants}
-                mode={config.mode}
-                onAddItem={handleAddItem}
-                onUpdateItem={handleUpdateItem}
-                onDeleteItem={handleDeleteItem}
+          {/* Right Column: Split Bill Result & Share (5 cols) */}
+          <div className="lg:col-span-5 space-y-4">
+            <div className="sticky top-20">
+              <SplitSummaryCard
+                result={result}
+                config={config}
+                onSaveToTransactionsAndTalangan={handleSaveToFinoch}
+                isSaved={isSaved}
               />
             </div>
-
-            {/* Right Column: Split Bill Result & Share (5 cols) */}
-            <div className="lg:col-span-5 space-y-4">
-              <div className="sticky top-20">
-                <SplitSummaryCard
-                  result={result}
-                  config={config}
-                  onSaveToTransactionsAndTalangan={handleSaveToFinoch}
-                  isSaved={isSaved}
-                />
-              </div>
-            </div>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       {/* Talangan History Modal */}
       <TalanganHistoryModal
@@ -334,9 +292,6 @@ export default function SplitBillPage() {
           refreshTalangan();
         }}
       />
-
-      {/* Mobile Bottom Navigation */}
-      <BottomNav onOpenVoice={() => router.push("/dashboard")} userEmail={user?.email} />
-    </div>
+    </>
   );
 }

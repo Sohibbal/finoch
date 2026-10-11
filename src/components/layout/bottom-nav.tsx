@@ -24,6 +24,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { FLOATING_PILL_BOTTOM } from "./insets";
 
 interface BottomNavProps {
   onOpenVoice: () => void;
@@ -126,7 +127,7 @@ export function BottomNav({ onOpenVoice, userEmail }: BottomNavProps) {
       )}
 
       {/* Floating Quick Feature Drawer Pill on Mobile */}
-      <div className="md:hidden fixed bottom-20 right-4 z-40 pointer-events-auto">
+      <div className={`md:hidden fixed ${FLOATING_PILL_BOTTOM} right-4 z-40 pointer-events-auto`}>
         <button
           type="button"
           onClick={() => setIsMenuOpen(true)}

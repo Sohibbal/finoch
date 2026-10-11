@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   Target,
   Plus,
@@ -17,15 +16,9 @@ import {
 } from "lucide-react";
 import { calculateGoalProjection } from "@/lib/financial/financial-engine";
 import { FinancialGoal } from "@/types/financial-types";
-import Link from "next/link";
-import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { BottomNav } from "@/components/layout/bottom-nav";
-import { Breadcrumbs } from "@/components/layout/breadcrumbs";
-import { BrandLogo } from "@/components/brand/brand-logo";
+import { PageHeader } from "@/components/layout/page-header";
 
 export default function GoalsPage() {
-  const router = useRouter();
   const [goals, setGoals] = useState<FinancialGoal[]>([
     {
       id: "goal-1",
@@ -142,130 +135,105 @@ export default function GoalsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors">
-      {/* Desktop Left Sidebar */}
-      <DashboardSidebar className="hidden md:flex" />
+    <>
+      <PageHeader
+        title="Target Tabungan (Goals)"
+        subtitle="Kelola target tabungan masa depan dan pantau kelayakan pencapaian"
+        actions={
+          <>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="px-3.5 py-2 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Tambah Target</span>
+            </button>
+          </>
+        }
+      />
 
-      {/* Main Content Area */}
-      <div className="flex-1 flex flex-col min-w-0 pb-24 md:pb-12">
-        {/* Top Header */}
-        <header className="sticky top-0 z-30 bg-cream-50/90 dark:bg-navy-950/90 backdrop-blur-md border-b border-cream-300 dark:border-navy-800 px-4 sm:px-6 py-3.5 transition-colors">
-          <div className="max-w-6xl mx-auto flex items-center justify-between">
-            {/* Left: Mobile Brand & Page Title */}
-            <div className="flex items-center gap-3">
-              <div className="md:hidden flex items-center">
-                <Link href="/dashboard" aria-label="Finoch Beranda">
-                  <BrandLogo variant="full" className="h-5 sm:h-6 w-auto" />
-                </Link>
-              </div>
-              <div className="hidden md:block">
-                <Breadcrumbs className="mb-1" />
-                <h1 className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                  Target Tabungan (Goals)
-                </h1>
-                <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
-                  Kelola target tabungan masa depan dan pantau kelayakan pencapaian
-                </p>
-              </div>
-            </div>
+      {/* Main Content */}
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
+        <div>
+          <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
+            Target Tabungan & Proyeksi Pencapaian
+          </h2>
+          <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
+            Status pencapaian dihitung otomatis dari estimasi tabungan bulanan Digital Twin Anda.
+          </p>
+        </div>
 
-            {/* Right: Theme Toggle & Add Goal */}
-            <div className="flex items-center gap-2">
-              <ThemeToggle />
-              <button
-                type="button"
-                onClick={() => setIsModalOpen(true)}
-                className="px-3.5 py-2 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center gap-1.5 shadow-sm transition-all active:scale-[0.98]"
+        {/* Goals Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {goals.map((g) => {
+            const progress = Math.min(
+              100,
+              Math.round((g.currentAmount / g.targetAmount) * 100)
+            );
+            const remaining = Math.max(0, g.targetAmount - g.currentAmount);
+
+            return (
+              <div
+                key={g.id}
+                className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4 transition-colors"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Tambah Target</span>
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Main Content */}
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
-          <div>
-            <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
-              Target Tabungan & Proyeksi Pencapaian
-            </h2>
-            <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
-              Status pencapaian dihitung otomatis dari estimasi tabungan bulanan Digital Twin Anda.
-            </p>
-          </div>
-
-          {/* Goals Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {goals.map((g) => {
-              const progress = Math.min(
-                100,
-                Math.round((g.currentAmount / g.targetAmount) * 100)
-              );
-              const remaining = Math.max(0, g.targetAmount - g.currentAmount);
-
-              return (
-                <div
-                  key={g.id}
-                  className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4 transition-colors"
-                >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="p-3 bg-cream-100 dark:bg-navy-900 rounded-xl">
-                        {getCategoryIcon(g.category)}
-                      </div>
-                      <div>
-                        <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
-                          {g.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-xs text-navy-500 dark:text-cream-400 mt-0.5">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span>Tenggat: {String(g.targetDate)}</span>
-                        </div>
-                      </div>
+                <div className="flex items-start justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 bg-cream-100 dark:bg-navy-900 rounded-xl">
+                      {getCategoryIcon(g.category)}
                     </div>
-                    {getStatusBadge(g.status)}
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="space-y-1.5">
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-navy-600 dark:text-cream-300/80">Progres Tercapai</span>
-                      <span className="font-bold text-navy-950 dark:text-cream-50">{progress}%</span>
-                    </div>
-                    <div className="w-full bg-cream-200 dark:bg-navy-800 h-2 rounded-full overflow-hidden">
-                      <div
-                        className="bg-navy-900 dark:bg-cream-100 h-full rounded-full transition-all duration-500"
-                        style={{ width: `${progress}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Amounts */}
-                  <div className="grid grid-cols-2 gap-3 pt-2 border-t border-cream-200 dark:border-navy-800/80 text-xs">
                     <div>
-                      <span className="text-navy-500 dark:text-cream-400">Terkumpul:</span>
-                      <div className="font-extrabold text-navy-950 dark:text-cream-50 mt-0.5">
-                        Rp {g.currentAmount.toLocaleString("id-ID")}
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <span className="text-navy-500 dark:text-cream-400">Target Total:</span>
-                      <div className="font-extrabold text-navy-950 dark:text-cream-50 mt-0.5">
-                        Rp {g.targetAmount.toLocaleString("id-ID")}
+                      <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
+                        {g.name}
+                      </h3>
+                      <div className="flex items-center gap-2 text-xs text-navy-500 dark:text-cream-400 mt-0.5">
+                        <Calendar className="w-3.5 h-3.5" />
+                        <span>Tenggat: {String(g.targetDate)}</span>
                       </div>
                     </div>
                   </div>
+                  {getStatusBadge(g.status)}
+                </div>
 
-                  <div className="p-3 rounded-xl bg-cream-50/70 dark:bg-navy-900/50 border border-cream-200 dark:border-navy-800/60 text-xs text-navy-600 dark:text-cream-300/70">
-                    Sisa dana yang dibutuhkan: <span className="font-bold text-navy-950 dark:text-cream-50">Rp {remaining.toLocaleString("id-ID")}</span>
+                {/* Progress Bar */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-navy-600 dark:text-cream-300/80">Progres Tercapai</span>
+                    <span className="font-bold text-navy-950 dark:text-cream-50">{progress}%</span>
+                  </div>
+                  <div className="w-full bg-cream-200 dark:bg-navy-800 h-2 rounded-full overflow-hidden">
+                    <div
+                      className="bg-navy-900 dark:bg-cream-100 h-full rounded-full transition-all duration-500"
+                      style={{ width: `${progress}%` }}
+                    />
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </main>
-      </div>
+
+                {/* Amounts */}
+                <div className="grid grid-cols-2 gap-3 pt-2 border-t border-cream-200 dark:border-navy-800/80 text-xs">
+                  <div>
+                    <span className="text-navy-500 dark:text-cream-400">Terkumpul:</span>
+                    <div className="font-extrabold text-navy-950 dark:text-cream-50 mt-0.5">
+                      Rp {g.currentAmount.toLocaleString("id-ID")}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-navy-500 dark:text-cream-400">Target Total:</span>
+                    <div className="font-extrabold text-navy-950 dark:text-cream-50 mt-0.5">
+                      Rp {g.targetAmount.toLocaleString("id-ID")}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-xl bg-cream-50/70 dark:bg-navy-900/50 border border-cream-200 dark:border-navy-800/60 text-xs text-navy-600 dark:text-cream-300/70">
+                  Sisa dana yang dibutuhkan: <span className="font-bold text-navy-950 dark:text-cream-50">Rp {remaining.toLocaleString("id-ID")}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </main>
 
       {/* Modal Add Goal */}
       {isModalOpen && (
@@ -353,9 +321,6 @@ export default function GoalsPage() {
           </div>
         </div>
       )}
-
-      {/* Mobile Bottom Navigation */}
-      <BottomNav onOpenVoice={() => router.push("/dashboard")} />
-    </div>
+    </>
   );
 }

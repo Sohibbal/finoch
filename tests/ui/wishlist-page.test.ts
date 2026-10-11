@@ -9,8 +9,8 @@ vi.mock("next/navigation", () => ({
   usePathname: () => "/wishlist",
 }));
 
-vi.mock("@/hooks/use-auth", () => ({
-  useAuth: () => ({
+vi.mock("@/components/layout/auth-provider", () => ({
+  useAuthContext: () => ({
     user: { id: "test-user-123", email: "test@finoch.id" },
     logout: vi.fn(),
   }),
