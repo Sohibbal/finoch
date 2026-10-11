@@ -1,13 +1,13 @@
 import { normalizeText } from "./normalize-text";
 import { parseIndonesianNumber } from "./number-normalizer";
 
-const DELIMITER_REGEX = /\b(dan|sama|lalu|terus|kemudian|serta)\b|,/gi;
+const DELIMITER_REGEX = /\b(dan|sama|lalu|terus|kemudian|serta|bayar|beli)\b|,/gi;
 
 /**
  * Splits a compound transcript into individual transaction segments.
  *
  * Employs a smart guard against false splits:
- * "dan" / "sama" is only treated as a transaction separator if the segment preceding
+ * "dan" / "sama" / "bayar" / "beli" is only treated as a transaction separator if the segment preceding
  * it already contains a valid amount/price. If the preceding segment has no price,
  * the conjunction is presumed to connect items (e.g. "nasi dan ayam bakar 25 ribu").
  */
@@ -53,7 +53,7 @@ export function splitTransactions(rawTranscript: string): string[] {
     }
     // Advance past delimiter word/comma
     const remaining = normalized.slice(splitIndex);
-    const delimMatch = remaining.match(/^(?:dan|sama|lalu|terus|kemudian|serta|,)\s*/i);
+    const delimMatch = remaining.match(/^(?:dan|sama|lalu|terus|kemudian|serta|bayar|beli|,)\s*/i);
     currentStart = splitIndex + (delimMatch ? delimMatch[0].length : 1);
   }
 
