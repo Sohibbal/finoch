@@ -13,6 +13,7 @@ import {
   Sparkles,
   Check,
 } from "lucide-react";
+import { DenomPicker } from "@/components/press/uang-denom";
 import { BudgetEnvelope } from "@/types/budget-types";
 
 interface BudgetFormModalProps {
@@ -39,15 +40,6 @@ const AVAILABLE_ICONS = [
   { id: "book", label: "Kuliah", icon: BookOpen },
   { id: "shopping", label: "Belanja", icon: ShoppingBag },
   { id: "sparkles", label: "Hobi", icon: Sparkles },
-];
-
-const AVAILABLE_COLORS = [
-  { id: "emerald", label: "Hijau", class: "bg-emerald-500" },
-  { id: "blue", label: "Biru", class: "bg-blue-500" },
-  { id: "amber", label: "Kuning", class: "bg-amber-500" },
-  { id: "purple", label: "Ungu", class: "bg-purple-500" },
-  { id: "rose", label: "Merah", class: "bg-rose-500" },
-  { id: "cyan", label: "Toska", class: "bg-cyan-500" },
 ];
 
 const STUDENT_PRESETS = [
@@ -155,21 +147,21 @@ export function BudgetFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
+      <div className="w-full max-w-lg bg-paper-sheet border border-ink/20 rounded-sm p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
         {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
+        <div className="flex items-center justify-between pb-3 border-b border-ink/20">
           <div>
-            <h3 className="font-bold text-base text-navy-950 dark:text-cream-50">
+            <h3 className="font-bold text-base text-ink">
               {initialEnvelope ? "Ubah Pos Anggaran" : "Tambah Pos Amplop Baru"}
             </h3>
-            <p className="text-xs text-navy-500 dark:text-cream-400">
+            <p className="text-xs text-ink-soft">
               Kustomisasi amplop digital agar pas dengan ritme kuliahmu
             </p>
           </div>
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-navy-500 hover:bg-cream-100 dark:hover:bg-navy-800"
+            className="w-8 h-8 rounded-full flex items-center justify-center text-ink-soft hover:bg-ink/5"
           >
             <X className="w-4 h-4" />
           </button>
@@ -178,7 +170,7 @@ export function BudgetFormModal({
         {/* Student Fast Presets (Only on Add mode) */}
         {!initialEnvelope && (
           <div>
-            <span className="text-[11px] font-bold text-navy-500 dark:text-cream-400 uppercase tracking-wider block mb-2">
+            <span className="text-meta font-bold text-ink-soft block mb-2">
               Preset Cepat Mahasiswa:
             </span>
             <div className="grid grid-cols-2 gap-2">
@@ -187,12 +179,12 @@ export function BudgetFormModal({
                   type="button"
                   key={idx}
                   onClick={() => applyPreset(preset)}
-                  className="p-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900/60 hover:bg-cream-100 dark:hover:bg-navy-800 text-left transition-all"
+                  className="p-2 rounded-sm border border-ink/20 bg-paper-sheet hover:bg-ink/5 text-left transition-all"
                 >
-                  <span className="font-bold text-xs text-navy-900 dark:text-cream-100 block">
+                  <span className="font-bold text-xs text-ink block">
                     {preset.name}
                   </span>
-                  <span className="text-[11px] text-navy-500 dark:text-cream-400">
+                  <span className="text-meta text-ink-soft">
                     Rp {preset.amount.toLocaleString("id-ID")}
                   </span>
                 </button>
@@ -204,7 +196,7 @@ export function BudgetFormModal({
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Nama Pos */}
           <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1">
+            <label className="text-xs font-semibold text-ink block mb-1">
               Nama Pos Anggaran:
             </label>
             <input
@@ -213,13 +205,13 @@ export function BudgetFormModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: Makan Siang Kampus"
-              className="w-full px-3.5 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900 text-navy-950 dark:text-cream-50 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
           {/* Jatah Nominal */}
           <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1">
+            <label className="text-xs font-semibold text-ink block mb-1">
               Jatah Alokasi Bulanan (Rp):
             </label>
             <input
@@ -229,14 +221,14 @@ export function BudgetFormModal({
               required
               value={allocatedAmount || ""}
               onChange={(e) => setAllocatedAmount(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900 text-navy-950 dark:text-cream-50 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               placeholder="500000"
             />
           </div>
 
           {/* Icon Selector */}
           <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1.5">
+            <label className="text-xs font-semibold text-ink block mb-1.5">
               Pilih Ikon Amplop:
             </label>
             <div className="flex flex-wrap gap-2">
@@ -248,10 +240,10 @@ export function BudgetFormModal({
                     type="button"
                     key={item.id}
                     onClick={() => setIcon(item.id)}
-                    className={`w-9 h-9 rounded-xl flex items-center justify-center border transition-all ${
+                    className={`w-9 h-9 rounded-sm flex items-center justify-center border transition-all ${
                       isSelected
-                        ? "bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm"
-                        : "bg-cream-100 dark:bg-navy-900 border-cream-300 dark:border-navy-800 text-navy-600 dark:text-cream-300 hover:bg-cream-200"
+                        ? "bg-ink text-paper-sheet border-transparent"
+                        : "bg-paper-deep border-ink/20 text-ink-soft hover:bg-ink/5"
                     }`}
                     title={item.label}
                   >
@@ -264,29 +256,15 @@ export function BudgetFormModal({
 
           {/* Color Selector */}
           <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1.5">
-              Warna Tema:
+            <label className="text-xs font-semibold text-ink block mb-1.5">
+              Warna amplop
             </label>
-            <div className="flex gap-2">
-              {AVAILABLE_COLORS.map((c) => (
-                <button
-                  type="button"
-                  key={c.id}
-                  onClick={() => setColor(c.id)}
-                  className={`w-7 h-7 rounded-full ${c.class} flex items-center justify-center transition-all ${
-                    color === c.id ? "ring-2 ring-offset-2 ring-navy-900 dark:ring-cream-100 scale-110" : "opacity-80"
-                  }`}
-                  title={c.label}
-                >
-                  {color === c.id && <Check className="w-3.5 h-3.5 text-white" />}
-                </button>
-              ))}
-            </div>
+            <DenomPicker value={color} onChange={setColor} />
           </div>
 
           {/* Category Aliases */}
           <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1">
+            <label className="text-xs font-semibold text-ink block mb-1">
               Kategori Pengeluaran Terhubung (Pisahkan dengan koma):
             </label>
             <input
@@ -294,16 +272,16 @@ export function BudgetFormModal({
               value={aliasesText}
               onChange={(e) => setAliasesText(e.target.value)}
               placeholder="Contoh: Food, Food & Drinks, Groceries"
-              className="w-full px-3.5 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900 text-navy-950 dark:text-cream-50 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
-            <p className="text-[10px] text-navy-500 dark:text-cream-400 mt-1">
+            <p className="text-meta text-ink-soft mt-1">
               Transaksi suara/struk yang mencocokkan kata-kata ini akan otomatis memotong amplop ini.
             </p>
           </div>
 
           {/* Notes */}
           <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1">
+            <label className="text-xs font-semibold text-ink block mb-1">
               Catatan / Pengingat (Opsional):
             </label>
             <input
@@ -311,17 +289,17 @@ export function BudgetFormModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Jatah maksimal 15rb per porsi makan warteg"
-              className="w-full px-3.5 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900 text-navy-950 dark:text-cream-50 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
           {/* Rollover Toggle */}
-          <div className="flex items-center justify-between p-3 rounded-xl bg-cream-100/70 dark:bg-navy-900 border border-cream-200 dark:border-navy-800">
+          <div className="flex items-center justify-between p-3 rounded-sm bg-paper-deep border border-ink/20">
             <div>
-              <span className="text-xs font-bold text-navy-950 dark:text-cream-50 block">
+              <span className="text-xs font-bold text-ink block">
                 Akumulasi Sisa Saldo (Rollover)
               </span>
-              <span className="text-[11px] text-navy-500 dark:text-cream-400">
+              <span className="text-meta text-ink-soft">
                 Sisa saldo yang tidak terpakai ditambahkan ke bulan depan
               </span>
             </div>
@@ -329,7 +307,7 @@ export function BudgetFormModal({
               type="checkbox"
               checked={rollover}
               onChange={(e) => setRollover(e.target.checked)}
-              className="w-4 h-4 accent-emerald-600 rounded"
+              className="w-4 h-4 accent-ink rounded"
             />
           </div>
 
@@ -338,13 +316,13 @@ export function BudgetFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="w-1/2 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-300 font-bold text-xs hover:bg-cream-100 dark:hover:bg-navy-800"
+              className="w-1/2 py-2.5 rounded-sm border border-ink/20 text-ink font-bold text-xs hover:bg-ink/5"
             >
               Batal
             </button>
             <button
               type="submit"
-              className="w-1/2 py-2.5 rounded-xl bg-navy-950 hover:bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 dark:hover:bg-white font-bold text-xs shadow-md active:scale-98 transition-all"
+              className="w-1/2 py-2.5 rounded-sm bg-ink hover:bg-ink/90 text-paper-sheet font-bold text-xs active:scale-98 transition-all"
             >
               Simpan Amplop
             </button>
