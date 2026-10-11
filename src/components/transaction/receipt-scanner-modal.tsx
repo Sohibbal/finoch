@@ -28,6 +28,7 @@ export function ReceiptScannerModal({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const workerRef = useRef<Worker | null>(null);
 
   // Stop camera stream on unmount or close
   const stopCamera = () => {
@@ -37,6 +38,22 @@ export function ReceiptScannerModal({
     }
     setUseCamera(false);
   };
+
+  // The <video> only mounts once useCamera is true, so attach the stream afterwards
+  useEffect(() => {
+    if (useCamera && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [useCamera]);
+
+  useEffect(() => {
+    return () => {
+      streamRef.current?.getTracks().forEach((track) => track.stop());
+      streamRef.current = null;
+      workerRef.current?.terminate();
+      workerRef.current = null;
+    };
+  }, []);
 
   const wasOpenRef = useRef(isOpen);
 
@@ -56,9 +73,6 @@ export function ReceiptScannerModal({
         video: { facingMode: "environment" },
       });
       streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
       setUseCamera(true);
     } catch {
       setErrorMessage(
@@ -135,10 +149,12 @@ export function ReceiptScannerModal({
           new URL("../../workers/ocr.worker.ts", import.meta.url),
           { type: "module" }
         );
+        workerRef.current = worker;
 
         worker.onmessage = (e) => {
           setIsScanning(false);
           worker.terminate();
+          workerRef.current = null;
           if (e.data.success && e.data.candidate) {
             onScanSuccess(e.data.candidate);
             onClose();
@@ -152,6 +168,7 @@ export function ReceiptScannerModal({
         worker.onerror = () => {
           setIsScanning(false);
           worker.terminate();
+          workerRef.current = null;
           setErrorMessage("Gagal menjalankan worker OCR offline.");
         };
 
