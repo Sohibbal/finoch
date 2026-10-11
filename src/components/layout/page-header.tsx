@@ -3,36 +3,38 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, FlaskConical, UserRoundCog, WifiOff, type LucideIcon } from "lucide-react";
+import {
+  ArrowLeft,
+  FlaskConical,
+  Bell,
+  Search,
+  User as UserIcon,
+  type LucideIcon,
+} from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ThemeToggle } from "./theme-toggle";
 import { GlobalSearchBar } from "./global-search-bar";
-
 interface PageHeaderProps {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** Right-side page actions, rendered after the theme toggle. */
   actions?: React.ReactNode;
   className?: string;
 }
 
-/**
- * Printed masthead shared by every app page: solid paper, one hairline rule, no glass.
- * The title wraps instead of truncating; on narrow screens the actions drop below it.
- */
 export function PageHeader({ title, subtitle, actions, className = "" }: PageHeaderProps) {
   const router = useRouter();
-  const isDashboard = usePathname() === "/dashboard";
-  // Read after mount: storage is client-only and the server render must match the first client render.
+  const pathname = usePathname();
+  const isDashboard = pathname === "/dashboard";
   const [demo, setDemo] = useState(false);
+  const [nickname, setNickname] = useState("Kawan");
+
   useEffect(() => {
     const on = isDemoMode();
     setDemo(on);
     if (!on) return;
-    // Every page has this header, so an empty demo scope gets its sample expenses wherever the app opens.
     seedDemoExpenses()
       .then((added) => {
         if (added > 0) window.dispatchEvent(new Event("finoch:data-pulled"));
@@ -40,137 +42,132 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
       .catch((err) => console.error("Gagal mengisi data demo:", err));
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("finoch_user_nickname");
+      if (stored && stored.trim()) setNickname(stored.trim());
+    }
+  }, []);
+
+  const navPills = [
+    { label: "Overview", href: "/dashboard" },
+    { label: "Pemasukan", href: "/pemasukan" },
+    { label: "Pengeluaran", href: "/pengeluaran" },
+    { label: "Wishlist", href: "/wishlist" },
+    { label: "Copilot", href: "/copilot" },
+  ];
+
   return (
     <header
-      className={`sticky top-0 z-40 bg-white/95 dark:bg-[#0B1320]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 pt-[env(safe-area-inset-top)] print:static ${className}`}
+      className={`sticky top-0 z-40 bg-white/90 dark:bg-[#0E1422]/90 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-800/80 px-4 sm:px-6 py-2.5 print:static ${className}`}
     >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
-        <div className="flex items-center gap-2 min-w-0 flex-1 basis-48">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-3">
+        {/* Left: Brand / Mobile Back / Title */}
+        <div className="flex items-center gap-3 min-w-0">
           {!isDashboard && (
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="-ml-2 w-11 h-11 rounded-full flex items-center justify-center text-ink hover:bg-ink/5 transition-colors shrink-0"
+              className="-ml-1 w-9 h-9 rounded-full flex items-center justify-center text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors shrink-0"
               aria-label="Kembali ke Beranda"
             >
-              <ArrowLeft className="w-5 h-5" />
+              <ArrowLeft className="w-4 h-4" />
             </button>
           )}
-          {/* On phones the mark only sits on Beranda: subpages already have the back arrow, and the title needs the room. */}
-          <Link href="/dashboard" className={`${isDashboard ? "md:hidden" : "hidden"} shrink-0 flex items-center`} aria-label="Finoch Beranda">
-            <BrandLogo variant="symbol" className="w-6 h-6 shrink-0" />
+
+          <Link href="/dashboard" className="flex items-center gap-2 shrink-0" aria-label="Finoch Beranda">
+            <BrandLogo variant="symbol" className="w-7 h-7 text-blue-600" />
+            <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white hidden sm:inline">
+              Finoch
+            </span>
           </Link>
-          <div className="min-w-0">
+
+          <div className="hidden lg:block h-5 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+
+          <div className="min-w-0 hidden sm:block">
             {!isDashboard && <Breadcrumbs className="hidden md:flex mb-0.5" />}
-            <h1 className="font-display text-head font-bold text-ink break-words">{title}</h1>
-            {subtitle && <p className="text-meta text-ink-soft hidden sm:block">{subtitle}</p>}
+            <h1 className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+              {title}
+            </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0 ml-auto">
+        {/* Center: Subly-style Pill Navigation Bar (Desktop) */}
+        <nav
+          aria-label="Navigasi Atas"
+          className="hidden md:flex items-center gap-1 p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/50 dark:border-slate-700/50 shadow-inner"
+        >
+          {navPills.map((pill) => {
+            const active = pathname === pill.href;
+            return (
+              <Link
+                key={pill.href}
+                href={pill.href}
+                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                  active
+                    ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                }`}
+              >
+                {pill.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right: Actions, Search, Notifications, Theme, User Pill */}
+        <div className="flex items-center gap-2.5 shrink-0 ml-auto">
           <GlobalSearchBar className="hidden sm:block" />
-          <ThemeToggle className="hidden md:inline-flex" />
+
+          {/* Notification Button */}
+          <button
+            type="button"
+            title="Notifikasi"
+            aria-label="Notifikasi"
+            className="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white flex items-center justify-center transition-colors"
+          >
+            <Bell className="w-3.5 h-3.5" />
+          </button>
+
+          <ThemeToggle />
+
+          {/* User Profile Pill (Matching Subly "James Noah" User Box) */}
+          <Link
+            href="/profile"
+            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors group"
+          >
+            <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[11px] shadow-sm">
+              {nickname.charAt(0).toUpperCase()}
+            </div>
+            <div className="text-left hidden xl:block leading-tight">
+              <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                {nickname}
+              </p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500">
+                Personal / Pro
+              </p>
+            </div>
+          </Link>
+
           {actions}
         </div>
+      </div>
 
-        {/* Its own line under the title row, so a wrapped title never collides with it. Ink, not a status hue. */}
-        {demo && (
-          <p className="basis-full text-meta text-ink-soft">
-            <Link href="/profile" className="inline-flex items-center gap-1 min-h-6 font-semibold text-ink underline underline-offset-2 decoration-ink/40 hover:decoration-ink">
-              <FlaskConical className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+      {/* Demo scope note */}
+      {demo && (
+        <div className="max-w-[1400px] mx-auto pt-1">
+          <p className="text-[11px] text-slate-400">
+            <Link
+              href="/profile"
+              className="inline-flex items-center gap-1 font-semibold text-slate-700 dark:text-slate-300 underline"
+            >
+              <FlaskConical className="w-3 h-3 text-amber-500" />
               Mode Demo
             </Link>{" "}
-            · data contoh, matikan di Profil
+            (data contoh lokal, atur di Profil)
           </p>
-        )}
-      </div>
+        </div>
+      )}
     </header>
-  );
-}
-
-interface ProfileGateProps {
-  profile: { loading: boolean; error: boolean; hasProfile: boolean };
-  children: React.ReactNode;
-}
-
-/**
- * Page body for pages computed from the user's allowance: skeletons while the profile loads,
- * an onboarding link when there is none, so no page ever shows placeholder amounts.
- */
-export function ProfileGate({ profile, children }: ProfileGateProps) {
-  if (profile.loading) {
-    return (
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3">
-        <ContentSkeleton />
-      </main>
-    );
-  }
-  if (!profile.hasProfile) {
-    return (
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3">
-        {profile.error ? (
-          <EmptyState
-            icon={WifiOff}
-            title="Profil keuangan belum bisa dimuat"
-            action={
-              <button type="button" onClick={() => window.location.reload()} className={EMPTY_ACTION_CLASS}>
-                Coba Lagi
-              </button>
-            }
-          >
-            Periksa koneksi internet, lalu coba lagi. Angka di halaman ini dihitung dari uang saku bulananmu.
-          </EmptyState>
-        ) : (
-          <EmptyState
-            icon={UserRoundCog}
-            title="Lengkapi profil keuanganmu dulu"
-            action={
-              <Link href="/onboarding" className={EMPTY_ACTION_CLASS}>
-                Isi Profil Keuangan
-              </Link>
-            }
-          >
-            Halaman ini dihitung dari uang saku dan pengeluaran tetap bulananmu. Isi sekali, berlaku di semua fitur.
-          </EmptyState>
-        )}
-      </main>
-    );
-  }
-  return <>{children}</>;
-}
-
-export const EMPTY_ACTION_CLASS =
-  "inline-flex items-center min-h-11 px-5 rounded-full bg-ink hover:bg-ink/90 text-paper-sheet dark:text-paper font-semibold text-body transition-colors";
-
-interface EmptyStateProps {
-  icon: LucideIcon;
-  title: string;
-  /** Primary (and optional secondary) action buttons or links. */
-  action?: React.ReactNode;
-  children: React.ReactNode;
-}
-
-/** Shared zero-data sheet so empty pages read as intentional: icon, short copy, primary action. */
-export function EmptyState({ icon: Icon, title, action, children }: EmptyStateProps) {
-  return (
-    <div className="max-w-md mx-auto mt-6 p-6 bg-paper-sheet border border-ink/20 text-center space-y-3">
-      <Icon className="w-6 h-6 mx-auto text-ink" />
-      <h2 className="font-display text-head font-bold text-ink">{title}</h2>
-      <p className="text-body text-ink-soft">{children}</p>
-      {action && <div className="flex flex-wrap justify-center gap-2 pt-1">{action}</div>}
-    </div>
-  );
-}
-
-/** Placeholder blocks while page data loads, instead of zero-filled cards. */
-export function ContentSkeleton() {
-  return (
-    <div className="space-y-4" aria-busy="true">
-      <div className="h-36 bg-paper-deep motion-safe:animate-pulse" />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="h-28 bg-paper-deep motion-safe:animate-pulse" />
-        <div className="h-28 bg-paper-deep motion-safe:animate-pulse" />
-      </div>
-    </div>
   );
 }
