@@ -48,6 +48,7 @@ import {
 } from "@/types/financial-types";
 import type { ExpenseCategory } from "@/lib/types/expense";
 import { PageHeader } from "@/components/layout/page-header";
+import Link from "next/link";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { loadFinancialProfile } from "@/hooks/use-financial-profile";
 
@@ -66,6 +67,9 @@ interface FinancialProfileSummary {
   currentSavings: number;
   monthlyFixedExpenses: number;
 }
+
+// The full history lives in Laporan; the dashboard only shows the latest few.
+const RECENT_TX_LIMIT = 8;
 
 // Used only when the profile can't be fetched (offline): never show made-up numbers.
 const EMPTY_PROFILE: FinancialProfileSummary = { monthlyIncome: 0, currentSavings: 0, monthlyFixedExpenses: 0 };
@@ -415,7 +419,7 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-2">
-                    {transactions.map((tx) => (
+                    {transactions.slice(0, RECENT_TX_LIMIT).map((tx) => (
                       <div
                         key={tx.id}
                         className="p-4 flex items-center justify-between hover:bg-navy-50 dark:hover:bg-white/[0.03] rounded-2xl transition-all duration-300 group/tx border border-transparent hover:border-navy-900/5 dark:hover:border-white/5"
@@ -456,6 +460,14 @@ export default function DashboardPage() {
                         </div>
                       </div>
                     ))}
+                    {transactions.length > RECENT_TX_LIMIT && (
+                      <Link
+                        href="/reports"
+                        className="block text-center pt-3 text-xs font-bold text-navy-700 dark:text-cream-300 hover:underline"
+                      >
+                        Lihat semua {transactions.length} transaksi di Laporan →
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
