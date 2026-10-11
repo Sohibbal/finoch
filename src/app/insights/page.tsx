@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { detectSpendingPatterns } from "@/lib/insights/pattern-detector";
 import { AiInsightCard } from "@/types/financial-types";
-import Link from "next/link";
 import { DashboardSidebar } from "@/components/layout/dashboard-sidebar";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
 import { BottomNav } from "@/components/layout/bottom-nav";
