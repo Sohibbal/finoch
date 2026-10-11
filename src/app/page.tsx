@@ -6,6 +6,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
+import { useTheme } from "@/hooks/use-theme";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import {
   Mic,
@@ -84,7 +85,7 @@ const SAMPLE_VOICE_PRESETS = [
 
 export default function LandingPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null);
-  const [isDark, setIsDark] = useState(false);
+  const { isDark, toggleTheme } = useTheme();
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -113,26 +114,7 @@ export default function LandingPage() {
       })
       .catch(() => {});
 
-    // Check theme
-    const isDarkTheme = document.documentElement.classList.contains("dark");
-    setIsDark(isDarkTheme);
   }, []);
-
-  const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("finoch_theme", "dark");
-      localStorage.setItem("voicash_theme", "dark");
-      localStorage.setItem("finra_theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("finoch_theme", "light");
-      localStorage.setItem("voicash_theme", "light");
-      localStorage.setItem("finra_theme", "light");
-    }
-  };
 
   const handleOcrSuccess = (candidate: TransactionCandidate) => {
     setCurrentCandidate(candidate);
