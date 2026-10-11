@@ -243,3 +243,19 @@ export async function toggleWishlistAchieved(id: string, userId: string = getDat
   await syncQueue.enqueue("update", updated as any);
   return updated;
 }
+
+export async function deleteWishlist(id: string, userId: string = getDataScope()): Promise<void> {
+  const db = await getDatabase();
+  const existing = await db.get("wishlists", id);
+  if (!existing || existing.userId !== userId) return;
+
+  const updated: LocalWishlist = {
+    ...existing,
+    isDeleted: true,
+    updatedAt: new Date().toISOString(),
+    syncStatus: "pending",
+  };
+
+  await db.put("wishlists", updated);
+  await syncQueue.enqueue("delete", updated as any);
+}

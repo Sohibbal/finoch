@@ -1,185 +1,234 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
-import { Plus } from "lucide-react";
-import { WishlistItem } from "@/types/wishlist-types";
-import {
-  getWishlist,
-  addWishlistItem,
-  cancelAndSaveMoney,
-  purchaseWishlistItem,
-  deleteWishlistItem,
-  getWishlistSummary,
-} from "@/lib/storage/wishlist-storage";
-import { expenseStorage } from "@/lib/storage/expense-storage";
-import { useAuthContext } from "@/components/layout/auth-provider";
-
-import { WishlistTag } from "@/components/wishlist/wishlist-tag";
-import { WishlistTrophyCard } from "@/components/wishlist/wishlist-trophy-card";
-import { WishlistFormModal } from "@/components/wishlist/wishlist-form-modal";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Plus, Mic, Gift, Sparkles, Filter } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
-import { OptionButton, PRIMARY_CLASS } from "@/components/press/kampus-press";
 import { rupiah } from "@/lib/format";
+import {
+  getWishlistItems,
+  saveWishlistItem,
+  toggleWishlistAchieved,
+  deleteWishlist,
+  type LocalWishlist,
+} from "@/lib/storage/wishlist-storage";
+import { getTransactions, type LocalTransaction } from "@/lib/storage/transaction-storage";
+import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
+import { WishlistItemCard } from "@/components/wishlist/wishlist-item-card";
+import { ManualWishlistModal } from "@/components/wishlist/manual-wishlist-modal";
+import { VoiceWishlistModal } from "@/components/wishlist/voice-wishlist-modal";
 
-type Filter = "active" | "ready" | "saved_money" | "purchased" | "all";
+type FilterStatus = "all" | "active" | "achieved";
 
 export default function WishlistPage() {
-  const { user } = useAuthContext();
+  const [items, setItems] = useState<LocalWishlist[]>([]);
+  const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [filter, setFilter] = useState<FilterStatus>("active");
 
-  const [items, setItems] = useState<WishlistItem[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<Filter>("active");
-  // Status line for screen readers when a tag changes state.
-  const [notice, setNotice] = useState("");
+  const [isManualOpen, setIsManualOpen] = useState(false);
+  const [isVoiceOpen, setIsVoiceOpen] = useState(false);
 
-  const refreshWishlist = () => {
-    setItems(getWishlist());
-  };
-
-  useEffect(() => {
-    refreshWishlist();
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [wList, txList] = await Promise.all([
+        getWishlistItems(),
+        getTransactions(),
+      ]);
+      setItems(wList);
+      setTransactions(txList);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  const summary = useMemo(() => getWishlistSummary(), [items]);
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
-  // Handlers
-  const handleAddItem = (data: {
-    name: string;
-    price: number;
-    category: string;
-    priority: "low" | "medium" | "high";
-    coolingDays: number;
-    note?: string;
-    linkUrl?: string;
-  }) => {
-    addWishlistItem(data);
-    refreshWishlist();
-  };
-
-  const handleCancelAndSave = (id: string) => {
-    const target = items.find((i) => i.id === id);
-    if (!target) return;
-
-    cancelAndSaveMoney(id);
-    refreshWishlist();
-    setNotice(`${target.name} batal dibeli. ${rupiah(target.price)} tetap di dompet.`);
-  };
-
-  const handlePurchase = async (id: string) => {
-    const target = items.find((i) => i.id === id);
-    if (!target) return;
-
-    if (target.status === "cooling") {
-      const confirmEarly = confirm(
-        `Barang ini masih dalam masa tunda pikir ulang (${target.coolingDays} hari). Yakin ingin membeli sekarang?`
-      );
-      if (!confirmEarly) return;
+  // Compute financial health for dynamic projections
+  const { currentSavings, dailySavingsRate } = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    for (const t of transactions) {
+      if (t.type === "income") income += t.amount;
+      if (t.type === "expense") expense += t.amount;
     }
+    const net = Math.max(0, income - expense);
+    // Surplus per day over 30 days
+    const dailyRate = Math.max(0, Math.round(net / 30));
+    return {
+      currentSavings: net,
+      dailySavingsRate: dailyRate > 0 ? dailyRate : 25000,
+    };
+  }, [transactions]);
 
-    purchaseWishlistItem(id);
-    refreshWishlist();
-
-    try {
-      await expenseStorage.saveExpense({
-        itemName: `Beli Wishlist: ${target.name}`,
-        amount: target.price,
-        category: "Shopping & Lifestyle",
-        userId: user?.id || "guest",
-      });
-      setNotice(`${target.name} (${rupiah(target.price)}) terbeli dan sudah dicatat ke Pengeluaran.`);
-    } catch (err) {
-      console.error("Gagal auto-record wishlist purchase:", err);
-    }
+  const handleManualSave = async (data: { name: string; targetPrice: number; priority: number }) => {
+    await saveWishlistItem({
+      name: data.name,
+      targetPrice: data.targetPrice,
+      savedAmount: 0,
+      priority: data.priority,
+      isAchieved: false,
+    });
+    await loadData();
   };
 
-  const handleDelete = (id: string) => {
+  const handleToggleAchieved = async (id: string) => {
+    await toggleWishlistAchieved(id);
+    await loadData();
+  };
+
+  const handleDelete = async (id: string) => {
     if (confirm("Hapus barang ini dari wishlist?")) {
-      deleteWishlistItem(id);
-      refreshWishlist();
+      await deleteWishlist(id);
+      await loadData();
     }
   };
 
-  // Filter items
-  const filteredItems = items.filter((item) => {
-    if (selectedStatus === "active") return item.status === "cooling" || item.status === "ready";
-    if (selectedStatus === "ready") return item.status === "ready";
-    if (selectedStatus === "saved_money") return item.status === "saved_money";
-    if (selectedStatus === "purchased") return item.status === "purchased";
-    return true; // all
-  });
+  const filteredItems = useMemo(() => {
+    return items.filter((item) => {
+      if (filter === "active") return !item.isAchieved;
+      if (filter === "achieved") return item.isAchieved;
+      return true;
+    });
+  }, [items, filter]);
 
-  const filters: { id: Filter; label: string; count: number }[] = [
-    { id: "active", label: "Lagi ditunda", count: summary.coolingCount + summary.readyCount },
-    { id: "ready", label: "Tunda selesai", count: summary.readyCount },
-    { id: "saved_money", label: "Diselamatkan", count: summary.savedMoneyCount },
-    { id: "purchased", label: "Terbeli", count: summary.purchasedCount },
-    { id: "all", label: "Semua", count: items.length },
-  ];
+  const totalValue = items.reduce((sum, item) => sum + item.targetPrice, 0);
+  const activeCount = items.filter((i) => !i.isAchieved).length;
+  const achievedCount = items.filter((i) => i.isAchieved).length;
 
   return (
     <>
-      <PageHeader title="Wishlist Tunda" subtitle="Tahan dulu 7 hari sebelum checkout. Masih pengen? Baru beli." />
+      <PageHeader
+        title="Wishlist"
+        subtitle="Kawal barang impian dan pantau estimasi jadwal ketercapaiannya"
+      />
 
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-10 space-y-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-5 items-end">
-          <div className="lg:col-span-2">
-            <WishlistTrophyCard summary={summary} />
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+        {/* Metric Summary Card */}
+        <div className="p-6 rounded-2xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 shadow-sm space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <p className="text-meta font-medium text-ink-soft dark:text-navy-400">Total Nilai Wishlist</p>
+              <h2 className="text-display font-bold text-ink dark:text-white money">
+                {rupiah(totalValue)}
+              </h2>
+              <p className="text-meta text-ink-soft dark:text-navy-400 mt-1 flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4 text-primary-500" />
+                <span>Tabungan bersih saat ini: <strong className="text-ink dark:text-white">{rupiah(currentSavings)}</strong></span>
+              </p>
+            </div>
+
+            {/* Input Options (Voice & Manual) */}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsVoiceOpen(true)}
+                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold text-meta transition-colors"
+              >
+                <Mic className="w-4 h-4" strokeWidth={2} />
+                <span>Bicara</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setIsManualOpen(true)}
+                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-ink text-paper-sheet dark:bg-white dark:text-navy-950 font-semibold text-meta hover:opacity-90 transition-opacity"
+              >
+                <Plus className="w-4 h-4" strokeWidth={2} />
+                <span>Catat Manual</span>
+              </button>
+            </div>
           </div>
-          <div className="space-y-3">
-            <p className="text-body text-ink-soft">
-              Lagi ditahan{" "}
-              <span className="money font-bold text-ink">{rupiah(summary.totalWishlistValue)}</span> dari{" "}
-              {summary.coolingCount + summary.readyCount} barang incaran.
-            </p>
-            <button type="button" onClick={() => setIsModalOpen(true)} className={`${PRIMARY_CLASS} w-full`}>
-              <Plus className="w-4 h-4" aria-hidden="true" />
-              Tambah incaran
+        </div>
+
+        {/* Filter Navigation */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 bg-paper-sheet dark:bg-navy-900 p-1 rounded-xl border border-ink/10 dark:border-navy-800">
+            <button
+              type="button"
+              onClick={() => setFilter("active")}
+              className={`px-3 py-1.5 rounded-lg text-meta font-semibold transition-colors ${
+                filter === "active"
+                  ? "bg-ink text-white dark:bg-white dark:text-navy-950 shadow-sm"
+                  : "text-ink-soft dark:text-navy-400 hover:text-ink dark:hover:text-white"
+              }`}
+            >
+              Aktif ({activeCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("achieved")}
+              className={`px-3 py-1.5 rounded-lg text-meta font-semibold transition-colors ${
+                filter === "achieved"
+                  ? "bg-ink text-white dark:bg-white dark:text-navy-950 shadow-sm"
+                  : "text-ink-soft dark:text-navy-400 hover:text-ink dark:hover:text-white"
+              }`}
+            >
+              Tercapai ({achievedCount})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilter("all")}
+              className={`px-3 py-1.5 rounded-lg text-meta font-semibold transition-colors ${
+                filter === "all"
+                  ? "bg-ink text-white dark:bg-white dark:text-navy-950 shadow-sm"
+                  : "text-ink-soft dark:text-navy-400 hover:text-ink dark:hover:text-white"
+              }`}
+            >
+              Semua ({items.length})
             </button>
           </div>
         </div>
 
-        <section aria-labelledby="wishlist-tags-title" className="space-y-4">
-          <h2 id="wishlist-tags-title" className="sr-only">
-            Barang incaran
-          </h2>
-          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Saring incaran">
-            {filters.map((f) => (
-              <OptionButton key={f.id} pressed={selectedStatus === f.id} onClick={() => setSelectedStatus(f.id)}>
-                {f.label} <span className="money font-normal">{f.count}</span>
-              </OptionButton>
-            ))}
-          </div>
-
-          <p role="status" className="text-body text-ink min-h-[1.4rem]">
-            {notice}
-          </p>
-
-          {filteredItems.length === 0 ? (
-            <div className="py-6 space-y-2 max-w-prose">
-              <p className="text-body font-semibold text-ink">Belum ada barang di sini.</p>
-              <p className="text-body text-ink-soft">
-                Lihat barang yang bikin kepengen di Shopee atau TikTok? Kunci dulu lewat Tambah incaran, lalu tunggu masa tundanya
-                lewat.
-              </p>
+        {/* Wishlist Items Grid */}
+        {filteredItems.length === 0 ? (
+          <div className="p-12 text-center rounded-2xl border border-dashed border-ink/20 dark:border-navy-800 bg-paper-sheet/50 dark:bg-navy-900/30 space-y-3">
+            <div className="w-12 h-12 rounded-2xl bg-ink/5 dark:bg-navy-800 mx-auto flex items-center justify-center text-ink-soft">
+              <Gift className="w-6 h-6" />
             </div>
-          ) : (
-            <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {filteredItems.map((item) => (
-                <li key={item.id}>
-                  <WishlistTag
-                    item={item}
-                    onCancelAndSave={handleCancelAndSave}
-                    onPurchase={handlePurchase}
-                    onDelete={handleDelete}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </main>
+            <h3 className="text-body font-bold text-ink dark:text-white">Belum ada barang di daftar ini</h3>
+            <p className="text-meta text-ink-soft dark:text-navy-400 max-w-sm mx-auto">
+              Punya barang yang pengen dibeli? Catat sekarang lewat tombol Bicara atau Catat Manual di atas.
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {filteredItems.map((item) => {
+              const projection = calculateWishlistProjection(
+                item.targetPrice,
+                currentSavings,
+                dailySavingsRate
+              );
 
-      <WishlistFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleAddItem} />
+              return (
+                <WishlistItemCard
+                  key={item.id}
+                  item={item}
+                  estimatedDays={projection.estimatedDays}
+                  projectionStatus={projection.status}
+                  onToggleAchieved={handleToggleAchieved}
+                  onDelete={handleDelete}
+                />
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Modals */}
+      <ManualWishlistModal
+        isOpen={isManualOpen}
+        onClose={() => setIsManualOpen(false)}
+        onSave={handleManualSave}
+      />
+
+      <VoiceWishlistModal
+        isOpen={isVoiceOpen}
+        onClose={() => setIsVoiceOpen(false)}
+        onSave={handleManualSave}
+      />
     </>
   );
 }

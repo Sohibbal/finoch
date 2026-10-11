@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
+import React from "react";
+import { renderToString } from "react-dom/server";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -16,58 +18,88 @@ vi.mock("@/components/layout/auth-provider", () => ({
   }),
 }));
 
-describe("Wishlist Anti-Impulsif Components", () => {
+describe("Wishlist Dynamic Components Architecture", () => {
   it("exports WishlistPage component successfully", async () => {
     const WishlistPageModule = await import("@/app/(app)/wishlist/page");
     expect(WishlistPageModule.default).toBeDefined();
     expect(typeof WishlistPageModule.default).toBe("function");
   });
 
-  it("exports WishlistTag and WishlistTrophyCard components", async () => {
-    const TagModule = await import("@/components/wishlist/wishlist-tag");
-    const TrophyModule = await import("@/components/wishlist/wishlist-trophy-card");
+  it("exports WishlistItemCard, ManualWishlistModal, and VoiceWishlistModal", async () => {
+    const CardModule = await import("@/components/wishlist/wishlist-item-card");
+    const ManualModule = await import("@/components/wishlist/manual-wishlist-modal");
+    const VoiceModule = await import("@/components/wishlist/voice-wishlist-modal");
 
-    expect(TagModule.WishlistTag).toBeDefined();
-    expect(TrophyModule.WishlistTrophyCard).toBeDefined();
+    expect(CardModule.WishlistItemCard).toBeDefined();
+    expect(ManualModule.ManualWishlistModal).toBeDefined();
+    expect(VoiceModule.VoiceWishlistModal).toBeDefined();
   });
 
-  it("counts whole cooling-off days left for the countdown stamp, never below zero", async () => {
-    const { coolingDaysLeft } = await import("@/components/wishlist/wishlist-tag");
-    const now = new Date("2026-10-11T10:00:00");
-    expect(coolingDaysLeft({ coolingEndDate: "2026-10-16T09:00:00" }, now)).toBe(5);
-    expect(coolingDaysLeft({ coolingEndDate: "2026-10-11T11:00:00" }, now)).toBe(1);
-    expect(coolingDaysLeft({ coolingEndDate: "2026-10-01T10:00:00" }, now)).toBe(0);
-  });
-
-  it("prints the category under the heading and the countdown as words, not a stamp or strike", async () => {
-    const React = await import("react");
-    const { renderToString } = await import("react-dom/server");
-    const { WishlistTag } = await import("@/components/wishlist/wishlist-tag");
+  it("renders WishlistItemCard with appropriate status badges", async () => {
+    const { WishlistItemCard } = await import("@/components/wishlist/wishlist-item-card");
     const noop = () => {};
-    const base = {
+
+    const mockItem = {
       id: "w1",
-      name: "Sepatu lari",
-      price: 450000,
-      category: "Fashion",
-      priority: "high",
-      coolingDays: 7,
-      createdAt: "2026-10-08T10:00:00",
-      coolingEndDate: "2026-10-15T10:00:00",
+      userId: "u1",
+      name: "Sepatu Adidas Samba",
+      targetPrice: 1500000,
+      savedAmount: 0,
+      priority: 3,
+      isAchieved: false,
+      isDeleted: false,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
-    const render = (status: string) =>
-      renderToString(
-        React.createElement(WishlistTag, {
-          item: { ...base, status } as never,
-          onCancelAndSave: noop,
-          onPurchase: noop,
-          onDelete: noop,
-          now: new Date("2026-10-11T10:00:00"),
-        })
-      );
-    const cooling = render("cooling");
-    expect(cooling.indexOf("<h3")).toBeLessThan(cooling.indexOf("Fashion &amp; pakaian"));
-    expect(cooling).toContain("Tunda 4 hari lagi");
-    expect(cooling).not.toContain("uppercase tracking-[0.08em]");
-    expect(render("saved_money")).not.toContain("line-through");
+
+    // 1. Achievable now
+    const htmlAchievable = renderToString(
+      React.createElement(WishlistItemCard, {
+        item: mockItem,
+        estimatedDays: 0,
+        projectionStatus: "achievable_now",
+        onToggleAchieved: noop,
+        onDelete: noop,
+      })
+    );
+    expect(htmlAchievable).toContain("Sepatu Adidas Samba");
+    expect(htmlAchievable).toContain("Tabungan Cukup!");
+
+    // 2. Delayed
+    const htmlDelayed = renderToString(
+      React.createElement(WishlistItemCard, {
+        item: mockItem,
+        estimatedDays: 999,
+        projectionStatus: "delayed",
+        onToggleAchieved: noop,
+        onDelete: noop,
+      })
+    );
+    expect(htmlDelayed).toContain("Tertunda (Rem Belanja)");
+
+    // 3. On track
+    const htmlOnTrack = renderToString(
+      React.createElement(WishlistItemCard, {
+        item: mockItem,
+        estimatedDays: 14,
+        projectionStatus: "on_track",
+        onToggleAchieved: noop,
+        onDelete: noop,
+      })
+    );
+    expect(htmlOnTrack).toContain("~14 hari lagi");
+
+    // 4. Achieved
+    const htmlAchieved = renderToString(
+      React.createElement(WishlistItemCard, {
+        item: { ...mockItem, isAchieved: true },
+        estimatedDays: 0,
+        projectionStatus: "achievable_now",
+        onToggleAchieved: noop,
+        onDelete: noop,
+      })
+    );
+    expect(htmlAchieved).toContain("Tercapai");
+    expect(htmlAchieved).toContain("Batalkan");
   });
 });
