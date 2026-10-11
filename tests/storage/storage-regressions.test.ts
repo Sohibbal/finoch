@@ -51,11 +51,11 @@ afterEach(() => {
 describe("readArray (shared localStorage helper)", () => {
   it("returns null for a missing key, [] for corrupt or non-array JSON", () => {
     expect(readArray("missing")).toBeNull();
-    mockStore.bad = "{not json";
+    mockStore["bad::guest"] = "{not json";
     expect(readArray("bad")).toEqual([]);
-    mockStore.obj = '{"a":1}';
+    mockStore["obj::guest"] = '{"a":1}';
     expect(readArray("obj")).toEqual([]);
-    mockStore.ok = "[1,2]";
+    mockStore["ok::guest"] = "[1,2]";
     expect(readArray("ok")).toEqual([1, 2]);
   });
 });
@@ -82,9 +82,9 @@ describe("#2 deleting the last item does not resurrect demo data", () => {
 
 describe("#3 corrupt JSON does not crash", () => {
   it("bills / talangan / wishlist return [] on corrupt storage", () => {
-    mockStore.finoch_recurring_bills = "{oops";
-    mockStore.finoch_talangan_records = "[{";
-    mockStore.finoch_student_wishlist = "nope";
+    mockStore["finoch_recurring_bills::guest"] = "{oops";
+    mockStore["finoch_talangan_records::guest"] = "[{";
+    mockStore["finoch_student_wishlist::guest"] = "nope";
     expect(getBills()).toEqual([]);
     expect(getTalanganList()).toEqual([]);
     expect(getWishlist()).toEqual([]);

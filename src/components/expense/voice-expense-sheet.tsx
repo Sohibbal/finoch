@@ -24,7 +24,7 @@ interface VoiceExpenseSheetProps {
 export function VoiceExpenseSheet({
   isOpen,
   onClose,
-  userId = "guest",
+  userId,
   onExpenseSaved,
 }: VoiceExpenseSheetProps) {
   const {

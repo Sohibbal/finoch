@@ -1,8 +1,40 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
-import type { BatchSyncRequest, BatchSyncResponse } from "@/lib/types/sync";
+import { EXPENSE_CATEGORIES } from "@/app/api/validation";
+import type { BatchSyncRequest, BatchSyncResponse, SyncRejection } from "@/lib/types/sync";
 import type { Expense } from "@/lib/types/expense";
+
+/** Client clocks may run slightly ahead; anything further is clamped so a fast clock can't win LWW forever. */
+const MAX_CLOCK_SKEW_MS = 60_000;
+/** Pulls re-read this window before the cursor so rows committed by a concurrent request are not missed. */
+const PULL_OVERLAP_MS = 60_000;
+const MAX_AMOUNT = 2_000_000_000;
+const ACTIONS = ["create", "update", "delete"];
+
+function isValidDate(value: unknown): value is string {
+  return typeof value === "string" && !Number.isNaN(new Date(value).getTime());
+}
+
+/** Returns a rejection reason, or null when the change is acceptable. */
+function validateChange(change: any): string | null {
+  if (!change || typeof change.id !== "string") return "invalid_queue_id";
+  if (!ACTIONS.includes(change.action)) return "invalid_action";
+  const p = change.payload;
+  if (!p || typeof p.id !== "string" || !p.id || p.id.length > 100) return "invalid_id";
+  // A delete only needs the id; legacy rows with old categories must still be deletable.
+  if (change.action === "delete") return null;
+  if (typeof p.itemName !== "string" || !p.itemName.trim() || p.itemName.length > 200) return "invalid_item_name";
+  if (!Number.isSafeInteger(p.amount) || p.amount < 1 || p.amount > MAX_AMOUNT) return "invalid_amount";
+  if (!EXPENSE_CATEGORIES.includes(p.category)) return "invalid_category";
+  if (!isValidDate(p.createdAt) || !isValidDate(p.updatedAt)) return "invalid_date";
+  return null;
+}
+
+function clampClientTime(value: string, now: Date): Date {
+  const time = new Date(value).getTime();
+  return new Date(Math.min(time, now.getTime() + MAX_CLOCK_SKEW_MS));
+}
 
 export async function POST(req: Request) {
   try {
@@ -12,97 +44,83 @@ export async function POST(req: Request) {
     }
 
     const body: BatchSyncRequest = await req.json();
-    const { clientChanges = [], lastSyncTimestamp } = body;
+    const clientChanges = Array.isArray(body?.clientChanges) ? body.clientChanges : [];
+    const { lastSyncTimestamp } = body ?? {};
     const appliedIds: string[] = [];
-    const serverTimestamp = new Date().toISOString();
+    const rejectedIds: SyncRejection[] = [];
+    const now = new Date();
 
-    // Process client mutations inside a transaction
-    await prisma.$transaction(async (tx) => {
-      for (const change of clientChanges) {
-        const { id: queueId, action, payload } = change;
-        if (!payload || !payload.id) continue;
+    // Each change stands alone: one bad item must not roll back the rest of the batch.
+    // Items that throw unexpectedly are neither applied nor rejected, so the client retries them.
+    for (const change of clientChanges) {
+      const reason = validateChange(change);
+      if (reason) {
+        if (typeof change?.id === "string") rejectedIds.push({ id: change.id, reason });
+        continue;
+      }
 
-        if (action === "create" || action === "update") {
-          const existing = await tx.expense.findUnique({
-            where: { id: payload.id },
-          });
+      const { id: queueId, action, payload } = change;
+      try {
+        const existing = await prisma.expense.findUnique({ where: { id: payload.id } });
+        if (existing && existing.userId !== session.userId) {
+          rejectedIds.push({ id: queueId, reason: "forbidden" });
+          continue;
+        }
 
+        if (action === "delete") {
+          if (existing) {
+            await prisma.expense.update({
+              where: { id: payload.id },
+              data: { isDeleted: true, updatedAt: now },
+            });
+          }
+        } else {
+          const clientUpdatedAt = clampClientTime(payload.updatedAt, now);
+          const data = {
+            itemName: payload.itemName.trim(),
+            amount: payload.amount,
+            category: payload.category,
+            isDeleted: !!payload.isDeleted,
+            updatedAt: clientUpdatedAt,
+          };
           if (!existing) {
-            await tx.expense.create({
+            await prisma.expense.create({
               data: {
+                ...data,
                 id: payload.id,
                 userId: session.userId,
-                itemName: payload.itemName,
-                amount: payload.amount,
-                category: payload.category,
-                isDeleted: !!payload.isDeleted,
-                createdAt: new Date(payload.createdAt),
-                updatedAt: new Date(payload.updatedAt),
+                createdAt: clampClientTime(payload.createdAt, now),
               },
             });
-            appliedIds.push(queueId);
-          } else {
-            // Ensure record belongs to authenticated user
-            if (existing.userId === session.userId) {
-              const clientTime = new Date(payload.updatedAt).getTime();
-              const serverTime = existing.updatedAt.getTime();
-
-              if (clientTime >= serverTime) {
-                await tx.expense.update({
-                  where: { id: payload.id },
-                  data: {
-                    itemName: payload.itemName,
-                    amount: payload.amount,
-                    category: payload.category,
-                    isDeleted: !!payload.isDeleted,
-                    updatedAt: new Date(payload.updatedAt),
-                  },
-                });
-              }
-              appliedIds.push(queueId);
-            }
+          } else if (clientUpdatedAt.getTime() >= existing.updatedAt.getTime()) {
+            // Last-write-wins on the (clamped) client time; serverUpdatedAt is bumped by Prisma.
+            await prisma.expense.update({ where: { id: payload.id }, data });
           }
-        } else if (action === "delete") {
-          const existing = await tx.expense.findUnique({
-            where: { id: payload.id },
-          });
-          if (existing && existing.userId === session.userId) {
-            await tx.expense.update({
-              where: { id: payload.id },
-              data: {
-                isDeleted: true,
-                updatedAt: new Date(),
-              },
-            });
-          }
-          appliedIds.push(queueId);
         }
+        appliedIds.push(queueId);
+      } catch (err) {
+        console.error(`Sync item ${queueId} gagal:`, err);
       }
-    });
-
-    // Fetch remote records modified since lastSyncTimestamp
-    let serverExpenses: any[] = [];
-    if (lastSyncTimestamp) {
-      serverExpenses = await prisma.expense.findMany({
-        where: {
-          userId: session.userId,
-          updatedAt: { gt: new Date(lastSyncTimestamp) },
-        },
-      });
-    } else {
-      serverExpenses = await prisma.expense.findMany({
-        where: {
-          userId: session.userId,
-        },
-      });
     }
+
+    // Pull by the server-assigned column: client updatedAt can be older than the cursor for
+    // records edited offline, which would otherwise never reach other devices.
+    const cursor = isValidDate(lastSyncTimestamp)
+      ? new Date(new Date(lastSyncTimestamp).getTime() - PULL_OVERLAP_MS)
+      : null;
+    const serverExpenses = await prisma.expense.findMany({
+      where: {
+        userId: session.userId,
+        ...(cursor ? { serverUpdatedAt: { gt: cursor } } : {}),
+      },
+    });
 
     const serverChanges: Expense[] = serverExpenses.map(exp => ({
       id: exp.id,
       userId: exp.userId,
       itemName: exp.itemName,
       amount: exp.amount,
-      category: exp.category as any,
+      category: exp.category,
       isDeleted: exp.isDeleted,
       createdAt: exp.createdAt.toISOString(),
       updatedAt: exp.updatedAt.toISOString(),
@@ -110,8 +128,9 @@ export async function POST(req: Request) {
 
     const response: BatchSyncResponse = {
       appliedIds,
+      rejectedIds,
       serverChanges,
-      serverTimestamp,
+      serverTimestamp: now.toISOString(),
     };
 
     return NextResponse.json(response, { status: 200 });

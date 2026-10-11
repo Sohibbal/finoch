@@ -21,8 +21,16 @@ export interface BatchSyncRequest {
   lastSyncTimestamp?: string;
 }
 
+export interface SyncRejection {
+  id: string;
+  reason: string;
+}
+
 export interface BatchSyncResponse {
   appliedIds: string[];
+  /** Changes the server will never accept (invalid, or the record belongs to someone else). */
+  rejectedIds: SyncRejection[];
   serverChanges: Expense[];
+  /** Server-clock cursor; send back as lastSyncTimestamp on the next sync. */
   serverTimestamp: string;
 }
