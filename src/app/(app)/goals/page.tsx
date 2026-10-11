@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Target,
   Plus,
@@ -13,78 +13,63 @@ import {
   Plane,
   Car,
   X,
+  Trash2,
 } from "lucide-react";
 import { calculateGoalProjection } from "@/lib/financial/financial-engine";
 import { FinancialGoal } from "@/types/financial-types";
-import { PageHeader } from "@/components/layout/page-header";
+import { PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { useFinancialProfile } from "@/hooks/use-financial-profile";
+import { addGoal, deleteGoal, getGoals } from "@/lib/storage/goal-storage";
+import { localDateKeyFromNow } from "@/lib/date";
+
+const DAY_MS = 86400000;
+
+/** Whole months left until the deadline (at least 1, so an overdue goal still gets a status). */
+function monthsUntil(targetDate: string | Date): number {
+  const ms = new Date(targetDate).getTime() - Date.now();
+  return Number.isFinite(ms) ? Math.max(1, Math.ceil(ms / (30 * DAY_MS))) : 1;
+}
+
+const emptyGoalForm = () => ({
+  name: "",
+  targetAmount: 5000000,
+  currentAmount: 0,
+  targetDate: localDateKeyFromNow(365),
+  category: "gadget",
+});
 
 export default function GoalsPage() {
-  const [goals, setGoals] = useState<FinancialGoal[]>([
-    {
-      id: "goal-1",
-      userId: "user-1",
-      name: "Dana Darurat (3 Bulan)",
-      targetAmount: 9000000,
-      currentAmount: 4500000,
-      targetDate: "2026-12-31",
-      category: "emergency_fund",
-      status: "on_track",
-    },
-    {
-      id: "goal-2",
-      userId: "user-1",
-      name: "Beli Laptop Kerja",
-      targetAmount: 14000000,
-      currentAmount: 3500000,
-      targetDate: "2027-06-30",
-      category: "gadget",
-      status: "at_risk",
-    },
-  ]);
+  const profile = useFinancialProfile();
+  const [goals, setGoals] = useState<FinancialGoal[]>([]);
+  useEffect(() => setGoals(getGoals()), []);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newGoal, setNewGoal] = useState({
-    name: "",
-    targetAmount: 5000000,
-    currentAmount: 500000,
-    targetDate: "2027-01-01",
-    category: "gadget",
-  });
+  const [newGoal, setNewGoal] = useState(emptyGoalForm);
 
-  const monthlySavingCapacity = 850000;
+  // What is left of the allowance after fixed costs; the status of every goal is measured against it.
+  const monthlySavingCapacity = (profile.monthlyIncome ?? 0) - (profile.fixedExpenses ?? 0);
+
+  const projectStatus = (goal: Pick<FinancialGoal, "targetAmount" | "currentAmount" | "targetDate">) =>
+    calculateGoalProjection({
+      targetAmount: goal.targetAmount,
+      currentAmount: goal.currentAmount,
+      monthlySaving: monthlySavingCapacity,
+      targetMonths: monthsUntil(goal.targetDate),
+    }).status;
 
   const handleCreateGoal = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newGoal.name.trim()) return;
+    if (!newGoal.name.trim() || !(newGoal.targetAmount > 0)) return;
 
-    const monthsToTarget = 12;
-    const proj = calculateGoalProjection({
-      targetAmount: newGoal.targetAmount,
-      currentAmount: newGoal.currentAmount,
-      monthlySaving: monthlySavingCapacity,
-      targetMonths: monthsToTarget,
-    });
-
-    const goalItem: FinancialGoal = {
-      id: `goal-${Date.now()}`,
-      userId: "user-1",
-      name: newGoal.name,
-      targetAmount: newGoal.targetAmount,
-      currentAmount: newGoal.currentAmount,
-      targetDate: newGoal.targetDate,
-      category: newGoal.category,
-      status: proj.status,
-    };
-
-    setGoals([...goals, goalItem]);
+    addGoal({ ...newGoal, name: newGoal.name.trim(), status: projectStatus(newGoal) });
+    setGoals(getGoals());
     setIsModalOpen(false);
-    setNewGoal({
-      name: "",
-      targetAmount: 5000000,
-      currentAmount: 500000,
-      targetDate: "2027-01-01",
-      category: "gadget",
-    });
+    setNewGoal(emptyGoalForm());
+  };
+
+  const handleDeleteGoal = (id: string) => {
+    deleteGoal(id);
+    setGoals(getGoals());
   };
 
   const getCategoryIcon = (category: string) => {
@@ -154,15 +139,35 @@ export default function GoalsPage() {
       />
 
       {/* Main Content */}
+      <ProfileGate profile={profile}>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
         <div>
           <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
             Target Tabungan & Proyeksi Pencapaian
           </h2>
           <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
-            Status pencapaian dihitung otomatis dari estimasi tabungan bulanan Digital Twin Anda.
+            Status dihitung dari kapasitas nabungmu: Rp {Math.max(0, monthlySavingCapacity).toLocaleString("id-ID")}/bulan (pemasukan dikurangi pengeluaran tetap).
           </p>
         </div>
+
+        {goals.length === 0 && (
+          <div className="max-w-md mx-auto p-6 rounded-3xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-center space-y-3 shadow-sm">
+            <div className="w-12 h-12 mx-auto rounded-2xl bg-cream-100 dark:bg-navy-900 flex items-center justify-center">
+              <Target className="w-5 h-5 text-navy-700 dark:text-cream-200" />
+            </div>
+            <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">Belum ada target tabungan</h3>
+            <p className="text-xs text-navy-600 dark:text-cream-300/70">
+              Mulai dari satu tujuan: dana darurat, laptop kuliah, atau biaya wisuda. Finoch hitung apakah tenggatnya realistis.
+            </p>
+            <button
+              type="button"
+              onClick={() => setIsModalOpen(true)}
+              className="px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs"
+            >
+              Buat Target Pertama
+            </button>
+          </div>
+        )}
 
         {/* Goals Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -193,7 +198,17 @@ export default function GoalsPage() {
                       </div>
                     </div>
                   </div>
-                  {getStatusBadge(g.status)}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {getStatusBadge(projectStatus(g))}
+                    <button
+                      type="button"
+                      onClick={() => g.id && handleDeleteGoal(g.id)}
+                      className="p-1.5 rounded-lg text-navy-400 hover:text-rose-600 dark:text-cream-400/60 dark:hover:text-rose-400"
+                      aria-label={`Hapus target ${g.name}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Progress Bar */}
@@ -234,6 +249,7 @@ export default function GoalsPage() {
           })}
         </div>
       </main>
+      </ProfileGate>
 
       {/* Modal Add Goal */}
       {isModalOpen && (
