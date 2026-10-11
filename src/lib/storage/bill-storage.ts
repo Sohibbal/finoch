@@ -1,18 +1,11 @@
 import { RecurringBill, BillSummary } from "@/types/bill-types";
+import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { isSameLocalMonth, parseDate } from "@/lib/date";
 
 const BILLS_STORAGE_KEY = "finoch_recurring_bills";
 
-function getStorage(): Storage | null {
-  if (typeof window !== "undefined" && window.localStorage) {
-    return window.localStorage;
-  }
-  if (typeof localStorage !== "undefined") {
-    return localStorage;
-  }
-  return null;
-}
-
-const DEFAULT_STUDENT_BILLS: RecurringBill[] = [
+// Fresh objects per call so callers mutating the result never corrupt the defaults.
+const createDefaultStudentBills = (createdAt: string): RecurringBill[] => [
   {
     id: "bill_default_kos",
     name: "Kamar Kos Bulanan",
@@ -23,7 +16,7 @@ const DEFAULT_STUDENT_BILLS: RecurringBill[] = [
     isPaidThisMonth: false,
     reminderDaysBefore: 5,
     note: "Transfer ke rekening Bu Kos (BCA)",
-    createdAt: "2026-10-01T00:00:00.000Z",
+    createdAt,
   },
   {
     id: "bill_default_wifi",
@@ -35,7 +28,7 @@ const DEFAULT_STUDENT_BILLS: RecurringBill[] = [
     isPaidThisMonth: false,
     reminderDaysBefore: 3,
     note: "Bayar ke ketua lorong kos",
-    createdAt: "2026-10-01T00:00:00.000Z",
+    createdAt,
   },
   {
     id: "bill_default_listrik",
@@ -47,7 +40,7 @@ const DEFAULT_STUDENT_BILLS: RecurringBill[] = [
     isPaidThisMonth: false,
     reminderDaysBefore: 2,
     note: "Beli via e-wallet",
-    createdAt: "2026-10-01T00:00:00.000Z",
+    createdAt,
   },
   {
     id: "bill_default_spotify",
@@ -59,24 +52,41 @@ const DEFAULT_STUDENT_BILLS: RecurringBill[] = [
     isPaidThisMonth: false,
     reminderDaysBefore: 2,
     note: "Patungan berlima sama temen sekelas",
-    createdAt: "2026-10-01T00:00:00.000Z",
+    createdAt,
   },
 ];
 
-export function getBills(): RecurringBill[] {
-  const storage = getStorage();
-  if (!storage) return DEFAULT_STUDENT_BILLS;
-  try {
-    const raw = storage.getItem(BILLS_STORAGE_KEY);
-    if (!raw) {
-      storage.setItem(BILLS_STORAGE_KEY, JSON.stringify(DEFAULT_STUDENT_BILLS));
-      return DEFAULT_STUDENT_BILLS;
-    }
-    return JSON.parse(raw);
-  } catch (err) {
-    console.error("Gagal membaca storage tagihan:", err);
-    return DEFAULT_STUDENT_BILLS;
+/**
+ * Paid status is only valid for the month it was paid in. Derived from lastPaidDate so
+ * it resets automatically each month; old records without lastPaidDate keep their flag.
+ */
+export function isBillPaidInMonth(bill: RecurringBill, currentDate: Date = new Date()): boolean {
+  const paidAt = parseDate(bill.lastPaidDate);
+  return paidAt ? isSameLocalMonth(paidAt, currentDate) : !!bill.isPaidThisMonth;
+}
+
+/** Due day clamped to the month length (dueDay 31 in February -> 28/29). */
+export function getEffectiveDueDay(bill: RecurringBill, currentDate: Date = new Date()): number {
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  return Math.min(Math.max(1, bill.dueDay), daysInMonth);
+}
+
+/** Monthly cost: weekly bills are charged once per occurrence of their due weekday in the month. */
+export function getMonthlyBillAmount(bill: RecurringBill, currentDate: Date = new Date()): number {
+  if (bill.frequency !== "weekly") return bill.amount;
+  const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+  const firstOccurrence = ((getEffectiveDueDay(bill, currentDate) - 1) % 7) + 1;
+  const weeks = Math.floor((daysInMonth - firstOccurrence) / 7) + 1;
+  return bill.amount * weeks;
+}
+
+export function getBills(currentDate: Date = new Date()): RecurringBill[] {
+  let bills = readArray<RecurringBill>(BILLS_STORAGE_KEY);
+  if (!bills) {
+    bills = createDefaultStudentBills(new Date().toISOString());
+    saveBills(bills);
   }
+  return bills.map((bill) => ({ ...bill, isPaidThisMonth: isBillPaidInMonth(bill, currentDate) }));
 }
 
 export function saveBills(bills: RecurringBill[]): void {
@@ -131,7 +141,7 @@ export function markBillAsPaid(id: string): void {
 }
 
 export function getBillSummary(currentDate: Date = new Date()): BillSummary {
-  const bills = getBills();
+  const bills = getBills(currentDate);
   const currentDay = currentDate.getDate();
 
   let totalMonthlyBills = 0;
@@ -140,22 +150,23 @@ export function getBillSummary(currentDate: Date = new Date()): BillSummary {
   let unpaidCount = 0;
   let paidCount = 0;
   const criticalUpcomingBills: RecurringBill[] = [];
+  const overdueBills: RecurringBill[] = [];
 
   bills.forEach((bill) => {
-    totalMonthlyBills += bill.amount;
+    const monthlyAmount = getMonthlyBillAmount(bill, currentDate);
+    totalMonthlyBills += monthlyAmount;
     if (bill.isPaidThisMonth) {
-      paidAmountThisMonth += bill.amount;
+      paidAmountThisMonth += monthlyAmount;
       paidCount += 1;
     } else {
-      unpaidAmountThisMonth += bill.amount;
+      unpaidAmountThisMonth += monthlyAmount;
       unpaidCount += 1;
 
-      // Check if bill is due soon: within reminderDaysBefore or today/past
-      const daysUntilDue = bill.dueDay - currentDay;
-      if (daysUntilDue >= 0 && daysUntilDue <= (bill.reminderDaysBefore || 3)) {
-        criticalUpcomingBills.push(bill);
-      } else if (daysUntilDue < 0) {
-        // Overdue!
+      // Due soon: within reminderDaysBefore (incl. today). Past due day: overdue.
+      const daysUntilDue = getEffectiveDueDay(bill, currentDate) - currentDay;
+      if (daysUntilDue < 0) {
+        overdueBills.push(bill);
+      } else if (daysUntilDue <= (bill.reminderDaysBefore || 3)) {
         criticalUpcomingBills.push(bill);
       }
     }
@@ -168,5 +179,6 @@ export function getBillSummary(currentDate: Date = new Date()): BillSummary {
     unpaidCount,
     paidCount,
     criticalUpcomingBills,
+    overdueBills,
   };
 }

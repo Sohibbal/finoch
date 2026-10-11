@@ -1,4 +1,5 @@
 import { BudgetEnvelope, BudgetSummary, EnvelopeStatus, ReallocationSuggestion } from "@/types/budget-types";
+import { isSameLocalMonth, parseDate } from "@/lib/date";
 
 /**
  * Calculates progress, remaining rupiah, overspent rupiah, and status for a single envelope.
@@ -65,29 +66,37 @@ export function getOverallBudgetSummary(envelopes: BudgetEnvelope[]): BudgetSumm
 }
 
 /**
- * Aggregates expense list into envelopes according to their categoryAliases.
+ * Aggregates this month's expenses into envelopes. Each expense lands in exactly one envelope:
+ * the first whose categoryAliases contain its category (case-insensitive exact match), otherwise
+ * the envelope holding the "Other" alias. Empty category counts as "Other".
  */
 export function syncExpensesToEnvelopes(
   envelopes: BudgetEnvelope[],
-  expenses: Array<{ category?: string; amount: number }>
+  expenses: Array<{ category?: string; amount: number; createdAt?: string }>,
+  referenceDate: Date = new Date()
 ): BudgetEnvelope[] {
-  return envelopes.map((env) => {
-    const aliases = env.categoryAliases.map((a) => a.toLowerCase().trim());
+  const normalize = (value: string) => value.toLowerCase().trim();
+  const aliasSets = envelopes.map((env) => new Set(env.categoryAliases.map(normalize)));
+  const otherIndex = aliasSets.findIndex((aliases) => aliases.has("other"));
+  const spentByEnvelope = envelopes.map(() => 0);
 
-    const spent = expenses.reduce((acc, exp) => {
-      const cat = (exp.category || "other").toLowerCase().trim();
-      const isMatch = aliases.some(
-        (alias) => cat === alias || cat.includes(alias) || alias.includes(cat)
-      );
-      return isMatch ? acc + (exp.amount || 0) : acc;
-    }, 0);
+  for (const exp of expenses) {
+    // Undated expenses are treated as current (callers may strip dates); others must be this month
+    const date = exp.createdAt ? parseDate(exp.createdAt) : referenceDate;
+    if (!date || !isSameLocalMonth(date, referenceDate)) continue;
+    const amount = Number.isFinite(exp.amount) && exp.amount > 0 ? exp.amount : 0;
 
-    return {
-      ...env,
-      spentAmount: spent,
-      updatedAt: new Date().toISOString(),
-    };
-  });
+    const cat = normalize(exp.category || "") || "other";
+    const matchIndex = aliasSets.findIndex((aliases) => aliases.has(cat));
+    const targetIndex = matchIndex !== -1 ? matchIndex : otherIndex;
+    if (targetIndex !== -1) spentByEnvelope[targetIndex] += amount;
+  }
+
+  return envelopes.map((env, index) => ({
+    ...env,
+    spentAmount: spentByEnvelope[index],
+    updatedAt: new Date().toISOString(),
+  }));
 }
 
 /**
@@ -156,7 +165,7 @@ export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): 
       color: "blue",
       allocatedAmount: Math.round(base * 0.3), // 30%
       spentAmount: 0,
-      categoryAliases: ["Bills & Utilities", "Bills", "Housing & Bills", "Housing", "Kost", "Listrik"],
+      categoryAliases: ["Bills & Utilities", "Bills", "Housing & Bills", "Housing", "Subscription", "Kost", "Listrik"],
       rollover: false,
       notes: "Sewa kamar, token listrik, iuran kebersihan",
       updatedAt: new Date().toISOString(),
@@ -180,7 +189,7 @@ export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): 
       color: "purple",
       allocatedAmount: Math.round(base * 0.1), // 10%
       spentAmount: 0,
-      categoryAliases: ["Shopping & Lifestyle", "Entertainment & Leisure", "Entertainment", "Nongkrong", "Kopi"],
+      categoryAliases: ["Entertainment & Leisure", "Entertainment", "Social & Family", "Nongkrong", "Kopi"],
       rollover: false,
       notes: "Coffee shop tugas, snack akhir pekan",
       updatedAt: new Date().toISOString(),
@@ -192,6 +201,7 @@ export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): 
       color: "rose",
       allocatedAmount: Math.round(base * 0.1), // 10%
       spentAmount: 0,
+      // "Other" also catches categories no envelope claims (e.g. Shopping, Education & Career)
       categoryAliases: ["Health & Personal Care", "Health", "Other", "Obat", "Dokter"],
       rollover: true,
       notes: "Obat-obatan, tambal ban, darurat mendadak",

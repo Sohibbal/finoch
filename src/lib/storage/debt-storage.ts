@@ -1,22 +1,19 @@
 import { DebtItem, DebtSummary } from "@/types/debt-types";
 import { calculateDebtSummary } from "@/lib/financial/debt-engine";
+import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { localDateKeyFromNow } from "@/lib/date";
 
 const DEBT_STORAGE_KEY = "finoch_student_debts_v1";
 
-function getStorage(): Storage | null {
-  if (typeof window !== "undefined" && window.localStorage) return window.localStorage;
-  if (typeof localStorage !== "undefined") return localStorage;
-  return null;
-}
-
-const DEFAULT_DEBTS: DebtItem[] = [
+// Built per call: due dates stay relative to today and callers can mutate freely.
+const createDefaultDebts = (): DebtItem[] => [
   {
     id: "debt-default-1",
     type: "receivable",
     personName: "Bagas Teman Kost",
     amount: 35000,
     description: "Talangan fotokopi modul & jilid laporan",
-    dueDate: new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0],
+    dueDate: localDateKeyFromNow(3),
     phone: "081234567890",
     status: "unpaid",
     createdAt: new Date().toISOString(),
@@ -27,7 +24,7 @@ const DEFAULT_DEBTS: DebtItem[] = [
     personName: "Ibu Warteg Berkah",
     amount: 22000,
     description: "Kasbon makan malam nasi telur + es teh",
-    dueDate: new Date(Date.now() + 2 * 86400000).toISOString().split("T")[0],
+    dueDate: localDateKeyFromNow(2),
     status: "unpaid",
     createdAt: new Date().toISOString(),
   },
@@ -37,21 +34,12 @@ const DEFAULT_DEBTS: DebtItem[] = [
  * Loads debts from localStorage.
  */
 export function getDebts(): DebtItem[] {
-  const storage = getStorage();
-  if (!storage) return DEFAULT_DEBTS;
-
-  try {
-    const raw = storage.getItem(DEBT_STORAGE_KEY);
-    if (!raw) {
-      storage.setItem(DEBT_STORAGE_KEY, JSON.stringify(DEFAULT_DEBTS));
-      return DEFAULT_DEBTS;
-    }
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) && parsed.length > 0 ? parsed : DEFAULT_DEBTS;
-  } catch (err) {
-    console.error("Error reading debts from storage:", err);
-    return DEFAULT_DEBTS;
-  }
+  // Defaults only when nothing was ever stored; an emptied list stays empty.
+  const stored = readArray<DebtItem>(DEBT_STORAGE_KEY);
+  if (stored) return stored;
+  const defaults = createDefaultDebts();
+  saveDebts(defaults);
+  return defaults;
 }
 
 /**
@@ -72,6 +60,9 @@ export function saveDebts(debts: DebtItem[]): void {
  * Adds a new debt or receivable record.
  */
 export function addDebt(data: Omit<DebtItem, "id" | "status" | "createdAt">): DebtItem {
+  if (!Number.isFinite(data.amount) || data.amount <= 0) {
+    throw new Error("Nominal hutang/piutang harus lebih dari Rp 0");
+  }
   const debts = getDebts();
   const newDebt: DebtItem = {
     ...data,

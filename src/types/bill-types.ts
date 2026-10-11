@@ -25,5 +25,6 @@ export interface BillSummary {
   unpaidAmountThisMonth: number;
   unpaidCount: number;
   paidCount: number;
-  criticalUpcomingBills: RecurringBill[]; // Due within <= 3 days
+  criticalUpcomingBills: RecurringBill[]; // Unpaid, due within reminderDaysBefore (not yet overdue)
+  overdueBills: RecurringBill[]; // Unpaid and past this month's due day
 }

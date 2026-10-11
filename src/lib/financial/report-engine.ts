@@ -1,5 +1,6 @@
 import { MonthlyReportSummary, WhatsAppReportOptions, CategoryBreakdown } from "@/types/report-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
+import { localDateKey, parseDate } from "@/lib/date";
 
 export const MONTH_NAMES_ID = [
   "Januari",
@@ -32,7 +33,8 @@ const NEEDS_CATEGORIES = [
   "education",
 ];
 
-const WANTS_CATEGORIES = [
+/** Lowercase "wants" categories (50/30/20), shared with the streak engine. */
+export const WANTS_CATEGORIES = [
   "shopping & lifestyle",
   "shopping",
   "entertainment & leisure",
@@ -59,12 +61,10 @@ export function generateMonthlyReport(
   month: number, // 1 - 12
   year: number
 ): MonthlyReportSummary {
-  // Filter expenses matching selected month and year
+  // Filter expenses matching selected month and year; undated/invalid dates belong to no month
   const targetExpenses = expenses.filter((e) => {
-    if (!e.createdAt) return true; // Include if untimed
-    const d = new Date(e.createdAt);
-    if (isNaN(d.getTime())) return true;
-    return d.getMonth() + 1 === month && d.getFullYear() === year;
+    const d = parseDate(e.createdAt);
+    return !!d && d.getMonth() + 1 === month && d.getFullYear() === year;
   });
 
   const totalExpenses = targetExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
@@ -232,7 +232,8 @@ export function formatWhatsAppReport(
 export function generateCsvContent(expenses: ExpenseRecord[]): string {
   const header = ["Tanggal", "Kategori", "Nama Pengeluaran", "Nominal (IDR)"];
   const rows = expenses.map((e) => {
-    const dateStr = e.createdAt ? new Date(e.createdAt).toISOString().split("T")[0] : "-";
+    const date = parseDate(e.createdAt);
+    const dateStr = date ? localDateKey(date) : "-";
     const category = `"${(e.category || "Other").replace(/"/g, '""')}"`;
     const name = `"${(e.itemName || "Pengeluaran").replace(/"/g, '""')}"`;
     const amount = e.amount || 0;
@@ -278,7 +279,8 @@ export function generateLpjSpreadsheetCsv(
   let runningBalance = summary.totalIncome;
 
   const rows = expenses.map((e, index) => {
-    const dateStr = e.createdAt ? new Date(e.createdAt).toISOString().split("T")[0] : "-";
+    const date = parseDate(e.createdAt);
+    const dateStr = date ? localDateKey(date) : "-";
     const category = `"${(e.category || "Kebutuhan Pokok").replace(/"/g, '""')}"`;
     const name = `"${(e.itemName || "Transaksi").replace(/"/g, '""')}"`;
     const expenseAmt = e.amount || 0;

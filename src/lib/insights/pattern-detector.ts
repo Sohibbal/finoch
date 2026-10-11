@@ -11,7 +11,10 @@ export function detectSpendingPatterns(input: PatternDetectorInput): AiInsightCa
   const { currentCategoryTotals, previousCategoryTotals, recurringExpenses = [] } = input;
 
   // 1. Detect Category Spending Jumps or Drops (> 20%)
-  for (const [category, currentVal] of Object.entries(currentCategoryTotals)) {
+  // Union of both periods so a category that dropped to 0 (absent now) is still reported
+  const categories = new Set([...Object.keys(currentCategoryTotals), ...Object.keys(previousCategoryTotals)]);
+  for (const category of categories) {
+    const currentVal = currentCategoryTotals[category] || 0;
     const previousVal = previousCategoryTotals[category];
     if (previousVal && previousVal > 0) {
       const changePercent = ((currentVal - previousVal) / previousVal) * 100;
