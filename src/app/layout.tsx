@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Archivo, Bodoni_Moda } from "next/font/google";
+import { Archivo, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { PwaInstallButton } from "@/components/layout/pwa-install-button";
 import { OfflineBanner } from "@/components/layout/offline-banner";
@@ -12,8 +12,9 @@ const uiFont = Archivo({
   axes: ["wdth"],
 });
 
-// Display face for the giant numeral and headings: engraved, high-contrast banknote figures.
-const displayFont = Bodoni_Moda({
+// Display face for the giant numeral and headings: heavy, low-contrast figures so 1, 4 and 7 stay
+// unmistakable at every size (the earlier hairline didone made a small 4 read as 1).
+const displayFont = Bricolage_Grotesque({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap",

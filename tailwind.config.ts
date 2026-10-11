@@ -14,8 +14,8 @@ const config: Config = {
     extend: {
       fontFamily: {
         sans: ["var(--font-ui)", "system-ui", "-apple-system", "sans-serif"],
-        // Engraved banknote numerals and headings only; never body text.
-        display: ["var(--font-display)", "Georgia", "serif"],
+        // Heavy banknote numerals and headings only; never body text.
+        display: ["var(--font-display)", "system-ui", "sans-serif"],
       },
       // The press scale: meta, body, head, plus the giant numeral.
       fontSize: {
