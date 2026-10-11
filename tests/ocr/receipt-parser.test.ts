@@ -31,3 +31,37 @@ describe("Local Receipt Parser (Regex & Pattern Matcher)", () => {
     expect(candidate.merchant).toBe("Struk Belanja");
   });
 });
+
+describe("Receipt parser regressions", () => {
+  it.each([
+    ["TOKO A\nTotal Item 2\nTOTAL 25.000", 25000],
+    ["TOKO A\nTotal Qty: 2\nTOTAL 25.000", 25000],
+    ["TOKO A\nJumlah Item 3\nTOTAL 25.000", 25000],
+    ["TOKO A\nTotal Belanja 45.000\nTotal Diskon 5.000\nTotal Bayar 40.000\nTunai 50.000", 40000],
+    ["TOKO A\nTOTAL Rp 12.500,00", 12500],
+    ["TOKO A\nTOTAL 25,000.00", 25000],
+  ])("detects total in %j as %d", (text, expected) => {
+    expect(parseReceiptText(text).amount).toBe(expected);
+  });
+
+  it("does not add PPN or service lines as items", () => {
+    const candidate = parseReceiptText(
+      "WARUNG KOPI\nKOPI SUSU 20.000\nPPN 11% 2.200\nSERVICE 5% 1.000\nTOTAL 23.200"
+    );
+    expect(candidate.items).toEqual([{ name: "KOPI SUSU", amount: 20000 }]);
+  });
+
+  it("supports 2-digit years and rejects invalid dates", () => {
+    expect(parseReceiptText("TOKO A\n05/03/24\nTOTAL 10.000").date).toBe("2024-03-05");
+    expect(parseReceiptText("TOKO A\n2024-03-05\nTOTAL 10.000").date).toBe("2024-03-05");
+    const today = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const localToday = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-${pad(today.getDate())}`;
+    expect(parseReceiptText("TOKO A\n2024-13-45\nTOTAL 10.000").date).toBe(localToday);
+  });
+
+  it("matches category keywords as whole words", () => {
+    expect(parseReceiptText("TOKO KOSMETIK CANTIK\nLIPSTIK 50.000\nTOTAL 50.000").category).toBe("Other");
+    expect(parseReceiptText("BAYAR KOS BULANAN\nTOTAL 900.000").category).toBe("Bills & Utilities");
+  });
+});
