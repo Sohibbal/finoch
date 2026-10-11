@@ -20,6 +20,13 @@ const PRIMARY =
   "inline-flex items-center justify-center min-h-12 px-6 rounded-full bg-ink text-paper-sheet dark:text-paper text-body font-bold hover:bg-ink/90 transition-colors";
 const TEXT_LINK = "font-semibold text-ink underline underline-offset-4 decoration-ink/40 hover:decoration-ink";
 
+// What happens after the first sentence; only what the app actually does.
+const HERO_FACTS: [string, string][] = [
+  ["Satu kalimat, beberapa catatan", "Tiap barang jadi catatan sendiri, lengkap dengan kategorinya."],
+  ["Jatah dicetak ulang", "Setiap kamu catat, jatah hari ini langsung dihitung lagi."],
+  ["Tanpa sinyal tetap jalan", "Catatan disimpan di HP dulu, dikirim begitu online lagi."],
+];
+
 // Each feature group printed under its own denomination color.
 const GROUP_RULE: Record<string, string> = {
   main: "border-ink",
@@ -145,6 +152,15 @@ export default function LandingPage() {
                 </>
               )}
             </div>
+            {/* Desktop: the press beside this runs long, so the column says what happens after the first sentence. */}
+            <dl className="hidden lg:block max-w-[34rem] pt-6 border-b border-ink/20">
+              {HERO_FACTS.map(([term, detail]) => (
+                <div key={term} className="py-3 border-t border-ink/20 grid grid-cols-[11rem_1fr] gap-x-6">
+                  <dt className="text-body font-semibold text-ink">{term}</dt>
+                  <dd className="text-body text-ink-soft">{detail}</dd>
+                </div>
+              ))}
+            </dl>
           </div>
 
           <SentencePress onTryMic={() => setIsVoiceOpen(true)} />
