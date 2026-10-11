@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Meal Calc Components (Cooking vs Warteg)", () => {
   it("exports MealCalcPage component successfully", async () => {
-    const MealCalcModule = await import("@/app/meal-calc/page");
+    const MealCalcModule = await import("@/app/(app)/meal-calc/page");
     expect(MealCalcModule.default).toBeDefined();
     expect(typeof MealCalcModule.default).toBe("function");
   });

@@ -20,7 +20,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Bills & Fixed Expense Shield Page Components", () => {
   it("exports BillsPage component successfully", async () => {
-    const mod = await import("@/app/bills/page");
+    const mod = await import("@/app/(app)/bills/page");
     expect(mod.default).toBeDefined();
     expect(typeof mod.default).toBe("function");
   });

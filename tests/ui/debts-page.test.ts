@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Student Debts Page & Components", () => {
   it("exports DebtsPage component successfully", async () => {
-    const DebtsPageModule = await import("@/app/debts/page");
+    const DebtsPageModule = await import("@/app/(app)/debts/page");
     expect(DebtsPageModule.default).toBeDefined();
     expect(typeof DebtsPageModule.default).toBe("function");
   });

@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Streak & No-Spend Challenge Components", () => {
   it("exports StreakPage component successfully", async () => {
-    const StreakPageModule = await import("@/app/streak/page");
+    const StreakPageModule = await import("@/app/(app)/streak/page");
     expect(StreakPageModule.default).toBeDefined();
     expect(typeof StreakPageModule.default).toBe("function");
   });

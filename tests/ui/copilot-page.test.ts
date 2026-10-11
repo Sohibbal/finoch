@@ -11,12 +11,12 @@ vi.mock("next/navigation", () => ({
 
 describe("Copilot Page Component", () => {
   it("exports Copilot page component successfully", async () => {
-    const mod = await import("@/app/copilot/page");
+    const mod = await import("@/app/(app)/copilot/page");
     expect(mod.default).toBeDefined();
   });
 
   it("renders Finoch branding and student welcome message", async () => {
-    const mod = await import("@/app/copilot/page");
+    const mod = await import("@/app/(app)/copilot/page");
     const html = renderToString(React.createElement(mod.default));
     expect(html).toContain("Finoch AI Copilot");
     expect(html).toContain("finoch");
@@ -25,7 +25,7 @@ describe("Copilot Page Component", () => {
   });
 
   it("renders student-tailored quick prompt chips", async () => {
-    const mod = await import("@/app/copilot/page");
+    const mod = await import("@/app/(app)/copilot/page");
     const html = renderToString(React.createElement(mod.default));
     expect(html).toContain("Jatah jajan hari ini masih aman nggak?");
     expect(html).toContain("Gimana trik hemat makan biar uang kiriman cukup sebulan?");

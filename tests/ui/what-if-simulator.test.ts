@@ -11,12 +11,12 @@ vi.mock("next/navigation", () => ({
 
 describe("What-If Simulator Page", () => {
   it("exports Simulator page component", async () => {
-    const mod = await import("@/app/simulator/page");
+    const mod = await import("@/app/(app)/simulator/page");
     expect(mod.default).toBeDefined();
   });
 
   it("renders Finoch branding and student presets", async () => {
-    const mod = await import("@/app/simulator/page");
+    const mod = await import("@/app/(app)/simulator/page");
     const html = renderToString(React.createElement(mod.default));
     expect(html).toContain("Finoch What-If Simulator");
     expect(html).toContain("finoch");

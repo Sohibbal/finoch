@@ -20,7 +20,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Split Bill Page Components", () => {
   it("exports SplitBillPage component successfully", async () => {
-    const mod = await import("@/app/split-bill/page");
+    const mod = await import("@/app/(app)/split-bill/page");
     expect(mod.default).toBeDefined();
     expect(typeof mod.default).toBe("function");
   });

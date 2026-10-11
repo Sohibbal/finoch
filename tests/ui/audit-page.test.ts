@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Micro-Expense Leak Audit Components", () => {
   it("exports AuditPage component successfully", async () => {
-    const AuditPageModule = await import("@/app/audit/page");
+    const AuditPageModule = await import("@/app/(app)/audit/page");
     expect(AuditPageModule.default).toBeDefined();
     expect(typeof AuditPageModule.default).toBe("function");
   });

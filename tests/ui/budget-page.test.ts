@@ -18,7 +18,7 @@ vi.mock("@/hooks/use-auth", () => ({
 
 describe("Budget Envelopes Page & Components", () => {
   it("exports BudgetPage component successfully", async () => {
-    const BudgetPageModule = await import("@/app/budget/page");
+    const BudgetPageModule = await import("@/app/(app)/budget/page");
     expect(BudgetPageModule.default).toBeDefined();
     expect(typeof BudgetPageModule.default).toBe("function");
   });
