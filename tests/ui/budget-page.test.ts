@@ -65,9 +65,9 @@ describe("Amplop Anggaran page", () => {
     const noop = () => {};
     const amplop = renderToString(React.createElement(BudgetAmplop, { envelope, onTransfer: noop, onEdit: noop, onDelete: noop }));
     expect(amplop).toContain("border-paper-sheet bg-paper-sheet text-ink");
-    const cap = renderToString(React.createElement(Cap, { tone: "habis" }, "Habis"));
+    const cap = renderToString(React.createElement(Cap, { tone: "habis", children: "Habis" }));
     expect(cap).not.toContain("border-dashed");
-    expect(cap).not.toBe(renderToString(React.createElement(Cap, { tone: "aman" }, "Habis")).replace(/aman/g, "habis"));
+    expect(cap).not.toBe(renderToString(React.createElement(Cap, { tone: "aman", children: "Habis" })).replace(/aman/g, "habis"));
   });
 
   it("keeps envelope actions scrolled clear of the mobile bottom bar and Catat seal", async () => {
