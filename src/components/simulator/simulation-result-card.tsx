@@ -45,10 +45,7 @@ function JatahSheet({
     <Note as="section" aria-label={title} thread={jatah.status} serial={<Serial id={serialId} date={today} />} className="overflow-hidden flex-1 min-w-0">
       <div className="relative px-5 sm:px-8 pt-6 pb-5 pr-12 sm:pr-16 space-y-3">
         <Guilloche seed={seed} size={160} families={3} className="absolute -right-10 -top-10 opacity-40" />
-        <div className="relative flex items-start justify-between gap-3">
-          <h2 className="text-body font-semibold text-ink-soft">{title}</h2>
-          {stamp}
-        </div>
+        <h2 className="relative text-body font-semibold text-ink-soft">{title}</h2>
         <p className="relative font-display font-bold text-ink money flex items-baseline gap-2">
           <span className="text-head">Rp</span>
           <span className="text-[clamp(2.75rem,12vw,4rem)] leading-none tracking-[-0.03em]" aria-hidden="true">
@@ -56,7 +53,10 @@ function JatahSheet({
           </span>
           <span className="sr-only">{jatah.jatah.toLocaleString("id-ID")}</span>
         </p>
-        <p className="relative text-body text-ink">jatah per hari · {jatah.daysLeft} hari lagi</p>
+        <div className="relative flex flex-wrap items-center gap-x-4 gap-y-2">
+          <p className="text-body text-ink">jatah per hari · {jatah.daysLeft} hari lagi</p>
+          {stamp}
+        </div>
         <dl className="relative grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t border-ink/15 pt-3">
           <dt className="text-body text-ink-soft">Sisa bulan ini</dt>
           <dd className="money text-body font-semibold text-ink text-right">{rupiah(jatah.sisaBulanIni)}</dd>

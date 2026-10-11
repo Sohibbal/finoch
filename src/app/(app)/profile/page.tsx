@@ -250,7 +250,8 @@ export default function ProfilePage() {
                 onChange={(v) => setFormData({ ...formData, monthlyIncome: v })}
               />
 
-              <fieldset className="py-4">
+              <div className="py-4">
+              <fieldset>
                 <legend className="text-body font-semibold text-ink mb-2">Sumber pemasukan utama</legend>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                   {incomeTypeOptions.map((opt) => (
@@ -267,6 +268,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
               </fieldset>
+              </div>
 
               <MoneyField
                 label="Tabungan cadangan saat ini"
@@ -282,7 +284,8 @@ export default function ProfilePage() {
                 onChange={(v) => setFormData({ ...formData, monthlyFixedExpenses: v })}
               />
 
-              <fieldset className="py-4">
+              <div className="py-4">
+              <fieldset>
                 <legend className="text-body font-semibold text-ink mb-2">Prioritas finansial utama</legend>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {priorityOptions.map((opt) => (
@@ -299,6 +302,7 @@ export default function ProfilePage() {
                   ))}
                 </div>
               </fieldset>
+              </div>
 
               <div className="pt-5">
                 <button

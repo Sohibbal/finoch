@@ -154,7 +154,7 @@ export default function CopilotPage() {
           <li ref={messagesEndRef} aria-hidden="true" />
         </ol>
 
-        <div className="shrink-0 pb-3 -mx-4 px-4 overflow-x-auto">
+        <div className="shrink-0 pb-3 -mx-4 px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <p className="text-meta text-ink-soft mb-1.5">Sering ditanya</p>
           <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
             {quickPrompts.map((prompt) => (
