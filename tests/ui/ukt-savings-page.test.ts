@@ -23,13 +23,19 @@ describe("UKT Sinking Fund Components", () => {
     expect(typeof UktModule.default).toBe("function");
   });
 
-  it("exports UktCardMobile, UktBentoDesktop, and UktModal", async () => {
-    const MobileMod = await import("@/components/ukt/ukt-card-mobile");
-    const DesktopMod = await import("@/components/ukt/ukt-bento-desktop");
+  it("exports UktPlanNote and UktModal", async () => {
+    const NoteMod = await import("@/components/ukt/ukt-plan-note");
     const ModalMod = await import("@/components/ukt/ukt-modal");
 
-    expect(MobileMod.UktCardMobile).toBeDefined();
-    expect(DesktopMod.UktBentoDesktop).toBeDefined();
+    expect(NoteMod.UktPlanNote).toBeDefined();
     expect(ModalMod.UktModal).toBeDefined();
+  });
+
+  it("prints every plan category in a denomination color with a personality line", async () => {
+    const { UKT_DENOM, UKT_PERSONALITY } = await import("@/components/ukt/ukt-plan-note");
+    for (const category of ["ukt", "praktikum", "kkn", "skripsi", "wisuda"] as const) {
+      expect(UKT_DENOM[category]).toBeTruthy();
+      expect(UKT_PERSONALITY[category]).toBeTruthy();
+    }
   });
 });
