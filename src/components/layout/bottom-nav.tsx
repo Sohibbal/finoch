@@ -40,12 +40,15 @@ function Tab({
       href={href}
       aria-label={ariaLabel}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-col items-center justify-center gap-0.5 min-h-12 text-meta transition-colors ${
-        active ? "text-ink dark:text-white font-bold" : "text-ink-soft dark:text-navy-400 font-medium"
+      className={`flex flex-col items-center justify-center gap-1 min-h-12 text-[11px] transition-colors ${
+        active
+          ? "text-blue-600 dark:text-blue-400 font-bold"
+          : "text-slate-500 dark:text-slate-400 font-medium hover:text-slate-700 dark:hover:text-slate-200"
       }`}
     >
-      <Icon className="w-5 h-5" strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
-      <span className={active ? "underline decoration-2 underline-offset-4" : ""}>{label}</span>
+      <Icon className="w-4 h-4" strokeWidth={active ? 2.4 : 1.75} aria-hidden="true" />
+      <span>{label}</span>
+      {active && <span className="w-1 h-1 rounded-full bg-blue-600 dark:bg-blue-400 -mt-0.5" />}
     </Link>
   );
 }
@@ -130,7 +133,7 @@ export function BottomNav({ userEmail }: BottomNavProps) {
 
       <nav
         aria-label="Navigasi Bawah Mobile"
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-paper dark:bg-navy-950 border-t border-ink/20 dark:border-navy-800 pb-[env(safe-area-inset-bottom)]"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0B1320]/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 pb-[env(safe-area-inset-bottom)]"
       >
         <div className="grid grid-cols-5 items-center h-16 max-w-md mx-auto px-1">
           <Tab

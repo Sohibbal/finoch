@@ -13,7 +13,7 @@ import {
 import { TransactionHistoryTable } from "@/components/transaction/transaction-history-table";
 import { ManualTransactionModal } from "@/components/transaction/manual-transaction-modal";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
-import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
+import { VoiceTransactionModal } from "@/components/transaction/voice-transaction-modal";
 import type { TransactionCandidate } from "@/types/financial-types";
 
 export default function PengeluaranPage() {
@@ -45,7 +45,7 @@ export default function PengeluaranPage() {
     category: string;
     transactionDate: string;
   }) => {
-    await saveTransaction({
+    const saved = await saveTransaction({
       type: "expense",
       itemName: data.itemName,
       amount: data.amount,
@@ -53,11 +53,36 @@ export default function PengeluaranPage() {
       source: "manual",
       transactionDate: data.transactionDate,
     });
+    setTransactions((prev) => [saved, ...prev.filter((t) => t.id !== saved.id)]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:transaction-changed"));
+    }
+    await loadData();
+  };
+
+  const handleVoiceSave = async (data: {
+    itemName: string;
+    amount: number;
+    category: string;
+    transactionDate: string;
+  }) => {
+    const saved = await saveTransaction({
+      type: "expense",
+      itemName: data.itemName,
+      amount: data.amount,
+      category: data.category,
+      source: "voice",
+      transactionDate: data.transactionDate,
+    });
+    setTransactions((prev) => [saved, ...prev.filter((t) => t.id !== saved.id)]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:transaction-changed"));
+    }
     await loadData();
   };
 
   const handleScanConfirmed = async (candidate: TransactionCandidate) => {
-    await saveTransaction({
+    const saved = await saveTransaction({
       type: "expense",
       itemName: candidate.merchant || candidate.description || candidate.items?.[0]?.name || "Belanja Struk",
       amount: candidate.amount,
@@ -65,11 +90,19 @@ export default function PengeluaranPage() {
       source: "ocr",
       transactionDate: candidate.date,
     });
+    setTransactions((prev) => [saved, ...prev.filter((t) => t.id !== saved.id)]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:transaction-changed"));
+    }
     await loadData();
   };
 
   const handleDelete = async (id: string) => {
+    setTransactions((prev) => prev.filter((t) => t.id !== id));
     await deleteTransaction(id);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:transaction-changed"));
+    }
     await loadData();
   };
 
@@ -84,21 +117,21 @@ export default function PengeluaranPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
         {/* Metric Card & Action Bar */}
-        <div className="p-6 rounded-2xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 shadow-sm space-y-6">
+        <div className="p-6 rounded-3xl bg-white dark:bg-[#111C2E] border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <p className="text-meta font-medium text-ink-soft dark:text-navy-400">Total Pengeluaran</p>
-              <h2 className="text-display font-bold text-ink dark:text-white money">
+              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Pengeluaran</p>
+              <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white money mt-1">
                 -{rupiah(totalThisMonth)}
               </h2>
             </div>
 
             {/* 3 Input Method Buttons */}
-            <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2.5">
               <button
                 type="button"
                 onClick={() => setIsVoiceOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold text-meta transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold text-xs transition-colors"
               >
                 <Mic className="w-4 h-4" strokeWidth={2} />
                 <span>Bicara</span>
@@ -107,7 +140,7 @@ export default function PengeluaranPage() {
               <button
                 type="button"
                 onClick={() => setIsScanOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 font-semibold text-meta transition-colors"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 font-semibold text-xs transition-colors"
               >
                 <ScanLine className="w-4 h-4" strokeWidth={2} />
                 <span>Scan Struk</span>
@@ -116,7 +149,7 @@ export default function PengeluaranPage() {
               <button
                 type="button"
                 onClick={() => setIsManualOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-ink text-paper-sheet dark:bg-white dark:text-navy-950 font-semibold text-meta hover:opacity-90 transition-opacity"
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-xs hover:opacity-90 transition-opacity"
               >
                 <Plus className="w-4 h-4" strokeWidth={2} />
                 <span>Catat Manual</span>
@@ -153,14 +186,16 @@ export default function PengeluaranPage() {
 
       <ReceiptScannerModal
         isOpen={isScanOpen}
+        type="expense"
         onClose={() => setIsScanOpen(false)}
         onConfirm={handleScanConfirmed}
       />
 
-      <VoiceExpenseSheet
+      <VoiceTransactionModal
         isOpen={isVoiceOpen}
+        type="expense"
         onClose={() => setIsVoiceOpen(false)}
-        onExpenseSaved={loadData}
+        onSave={handleVoiceSave}
       />
     </>
   );

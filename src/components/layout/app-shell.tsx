@@ -50,7 +50,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-paper text-ink flex flex-col md:flex-row transition-colors">
+    <div className="min-h-[100dvh] bg-[#F8FAFC] dark:bg-[#0B1320] text-slate-900 dark:text-slate-100 flex flex-col md:flex-row transition-colors">
       <DashboardSidebar className="hidden md:flex print:hidden" />
 
       {/* Document scroll (no h-screen overflow box) so iOS can collapse the address bar.

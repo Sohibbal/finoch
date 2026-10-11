@@ -41,7 +41,7 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
 
   return (
     <header
-      className={`sticky top-0 z-40 bg-paper border-b border-ink/15 pt-[env(safe-area-inset-top)] print:static ${className}`}
+      className={`sticky top-0 z-40 bg-white/95 dark:bg-[#0B1320]/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 pt-[env(safe-area-inset-top)] print:static ${className}`}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
         <div className="flex items-center gap-2 min-w-0 flex-1 basis-48">

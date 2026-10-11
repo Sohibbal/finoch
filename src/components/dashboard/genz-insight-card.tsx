@@ -15,30 +15,30 @@ export function GenZInsightCard({ nickname, insight }: GenZInsightCardProps) {
 
   return (
     <div
-      className={`relative overflow-hidden p-6 rounded-3xl border transition-all ${
+      className={`relative overflow-hidden p-6 rounded-3xl border shadow-sm transition-all ${
         isWarning
-          ? "bg-amber-500/5 dark:bg-amber-950/20 border-amber-500/20 text-ink dark:text-white"
+          ? "bg-amber-500/[0.04] dark:bg-amber-950/20 border-amber-200 dark:border-amber-900/40"
           : isHype
-          ? "bg-primary-500/5 dark:bg-primary-950/20 border-primary-500/20 text-ink dark:text-white"
-          : "bg-paper-sheet dark:bg-navy-900 border-ink/15 dark:border-navy-800 text-ink dark:text-white"
+          ? "bg-blue-500/[0.04] dark:bg-blue-950/20 border-blue-200 dark:border-blue-900/40"
+          : "bg-white dark:bg-[#111C2E] border-slate-200/80 dark:border-slate-800"
       }`}
     >
       <div className="flex items-start gap-4">
         <div
-          className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
+          className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 ${
             isWarning
               ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
               : isHype
-              ? "bg-primary-500/10 text-primary-600 dark:text-primary-400"
-              : "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+              ? "bg-blue-500/10 text-blue-600 dark:text-blue-400"
+              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
           }`}
         >
           {isWarning ? (
-            <AlertTriangle className="w-6 h-6" />
+            <AlertTriangle className="w-5 h-5" strokeWidth={1.75} />
           ) : isHype ? (
-            <Sparkles className="w-6 h-6" />
+            <Sparkles className="w-5 h-5" strokeWidth={1.75} />
           ) : (
-            <Smile className="w-6 h-6" />
+            <Smile className="w-5 h-5" strokeWidth={1.75} />
           )}
         </div>
 

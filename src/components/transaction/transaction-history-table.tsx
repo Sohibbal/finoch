@@ -56,19 +56,19 @@ export function TransactionHistoryTable({
       {/* Search & Summary Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-ink-soft" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder={`Cari ${type === "income" ? "pemasukan" : "pengeluaran"}...`}
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-ink/20 dark:border-navy-700 bg-paper-sheet dark:bg-navy-900 text-body text-ink dark:text-white placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-ink/20"
+            className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-[#111C2E] text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
 
-        <div className="text-meta font-medium text-ink-soft dark:text-navy-300">
+        <div className="text-xs font-medium text-slate-500 dark:text-slate-400">
           Total ({filtered.length} item):{" "}
-          <span className={`font-semibold money ${type === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-ink dark:text-white"}`}>
+          <span className={`font-semibold money ${type === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"}`}>
             {type === "income" ? "+" : "-"} {rupiah(totalAmount)}
           </span>
         </div>
@@ -76,17 +76,17 @@ export function TransactionHistoryTable({
 
       {/* Table / List Container */}
       {isLoading ? (
-        <div className="p-12 text-center text-body text-ink-soft">Memuat riwayat...</div>
+        <div className="p-12 text-center text-xs text-slate-400">Memuat riwayat...</div>
       ) : filtered.length === 0 ? (
-        <div className="p-12 text-center rounded-2xl border border-dashed border-ink/20 dark:border-navy-700 bg-paper-sheet/50 dark:bg-navy-900/50">
-          <Inbox className="w-10 h-10 mx-auto text-ink-soft/60 mb-2" strokeWidth={1.5} />
-          <p className="text-body font-medium text-ink-soft">
+        <div className="p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#111C2E]/50">
+          <Inbox className="w-9 h-9 mx-auto text-slate-300 dark:text-slate-600 mb-2" strokeWidth={1.5} />
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
             {search ? "Tidak ada transaksi yang cocok" : `Belum ada catatan ${type === "income" ? "pemasukan" : "pengeluaran"}.`}
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-2xl border border-ink/15 dark:border-navy-800 bg-paper-sheet dark:bg-navy-900 shadow-sm">
-          <div className="divide-y divide-ink/10 dark:divide-navy-800">
+        <div className="overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111C2E] shadow-sm">
+          <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {filtered.map((item) => {
               const dateStr = new Date(item.transactionDate).toLocaleDateString("id-ID", {
                 day: "numeric",
@@ -97,18 +97,18 @@ export function TransactionHistoryTable({
               return (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between p-4 hover:bg-ink/5 dark:hover:bg-navy-800/60 transition-colors"
+                  className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
                 >
                   <div className="flex items-center gap-3 min-w-0">
-                    <div className="p-2 rounded-lg bg-paper-deep dark:bg-navy-800 border border-ink/10 dark:border-navy-700 shrink-0">
+                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
                       {getSourceIcon(item.source)}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-body font-semibold text-ink dark:text-white truncate">
+                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
                         {item.itemName}
                       </p>
-                      <div className="flex items-center gap-2 text-meta text-ink-soft dark:text-navy-400">
-                        <span className="px-1.5 py-0.5 rounded bg-ink/5 dark:bg-navy-800 text-[11px] font-medium">
+                      <div className="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
+                        <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-medium text-slate-600 dark:text-slate-300">
                           {item.category}
                         </span>
                         <span>·</span>
@@ -119,8 +119,8 @@ export function TransactionHistoryTable({
 
                   <div className="flex items-center gap-4 shrink-0">
                     <span
-                      className={`font-semibold money text-body ${
-                        type === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-ink dark:text-white"
+                      className={`font-semibold money text-sm ${
+                        type === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"
                       }`}
                     >
                       {type === "income" ? "+" : "-"} {rupiah(item.amount)}
@@ -128,7 +128,7 @@ export function TransactionHistoryTable({
                     <button
                       type="button"
                       onClick={() => onDelete(item.id)}
-                      className="p-1.5 rounded-lg text-ink-soft hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
                       title="Hapus"
                     >
                       <Trash2 className="w-4 h-4" strokeWidth={1.5} />

@@ -7,6 +7,7 @@ import { PaperDialog, PRIMARY_CLASS, SECONDARY_CLASS } from "@/components/press/
 
 interface ReceiptScannerModalProps {
   isOpen: boolean;
+  type?: "income" | "expense";
   /** Keep it stable (useCallback): the dialog re-focuses itself when it changes. */
   onClose: () => void;
   onScanSuccess?: (candidate: TransactionCandidate) => void;
@@ -15,6 +16,7 @@ interface ReceiptScannerModalProps {
 
 export function ReceiptScannerModal({
   isOpen,
+  type = "expense",
   onClose,
   onScanSuccess,
   onConfirm,
@@ -183,8 +185,14 @@ export function ReceiptScannerModal({
     }
   };
 
+  const isIncome = type === "income";
+
   return (
-    <PaperDialog isOpen={isOpen} onClose={onClose} title="Scan struk">
+    <PaperDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={isIncome ? "Scan bukti transfer" : "Scan struk"}
+    >
       <div className="space-y-4">
         {errorMessage && (
           <p role="alert" className="text-body text-habis-ink">
@@ -195,8 +203,14 @@ export function ReceiptScannerModal({
         {isScanning ? (
           <div aria-busy="true" className="py-10 flex flex-col items-center gap-3 text-center">
             <Loader2 className="w-8 h-8 text-ink motion-safe:animate-spin" aria-hidden="true" />
-            <p className="text-body font-semibold text-ink">Membaca struk...</p>
-            <p className="text-meta text-ink-soft">Nama toko, tanggal dan totalnya. Kamu cek dulu sebelum disimpan.</p>
+            <p className="text-body font-semibold text-ink">
+              {isIncome ? "Membaca bukti transfer..." : "Membaca struk..."}
+            </p>
+            <p className="text-meta text-ink-soft">
+              {isIncome
+                ? "Nominal transfer dan tanggal. Kamu cek dulu sebelum disimpan."
+                : "Nama toko, tanggal dan totalnya. Kamu cek dulu sebelum disimpan."}
+            </p>
           </div>
         ) : useCamera ? (
           <div className="space-y-3">
@@ -209,7 +223,7 @@ export function ReceiptScannerModal({
               </button>
               <button type="button" onClick={capturePhoto} className={`${PRIMARY_CLASS} flex-1`}>
                 <Camera className="w-4 h-4" aria-hidden="true" />
-                Foto struknya
+                {isIncome ? "Foto bukti transfer" : "Foto struknya"}
               </button>
             </div>
           </div>

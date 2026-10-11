@@ -15,7 +15,7 @@ export function StreakWidget({ streakDays, dailyAllowance, todaySpent }: StreakW
   const sisa = Math.max(0, dailyAllowance - todaySpent);
 
   return (
-    <div className="p-6 rounded-3xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 shadow-sm space-y-4">
+    <div className="p-6 rounded-3xl bg-white dark:bg-[#111C2E] border border-slate-200/80 dark:border-slate-800 shadow-sm space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div
