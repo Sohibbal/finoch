@@ -1,32 +1,33 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  Handshake,
-  Plus,
-  ArrowDownLeft,
-  ArrowUpRight,
-} from "lucide-react";
+import { Plus } from "lucide-react";
 import { DebtItem, DebtSummary, DebtType } from "@/types/debt-types";
-import {
-  getDebts,
-  addDebt,
-  markDebtAsPaid,
-  deleteDebt,
-  getDebtSummary,
-} from "@/lib/storage/debt-storage";
-import { formatRupiah } from "@/lib/financial/split-bill-engine";
+import { getDebts, addDebt, markDebtAsPaid, deleteDebt, getDebtSummary } from "@/lib/storage/debt-storage";
+import { rupiah } from "@/lib/format";
 
-import { DebtCardMobile } from "@/components/debts/debt-card-mobile";
-import { DebtTableDesktop } from "@/components/debts/debt-table-desktop";
+import { DebtSlip, sortSlips } from "@/components/debts/debt-slip";
 import { DebtFormModal } from "@/components/debts/debt-form-modal";
 import { PageHeader } from "@/components/layout/page-header";
-import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
+
+const PRIMARY_ACTION =
+  "inline-flex items-center gap-2 min-h-11 px-4 rounded-full bg-ink hover:bg-ink/90 text-paper-sheet text-body font-semibold transition-colors";
+
+const FILTERS = [
+  { id: "all", label: "Semua" },
+  { id: "receivable", label: "Piutang" },
+  { id: "payable", label: "Utang" },
+  { id: "unpaid", label: "Belum lunas" },
+  { id: "paid", label: "Lunas" },
+] as const;
+
+type Filter = (typeof FILTERS)[number]["id"];
 
 export default function DebtsPage() {
-
   const [debts, setDebts] = useState<DebtItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [filter, setFilter] = useState<Filter>("all");
+  const [justPaidId, setJustPaidId] = useState<string | null>(null);
 
   const refreshDebts = () => {
     setDebts(getDebts());
@@ -39,6 +40,16 @@ export default function DebtsPage() {
   const summary: DebtSummary = useMemo(() => {
     return getDebtSummary();
   }, [debts]);
+
+  const slips = useMemo(
+    () =>
+      sortSlips(debts).filter((d) => {
+        if (filter === "receivable" || filter === "payable") return d.type === filter;
+        if (filter === "unpaid" || filter === "paid") return d.status === filter;
+        return true;
+      }),
+    [debts, filter]
+  );
 
   const handleAddDebt = (data: {
     type: DebtType;
@@ -53,7 +64,8 @@ export default function DebtsPage() {
   };
 
   const handleTogglePaid = (id: string) => {
-    markDebtAsPaid(id);
+    const settled = markDebtAsPaid(id);
+    setJustPaidId(settled?.status === "paid" ? id : null);
     refreshDebts();
   };
 
@@ -65,117 +77,88 @@ export default function DebtsPage() {
   return (
     <>
       <PageHeader
-        title="Buku Kasbon & Hutang Piutang"
-        subtitle="Kelola pinjaman teman kost & kasbon warteg dengan pengingat ramah"
+        title="Buku Kasbon"
+        subtitle="Utang dan piutang sama teman kos, dengan pengingat yang nggak bikin canggung"
         actions={
-          <>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              className="px-4 py-1.5 rounded-full bg-navy-950 hover:bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 dark:hover:bg-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Catat Kasbon Baru</span>
-              <span className="sm:hidden">Tambah</span>
-            </button>
-          </>
+          <button type="button" onClick={() => setIsModalOpen(true)} className={PRIMARY_ACTION}>
+            <Plus className="w-4 h-4" aria-hidden="true" />
+            Catat kasbon
+          </button>
         }
       />
 
-      {/* Page Body */}
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
-        {/* MOBILE PWA VIEW (md:hidden) */}
-        <div className="md:hidden space-y-4">
-          {/* Mobile Summary Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-emerald-500/20 shadow-sm">
-              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-1">
-                <ArrowDownLeft className="w-3.5 h-3.5" />
-                <span>Piutang Saya</span>
-              </div>
-              <div className="text-sm font-black text-navy-950 dark:text-cream-50">
-                {formatRupiah(summary.totalReceivable)}
-              </div>
-              <span className="text-[10px] text-navy-500 dark:text-cream-400">
-                {summary.unpaidReceivablesCount} orang belum bayar
-              </span>
+      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-5 space-y-6">
+        {/* Both directions side by side, then the net, so who owes whom reads at a glance. */}
+        <section aria-labelledby="kasbon-total-title" className="border-y border-ink/20 py-4 space-y-3">
+          <h2 id="kasbon-total-title" className="sr-only">
+            Ringkasan kasbon
+          </h2>
+          <dl className="grid grid-cols-2 gap-4">
+            <div className="min-w-0">
+              <dt className="text-body text-ink-soft">Teman utang ke kamu</dt>
+              <dd className="font-display text-head font-bold text-aman-ink money break-words">{rupiah(summary.totalReceivable)}</dd>
+              <dd className="text-meta text-ink-soft">{summary.unpaidReceivablesCount} orang belum bayar</dd>
             </div>
+            <div className="min-w-0">
+              <dt className="text-body text-ink-soft">Kamu utang ke teman</dt>
+              <dd className="font-display text-head font-bold text-mepet-ink money break-words">{rupiah(summary.totalPayable)}</dd>
+              <dd className="text-meta text-ink-soft">{summary.unpaidPayablesCount} belum kamu lunasi</dd>
+            </div>
+          </dl>
+          <p className="text-body text-ink border-t border-ink/10 pt-3">
+            {summary.netBalance > 0
+              ? "Bersihnya kamu masih akan terima "
+              : summary.netBalance < 0
+                ? "Bersihnya kamu masih harus bayar "
+                : "Impas, nggak ada yang nunggak. "}
+            {summary.netBalance !== 0 && <span className="money font-semibold">{rupiah(Math.abs(summary.netBalance))}</span>}
+          </p>
+        </section>
 
-            <div className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-amber-500/20 shadow-sm">
-              <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 text-xs font-bold mb-1">
-                <ArrowUpRight className="w-3.5 h-3.5" />
-                <span>Hutang Saya</span>
-              </div>
-              <div className="text-sm font-black text-navy-950 dark:text-cream-50">
-                {formatRupiah(summary.totalPayable)}
-              </div>
-              <span className="text-[10px] text-navy-500 dark:text-cream-400">
-                {summary.unpaidPayablesCount} kewajiban aktif
-              </span>
-            </div>
+        <div role="group" aria-label="Saring kasbon" className="flex flex-wrap gap-2">
+          {FILTERS.map((f) => (
+            <button
+              key={f.id}
+              type="button"
+              aria-pressed={filter === f.id}
+              onClick={() => setFilter(f.id)}
+              className={`min-h-11 px-4 rounded-full border text-body font-semibold transition-colors ${
+                filter === f.id ? "bg-ink text-paper-sheet border-ink" : "border-ink/30 text-ink hover:bg-ink/5"
+              }`}
+            >
+              {f.label}
+            </button>
+          ))}
+        </div>
+
+        {slips.length === 0 ? (
+          <div className="py-4 space-y-2">
+            <p className="text-body font-semibold text-ink">
+              {debts.length === 0 ? "Buku kasbon masih bersih." : "Tidak ada kasbon di saringan ini."}
+            </p>
+            <p className="text-body text-ink-soft max-w-prose">
+              {debts.length === 0
+                ? "Talangin makan teman atau pinjam duit buat bayar kos? Catat di sini, lalu ingatkan lewat WhatsApp kalau sudah waktunya."
+                : "Coba saringan lain."}
+            </p>
           </div>
-
-          {/* List of Debt Cards */}
-          <div className="space-y-3">
-            <div className="flex items-center justify-between px-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-navy-500 dark:text-cream-400">
-                Semua Catatan ({debts.length})
-              </span>
-            </div>
-
-            {debts.map((debt) => (
-              <DebtCardMobile
+        ) : (
+          <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {slips.map((debt) => (
+              <DebtSlip
                 key={debt.id}
                 debt={debt}
+                justPaid={debt.id === justPaidId}
                 onTogglePaid={handleTogglePaid}
                 onDelete={handleDeleteDebt}
               />
             ))}
-          </div>
-        </div>
-
-        {/* DESKTOP VIEW (hidden md:block) */}
-        <div className="hidden md:block">
-          <DebtTableDesktop
-            debts={debts}
-            summary={summary}
-            onTogglePaid={handleTogglePaid}
-            onDelete={handleDeleteDebt}
-          />
-        </div>
+          </ul>
+        )}
       </main>
 
-      {/* MOBILE STICKY FLOATING DOCK (md:hidden) */}
-      <div className={`md:hidden fixed ${ACTION_BAR_BOTTOM} left-0 right-0 z-30 px-4 pointer-events-none flex justify-center`}>
-        <div className="pointer-events-auto w-full max-w-md bg-white/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 rounded-2xl shadow-xl p-2.5 flex items-center justify-between backdrop-blur-xl">
-          <div className="pl-2">
-            <span className="text-[10px] text-navy-500 dark:text-cream-400 block leading-tight">
-              Saldo Bersih
-            </span>
-            <span
-              className={`text-sm font-black ${
-                summary.netBalance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
-              }`}
-            >
-              {formatRupiah(summary.netBalance)}
-            </span>
-          </div>
-
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="min-h-[44px] px-4 rounded-xl bg-navy-950 dark:bg-cream-100 text-white dark:text-navy-950 font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Catat Kasbon</span>
-          </button>
-        </div>
-      </div>
-
       {/* Form Modal */}
-      <DebtFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSave={handleAddDebt}
-      />
+      <DebtFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleAddDebt} />
     </>
   );
 }
