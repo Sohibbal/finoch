@@ -1,18 +1,13 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import {
-  X,
-  Camera,
-  UploadCloud,
-  Loader2,
-  AlertCircle,
-  RefreshCw,
-} from "lucide-react";
+import { Camera, ImageUp, Loader2 } from "lucide-react";
 import { TransactionCandidate } from "@/types/financial-types";
+import { PaperDialog, PRIMARY_CLASS, SECONDARY_CLASS } from "@/components/press/kampus-press";
 
 interface ReceiptScannerModalProps {
   isOpen: boolean;
+  /** Keep it stable (useCallback): the dialog re-focuses itself when it changes. */
   onClose: () => void;
   onScanSuccess: (candidate: TransactionCandidate) => void;
 }
@@ -76,7 +71,7 @@ export function ReceiptScannerModal({
       setUseCamera(true);
     } catch {
       setErrorMessage(
-        "Kamera tidak dapat diakses. Silakan izinkan akses kamera atau gunakan unggah foto."
+        "Kamera nggak bisa dibuka. Izinkan akses kamera di browser, atau pilih foto dari galeri."
       );
     }
   };
@@ -101,7 +96,7 @@ export function ReceiptScannerModal({
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 10 * 1024 * 1024) {
-        setErrorMessage("Ukuran gambar melebihi batas 10 MB.");
+        setErrorMessage("Fotonya lebih dari 10 MB. Pilih foto yang lebih kecil.");
         return;
       }
       processImageFile(file);
@@ -127,7 +122,7 @@ export function ReceiptScannerModal({
 
         if (!res.ok) {
           const errData = await res.json();
-          throw new Error(errData.error || "Gagal memproses struk di server");
+          throw new Error(errData.error || "Server belum bisa membaca struk ini");
         }
 
         const data = await res.json();
@@ -137,8 +132,8 @@ export function ReceiptScannerModal({
           return;
         }
       } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : "Gagal memproses OCR online";
-        setErrorMessage(`${msg}. Mencoba pemindaian offline...`);
+        const msg = err instanceof Error ? err.message : "Server belum bisa membaca struk ini";
+        setErrorMessage(`${msg}. Mencoba baca di HP...`);
       }
     }
 
@@ -160,7 +155,7 @@ export function ReceiptScannerModal({
             onClose();
           } else {
             setErrorMessage(
-              e.data.error || "Gagal mengenali teks struk secara offline."
+              e.data.error || "Tulisan di struknya belum kebaca. Foto ulang lebih dekat dan terang, atau pakai Catat manual."
             );
           }
         };
@@ -169,7 +164,7 @@ export function ReceiptScannerModal({
           setIsScanning(false);
           worker.terminate();
           workerRef.current = null;
-          setErrorMessage("Gagal menjalankan worker OCR offline.");
+          setErrorMessage("Pembaca struk di HP gagal jalan. Coba lagi saat online, atau pakai Catat manual.");
         };
 
         worker.postMessage({
@@ -178,129 +173,67 @@ export function ReceiptScannerModal({
         });
       } else {
         setIsScanning(false);
-        setErrorMessage("Browser tidak mendukung Web Worker untuk OCR offline.");
+        setErrorMessage("Browser ini belum bisa baca struk tanpa internet. Coba lagi saat online, atau pakai Catat manual.");
       }
     } catch {
       setIsScanning(false);
-      setErrorMessage("Terjadi kegagalan saat menjalankan pemrosesan OCR.");
+      setErrorMessage("Struknya gagal dibaca. Coba foto ulang, atau pakai Catat manual.");
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
-      <div className="bg-paper-sheet rounded-none border border-ink/20 max-w-md w-full overflow-hidden text-ink transition-colors">
-        {/* Header */}
-        <div className="px-6 py-4 border-b border-cream-200 dark:border-navy-800 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cream-200/80 dark:bg-navy-900 text-ink border border-ink/20">
-              <Camera className="w-5 h-5" />
+    <PaperDialog isOpen={isOpen} onClose={onClose} title="Scan struk">
+      <div className="space-y-4">
+        {errorMessage && (
+          <p role="alert" className="text-body text-habis-ink">
+            {errorMessage}
+          </p>
+        )}
+
+        {isScanning ? (
+          <div aria-busy="true" className="py-10 flex flex-col items-center gap-3 text-center">
+            <Loader2 className="w-8 h-8 text-ink motion-safe:animate-spin" aria-hidden="true" />
+            <p className="text-body font-semibold text-ink">Membaca struk...</p>
+            <p className="text-meta text-ink-soft">Nama toko, tanggal dan totalnya. Kamu cek dulu sebelum disimpan.</p>
+          </div>
+        ) : useCamera ? (
+          <div className="space-y-3">
+            <div className="relative overflow-hidden bg-ink aspect-[4/3] border border-ink/20">
+              <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
             </div>
-            <div>
-              <h3 className="text-base font-bold text-ink">
-                Scan Struk Belanja
-              </h3>
-              <p className="text-xs text-navy-600 dark:text-cream-400">
-                Ekstrak otomatis total nominal &amp; rincian transaksi
-              </p>
+            <div className="flex gap-2">
+              <button type="button" onClick={stopCamera} className={SECONDARY_CLASS}>
+                Batal
+              </button>
+              <button type="button" onClick={capturePhoto} className={`${PRIMARY_CLASS} flex-1`}>
+                <Camera className="w-4 h-4" aria-hidden="true" />
+                Foto struknya
+              </button>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Tutup"
-            className="p-1.5 rounded-full text-navy-500 hover:text-navy-950 dark:text-cream-400 dark:hover:text-cream-50 hover:bg-cream-200 dark:hover:bg-navy-800 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="p-6 space-y-4 text-center">
-          {errorMessage && (
-            <div className="p-3 rounded-sm bg-paper border border-habis-ink text-meta text-habis-ink flex items-center gap-2 text-left">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{errorMessage}</span>
-            </div>
-          )}
-
-          {isScanning ? (
-            <div className="py-12 flex flex-col items-center justify-center space-y-3">
-              <Loader2 className="w-10 h-10 text-navy-900 dark:text-cream-100 animate-spin" />
-              <div className="text-sm font-bold text-ink">
-                Membaca &amp; Mengekstrak Data Struk...
-              </div>
-              <p className="text-xs text-navy-600 dark:text-cream-400">
-                Mendeteksi nama merchant, tanggal, dan total belanja
-              </p>
-            </div>
-          ) : useCamera ? (
-            <div className="space-y-3">
-              <div className="relative rounded-sm overflow-hidden bg-black aspect-[4/3] border border-ink/20">
-                <video
-                  ref={videoRef}
-                  autoPlay
-                  playsInline
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="flex gap-2 justify-center">
-                <button
-                  type="button"
-                  onClick={capturePhoto}
-                  className="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-sm font-bold text-cream-50 dark:text-navy-950 transition active:scale-95"
-                >
-                  Ambil Foto Struk
-                </button>
-                <button
-                  type="button"
-                  onClick={stopCamera}
-                  className="px-4 py-2.5 rounded-xl border border-ink/20 text-sm font-semibold text-navy-800 dark:text-cream-200 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition active:scale-95"
-                >
-                  Batal
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-4">
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="cursor-pointer border-2 border-dashed border-ink/20 hover:border-navy-900 dark:hover:border-cream-300 rounded-sm p-8 flex flex-col items-center justify-center space-y-2 transition-all group bg-white/40 dark:bg-navy-900/30"
-              >
-                <div className="p-3 bg-cream-200/80 dark:bg-navy-900 rounded-full text-navy-800 dark:text-cream-200 group-hover:bg-cream-300 dark:group-hover:bg-navy-800 transition-colors">
-                  <UploadCloud className="w-8 h-8" />
-                </div>
-                <div className="text-sm font-bold text-ink">
-                  Pilih atau Tarik Berkas Foto Struk
-                </div>
-                <p className="text-xs text-navy-600 dark:text-cream-400">
-                  Format JPG, PNG, WEBP (maks. 10 MB)
-                </p>
-              </div>
-
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-
-              <div className="flex items-center justify-between gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={startCamera}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-ink/20 text-sm font-semibold text-navy-900 dark:text-cream-100 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition-colors"
-                >
-                  <Camera className="w-4 h-4" />
-                  Buka Kamera
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+        ) : (
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={startCamera}
+              className={`${PRIMARY_CLASS} w-full`}
+            >
+              <Camera className="w-4 h-4" aria-hidden="true" />
+              Buka kamera
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className={`${SECONDARY_CLASS} w-full`}
+            >
+              <ImageUp className="w-4 h-4" aria-hidden="true" />
+              Pilih foto dari galeri
+            </button>
+            <p className="text-meta text-ink-soft">JPG, PNG atau WEBP, maksimal 10 MB.</p>
+            <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+          </div>
+        )}
       </div>
-    </div>
+    </PaperDialog>
   );
 }

@@ -5,6 +5,7 @@ import { categoryLabel, shortDate, rupiah } from "@/lib/format";
 import { formatSerial } from "@/components/press/serial";
 import { rosetteFamilies } from "@/components/press/guilloche";
 import { Stub, stubStateLabel } from "@/components/press/stub";
+import { receiptLines } from "@/components/press/receipt-stub";
 import { StatusStamp } from "@/components/press/status-stamp";
 import { printDate } from "@/components/press/print-date";
 import { DENOM, DENOMS, DENOM_FIELD, DENOM_CHOICES, denomOf, type Denom } from "@/components/press/denom";
@@ -57,10 +58,28 @@ describe("press primitives", () => {
     expect(html).toContain("Makan &amp; Minum");
   });
 
+  it("prints the serial only when asked, and opens the record when tappable", () => {
+    const data = { id: "a", item: "Es teh", amount: 5000, date: "2026-10-11" };
+    const serial = formatSerial("a", "2026-10-11");
+    expect(renderToString(React.createElement(Stub, { data }))).not.toContain(serial);
+    expect(renderToString(React.createElement(Stub, { data, serial: true }))).toContain(serial);
+    expect(renderToString(React.createElement(Stub, { data }))).not.toContain("<button");
+    expect(renderToString(React.createElement(Stub, { data, onOpen: () => {} }))).toContain("<button");
+  });
+
   it("stamps every status with a word, not color alone", () => {
     for (const [status, word] of [["aman", "Aman"], ["mepet", "Mepet"], ["habis", "Habis"], ["tertunda", "Tertunda sinkron"]] as const) {
       expect(renderToString(React.createElement(StatusStamp, { status }))).toContain(word);
     }
+  });
+});
+
+describe("save receipt", () => {
+  const items = [{ name: "Nasi", amount: 15000 }, { name: "Es teh", amount: 5000 }];
+  it("states the total, the count and today's jatah left", () => {
+    expect(receiptLines(items, 35000)).toEqual([`Tercatat ${rupiah(20000)}`, `2 item · jatah hari ini sisa ${rupiah(35000)}`]);
+    expect(receiptLines(items, -4000)[1]).toBe(`2 item · lewat ${rupiah(4000)} dari jatah hari ini`);
+    expect(receiptLines(items)[1]).toBe("2 item");
   });
 });
 

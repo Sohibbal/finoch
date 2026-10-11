@@ -1,23 +1,43 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Check } from "lucide-react";
-import type { ParsedVoiceItem, ExpenseCategory } from "@/lib/types/expense";
+import type { ExpenseCategory } from "@/lib/types/expense";
+import { categoryLabel } from "@/lib/format";
+import { FIELD_CLASS, LABEL_CLASS, PRIMARY_CLASS, SECONDARY_CLASS } from "@/components/press/kampus-press";
 
-interface ExpenseEditorProps {
-  item: ParsedVoiceItem;
-  isOpen: boolean;
-  onSave: (updatedItem: ParsedVoiceItem) => void;
-  onClose: () => void;
+/** FIELD_CLASS at 16px: anything smaller makes iOS zoom into the field. */
+export const INPUT_CLASS = FIELD_CLASS.replace("text-body", "text-base");
+
+export const CATEGORIES: ExpenseCategory[] = [
+  "Food & Drinks",
+  "Transportation",
+  "Bills & Utilities",
+  "Shopping & Lifestyle",
+  "Other",
+];
+
+export interface EditableExpense {
+  itemName: string;
+  amount: number;
+  category: ExpenseCategory;
 }
 
-export function ExpenseEditor({ item, isOpen, onSave, onClose }: ExpenseEditorProps) {
+interface ExpenseEditorProps {
+  item: EditableExpense;
+  onSave: (updated: EditableExpense) => void;
+  onCancel: () => void;
+  submitLabel?: string;
+  /** Extra fields (wallet, date) printed between the category and the buttons. */
+  children?: React.ReactNode;
+  busy?: boolean;
+}
+
+/** Name, amount and category of one expense, edited in place. */
+export function ExpenseEditor({ item, onSave, onCancel, submitLabel = "Simpan", children, busy = false }: ExpenseEditorProps) {
   const [itemName, setItemName] = useState(item.itemName);
-  const [amount, setAmount] = useState(item.amount.toString());
+  const [amount, setAmount] = useState(item.amount ? String(item.amount) : "");
   const [category, setCategory] = useState<ExpenseCategory>(item.category);
   const [error, setError] = useState<string | null>(null);
-
-  if (!isOpen) return null;
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,121 +45,81 @@ export function ExpenseEditor({ item, isOpen, onSave, onClose }: ExpenseEditorPr
     const cleanAmount = parseInt(amount.replace(/\D/g, ""), 10);
 
     if (!cleanName) {
-      setError("Nama transaksi tidak boleh kosong.");
+      setError("Tulis dulu buat apa uangnya.");
       return;
     }
-
     if (isNaN(cleanAmount) || cleanAmount <= 0) {
-      setError("Jumlah uang harus lebih besar dari Rp0.");
+      setError("Isi jumlahnya, lebih dari Rp 0.");
       return;
     }
-
-    onSave({
-      ...item,
-      itemName: cleanName,
-      amount: cleanAmount,
-      category,
-    });
-    onClose();
+    onSave({ itemName: cleanName, amount: cleanAmount, category });
   };
 
+  // Unknown legacy categories stay selectable so saving never silently changes them.
+  const options = CATEGORIES.includes(item.category) ? CATEGORIES : [...CATEGORIES, item.category];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-sm rounded-3xl bg-cream-50 dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-5 sm:p-6 shadow-2xl text-navy-950 dark:text-cream-50 transition-colors">
-        <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
-          <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
-            Edit Transaksi
-          </h3>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Tutup"
-            className="p-1.5 rounded-full text-navy-500 hover:text-navy-950 dark:text-cream-400 dark:hover:text-cream-50 hover:bg-cream-200 dark:hover:bg-navy-800 transition"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSave} className="space-y-4 pt-4">
-          {error && (
-            <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-rose-600 dark:text-rose-400 text-xs font-medium">
-              {error}
-            </div>
-          )}
-
-          <div>
-            <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1">
-              Nama Pengeluaran
-            </label>
-            <input
-              type="text"
-              value={itemName}
-              onChange={(e) => {
-                setItemName(e.target.value);
-                setError(null);
-              }}
-              placeholder="Contoh: Nasi Padang"
-              className="w-full px-3 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 text-sm focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 shadow-sm transition"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1">
-              Jumlah (Rp)
-            </label>
-            <input
-              type="number"
-              value={amount}
-              onChange={(e) => {
-                setAmount(e.target.value);
-                setError(null);
-              }}
-              placeholder="15000"
-              className="w-full px-3 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 text-sm focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 shadow-sm transition"
-            />
-          </div>
-
-          <div>
-            <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1">
-              Kategori
-            </label>
-            <select
-              value={category}
-              onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
-              className="w-full px-3 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 text-sm focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 shadow-sm transition"
-            >
-              {[
-                "Food & Drinks",
-                "Transportation",
-                "Bills & Utilities",
-                "Shopping & Lifestyle",
-                "Other",
-              ].map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold text-navy-800 dark:text-cream-300 bg-cream-200/70 hover:bg-cream-200 dark:bg-navy-900 dark:hover:bg-navy-800 transition"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-2.5 px-4 rounded-xl text-xs font-bold text-cream-50 dark:text-navy-950 bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 flex items-center justify-center gap-1.5 shadow-sm transition"
-            >
-              <Check className="w-3.5 h-3.5 stroke-[2.5]" />
-              Simpan Perubahan
-            </button>
-          </div>
-        </form>
+    <form onSubmit={handleSave} className="space-y-3" noValidate>
+      <div>
+        <label htmlFor="expense-name" className={LABEL_CLASS}>Buat apa</label>
+        <input
+          id="expense-name"
+          type="text"
+          value={itemName}
+          onChange={(e) => {
+            setItemName(e.target.value);
+            setError(null);
+          }}
+          placeholder="Nasi padang"
+          className={INPUT_CLASS}
+        />
       </div>
-    </div>
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label htmlFor="expense-amount" className={LABEL_CLASS}>Jumlah (Rp)</label>
+          <input
+            id="expense-amount"
+            type="text"
+            inputMode="numeric"
+            value={amount}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              setError(null);
+            }}
+            placeholder="15000"
+            className={`${INPUT_CLASS} money`}
+          />
+        </div>
+        <div>
+          <label htmlFor="expense-category" className={LABEL_CLASS}>Kategori</label>
+          <select
+            id="expense-category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value as ExpenseCategory)}
+            className={INPUT_CLASS}
+          >
+            {options.map((cat) => (
+              <option key={cat} value={cat}>
+                {categoryLabel(cat)}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+      {children}
+      {error && (
+        <p role="alert" className="text-body text-habis-ink">
+          {error}
+        </p>
+      )}
+      <div className="flex gap-2 pt-1">
+        <button type="button" onClick={onCancel} disabled={busy} className={SECONDARY_CLASS}>
+          Batal
+        </button>
+        <button type="submit" disabled={busy} className={`${PRIMARY_CLASS} flex-1`}>
+          {submitLabel}
+        </button>
+      </div>
+    </form>
   );
 }
