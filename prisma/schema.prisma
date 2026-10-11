@@ -26,17 +26,18 @@ model User {
 }
 
 model Expense {
-  id        String   @id // Client-generated UUID v4
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  itemName  String
-  amount    Int
-  category  String   // "Food & Drinks", "Transportation", "Housing & Bills", "Shopping & Clothing", "Entertainment & Leisure", "Education & Career", "Health & Personal Care", "Social & Family", "Other"
-  isDeleted Boolean  @default(false)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id              String   @id // Client-generated UUID v4
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  itemName        String
+  amount          Int
+  category        String   // "Food & Drinks", "Transportation", "Housing & Bills", "Shopping & Clothing", "Entertainment & Leisure", "Education & Career", "Health & Personal Care", "Social & Family", "Other"
+  isDeleted       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt // Client edit time, used only for last-write-wins
+  serverUpdatedAt DateTime @default(now()) @updatedAt // Server clock; sync pulls filter on this
 
-  @@index([userId, updatedAt])
+  @@index([userId, serverUpdatedAt])
   @@map("expenses")
 }
 
