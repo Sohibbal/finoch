@@ -1,4 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
+import React from "react";
+import { renderToString } from "react-dom/server";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -23,11 +25,22 @@ describe("Micro-Expense Leak Audit Components", () => {
     expect(typeof AuditPageModule.default).toBe("function");
   });
 
-  it("exports AuditCardMobile and AuditBentoDesktop components", async () => {
-    const MobileModule = await import("@/components/audit/audit-card-mobile");
-    const DesktopModule = await import("@/components/audit/audit-bento-desktop");
-
-    expect(MobileModule.AuditCardMobile).toBeDefined();
-    expect(DesktopModule.AuditBentoDesktop).toBeDefined();
+  it("prints leaks as a receipt: struck items, the warteg count, tips only for what was found", async () => {
+    const { AuditReceipt } = await import("@/components/audit/audit-receipt");
+    const { auditMicroExpenses } = await import("@/lib/financial/audit-engine");
+    const today = new Date().toISOString();
+    const summary = auditMicroExpenses(
+      [
+        { id: "a", itemName: "Parkir Indomaret", amount: 2000, category: "Transportation", createdAt: today },
+        { id: "b", itemName: "Isi ulang galon", amount: 6000, category: "Bills & Utilities", createdAt: today },
+      ],
+      2000000
+    );
+    const html = renderToString(React.createElement(AuditReceipt, { summary, monthLabel: "Oktober 2026" }));
+    expect(html).toContain("Parkir Indomaret");
+    expect(html).toContain("line-through");
+    expect(html).toContain("porsi warteg");
+    expect(html).not.toContain("galon");
+    expect(html).not.toContain("Family Plan");
   });
 });

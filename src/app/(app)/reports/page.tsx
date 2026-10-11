@@ -1,18 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  FileText,
-  Calendar,
-  Download,
-  Printer,
-  Share2,
-  MessageSquare,
-  Sparkles,
-  TrendingDown,
-  PieChart,
-  FileSpreadsheet,
-} from "lucide-react";
+import { Download, FileSpreadsheet, FileText, MessageSquare, Printer } from "lucide-react";
 import Link from "next/link";
 import { MonthlyReportSummary } from "@/types/report-types";
 import {
@@ -23,16 +12,20 @@ import {
   ExpenseRecord,
 } from "@/lib/financial/report-engine";
 import { expenseStorage } from "@/lib/storage/expense-storage";
-import { formatRupiah } from "@/lib/financial/split-bill-engine";
 import { useAuthContext } from "@/components/layout/auth-provider";
 
-import { ReportSummaryCard } from "@/components/reports/report-summary-card";
 import { ReportWhatsAppModal } from "@/components/reports/report-whatsapp-modal";
 import { ReportPrintableDocument } from "@/components/reports/report-printable-document";
 import { ContentSkeleton, EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { isDemoMode } from "@/lib/storage/local-storage";
-import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
+
+const SELECT_CLASS =
+  "min-h-11 px-3 bg-paper-sheet border border-ink/30 text-body font-semibold text-ink rounded-none focus-visible:outline-offset-2";
+const PRIMARY_ACTION =
+  "inline-flex items-center gap-2 min-h-11 px-5 rounded-full bg-ink hover:bg-ink/90 text-paper-sheet dark:text-paper text-body font-semibold transition-colors";
+const SECONDARY_ACTION =
+  "inline-flex items-center gap-2 min-h-11 px-4 rounded-full border border-ink/30 text-ink text-body font-semibold hover:bg-ink/5 transition-colors";
 
 export default function ReportsPage() {
   const { user } = useAuthContext();
@@ -43,7 +36,7 @@ export default function ReportsPage() {
   const profile = useFinancialProfile();
   const [loaded, setLoaded] = useState(false);
   const studentName = user?.name || user?.email?.split("@")[0] || "Mahasiswa Finoch";
-  const [campusName, setCampusName] = useState<string>("Kampus Indonesia");
+  const campusName = "Kampus Indonesia";
 
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
   const [isWhatsAppModalOpen, setIsWhatsAppModalOpen] = useState(false);
@@ -130,79 +123,56 @@ export default function ReportsPage() {
 
   return (
     <>
-      <PageHeader
-        className="print:hidden"
-        title="Laporan & Ekspor Bulanan"
-        subtitle="Format resmi pertanggungjawaban untuk orang tua atau beasiswa"
-        actions={
-          <>
-            {/* Month Selector Dropdown */}
-            <div className="flex items-center gap-1.5 bg-cream-100 dark:bg-navy-900 px-3 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 text-xs font-semibold text-navy-800 dark:text-cream-200">
-              <Calendar className="w-3.5 h-3.5 text-navy-500 dark:text-cream-400" />
-              <select
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-                className="bg-transparent text-navy-950 dark:text-cream-50 focus:outline-none font-bold"
-              >
+      <PageHeader className="print:hidden" title="Laporan & LPJ" subtitle="Rekap bulanan untuk orang tua atau beasiswa" />
+
+      <ProfileGate profile={profile}>
+      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-10 space-y-6 print:p-0">
+        <div className="max-w-4xl mx-auto flex flex-wrap items-end gap-x-6 gap-y-4 print:hidden">
+          <div className="flex items-end gap-2">
+            <label className="space-y-1">
+              <span className="block text-meta text-ink-soft">Bulan</span>
+              <select value={selectedMonth} onChange={(e) => setSelectedMonth(Number(e.target.value))} className={SELECT_CLASS}>
                 {MONTH_NAMES_ID.map((name, idx) => (
-                  <option key={idx} value={idx + 1} className="dark:bg-navy-900">
+                  <option key={idx} value={idx + 1}>
                     {name}
                   </option>
                 ))}
               </select>
-              <select
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-                className="bg-transparent text-navy-950 dark:text-cream-50 focus:outline-none font-bold"
-              >
-                <option value={2026} className="dark:bg-navy-900">2026</option>
-                <option value={2025} className="dark:bg-navy-900">2025</option>
+            </label>
+            <label className="space-y-1">
+              <span className="block text-meta text-ink-soft">Tahun</span>
+              <select value={selectedYear} onChange={(e) => setSelectedYear(Number(e.target.value))} className={SELECT_CLASS}>
+                {[now.getFullYear(), now.getFullYear() - 1].map((y) => (
+                  <option key={y} value={y}>
+                    {y}
+                  </option>
+                ))}
               </select>
+            </label>
+          </div>
+
+          {loaded && expenses.length > 0 && (
+            <div className="flex flex-wrap items-center gap-2 sm:ml-auto">
+              <button type="button" onClick={() => setIsWhatsAppModalOpen(true)} className={PRIMARY_ACTION}>
+                <MessageSquare className="w-4 h-4" aria-hidden="true" />
+                Kirim ke WhatsApp
+              </button>
+              <button type="button" onClick={handleExportLpj} className={SECONDARY_ACTION} title="Format LPJ beasiswa, dibuka di Excel">
+                <FileSpreadsheet className="w-4 h-4" aria-hidden="true" />
+                LPJ Excel
+              </button>
+              <button type="button" onClick={handleExportCsv} className={SECONDARY_ACTION}>
+                <Download className="w-4 h-4" aria-hidden="true" />
+                CSV
+              </button>
+              <button type="button" onClick={handlePrint} className={SECONDARY_ACTION} title="Cetak atau simpan sebagai PDF A4">
+                <Printer className="w-4 h-4" aria-hidden="true" />
+                Cetak
+              </button>
             </div>
+          )}
+        </div>
 
-            {/* Desktop action buttons */}
-            <button
-              onClick={handleExportLpj}
-              className="hidden lg:flex px-3.5 py-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 text-xs font-bold hover:bg-emerald-500/20 items-center gap-1.5 transition-all shadow-sm"
-              title="Unduh format formal LPJ Beasiswa / Excel Spreadsheet"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>LPJ Excel</span>
-            </button>
-
-            <button
-              onClick={handleExportCsv}
-              className="hidden lg:flex px-3.5 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 text-xs font-bold hover:bg-cream-100 dark:hover:bg-navy-900 items-center gap-1.5 transition-all"
-              title="Unduh format spreadsheet CSV"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>CSV</span>
-            </button>
-
-            <button
-              onClick={handlePrint}
-              className="hidden sm:flex px-3.5 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 text-xs font-bold hover:bg-cream-100 dark:hover:bg-navy-900 items-center gap-1.5 transition-all"
-              title="Cetak atau simpan sebagai PDF A4"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Cetak A4</span>
-            </button>
-
-            <button
-              onClick={() => setIsWhatsAppModalOpen(true)}
-              className="px-4 py-1.5 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Kirim WhatsApp</span>
-              <span className="sm:hidden">Share WA</span>
-            </button>
-          </>
-        }
-      />
-
-      {/* Page Body */}
-      <ProfileGate profile={profile}>
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
         {!loaded ? (
           <ContentSkeleton />
         ) : expenses.length === 0 ? (
@@ -218,130 +188,10 @@ export default function ReportsPage() {
             Laporan bulanan dan ekspor LPJ dibuat dari pengeluaran yang kamu catat. Mulai catat, laporan tersusun otomatis.
           </EmptyState>
         ) : (
-        <>
-        {/* Summary Metric Cards */}
-        <div className="print:hidden">
-          <ReportSummaryCard summary={summary} />
-        </div>
-
-        {/* MOBILE PWA VIEW (md:hidden) */}
-        <div className="md:hidden space-y-4 print:hidden">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-navy-500 dark:text-cream-400">
-              Rincian Kategori ({summary.topCategories.length})
-            </span>
-            <span className="text-xs font-semibold text-navy-600 dark:text-cream-300">
-              {summary.totalTransactions} Transaksi
-            </span>
-          </div>
-
-          <div className="space-y-2.5">
-            {summary.topCategories.map((cat, idx) => (
-              <div
-                key={cat.category}
-                className="p-3.5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm space-y-2"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <span className="w-5 h-5 rounded-full bg-cream-200 dark:bg-navy-900 text-navy-700 dark:text-cream-300 text-[10px] font-bold flex items-center justify-center">
-                      {idx + 1}
-                    </span>
-                    <span className="font-bold text-xs text-navy-950 dark:text-cream-50">
-                      {cat.category}
-                    </span>
-                  </div>
-                  <span className="font-black text-xs text-navy-950 dark:text-cream-50">
-                    {formatRupiah(cat.amount)}
-                  </span>
-                </div>
-
-                <div className="flex items-center justify-between text-[11px] text-navy-500 dark:text-cream-400">
-                  <span>{cat.transactionCount} transaksi</span>
-                  <span>{cat.percentage}% dari total belanja</span>
-                </div>
-
-                <div className="w-full h-1.5 rounded-full bg-cream-200 dark:bg-navy-900 overflow-hidden">
-                  <div
-                    className="bg-emerald-500 h-full rounded-full"
-                    style={{ width: `${Math.min(100, cat.percentage)}%` }}
-                  />
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {/* Quick Action Button for Mobile */}
-          <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 border border-emerald-500/20 text-center space-y-2">
-            <h4 className="text-xs font-bold text-navy-950 dark:text-cream-50">
-              Kirim Laporan Resmi ke Orang Tua
-            </h4>
-            <p className="text-[11px] text-navy-600 dark:text-cream-300">
-              Format pesan sopan siap kirim via WhatsApp tanpa ribet rekap manual.
-            </p>
-            <button
-              onClick={() => setIsWhatsAppModalOpen(true)}
-              className="w-full min-h-[44px] py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm"
-            >
-              <MessageSquare className="w-4 h-4" />
-              <span>Buka Template WhatsApp</span>
-            </button>
-          </div>
-        </div>
-
-        {/* DESKTOP VIEW: Printable Document Section */}
-        <div className="hidden md:block">
-          <ReportPrintableDocument
-            summary={summary}
-            expenses={expenses}
-            studentName={studentName}
-            campusName={campusName}
-            onPrint={handlePrint}
-            onExportCsv={handleExportCsv}
-          />
-        </div>
-        </>
+          <ReportPrintableDocument summary={summary} expenses={expenses} studentName={studentName} campusName={campusName} />
         )}
       </main>
       </ProfileGate>
-
-      {/* MOBILE STICKY FLOATING DOCK (md:hidden, hidden on print) */}
-      <div className={`md:hidden fixed ${ACTION_BAR_BOTTOM} left-0 right-0 z-30 px-4 pointer-events-none flex justify-center print:hidden`}>
-        <div className="pointer-events-auto w-full max-w-md bg-white/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 rounded-2xl shadow-xl p-2.5 flex items-center justify-between backdrop-blur-xl">
-          <div className="pl-2">
-            <span className="text-[10px] text-navy-500 dark:text-cream-400 block leading-tight">
-              Sisa Saldo Kas
-            </span>
-            <span className="text-sm font-black text-navy-950 dark:text-cream-50">
-              {formatRupiah(summary.netSavings)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={handleExportLpj}
-              className="min-h-[44px] px-2.5 rounded-xl border border-emerald-500/30 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 font-bold text-xs flex items-center gap-1"
-              title="Unduh LPJ Spreadsheet"
-            >
-              <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>LPJ</span>
-            </button>
-            <button
-              onClick={handleExportCsv}
-              className="min-h-[44px] px-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-100 dark:bg-navy-900 text-navy-800 dark:text-cream-200 font-bold text-xs flex items-center gap-1"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>CSV</span>
-            </button>
-            <button
-              onClick={() => setIsWhatsAppModalOpen(true)}
-              className="min-h-[44px] px-3.5 rounded-xl bg-emerald-600 text-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95"
-            >
-              <MessageSquare className="w-3.5 h-3.5" />
-              <span>WA</span>
-            </button>
-          </div>
-        </div>
-      </div>
 
       {/* WhatsApp Export Modal */}
       <ReportWhatsAppModal

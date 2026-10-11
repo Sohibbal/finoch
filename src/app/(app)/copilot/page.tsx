@@ -1,14 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import {
-  Bot,
-  Send,
-  User,
-  Sparkles,
-  ShieldCheck,
-  Loader2,
-} from "lucide-react";
+import { Loader2, Send } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 
 interface ChatMessage {
@@ -34,7 +27,7 @@ export default function CopilotPage() {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesEndRef = useRef<HTMLLIElement | null>(null);
 
   const quickPrompts = [
     "Jatah jajan hari ini masih aman nggak?",
@@ -44,7 +37,9 @@ export default function CopilotPage() {
   ];
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Reduced motion jumps straight to the newest message.
+    const smooth = !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
   };
 
   useEffect(() => {
@@ -102,7 +97,7 @@ export default function CopilotPage() {
         {
           id: `bot-err-${Date.now()}`,
           sender: "copilot",
-          text: "Maaf, terjadi kendala saat menganalisis data keuangan Anda. Silakan coba kembali sesaat lagi.",
+          text: "Maaf, Copilot lagi nggak bisa dihubungi. Cek koneksi, lalu kirim ulang pertanyaanmu.",
           timestamp: "Sekarang",
         },
       ]);
@@ -113,109 +108,62 @@ export default function CopilotPage() {
 
   return (
     <>
-      <PageHeader
-        title="Finoch AI Copilot"
-        subtitle="Teman finansial cerdas mahasiswa & anak kost berbasis kondisi keuangan riil"
-      />
+      <PageHeader title="Copilot AI" subtitle="Tanya soal duitmu, dijawab dari catatanmu sendiri" />
 
-      {/* Main Chat Container: fills the viewport between header and the shell bottom inset, only messages scroll */}
-      <main className="h-[calc(100dvh-16.5rem-env(safe-area-inset-bottom))] md:h-[calc(100dvh-7.5rem)] max-w-4xl w-full mx-auto p-4 sm:p-6 flex flex-col justify-between overflow-hidden">
-        {/* Grounded Banner */}
-        <div className="mb-3 p-3 rounded-2xl bg-cream-100 dark:bg-navy-900/60 border border-cream-300 dark:border-navy-800 text-xs text-navy-800 dark:text-cream-200 flex items-center gap-2 shrink-0">
-          <ShieldCheck className="w-4 h-4 shrink-0 text-navy-700 dark:text-cream-300" />
-          <span>
-            Jawaban didasarkan pada data transaksi riil kamu. Tanpa halusinasi angka.
-          </span>
-        </div>
+      {/* Fills the viewport between header and the shell bottom inset; only the conversation scrolls. */}
+      <main className="h-[calc(100dvh-16.5rem-env(safe-area-inset-bottom))] md:h-[calc(100dvh-7.5rem)] max-w-3xl w-full mx-auto px-4 sm:px-6 pt-4 pb-4 flex flex-col overflow-hidden">
+        <p className="text-meta text-ink-soft shrink-0 pb-3 border-b border-ink/15">
+          Angka di jawaban dihitung dari pengeluaran dan target yang kamu catat.
+        </p>
 
-        {/* Message History */}
-        <div className="flex-1 space-y-4 overflow-y-auto mb-4 pr-1">
-          {messages.map((msg) => (
-            <div
-              key={msg.id}
-              className={`flex items-start gap-3 ${
-                msg.sender === "user" ? "flex-row-reverse" : "flex-row"
-              }`}
-            >
-              <div
-                className={`p-2 rounded-xl shrink-0 ${
-                  msg.sender === "user"
-                    ? "bg-cream-200 dark:bg-navy-800 text-navy-900 dark:text-cream-100"
-                    : "bg-navy-900 dark:bg-cream-100 text-cream-50 dark:text-navy-950 shadow-sm"
-                }`}
-              >
-                {msg.sender === "user" ? (
-                  <User className="w-4 h-4" />
-                ) : (
-                  <Bot className="w-4 h-4" />
-                )}
-              </div>
-
-              <div
-                className={`max-w-[80%] rounded-2xl p-4 text-xs sm:text-sm leading-relaxed shadow-sm ${
-                  msg.sender === "user"
-                    ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 rounded-tr-none"
-                    : "bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-navy-950 dark:text-cream-50 rounded-tl-none"
-                }`}
-              >
-                <p className="whitespace-pre-line">{msg.text}</p>
-                <div
-                  className={`text-[10px] mt-2 flex items-center justify-between gap-2 ${
-                    msg.sender === "user" ? "text-cream-300 dark:text-navy-700" : "text-navy-400 dark:text-cream-400/60"
-                  }`}
-                >
-                  {msg.sender === "copilot" && msg.source && (
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {msg.source === "llm" ? (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cream-100 dark:bg-navy-900 text-navy-900 dark:text-cream-100">
-                          <Sparkles className="w-3 h-3" />
-                          Live AI ({msg.model || msg.provider})
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cream-100 dark:bg-navy-900 text-navy-700 dark:text-cream-300">
-                          Mode Heuristik
-                        </span>
-                      )}
-                      {msg.diagnostic && (
-                        <span className="text-[10px] text-amber-600 dark:text-amber-400">
-                          ({msg.diagnostic})
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <span className="ml-auto">{msg.timestamp}</span>
+        <ol className="flex-1 overflow-y-auto py-4 space-y-4" aria-live="polite">
+          {messages.map((msg) =>
+            msg.sender === "user" ? (
+              <li key={msg.id} className="flex justify-end">
+                <div className="max-w-[85%] bg-ink text-paper-sheet dark:text-paper px-4 py-3">
+                  <p className="text-body whitespace-pre-line break-words">{msg.text}</p>
+                  <p className="mt-1 text-meta opacity-80 text-right">Kamu · {msg.timestamp}</p>
                 </div>
-              </div>
-            </div>
-          ))}
-
-          {isLoading && (
-            <div className="flex items-start gap-3">
-              <div className="p-2 rounded-xl bg-navy-900 dark:bg-cream-100 text-cream-50 dark:text-navy-950 shrink-0">
-                <Bot className="w-4 h-4" />
-              </div>
-              <div className="bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-4 rounded-2xl rounded-tl-none text-xs sm:text-sm text-navy-600 dark:text-cream-300/70 flex items-center gap-2">
-                <Loader2 className="w-4 h-4 animate-spin text-navy-800 dark:text-cream-200" />
-                <span>Menganalisis kondisi finansial kamu...</span>
-              </div>
-            </div>
+              </li>
+            ) : (
+              <li key={msg.id} className="max-w-[92%]">
+                {/* Copilot answers are printed slips, torn off the same pad as the stubs. */}
+                <div className="relative bg-paper-sheet border border-ink/15 pl-5 pr-4 py-3">
+                  <span aria-hidden="true" className="absolute left-2 top-2 bottom-2 border-l border-dotted border-ink/40" />
+                  <p className="text-body text-ink whitespace-pre-line break-words">{msg.text}</p>
+                  <p className="mt-2 text-meta text-ink-soft">
+                    Finoch
+                    {msg.source === "llm" && ` · dijawab AI${msg.model || msg.provider ? ` (${msg.model || msg.provider})` : ""}`}
+                    {msg.source === "facts_fallback" && " · mode hitung offline"}
+                    {msg.diagnostic && <span className="text-mepet-ink"> · {msg.diagnostic}</span>} · {msg.timestamp}
+                  </p>
+                </div>
+              </li>
+            )
           )}
 
-          <div ref={messagesEndRef} />
-        </div>
+          {isLoading && (
+            <li className="max-w-[92%]">
+              <div className="relative bg-paper-sheet border border-dashed border-ink/40 pl-5 pr-4 py-3 flex items-center gap-2 text-body text-ink-soft">
+                <Loader2 className="w-4 h-4 motion-safe:animate-spin" aria-hidden="true" />
+                Lagi ngitung dari catatanmu...
+              </div>
+            </li>
+          )}
 
-        {/* Quick Prompts Chips */}
-        <div className="mb-3 space-y-1.5 shrink-0">
-          <div className="text-[11px] font-semibold text-navy-500 dark:text-cream-400 uppercase tracking-wider">
-            Pertanyaan Populer:
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {quickPrompts.map((prompt, idx) => (
+          <li ref={messagesEndRef} aria-hidden="true" />
+        </ol>
+
+        <div className="shrink-0 pb-3 -mx-4 px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <p className="text-meta text-ink-soft mb-1.5">Sering ditanya</p>
+          <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
+            {quickPrompts.map((prompt) => (
               <button
-                key={idx}
+                key={prompt}
                 type="button"
                 onClick={() => handleSendMessage(prompt)}
-                className="px-3 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 bg-white dark:bg-[#070E1A] hover:bg-cream-100 dark:hover:bg-navy-900 text-xs text-navy-800 dark:text-cream-200 transition-colors shadow-sm"
+                disabled={isLoading}
+                className="min-h-11 px-3 border border-ink/30 text-body text-ink text-left hover:bg-ink/5 disabled:opacity-50 transition-colors"
               >
                 {prompt}
               </button>
@@ -223,27 +171,31 @@ export default function CopilotPage() {
           </div>
         </div>
 
-        {/* Input Bar */}
         <form
           onSubmit={(e) => {
             e.preventDefault();
             handleSendMessage();
           }}
-          className="flex items-center gap-2 bg-white dark:bg-[#070E1A] p-2 rounded-2xl border border-cream-300 dark:border-navy-800 shadow-sm shrink-0"
+          className="shrink-0 flex items-end gap-2 border-t-2 border-ink pt-3"
         >
+          <label htmlFor="copilot-input" className="sr-only">
+            Pertanyaan untuk Copilot
+          </label>
           <input
+            id="copilot-input"
             type="text"
             value={inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Tanya jatah jajan, tips hemat, atau saran finansial ke Finoch..."
-            className="flex-1 px-3 py-2 bg-transparent text-xs sm:text-sm text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 focus:outline-none"
+            placeholder="Tanya jatah jajan, tips hemat..."
+            className="flex-1 min-w-0 min-h-11 px-0 bg-transparent border-b border-dotted border-ink/50 text-body text-ink placeholder:text-ink-soft focus-visible:outline-offset-4"
           />
           <button
             type="submit"
             disabled={!inputMessage.trim() || isLoading}
-            className="p-2.5 bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 disabled:opacity-50 text-cream-50 dark:text-navy-950 rounded-xl shadow-sm transition-colors"
+            aria-label="Kirim pertanyaan"
+            className="w-11 h-11 shrink-0 rounded-full bg-ink hover:bg-ink/90 disabled:opacity-40 text-paper-sheet dark:text-paper flex items-center justify-center transition-colors"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4" aria-hidden="true" />
           </button>
         </form>
       </main>

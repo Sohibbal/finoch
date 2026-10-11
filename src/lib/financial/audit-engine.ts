@@ -54,6 +54,20 @@ const LEAK_PATTERNS: Array<{
   },
 ];
 
+// Rumah-tangga kost, not jajan: never a generic micro leak, however small.
+const ESSENTIAL_CATEGORY = /bill|housing|utilit/i;
+const ESSENTIAL_ITEM = /\b(galon|air minum|gas|elpiji|lpg|token listrik)\b/i;
+
+// One tip per detected leak category, so advice only names habits the user actually has.
+const CHECKLIST: Record<LeakCategory, string> = {
+  admin_fee: "Aktifkan transfer gratis via BI-Fast di m-Banking atau gunakan Flip.",
+  platform_fee: "Ambil pesanan makanan langsung ke warung jika jaraknya dekat dengan kost.",
+  parking: "Belanja mingguan sekali jalan biar nggak bayar parkir berkali-kali.",
+  cheap_snack: "Bawa botol tumbler air minum sendiri saat ke kampus atau perpustakaan.",
+  subscription: "Gabung paket langganan keluarga (Family Plan) bersama teman kost.",
+  other_leak: "Kumpulkan uang kembalian di celengan koin, jangan langsung dijajanin.",
+};
+
 // Whole-word matchers so "coffee" doesn't hit "fee" and "badminton" doesn't hit "admin".
 const LEAK_MATCHERS = LEAK_PATTERNS.map((pattern) => ({
   pattern,
@@ -105,7 +119,8 @@ export function auditMicroExpenses(
     }
 
     // Generic micro expense: <= 12,000 in 'Other' or 'Shopping' without large description
-    if (!matched && amount <= 12000 && amount > 0) {
+    const essential = ESSENTIAL_CATEGORY.test(cat) || ESSENTIAL_ITEM.test(name);
+    if (!matched && !essential && amount <= 12000 && amount > 0) {
       if (cat.includes("other") || cat.includes("shopping") || cat.includes("food") || name.length <= 15) {
         detectedItems.push({
           id: exp.id || `leak-${Math.random().toString(36).substring(2, 7)}`,
@@ -146,19 +161,14 @@ export function auditMicroExpenses(
     count: val.count,
   })).sort((a, b) => b.amount - a.amount);
 
-  let shockMessage = "Pola pengeluaran mikro kamu masih sangat terkontrol dan efisien! 🌟";
+  let shockMessage = "Pola pengeluaran mikro kamu masih sangat terkontrol dan efisien.";
   if (totalLeakedAmount >= 100000) {
-    shockMessage = `Perhatian! Kamu menghabiskan ${formatRupiah(totalLeakedAmount)} bulan ini hanya untuk kebocoran halus (admin, parkir, jajan receh). Ini setara dengan ${wartegEquivalence} porsi nasi warteg komplit! 🍲`;
+    shockMessage = `Perhatian! Kamu menghabiskan ${formatRupiah(totalLeakedAmount)} bulan ini hanya untuk kebocoran halus (admin, parkir, jajan receh). Ini setara dengan ${wartegEquivalence} porsi nasi warteg komplit.`;
   } else if (totalLeakedAmount >= 50000) {
-    shockMessage = `Ada ${formatRupiah(totalLeakedAmount)} uang saku yang menguap dari transaksi kecil tanpa disadari. Setara dengan ${wartegEquivalence} porsi nasi warteg kampus! 🍲`;
+    shockMessage = `Ada ${formatRupiah(totalLeakedAmount)} uang saku yang menguap dari transaksi kecil tanpa disadari. Setara dengan ${wartegEquivalence} porsi nasi warteg kampus.`;
   }
 
-  const actionChecklist = [
-    "Aktifkan transfer gratis via BI-Fast di m-Banking atau gunakan Flip.",
-    "Bawa botol tumbler air minum sendiri saat ke kampus atau perpustakaan.",
-    "Gabung paket langganan keluarga (Family Plan) bersama teman kost.",
-    "Ambil pesanan makanan langsung ke warung jika jaraknya dekat dengan kost.",
-  ];
+  const actionChecklist = leaksByCategory.map((l) => CHECKLIST[l.category]);
 
   return {
     totalLeakedAmount,

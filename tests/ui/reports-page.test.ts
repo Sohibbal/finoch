@@ -24,12 +24,26 @@ describe("Reports & Export Statement Components", () => {
   });
 
   it("exports all report child components correctly", async () => {
-    const SummaryModule = await import("@/components/reports/report-summary-card");
     const WhatsAppModalModule = await import("@/components/reports/report-whatsapp-modal");
     const PrintableDocModule = await import("@/components/reports/report-printable-document");
 
-    expect(SummaryModule.ReportSummaryCard).toBeDefined();
     expect(WhatsAppModalModule.ReportWhatsAppModal).toBeDefined();
     expect(PrintableDocModule.ReportPrintableDocument).toBeDefined();
+  });
+
+  it("prints the month as a statement: oldest first, each row with the balance left after it", async () => {
+    const { statementRows } = await import("@/components/reports/report-printable-document");
+    const { generateMonthlyReport } = await import("@/lib/financial/report-engine");
+    const expenses = [
+      { id: "b", itemName: "Warteg", amount: 15000, category: "Food & Drinks", createdAt: new Date(2026, 9, 5, 12).toISOString() },
+      { id: "a", itemName: "Galon", amount: 6000, category: "Bills & Utilities", createdAt: new Date(2026, 9, 2, 8).toISOString() },
+      { id: "c", itemName: "Bulan lalu", amount: 9000, category: "Other", createdAt: new Date(2026, 8, 30, 8).toISOString() },
+    ];
+    const summary = generateMonthlyReport(expenses, 100000, 10, 2026);
+    const rows = statementRows(expenses, summary);
+    expect(rows.map((r) => [r.item, r.saldo])).toEqual([
+      ["Galon", 94000],
+      ["Warteg", 79000],
+    ]);
   });
 });
