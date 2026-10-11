@@ -110,28 +110,6 @@ body {
 /* Double-Bezel Hardware Architecture (Doppelrand) */
 /* Premium Glass & Reflection */
 /* Dicoding-style Animated Wave Background */
-@keyframes waveFlow1 {
-  0% { transform: translate3d(0, 0, 0) scaleY(1); }
-  50% { transform: translate3d(-3%, 8px, 0) scaleY(1.08); }
-  100% { transform: translate3d(0, 0, 0) scaleY(1); }
-}
-
-@keyframes waveFlow2 {
-  0% { transform: translate3d(0, 0, 0) scaleY(1.05); }
-  50% { transform: translate3d(3%, -10px, 0) scaleY(0.95); }
-  100% { transform: translate3d(0, 0, 0) scaleY(1.05); }
-}
-
-.animate-wave-1 {
-  animation: waveFlow1 14s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-wave-2 {
-  animation: waveFlow2 18s ease-in-out infinite;
-  will-change: transform;
-}
-
 /* Smooth Fade In */
 @keyframes fadeIn {
   from {

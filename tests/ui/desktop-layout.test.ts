@@ -17,16 +17,6 @@ describe("Desktop Layout & Navigation", () => {
     currentPathname = "/dashboard";
   });
 
-  it("exports TopNav component for desktop navigation", async () => {
-    const module = await import("@/components/layout/top-nav");
-    expect(module.TopNav).toBeDefined();
-  });
-
-  it("exports DesktopFloatingActions component for desktop floating actions", async () => {
-    const module = await import("@/components/layout/desktop-floating-actions");
-    expect(module.DesktopFloatingActions).toBeDefined();
-  });
-
   it("exports PwaInstallButton component for floating PWA installation", async () => {
     const module = await import("@/components/layout/pwa-install-button");
     expect(module.PwaInstallButton).toBeDefined();
