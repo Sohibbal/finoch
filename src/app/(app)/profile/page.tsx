@@ -10,9 +10,12 @@ import {
   AlertCircle,
   Loader2,
   Save,
+  FlaskConical,
 } from "lucide-react";
 import { useAuthContext } from "@/components/layout/auth-provider";
 import { PageHeader } from "@/components/layout/page-header";
+import { invalidateFinancialProfile } from "@/hooks/use-financial-profile";
+import { isDemoMode, setDemoMode } from "@/lib/storage/local-storage";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -25,13 +28,24 @@ export default function ProfilePage() {
     message: string;
   } | null>(null);
 
+  // Without a saved profile the form starts empty rather than with made-up amounts.
   const [formData, setFormData] = useState({
-    monthlyIncome: 3500000,
+    monthlyIncome: 0,
     incomeType: "salary",
-    currentSavings: 1500000,
-    monthlyFixedExpenses: 1200000,
+    currentSavings: 0,
+    monthlyFixedExpenses: 0,
     financialPriority: "emergency_fund",
   });
+
+  // Read after mount: storage is client-only.
+  const [demoMode, setDemoModeState] = useState(false);
+  useEffect(() => setDemoModeState(isDemoMode()), []);
+
+  // Pages read storage on mount, so a full reload switches every store to the other namespace.
+  const handleToggleDemo = () => {
+    setDemoMode(!demoMode);
+    window.location.reload();
+  };
 
   const incomeTypeOptions = [
     { id: "salary", label: "Gaji Tetap", desc: "Penghasilan rutin per bulan" },
@@ -96,6 +110,7 @@ export default function ProfilePage() {
         throw new Error(data.error || "Gagal memperbarui profil.");
       }
 
+      invalidateFinancialProfile();
       setFeedback({
         type: "success",
         message: "Profil finansial Anda berhasil disimpan dan diperbarui.",
@@ -134,6 +149,37 @@ export default function ProfilePage() {
             </div>
           </div>
         )}
+
+        {/* Demo Mode */}
+        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 flex items-center justify-between gap-4 transition-colors shadow-sm">
+          <div className="flex items-start gap-3 min-w-0">
+            <FlaskConical className="w-4 h-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
+            <div className="min-w-0">
+              <h3 id="demo-mode-label" className="text-sm font-bold text-navy-950 dark:text-cream-50">
+                Mode Demo (data contoh)
+              </h3>
+              <p className="text-xs text-navy-600 dark:text-cream-300/70">
+                Isi aplikasi dengan data contoh untuk presentasi. Data asli aman dan data demo tidak disinkron ke server.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            role="switch"
+            aria-checked={demoMode}
+            aria-labelledby="demo-mode-label"
+            onClick={handleToggleDemo}
+            className={`relative w-11 h-6 shrink-0 rounded-full transition-colors ${
+              demoMode ? "bg-amber-500" : "bg-cream-300 dark:bg-navy-800"
+            }`}
+          >
+            <span
+              className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
+                demoMode ? "translate-x-5" : ""
+              }`}
+            />
+          </button>
+        </div>
 
         {/* Feedback Alert */}
         {feedback && (
