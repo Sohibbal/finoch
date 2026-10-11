@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Bot, Send, Loader2, Sparkles, ArrowUpRight } from "lucide-react";
+import { Send, Loader2, Sparkles, Wallet, TrendingUp, TrendingDown } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { getTransactions } from "@/lib/storage/transaction-storage";
 import { getWishlistItems } from "@/lib/storage/wishlist-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
+import { rupiah } from "@/lib/format";
 
 interface ChatMessage {
   id: string;
@@ -13,6 +14,28 @@ interface ChatMessage {
   text: string;
   timestamp: string;
   source?: "llm" | "facts_fallback";
+}
+
+/** Original FinBot vector mark - geometric wallet & pulse emblem */
+function FinBotAvatar() {
+  return (
+    <div className="w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-xs">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className="w-4 h-4"
+        aria-hidden="true"
+      >
+        <rect x="2" y="5" width="20" height="14" rx="3" />
+        <path d="M2 9h20" />
+        <circle cx="16" cy="14" r="1.5" fill="currentColor" />
+      </svg>
+    </div>
+  );
 }
 
 export default function CopilotPage() {
@@ -27,6 +50,7 @@ export default function CopilotPage() {
   ]);
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const quickPrompts = [
@@ -35,6 +59,21 @@ export default function CopilotPage() {
     "Kapan wishlist gue bisa kebeli?",
     "Kasih tips hemat biar gak boncos dong",
   ];
+
+  // Load summary for side panel
+  useEffect(() => {
+    async function loadStats() {
+      const txs = await getTransactions().catch(() => []);
+      let inc = 0;
+      let exp = 0;
+      for (const t of txs) {
+        if (t.type === "income") inc += t.amount;
+        else if (t.type === "expense") exp += t.amount;
+      }
+      setSummary({ income: inc, expense: exp, balance: inc - exp });
+    }
+    loadStats();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -54,10 +93,7 @@ export default function CopilotPage() {
       id: `user-${Date.now()}`,
       sender: "user",
       text: text.trim(),
-      timestamp: new Date().toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
     };
 
     setMessages((prev) => [...prev, userMsg]);
@@ -65,64 +101,51 @@ export default function CopilotPage() {
     setIsLoading(true);
 
     try {
-      // Trigger background sync to server
-      syncManager.triggerSync().catch(() => {});
-
-      let clientFacts: any = undefined;
-      try {
-        const [txList, wList] = await Promise.all([
-          getTransactions(),
-          getWishlistItems(),
-        ]);
-        let inc = 0;
-        let exp = 0;
-        let topCategory = "Pengeluaran Harian";
-        const catMap: Record<string, number> = {};
-        for (const t of txList) {
-          if (t.type === "income") inc += t.amount;
-          else if (t.type === "expense") {
-            exp += t.amount;
-            catMap[t.category] = (catMap[t.category] || 0) + t.amount;
-          }
-        }
-        let maxCatAmount = 0;
-        for (const [c, a] of Object.entries(catMap)) {
-          if (a > maxCatAmount) {
-            maxCatAmount = a;
-            topCategory = c;
-          }
-        }
-        const activeW = wList.filter((w) => !w.isAchieved);
-        clientFacts = {
-          monthlyIncome: inc,
-          monthlyExpense: exp,
-          netBalance: inc - exp,
-          topExpenseCategory: topCategory,
-          wishlistSummary: activeW.length > 0 ? activeW.map((w, idx) => `${idx + 1}. ${w.name}`).join(", ") : undefined,
-        };
-      } catch {
-        // ignore
+      if (typeof window !== "undefined") {
+        syncManager.triggerSync().catch(() => {});
       }
+
+      const [txs, wls] = await Promise.all([
+        getTransactions().catch(() => []),
+        getWishlistItems().catch(() => []),
+      ]);
+
+      const clientFacts = {
+        transactions: txs.map((t) => ({
+          type: t.type,
+          itemName: t.itemName,
+          amount: t.amount,
+          category: t.category,
+          source: t.source,
+          date: t.transactionDate,
+        })),
+        wishlists: wls.map((w) => ({
+          name: w.name,
+          targetPrice: w.targetPrice,
+          savedAmount: w.savedAmount,
+          isAchieved: w.isAchieved,
+        })),
+      };
 
       const res = await fetch("/api/copilot", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: text.trim(), clientFacts }),
+        body: JSON.stringify({
+          message: text.trim(),
+          clientFacts,
+        }),
       });
 
       if (!res.ok) {
-        throw new Error("Gagal menghubungi FinBot");
+        throw new Error("Gagal menghubungi FinBot server");
       }
 
       const data = await res.json();
       const botMsg: ChatMessage = {
         id: `bot-${Date.now()}`,
         sender: "copilot",
-        text: data.reply,
-        timestamp: new Date().toLocaleTimeString("id-ID", {
-          hour: "2-digit",
-          minute: "2-digit",
-        }),
+        text: data.reply || "Gue udah catat pertanyaannya, tapi kayaknya koneksi lagi ngadat.",
+        timestamp: new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" }),
         source: data.source,
       };
 
@@ -149,102 +172,157 @@ export default function CopilotPage() {
         subtitle="Tanya finansial lo dengan cepat & santai, 100% valid dari database lo"
       />
 
-      <main className="max-w-4xl w-full mx-auto px-4 sm:px-6 py-4 flex flex-col h-[calc(100vh-12rem)] min-h-[500px]">
-        {/* Chat message history container */}
-        <div className="flex-1 overflow-y-auto space-y-4 p-4 rounded-3xl bg-paper-sheet dark:bg-navy-900 border border-ink/10 dark:border-navy-800 shadow-sm">
-          {messages.map((msg) => {
-            const isUser = msg.sender === "user";
-            return (
-              <div
-                key={msg.id}
-                className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
-              >
-                {!isUser && (
-                  <div className="w-9 h-9 rounded-2xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0 mt-0.5">
-                    <Bot className="w-5 h-5" />
-                  </div>
-                )}
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-4 flex flex-col lg:flex-row gap-5 h-[calc(100vh-10rem)] min-h-[560px]">
+        {/* Left Side: Financial Context & Quick Actions Panel (Desktop) */}
+        <aside className="hidden lg:flex lg:w-72 shrink-0 flex-col gap-4">
+          <div className="relative overflow-hidden rounded-3xl p-5 backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-blue-500/80 after:shadow-sm space-y-4">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                <Wallet className="w-3.5 h-3.5 text-blue-500" />
+                <span>Konteks Finansial</span>
+              </p>
+              <h3 className="text-xl font-extrabold text-slate-900 dark:text-white money mt-1">
+                {rupiah(summary.balance)}
+              </h3>
+              <p className="text-[11px] text-slate-400 mt-0.5">Saldo bersih aktif</p>
+            </div>
 
-                <div
-                  className={`max-w-[80%] rounded-2xl p-4 shadow-sm space-y-1.5 ${
-                    isUser
-                      ? "bg-ink text-paper-sheet dark:bg-white dark:text-navy-950 rounded-tr-sm"
-                      : "bg-paper dark:bg-navy-950 border border-ink/10 dark:border-navy-800 text-ink dark:text-white rounded-tl-sm"
-                  }`}
-                >
-                  <p className="text-body leading-relaxed whitespace-pre-wrap">{msg.text}</p>
-                  <div
-                    className={`text-meta opacity-60 flex items-center gap-2 ${
-                      isUser ? "justify-end" : "justify-start"
-                    }`}
-                  >
-                    <span>{msg.timestamp}</span>
-                    {!isUser && msg.source === "llm" && <span>• AI Gen-Z</span>}
-                    {!isUser && msg.source === "facts_fallback" && <span>• Database Facts</span>}
-                  </div>
-                </div>
+            <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 text-emerald-500" />
+                  <span>Pemasukan:</span>
+                </span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                  +{rupiah(summary.income)}
+                </span>
               </div>
-            );
-          })}
-
-          {isLoading && (
-            <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-2xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center shrink-0">
-                <Bot className="w-5 h-5" />
-              </div>
-              <div className="p-4 rounded-2xl bg-paper dark:bg-navy-950 border border-ink/10 dark:border-navy-800 flex items-center gap-2 text-ink-soft dark:text-navy-400 text-body">
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>FinBot lagi ngecek database lo...</span>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 flex items-center gap-1">
+                  <TrendingDown className="w-3 h-3 text-rose-500" />
+                  <span>Pengeluaran:</span>
+                </span>
+                <span className="font-bold text-slate-800 dark:text-slate-200">
+                  -{rupiah(summary.expense)}
+                </span>
               </div>
             </div>
-          )}
+          </div>
 
-          <div ref={messagesEndRef} />
-        </div>
+          <div className="flex-1 rounded-3xl p-5 backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-3">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                <span>Pusat Tanya Cepat</span>
+              </p>
+              <div className="mt-3 space-y-2">
+                {quickPrompts.map((prompt) => (
+                  <button
+                    key={prompt}
+                    type="button"
+                    disabled={isLoading}
+                    onClick={() => handleSendMessage(prompt)}
+                    className="w-full text-left text-xs p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/70 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-800 transition-colors"
+                  >
+                    {prompt}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="text-[10px] text-slate-400 text-center">
+              100% tersinkron dengan tabel transaksi lo.
+            </p>
+          </div>
+        </aside>
 
-        {/* Suggestion Chips */}
-        <div className="py-3 flex items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
-          <span className="text-meta font-semibold text-ink-soft dark:text-navy-400 shrink-0 flex items-center gap-1">
-            <Sparkles className="w-3.5 h-3.5 text-primary-500" />
-            <span>Tanya Cepat:</span>
-          </span>
-          {quickPrompts.map((prompt) => (
-            <button
-              key={prompt}
-              type="button"
-              disabled={isLoading}
-              onClick={() => handleSendMessage(prompt)}
-              className="text-meta px-3 py-1.5 rounded-full border border-ink/15 dark:border-navy-700 bg-paper-sheet dark:bg-navy-900 text-ink dark:text-white hover:bg-ink/5 dark:hover:bg-navy-800 shrink-0 transition-colors"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
+        {/* Right Side: Chat Container */}
+        <section className="flex-1 flex flex-col min-w-0 h-full">
+          {/* Chat message history container */}
+          <div className="flex-1 overflow-y-auto space-y-3.5 p-4 sm:p-5 rounded-3xl backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-blue-500/80 after:shadow-sm">
+            {messages.map((msg) => {
+              const isUser = msg.sender === "user";
+              return (
+                <div
+                  key={msg.id}
+                  className={`flex items-start gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}
+                >
+                  {!isUser && <FinBotAvatar />}
 
-        {/* Input Form */}
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="flex items-center gap-2 pt-1 shrink-0"
-        >
-          <input
-            type="text"
-            value={inputMessage}
-            onChange={(e) => setInputMessage(e.target.value)}
-            placeholder="Ketik pertanyaan seputar uang lo ke FinBot..."
-            className="flex-1 px-5 py-3.5 rounded-2xl border border-ink/15 dark:border-navy-700 bg-paper-sheet dark:bg-navy-900 text-ink dark:text-white placeholder:text-ink-soft/60 focus:outline-none focus:ring-2 focus:ring-primary-500"
-          />
-          <button
-            type="submit"
-            disabled={!inputMessage.trim() || isLoading}
-            className="p-3.5 rounded-2xl bg-ink text-paper-sheet dark:bg-white dark:text-navy-950 hover:opacity-90 disabled:opacity-40 transition-opacity flex items-center justify-center"
-            title="Kirim Pesan"
+                  <div
+                    className={`max-w-[85%] sm:max-w-[75%] rounded-2xl p-4 shadow-xs space-y-1.5 ${
+                      isUser
+                        ? "bg-slate-900 text-white dark:bg-white dark:text-slate-900 rounded-tr-xs"
+                        : "bg-slate-50 dark:bg-slate-800/90 border border-slate-200/70 dark:border-slate-700/70 text-slate-800 dark:text-white rounded-tl-xs"
+                    }`}
+                  >
+                    <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                    <div
+                      className={`text-[10px] opacity-60 flex items-center gap-2 ${
+                        isUser ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <span>{msg.timestamp}</span>
+                      {!isUser && msg.source === "llm" && <span>• AI Gen-Z</span>}
+                      {!isUser && msg.source === "facts_fallback" && <span>• Database Facts</span>}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+
+            {isLoading && (
+              <div className="flex items-start gap-3">
+                <FinBotAvatar />
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700 flex items-center gap-2 text-slate-500 text-xs">
+                  <Loader2 className="w-4 h-4 animate-spin text-blue-500" />
+                  <span>FinBot lagi ngecek database lo...</span>
+                </div>
+              </div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Quick Prompts Mobile Strip */}
+          <div className="py-2.5 flex lg:hidden items-center gap-2 overflow-x-auto no-scrollbar shrink-0">
+            {quickPrompts.map((prompt) => (
+              <button
+                key={prompt}
+                type="button"
+                disabled={isLoading}
+                onClick={() => handleSendMessage(prompt)}
+                className="text-[11px] px-3 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-[#111C2E] text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 shrink-0 transition-colors"
+              >
+                {prompt}
+              </button>
+            ))}
+          </div>
+
+          {/* Input Form */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              handleSendMessage();
+            }}
+            className="flex items-center gap-2 pt-2 shrink-0"
           >
-            <Send className="w-5 h-5" />
-          </button>
-        </form>
+            <input
+              type="text"
+              value={inputMessage}
+              onChange={(e) => setInputMessage(e.target.value)}
+              placeholder="Ketik pertanyaan seputar duit lo ke FinBot..."
+              className="flex-1 px-4 py-3 rounded-2xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-[#111C2E] text-xs sm:text-sm text-slate-800 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-xs"
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !inputMessage.trim()}
+              className="h-11 px-4 sm:px-5 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-xs flex items-center gap-2 hover:opacity-90 disabled:opacity-50 transition-all shadow-xs"
+            >
+              <Send className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Kirim</span>
+            </button>
+          </form>
+        </section>
       </main>
     </>
   );

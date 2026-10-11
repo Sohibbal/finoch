@@ -9,6 +9,7 @@ import { seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ThemeToggle } from "./theme-toggle";
+import { GlobalSearchBar } from "./global-search-bar";
 
 interface PageHeaderProps {
   title: React.ReactNode;
@@ -67,6 +68,7 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
         </div>
 
         <div className="flex items-center gap-2 shrink-0 ml-auto">
+          <GlobalSearchBar className="hidden sm:block" />
           <ThemeToggle className="hidden md:inline-flex" />
           {actions}
         </div>

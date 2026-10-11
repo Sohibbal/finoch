@@ -31,31 +31,18 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
     <aside
       className={`w-64 h-screen sticky top-0 self-start overflow-hidden bg-white dark:bg-[#0B1320] border-r border-slate-200/80 dark:border-slate-800 flex flex-col shrink-0 ${className}`}
     >
-      <div className="p-4 pb-3 space-y-3 shrink-0 border-b border-slate-100 dark:border-slate-800">
+      <div className="p-4 pb-3 shrink-0 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <Link href="/dashboard" className="inline-flex items-center" aria-label="finoch.id dashboard">
           <BrandLogo variant="full" className="h-6 w-auto" />
         </Link>
-
-        <div className="relative">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" aria-hidden="true" />
+        <div className="sr-only">
           <input
             type="search"
             placeholder="Cari menu..."
             aria-label="Cari menu"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full h-9 pl-9 pr-8 text-xs rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/70 dark:border-slate-700/70 placeholder:text-slate-400 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
-          {searchQuery && (
-            <button
-              type="button"
-              onClick={() => setSearchQuery("")}
-              className="absolute right-1 top-1/2 -translate-y-1/2 w-7 h-7 flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-              aria-label="Hapus pencarian"
-            >
-              <X className="w-3.5 h-3.5" />
-            </button>
-          )}
         </div>
       </div>
 
