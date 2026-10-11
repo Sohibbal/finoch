@@ -1,14 +1,18 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import { isAuthRateLimited } from "@/lib/auth/rate-limit";
 import { prisma } from "@/lib/prisma";
 import { signSessionToken, COOKIE_NAME, getCookieOptions } from "@/lib/auth/jwt";
 
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "JSON tidak valid." }, { status: 400 });
+    }
     const { email, password } = body;
 
-    if (!email || !password) {
+    if (typeof email !== "string" || !email.trim() || typeof password !== "string" || !password) {
       return NextResponse.json(
         { error: "Email dan password wajib diisi." },
         { status: 400 }
@@ -16,19 +20,16 @@ export async function POST(req: Request) {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+    if (isAuthRateLimited(req, normalizedEmail)) {
+      return NextResponse.json({ error: "Terlalu banyak percobaan. Coba lagi nanti." }, { status: 429 });
+    }
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
     });
 
-    if (!user) {
-      return NextResponse.json(
-        { error: "Email atau password salah." },
-        { status: 401 }
-      );
-    }
-
-    const isValid = await bcrypt.compare(password, user.password);
-    if (!isValid) {
+    const dummyHash = "$2b$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhWy";
+    const isValid = await bcrypt.compare(password, user?.password ?? dummyHash);
+    if (!user || !isValid) {
       return NextResponse.json(
         { error: "Email atau password salah." },
         { status: 401 }

@@ -30,7 +30,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    if (!body || typeof body !== "object" || Array.isArray(body)) {
+      return NextResponse.json({ error: "JSON tidak valid." }, { status: 400 });
+    }
     const validation = validateOnboardingProfile(body);
     if (!validation.success) {
       return NextResponse.json(
