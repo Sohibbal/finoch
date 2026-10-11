@@ -18,6 +18,7 @@ model User {
   transactions Transaction[]
   wishlists    Wishlist[]
   expenses     Expense[]
+  documents    UserDocument[]
 
   @@map("users")
 }
@@ -88,4 +89,19 @@ model Expense {
 
   @@index([userId, serverUpdatedAt])
   @@map("expenses")
+}
+
+model UserDocument {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  key             String
+  data            Json
+  isDeleted       Boolean  @default(false)
+  clientUpdatedAt DateTime
+  serverUpdatedAt DateTime @default(now()) @updatedAt
+
+  @@unique([userId, key])
+  @@index([userId, serverUpdatedAt])
+  @@map("user_documents")
 }

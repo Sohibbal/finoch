@@ -1,17 +1,8 @@
-import {
-  LayoutDashboard,
-  ArrowDownLeft,
-  ArrowUpRight,
-  Gift,
-  Bot,
-  User,
-  type LucideIcon,
-} from "lucide-react";
 import { NAVIGATION_ITEMS, type NavigationItem } from "./navigation-items";
 
 export { NAVIGATION_ITEMS, type NavigationItem };
 
-export interface NavItem extends NavigationItem {}
+export type NavItem = NavigationItem;
 
 export interface NavGroup {
   id: string;

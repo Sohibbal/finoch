@@ -9,13 +9,15 @@ interface ReceiptScannerModalProps {
   isOpen: boolean;
   /** Keep it stable (useCallback): the dialog re-focuses itself when it changes. */
   onClose: () => void;
-  onScanSuccess: (candidate: TransactionCandidate) => void;
+  onScanSuccess?: (candidate: TransactionCandidate) => void;
+  onConfirm?: (candidate: TransactionCandidate) => void;
 }
 
 export function ReceiptScannerModal({
   isOpen,
   onClose,
   onScanSuccess,
+  onConfirm,
 }: ReceiptScannerModalProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
@@ -127,7 +129,7 @@ export function ReceiptScannerModal({
 
         const data = await res.json();
         if (data.candidate) {
-          onScanSuccess(data.candidate);
+          (onScanSuccess || onConfirm)?.(data.candidate);
           onClose();
           return;
         }
@@ -151,7 +153,7 @@ export function ReceiptScannerModal({
           worker.terminate();
           workerRef.current = null;
           if (e.data.success && e.data.candidate) {
-            onScanSuccess(e.data.candidate);
+            (onScanSuccess || onConfirm)?.(e.data.candidate);
             onClose();
           } else {
             setErrorMessage(

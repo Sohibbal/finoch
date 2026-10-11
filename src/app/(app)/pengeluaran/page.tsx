@@ -59,7 +59,7 @@ export default function PengeluaranPage() {
   const handleScanConfirmed = async (candidate: TransactionCandidate) => {
     await saveTransaction({
       type: "expense",
-      itemName: candidate.merchant || candidate.itemName || "Belanja Struk",
+      itemName: candidate.merchant || candidate.description || candidate.items?.[0]?.name || "Belanja Struk",
       amount: candidate.amount,
       category: candidate.category || "Makanan & Minuman",
       source: "ocr",

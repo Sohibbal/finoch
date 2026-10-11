@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { jakartaDate } from "@/app/api/validation";
 
 export interface UserFinancialSnapshot {
   nickname: string;
@@ -28,6 +29,7 @@ export function formatFinancialContextForLLM(snapshot: UserFinancialSnapshot): s
 /**
  * Builds live database financial snapshot for a specific user.
  * Queries PostgreSQL via Prisma Client with zero hallucination.
+ * Seamlessly handles unified Transaction/Wishlist models and legacy models.
  */
 export async function buildUserFinancialSnapshot(userId: string): Promise<UserFinancialSnapshot> {
   const defaultSnapshot: UserFinancialSnapshot = {
@@ -44,24 +46,47 @@ export async function buildUserFinancialSnapshot(userId: string): Promise<UserFi
   if (!userId) return defaultSnapshot;
 
   try {
-    const [profile, transactions, wishlists] = await Promise.all([
-      prisma.profile.findUnique({ where: { userId } }).catch(() => null),
-      prisma.transaction.findMany({
+    let nickname = "Teman";
+
+    // 1. Check Profile
+    if (prisma.profile) {
+      const p = await prisma.profile.findUnique({ where: { userId } }).catch(() => null);
+      if (p?.nickname) nickname = p.nickname;
+    }
+
+    // 2. Query Transactions
+    let txList: { type: string; amount: number; itemName: string; category: string }[] = [];
+    if (prisma.transaction) {
+      txList = await prisma.transaction.findMany({
         where: { userId, isDeleted: false },
         orderBy: { transactionDate: "desc" },
-      }).catch(() => []),
-      prisma.wishlist.findMany({
-        where: { userId, isDeleted: false },
-        orderBy: { priority: "desc" },
-      }).catch(() => []),
-    ]);
+      }).catch(() => []);
+    }
+
+    // 3. Fallback to legacy models if unified table has no rows
+    if (txList.length === 0 && prisma.expense) {
+      const [year, month] = jakartaDate().split("-").map(Number);
+      const monthStart = new Date(Date.UTC(year, month - 1, 1) - 7 * 60 * 60 * 1000);
+      const nextMonth = new Date(Date.UTC(year, month, 1) - 7 * 60 * 60 * 1000);
+
+      const legacyExpenses = await prisma.expense.findMany({
+        where: { userId, isDeleted: false, createdAt: { gte: monthStart, lt: nextMonth } },
+      }).catch(() => []);
+
+      txList = legacyExpenses.map((e: any) => ({
+        type: "expense",
+        amount: e.amount,
+        itemName: e.itemName,
+        category: e.category,
+      }));
+    }
 
     let totalIncome = 0;
     let totalExpense = 0;
     const expenseCategoryMap: Record<string, number> = {};
     let highestExpenseItem: { name: string; amount: number } | null = null;
 
-    for (const t of transactions) {
+    for (const t of txList) {
       if (t.type === "income") {
         totalIncome += t.amount;
       } else if (t.type === "expense") {
@@ -71,6 +96,39 @@ export async function buildUserFinancialSnapshot(userId: string): Promise<UserFi
         if (!highestExpenseItem || t.amount > highestExpenseItem.amount) {
           highestExpenseItem = { name: t.itemName, amount: t.amount };
         }
+      }
+    }
+
+    // If total income not from unified transactions, check financialProfile
+    if (totalIncome === 0 && (prisma as any).financialProfile) {
+      const fp = await (prisma as any).financialProfile.findUnique({ where: { userId } }).catch(() => null);
+      if (fp?.monthlyIncome) totalIncome = fp.monthlyIncome;
+    }
+
+    // 4. Query Wishlists or Goals
+    let wishlistSummary: string | undefined = undefined;
+    if (prisma.wishlist) {
+      const activeWishlists = await prisma.wishlist.findMany({
+        where: { userId, isDeleted: false, isAchieved: false },
+        orderBy: { priority: "desc" },
+      }).catch(() => []);
+
+      if (activeWishlists.length > 0) {
+        wishlistSummary = activeWishlists
+          .slice(0, 3)
+          .map((w: any, idx: number) => `${idx + 1}. ${w.name} (Rp${w.targetPrice.toLocaleString("id-ID")})`)
+          .join(", ");
+      }
+    }
+
+    if (!wishlistSummary && (prisma as any).financialGoal) {
+      const goals = await (prisma as any).financialGoal.findMany({
+        where: { userId },
+        orderBy: [{ targetDate: "asc" }, { id: "asc" }],
+      }).catch(() => []);
+
+      if (goals.length > 0) {
+        wishlistSummary = goals[0].name;
       }
     }
 
@@ -84,17 +142,8 @@ export async function buildUserFinancialSnapshot(userId: string): Promise<UserFi
       ? `${highestExpenseItem.name} (Rp${highestExpenseItem.amount.toLocaleString("id-ID")})`
       : undefined;
 
-    // Wishlist Summary
-    const activeWishlists = wishlists.filter((w) => !w.isAchieved);
-    const wishlistSummary = activeWishlists.length > 0
-      ? activeWishlists
-          .slice(0, 3)
-          .map((w, idx) => `${idx + 1}. ${w.name} (Rp${w.targetPrice.toLocaleString("id-ID")})`)
-          .join(", ")
-      : undefined;
-
     return {
-      nickname: profile?.nickname || "Teman",
+      nickname,
       netBalance: totalIncome - totalExpense,
       monthlyIncome: totalIncome,
       monthlyExpense: totalExpense,

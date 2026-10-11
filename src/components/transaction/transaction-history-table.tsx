@@ -29,11 +29,23 @@ export function TransactionHistoryTable({
   const getSourceIcon = (source: string) => {
     switch (source) {
       case "voice":
-        return <Mic className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} title="Dicatat via Bicara" />;
+        return (
+          <span title="Dicatat via Bicara">
+            <Mic className="w-3.5 h-3.5 text-blue-500" strokeWidth={2} />
+          </span>
+        );
       case "ocr":
-        return <ScanLine className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} title="Dicatat via Scan" />;
+        return (
+          <span title="Dicatat via Scan">
+            <ScanLine className="w-3.5 h-3.5 text-emerald-500" strokeWidth={2} />
+          </span>
+        );
       default:
-        return <PencilLine className="w-3.5 h-3.5 text-slate-500" strokeWidth={2} title="Dicatat Manual" />;
+        return (
+          <span title="Dicatat Manual">
+            <PencilLine className="w-3.5 h-3.5 text-slate-500" strokeWidth={2} />
+          </span>
+        );
     }
   };
 
