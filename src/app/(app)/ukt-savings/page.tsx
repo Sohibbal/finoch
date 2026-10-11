@@ -120,7 +120,7 @@ export default function UktSavingsPage() {
                 </Note>
                 <div className="space-y-3">
                   <p className="text-body text-ink-soft">
-                    Tiap tabungan dicetak di warnanya sendiri, dan warnanya terisi penuh begitu targetnya lunas.
+                    Setor dikit tiap hari, jangan nunggu akhir semester. Bolong sehari, setoran harian sisanya ikut naik.
                   </p>
                   <button type="button" onClick={() => setIsAddModalOpen(true)} className={`${PRIMARY_CLASS} w-full`}>
                     <Plus className="w-4 h-4" aria-hidden="true" />

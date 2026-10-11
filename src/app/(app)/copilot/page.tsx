@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Loader2, Send } from "lucide-react";
+import { ArrowUpRight, Loader2, Send } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 
 interface ChatMessage {
@@ -20,7 +20,7 @@ export default function CopilotPage() {
     {
       id: "msg-1",
       sender: "copilot",
-      text: "Halo! Saya Finoch AI Copilot untuk Mahasiswa & Anak Kost. Saya menganalisis kondisi finansial riil kamu berdasarkan catatan pengeluaran dan target tabungan. Mau cek jatah jajan harian, trik hemat anak kost, atau simulasi beli barang impian?",
+      text: "Hai, aku Finoch. Tanya aja soal duitmu: jatah hari ini, cukup nggak sampai kiriman berikutnya, atau aman nggak beli sesuatu minggu ini. Jawabanku dihitung dari catatanmu sendiri.",
       timestamp: "Baru saja",
       source: "facts_fallback",
     },
@@ -28,6 +28,7 @@ export default function CopilotPage() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLLIElement | null>(null);
+  const hasAsked = messages.some((m) => m.sender === "user");
 
   const quickPrompts = [
     "Jatah jajan hari ini masih aman nggak?",
@@ -142,6 +143,29 @@ export default function CopilotPage() {
             )
           )}
 
+          {/* Before the first question the middle holds the questions themselves, printed as slips to tear off. */}
+          {!hasAsked && (
+            <li>
+              <h2 className="text-body font-semibold text-ink mb-2">Coba tanya ini</h2>
+              <ul className="space-y-2">
+                {quickPrompts.map((prompt) => (
+                  <li key={prompt}>
+                    <button
+                      type="button"
+                      onClick={() => handleSendMessage(prompt)}
+                      disabled={isLoading}
+                      className="relative w-full min-h-11 flex items-center justify-between gap-3 bg-paper-sheet border border-ink/15 pl-5 pr-4 py-3 text-left text-body text-ink hover:border-ink/40 disabled:opacity-50 transition-colors"
+                    >
+                      <span aria-hidden="true" className="absolute left-2 top-2 bottom-2 border-l border-dotted border-ink/40" />
+                      {prompt}
+                      <ArrowUpRight className="w-4 h-4 shrink-0 text-ink-soft" aria-hidden="true" />
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          )}
+
           {isLoading && (
             <li className="max-w-[92%]">
               <div className="relative bg-paper-sheet border border-dashed border-ink/40 pl-5 pr-4 py-3 flex items-center gap-2 text-body text-ink-soft">
@@ -154,22 +178,24 @@ export default function CopilotPage() {
           <li ref={messagesEndRef} aria-hidden="true" />
         </ol>
 
-        <div className="shrink-0 pb-3 -mx-4 px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          <p className="text-meta text-ink-soft mb-1.5">Sering ditanya</p>
-          <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
-            {quickPrompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                onClick={() => handleSendMessage(prompt)}
-                disabled={isLoading}
-                className="min-h-11 px-3 border border-ink/30 text-body text-ink text-left hover:bg-ink/5 disabled:opacity-50 transition-colors"
-              >
-                {prompt}
-              </button>
-            ))}
+        {hasAsked && (
+          <div className="shrink-0 pb-3 -mx-4 px-4 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <p className="text-meta text-ink-soft mb-1.5">Sering ditanya</p>
+            <div className="flex gap-2 w-max sm:w-auto sm:flex-wrap">
+              {quickPrompts.map((prompt) => (
+                <button
+                  key={prompt}
+                  type="button"
+                  onClick={() => handleSendMessage(prompt)}
+                  disabled={isLoading}
+                  className="min-h-11 px-3 border border-ink/30 text-body text-ink text-left hover:bg-ink/5 disabled:opacity-50 transition-colors"
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
 
         <form
           onSubmit={(e) => {
