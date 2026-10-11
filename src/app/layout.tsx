@@ -1,14 +1,23 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Archivo, Bodoni_Moda } from "next/font/google";
 import "./globals.css";
 import { PwaInstallButton } from "@/components/layout/pwa-install-button";
 import { OfflineBanner } from "@/components/layout/offline-banner";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+// Workhorse UI face: a grotesque with tabular figures and a width axis for printed labels.
+const uiFont = Archivo({
   subsets: ["latin"],
-  variable: "--font-plus-jakarta-sans",
+  variable: "--font-ui",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
+  axes: ["wdth"],
+});
+
+// Display face for the giant numeral and headings: engraved, high-contrast banknote figures.
+const displayFont = Bodoni_Moda({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  axes: ["opsz"],
 });
 
 export const metadata: Metadata = {
@@ -34,7 +43,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#0B192C",
   width: "device-width",
   initialScale: 1,
 };
@@ -45,7 +54,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={plusJakartaSans.variable} suppressHydrationWarning>
+    <html lang="id" className={`${uiFont.variable} ${displayFont.variable}`} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -69,7 +78,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-[#FAF8F5] dark:bg-[#0A1120] text-[#0B192C] dark:text-[#F6F4ED] min-h-screen font-sans transition-colors duration-300">
+      <body className="antialiased bg-paper text-ink min-h-screen font-sans transition-colors duration-300">
         {/* Real-time Offline & Online Sync Banner */}
         <OfflineBanner />
 

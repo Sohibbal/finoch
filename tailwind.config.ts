@@ -1,5 +1,8 @@
 import type { Config } from "tailwindcss";
 
+// Theme-aware colors live as "R G B" channels in globals.css so `/opacity` modifiers still work.
+const channel = (name: string) => `rgb(var(--${name}) / <alpha-value>)`;
+
 const config: Config = {
   darkMode: "class",
   content: [
@@ -10,32 +13,44 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: [
-          "var(--font-plus-jakarta-sans)",
-          "Plus Jakarta Sans",
-          "system-ui",
-          "-apple-system",
-          "sans-serif",
-        ],
+        sans: ["var(--font-ui)", "system-ui", "-apple-system", "sans-serif"],
+        // Engraved banknote numerals and headings only; never body text.
+        display: ["var(--font-display)", "Georgia", "serif"],
+      },
+      // The press scale: meta, body, head, plus the giant numeral.
+      fontSize: {
+        meta: ["0.75rem", { lineHeight: "1rem", letterSpacing: "0.02em" }],
+        body: ["0.9375rem", { lineHeight: "1.4rem" }],
+        head: ["1.375rem", { lineHeight: "1.75rem", letterSpacing: "-0.01em" }],
+        numeral: ["clamp(3.5rem, 17vw, 5rem)", { lineHeight: "1", letterSpacing: "-0.03em" }],
       },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+        // Lembar Rupiah: ink on note paper, flipped in dark mode.
+        paper: { DEFAULT: channel("paper"), sheet: channel("paper-sheet"), deep: channel("paper-deep") },
+        ink: { DEFAULT: channel("ink"), soft: channel("ink-soft"), rule: channel("ink-rule") },
+        aman: { DEFAULT: channel("aman"), ink: channel("aman-ink") },
+        mepet: { DEFAULT: channel("mepet"), ink: channel("mepet-ink") },
+        habis: { DEFAULT: channel("habis"), ink: channel("habis-ink") },
+        denom: { blue: channel("denom-blue"), violet: channel("denom-violet") },
         cream: {
-          50: "#FCFBF7",
-          100: "#FAF7F0",
-          200: "#F3EEDF",
-          300: "#E7DFCC",
-          400: "#D6C9B0",
-          500: "#BDAC8D",
+          50: "#FBF8F1",
+          100: "#F5EFE0",
+          200: "#ECE4D0",
+          300: "#DDD2B8",
+          400: "#C7B999",
+          500: "#A8977A",
+          600: "#8C7B5F",
         },
         navy: {
-          50: "#F4F7FB",
-          100: "#E6EDF6",
-          200: "#CBD9EB",
-          300: "#A4BDDB",
-          400: "#769CC7",
-          500: "#4B79AD",
+          50: "#F3F5F8",
+          100: "#E4E9F0",
+          200: "#C9D3E0",
+          // 300 is for rules/icons only; 400+ pass AA as text on paper.
+          300: "#8A9FB8",
+          400: "#4F6B8F",
+          500: "#3D6491",
           950: "#070E1A",
           900: "#0B192C",
           850: "#0F223B",

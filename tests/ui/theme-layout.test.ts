@@ -3,7 +3,7 @@ import React, { createElement, type ReactElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { runInNewContext } from "node:vm";
 
-vi.mock("next/font/google", () => ({ Plus_Jakarta_Sans: () => ({ variable: "font" }) }));
+vi.mock("next/font/google", () => ({ Archivo: () => ({ variable: "font-ui" }), Bodoni_Moda: () => ({ variable: "font-display" }) }));
 vi.mock("@/components/layout/pwa-install-button", () => ({ PwaInstallButton: () => null }));
 vi.mock("@/components/layout/offline-banner", () => ({ OfflineBanner: () => null }));
 import RootLayout, { metadata } from "@/app/layout";
