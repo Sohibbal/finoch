@@ -83,17 +83,17 @@ export function BillFormModal({
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white dark:bg-navy-900 border border-cream-300 dark:border-navy-800 rounded-2xl w-full max-w-md max-h-[90vh] flex flex-col shadow-2xl overflow-hidden transition-colors">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
+      <div className="bg-paper-sheet border border-ink/20 rounded-sm w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden transition-colors">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-cream-200 dark:border-navy-800">
-          <h2 className="text-sm sm:text-base font-bold text-navy-950 dark:text-cream-50">
+        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-ink/20">
+          <h2 className="text-sm sm:text-base font-bold text-ink">
             {initialData ? "Edit Tagihan Rutin" : "Tambah Tagihan Rutin Mahasiswa"}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-navy-400 hover:text-navy-700 dark:hover:text-cream-100 transition-colors"
+            className="p-1 rounded-sm text-ink-soft hover:text-ink transition-colors"
           >
             <X className="w-4 h-4" />
           </button>
@@ -104,35 +104,35 @@ export function BillFormModal({
           {/* Quick Presets for Students */}
           {!initialData && (
             <div className="space-y-1.5">
-              <span className="text-[11px] font-bold text-navy-600 dark:text-cream-300/70">
+              <span className="text-meta font-bold text-ink-soft">
                 Preset Cepat Anak Kost:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 <button
                   type="button"
                   onClick={() => applyPreset("Kamar Kos", "kos", 850000, 1)}
-                  className="text-[10px] px-2.5 py-1 rounded-lg bg-cream-100 hover:bg-cream-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-navy-800 dark:text-cream-200 border border-cream-200 dark:border-navy-700"
+                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
                 >
                   Uang Kos (850k - Tgl 1)
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset("WiFi Kosan", "utilities", 45000, 10)}
-                  className="text-[10px] px-2.5 py-1 rounded-lg bg-cream-100 hover:bg-cream-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-navy-800 dark:text-cream-200 border border-cream-200 dark:border-navy-700"
+                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
                 >
                   WiFi (45k - Tgl 10)
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset("Token Listrik", "utilities", 60000, 15)}
-                  className="text-[10px] px-2.5 py-1 rounded-lg bg-cream-100 hover:bg-cream-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-navy-800 dark:text-cream-200 border border-cream-200 dark:border-navy-700"
+                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
                 >
                   Listrik (60k - Tgl 15)
                 </button>
                 <button
                   type="button"
                   onClick={() => applyPreset("Spotify Family", "subscription", 25000, 25)}
-                  className="text-[10px] px-2.5 py-1 rounded-lg bg-cream-100 hover:bg-cream-200 dark:bg-navy-800 dark:hover:bg-navy-700 text-navy-800 dark:text-cream-200 border border-cream-200 dark:border-navy-700"
+                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
                 >
                   Spotify (25k)
                 </button>
@@ -142,7 +142,7 @@ export function BillFormModal({
 
           {/* Name */}
           <div>
-            <label className="block text-xs font-bold text-navy-800 dark:text-cream-200 mb-1">
+            <label className="block text-xs font-bold text-ink mb-1">
               Nama Tagihan
             </label>
             <input
@@ -151,13 +151,13 @@ export function BillFormModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: Kamar Kos Lantai 2 / Laundry Bulanan"
-              className="w-full px-3 py-2 bg-cream-50 dark:bg-navy-950 border border-cream-300 dark:border-navy-800 rounded-xl text-xs sm:text-sm text-navy-950 dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink"
             />
           </div>
 
           {/* Category */}
           <div>
-            <label className="block text-xs font-bold text-navy-800 dark:text-cream-200 mb-1">
+            <label className="block text-xs font-bold text-ink mb-1">
               Kategori
             </label>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
@@ -169,10 +169,10 @@ export function BillFormModal({
                     key={cat.key}
                     type="button"
                     onClick={() => setCategory(cat.key)}
-                    className={`flex items-center gap-1.5 p-2 rounded-xl text-xs font-medium border transition-all ${
+                    className={`flex items-center gap-1.5 p-2 rounded-sm text-xs font-medium border transition-all ${
                       isSelected
-                        ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm font-bold"
-                        : "bg-cream-50 dark:bg-navy-950 text-navy-700 dark:text-cream-300 border-cream-300 dark:border-navy-800"
+                        ? "bg-ink text-paper-sheet border-transparent font-bold"
+                        : "bg-paper-sheet text-ink border-ink/20"
                     }`}
                   >
                     <CatIcon className="w-3.5 h-3.5" />
@@ -186,7 +186,7 @@ export function BillFormModal({
           {/* Amount & Due Date */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-bold text-navy-800 dark:text-cream-200 mb-1">
+              <label className="block text-xs font-bold text-ink mb-1">
                 Nominal (Rp)
               </label>
               <input
@@ -196,12 +196,12 @@ export function BillFormModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Contoh: 850000"
-                className="w-full px-3 py-2 bg-cream-50 dark:bg-navy-950 border border-cream-300 dark:border-navy-800 rounded-xl text-xs sm:text-sm text-navy-950 dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-navy-800 dark:text-cream-200 mb-1">
+              <label className="block text-xs font-bold text-ink mb-1">
                 Jatuh Tempo (Tgl 1-31)
               </label>
               <input
@@ -212,14 +212,14 @@ export function BillFormModal({
                 value={dueDay}
                 onChange={(e) => setDueDay(e.target.value)}
                 placeholder="1"
-                className="w-full px-3 py-2 bg-cream-50 dark:bg-navy-950 border border-cream-300 dark:border-navy-800 rounded-xl text-xs sm:text-sm text-navy-950 dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40 text-center"
+                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink text-center"
               />
             </div>
           </div>
 
           {/* Reminder days */}
           <div>
-            <label className="block text-xs font-bold text-navy-800 dark:text-cream-200 mb-1">
+            <label className="block text-xs font-bold text-ink mb-1">
               Ingatkan Berapa Hari Sebelum Jatuh Tempo?
             </label>
             <div className="flex gap-2">
@@ -228,10 +228,10 @@ export function BillFormModal({
                   key={days}
                   type="button"
                   onClick={() => setReminderDaysBefore(String(days))}
-                  className={`flex-1 py-1.5 rounded-xl text-xs font-semibold border transition-all ${
+                  className={`flex-1 py-1.5 rounded-sm text-xs font-semibold border transition-all ${
                     Number(reminderDaysBefore) === days
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                      : "bg-cream-50 dark:bg-navy-950 text-navy-700 dark:text-cream-300 border-cream-300 dark:border-navy-800"
+                      ? "bg-ink text-paper-sheet border-aman-ink/40"
+                      : "bg-paper-sheet text-ink border-ink/20"
                   }`}
                 >
                   H-{days}
@@ -242,7 +242,7 @@ export function BillFormModal({
 
           {/* Note */}
           <div>
-            <label className="block text-xs font-bold text-navy-800 dark:text-cream-200 mb-1">
+            <label className="block text-xs font-bold text-ink mb-1">
               Catatan Pembayaran (Opsional)
             </label>
             <input
@@ -250,7 +250,7 @@ export function BillFormModal({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Contoh: No Rek Ibu Kos BCA 12345 / Bayar via Gopay"
-              className="w-full px-3 py-2 bg-cream-50 dark:bg-navy-950 border border-cream-300 dark:border-navy-800 rounded-xl text-xs text-navy-950 dark:text-cream-100 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink"
             />
           </div>
 
@@ -258,7 +258,7 @@ export function BillFormModal({
           <div className="pt-2">
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 text-xs font-bold shadow-md transition-all active:scale-95"
+              className="w-full py-2.5 rounded-sm bg-ink hover:bg-ink/90 text-paper-sheet text-xs font-bold transition-all active:scale-95"
             >
               {initialData ? "Simpan Perubahan Tagihan" : "Tambahkan ke Tagihan Rutin"}
             </button>
