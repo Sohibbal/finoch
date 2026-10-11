@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { Cloud, CloudOff } from "lucide-react";
 
 export function OfflineBanner() {
   const [mounted, setMounted] = useState(false);
@@ -56,10 +57,11 @@ export function OfflineBanner() {
         role="status"
         aria-live="polite"
         data-testid="offline-banner"
-        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-2 px-4 bg-amber-500/95 dark:bg-amber-600/95 text-white backdrop-blur-md shadow-md text-xs sm:text-sm font-semibold transition-transform duration-300 ease-out transform translate-y-0"
+        className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center py-2 px-4 bg-ink text-paper-sheet dark:text-paper border-b-2 border-dashed border-mepet text-meta sm:text-body font-semibold transition-transform duration-300 ease-out transform translate-y-0"
       >
         <div className="flex items-center gap-2 text-center leading-tight">
-          <span>🟠 Mode Offline Aktif · Data tersimpan lokal di HP (IndexedDB)</span>
+          <CloudOff className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span>Mode offline · catatan tersimpan di HP, nanti disinkronkan</span>
         </div>
       </aside>
     );
@@ -72,10 +74,11 @@ export function OfflineBanner() {
         role="status"
         aria-live="polite"
         data-testid="online-toast"
-        className="fixed top-3 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center py-2 px-4 rounded-full bg-emerald-600/95 text-white backdrop-blur-md shadow-lg text-xs sm:text-sm font-semibold transition-all duration-300 animate-fade-in"
+        className="fixed top-3 left-1/2 -translate-x-1/2 z-50 flex items-center justify-center py-2 px-4 rounded-full bg-ink text-paper-sheet dark:text-paper border border-aman text-meta sm:text-body font-semibold transition-all duration-300 animate-fade-in"
       >
         <div className="flex items-center gap-2 text-center leading-tight">
-          <span>🟢 Terhubung Kembali · Data otomatis sinkron ke server</span>
+          <Cloud className="w-4 h-4 shrink-0" aria-hidden="true" />
+          <span>Online lagi · catatan disinkronkan ke akunmu</span>
         </div>
       </aside>
     );

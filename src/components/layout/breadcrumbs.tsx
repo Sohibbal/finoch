@@ -166,7 +166,7 @@ export function Breadcrumbs({
   if (items && items.length > 0) {
     return (
       <nav aria-label="Breadcrumb" className={`flex items-center min-w-0 ${className}`}>
-        <ol className="flex items-center gap-1.5 text-xs text-navy-600 dark:text-cream-400 font-medium overflow-hidden">
+        <ol className="flex items-center gap-1.5 text-meta text-ink-soft font-medium overflow-hidden">
           {items.map((item, index) => {
             const isLast = index === items.length - 1;
             const Icon = item.icon;
@@ -174,20 +174,20 @@ export function Breadcrumbs({
             return (
               <li key={`${item.label}-${index}`} className="flex items-center gap-1.5 shrink-0">
                 {index > 0 && (
-                  <ChevronRight className="w-3.5 h-3.5 text-navy-400 dark:text-cream-600 shrink-0" />
+                  <ChevronRight className="w-3.5 h-3.5 text-ink-soft shrink-0" />
                 )}
                 {isLast ? (
                   <span
                     aria-current="page"
-                    className="font-bold text-navy-950 dark:text-white flex items-center gap-1.5 truncate max-w-[200px]"
+                    className="font-bold text-ink flex items-center gap-1.5 truncate max-w-[200px]"
                   >
-                    {Icon && <Icon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />}
+                    {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
                     <span>{item.label}</span>
                   </span>
                 ) : item.href ? (
                   <Link
                     href={item.href}
-                    className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+                    className="hover:text-ink hover:underline underline-offset-2 transition-colors flex items-center gap-1.5"
                   >
                     {Icon && <Icon className="w-3.5 h-3.5 shrink-0" />}
                     <span>{item.label}</span>
@@ -212,21 +212,21 @@ export function Breadcrumbs({
 
   return (
     <nav aria-label="Breadcrumb" className={`flex items-center min-w-0 ${className}`}>
-      <ol className="flex items-center gap-1.5 text-xs text-navy-600 dark:text-cream-400 font-medium overflow-hidden">
+      <ol className="flex items-center gap-1.5 text-meta text-ink-soft font-medium overflow-hidden">
         {/* Step 1: Root Home/Dashboard */}
         <li className="flex items-center shrink-0">
           {isDashboard ? (
             <span
               aria-current="page"
-              className="font-bold text-navy-950 dark:text-white flex items-center gap-1.5"
+              className="font-bold text-ink flex items-center gap-1.5"
             >
-              {showHomeIcon && <LayoutDashboard className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
+              {showHomeIcon && <LayoutDashboard className="w-3.5 h-3.5" />}
               <span>Dashboard</span>
             </span>
           ) : (
             <Link
               href="/dashboard"
-              className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1.5"
+              className="hover:text-ink hover:underline underline-offset-2 transition-colors flex items-center gap-1.5"
             >
               {showHomeIcon && <LayoutDashboard className="w-3.5 h-3.5" />}
               <span>Dashboard</span>
@@ -237,11 +237,11 @@ export function Breadcrumbs({
         {/* Step 2: Parent Category (if present) */}
         {!isDashboard && route?.parentLabel && (
           <li className="flex items-center gap-1.5 shrink-0">
-            <ChevronRight className="w-3.5 h-3.5 text-navy-400 dark:text-cream-600 shrink-0" />
+            <ChevronRight className="w-3.5 h-3.5 text-ink-soft shrink-0" />
             {route.parentHref ? (
               <Link
                 href={route.parentHref}
-                className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors flex items-center gap-1 truncate max-w-[150px]"
+                className="hover:text-ink hover:underline underline-offset-2 transition-colors flex items-center gap-1 truncate max-w-[150px]"
               >
                 {route.parentIcon && <route.parentIcon className="w-3.5 h-3.5 shrink-0 opacity-70" />}
                 <span>{route.parentLabel}</span>
@@ -258,13 +258,13 @@ export function Breadcrumbs({
         {/* Step 3: Current Page */}
         {!isDashboard && route && (
           <li className="flex items-center gap-1.5 shrink-0">
-            <ChevronRight className="w-3.5 h-3.5 text-navy-400 dark:text-cream-600 shrink-0" />
+            <ChevronRight className="w-3.5 h-3.5 text-ink-soft shrink-0" />
             <span
               aria-current="page"
-              className="font-bold text-navy-950 dark:text-white flex items-center gap-1.5 truncate max-w-[220px]"
+              className="font-bold text-ink flex items-center gap-1.5 truncate max-w-[220px]"
             >
               {route.icon && (
-                <route.icon className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                <route.icon className="w-3.5 h-3.5 shrink-0" />
               )}
               <span>{route.label}</span>
             </span>

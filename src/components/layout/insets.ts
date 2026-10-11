@@ -1,7 +1,5 @@
 /**
- * Mobile bottom insets, stacked so nothing covers anything else:
- * nav bar (bottom-3, h-16) < floating pills (Menu Fitur, Pasang Finoch) < page action bars.
- * The app shell pads its content by enough to clear all three.
+ * Mobile bottom inset for page action bars: they sit just above the bottom nav
+ * (h-16) and clear the Catat seal that rises above it. The app shell pads its content to match.
  */
-export const FLOATING_PILL_BOTTOM = "bottom-[calc(5.5rem+env(safe-area-inset-bottom))]";
-export const ACTION_BAR_BOTTOM = "bottom-[calc(8.25rem+env(safe-area-inset-bottom))]";
+export const ACTION_BAR_BOTTOM = "bottom-[calc(6.25rem+env(safe-area-inset-bottom))]";

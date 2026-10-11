@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Download, X } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
-import { FLOATING_PILL_BOTTOM } from "./insets";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -90,18 +89,18 @@ export function PwaInstallButton() {
   }
 
   if (!isLanding || isDismissed) {
-    // In the app only a small pill, and only when the browser says Finoch is installable.
-    // z-30 keeps it under modals (z-50) and the nav.
+    // In the app only a small desktop pill, and only when the browser says Finoch is installable.
+    // Phones keep the bottom edge for the nav alone. z-30 keeps it under modals (z-50).
     if (!deferredPrompt) return null;
     return (
-      <div className={`fixed ${FLOATING_PILL_BOTTOM} left-4 md:bottom-6 md:left-6 z-30`}>
+      <div className="hidden md:block fixed md:bottom-6 md:left-6 z-30">
         <button
           type="button"
           onClick={handleInstallClick}
           aria-label="Pasang Aplikasi Finoch"
-          className="flex items-center gap-2 px-3.5 py-2 rounded-full bg-cream-50 dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-navy-900 dark:text-cream-100 hover:bg-cream-100 dark:hover:bg-navy-900 shadow-lg text-xs font-bold transition active:scale-95"
+          className="flex items-center gap-2 px-4 min-h-10 rounded-full bg-paper-sheet border border-ink/30 text-ink hover:bg-paper-deep text-meta font-semibold transition-colors"
         >
-          <Download className="w-3.5 h-3.5 text-navy-900 dark:text-cream-100" />
+          <Download className="w-4 h-4" />
           <span>Pasang Finoch</span>
         </button>
       </div>

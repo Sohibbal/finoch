@@ -50,18 +50,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-cream-50 dark:bg-[#030712] text-navy-900 dark:text-cream-100 flex flex-col md:flex-row transition-colors selection:bg-navy-900 selection:text-white">
+    <div className="min-h-[100dvh] bg-paper text-ink flex flex-col md:flex-row transition-colors">
       <DashboardSidebar className="hidden md:flex print:hidden" />
 
       {/* Document scroll (no h-screen overflow box) so iOS can collapse the address bar.
-          Bottom padding reserves the mobile nav, floating pills and page action bars. */}
-      <div className="flex-1 flex flex-col min-w-0 pb-[calc(12rem+env(safe-area-inset-bottom))] md:pb-12 print:p-0">
+          Bottom padding reserves the mobile nav, its seal and page action bars. */}
+      <div className="flex-1 flex flex-col min-w-0 pb-[calc(10rem+env(safe-area-inset-bottom))] md:pb-12 print:p-0">
         {canShowPage ? (
           // Pages read per-user storage on mount: remount them when the account or pulled data changes.
           <Fragment key={`${user?.id ?? "offline"}:${dataRevision}`}>{children}</Fragment>
         ) : (
           <div className="flex-1 flex items-center justify-center py-32" aria-busy="true">
-            <Loader2 className="w-6 h-6 animate-spin text-navy-400 dark:text-cream-400" aria-label="Memuat" />
+            <Loader2 className="w-6 h-6 motion-safe:animate-spin text-ink-soft" aria-label="Memuat" />
           </div>
         )}
       </div>

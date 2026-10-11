@@ -25,6 +25,6 @@ describe("PwaInstallButton placement", () => {
     const { readFileSync } = await import("node:fs");
     const source = readFileSync("src/components/layout/pwa-install-button.tsx", "utf8");
     expect(source).not.toMatch(/top-\[calc/);
-    expect(source).toMatch(/left-4 md:bottom-6 md:left-6 z-30/);
+    expect(source).toMatch(/hidden md:block fixed md:bottom-6 md:left-6 z-30/);
   });
 });

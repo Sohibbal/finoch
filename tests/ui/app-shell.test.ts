@@ -37,12 +37,19 @@ describe("app route group", () => {
     expect(source).not.toMatch(/fixed bottom-(16|20)\b/);
   });
 
-  it("stacks the Menu Fitur pill and PWA install prompt clear of the nav and action bars", () => {
-    for (const file of ["bottom-nav.tsx", "pwa-install-button.tsx"]) {
-      const source = readFileSync(path.resolve(__dirname, "../../src/components/layout", file), "utf8");
-      expect(source).not.toMatch(/fixed bottom-20/);
-      expect(source).toContain("FLOATING_PILL_BOTTOM");
-    }
+  it("keeps one bar on the mobile bottom edge: no floating Menu pill, install pill desktop-only", () => {
+    const layoutDir = path.resolve(__dirname, "../../src/components/layout");
+    const nav = readFileSync(path.join(layoutDir, "bottom-nav.tsx"), "utf8");
+    const pwa = readFileSync(path.join(layoutDir, "pwa-install-button.tsx"), "utf8");
+    expect(nav).not.toMatch(/Menu Fitur|FLOATING_PILL_BOTTOM/);
+    expect(pwa).not.toMatch(/FLOATING_PILL_BOTTOM/);
+    expect(pwa).toContain("hidden md:block fixed");
+  });
+
+  it("lists all 17 app pages in the shared navigation", async () => {
+    const { NAV_GROUPS } = await import("@/components/layout/nav-items");
+    const hrefs = NAV_GROUPS.flatMap((g) => g.items.map((i) => i.href)).sort();
+    expect(hrefs).toEqual(pages.map((p) => `/${p.route}`).sort());
   });
 
   it("wraps pages in a single AuthProvider + AppShell", () => {

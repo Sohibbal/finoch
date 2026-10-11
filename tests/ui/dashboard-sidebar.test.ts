@@ -49,6 +49,9 @@ describe("Dashboard Sidebar Component", () => {
     expect(html).toContain('href="/reports"');
     expect(html).toContain('href="/simulator"');
     expect(html).toContain('href="/goals"');
+    expect(html).toContain('href="/insights"');
+    expect(html).toContain('href="/copilot"');
+    expect(html).toContain('href="/profile"');
 
     // User Profile Card & Offline indicator
     expect(html).toContain("Budi Mahasiswa");
