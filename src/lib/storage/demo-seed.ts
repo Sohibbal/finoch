@@ -1,7 +1,7 @@
 import { getDatabase } from "./indexed-db";
 import { expenseStorage, type CreateExpenseParams } from "./expense-storage";
 import { LEGACY_FEATURE_KEYS, getDataScope, getStorage, isDemoMode } from "./local-storage";
-import { getWallets } from "./wallet-storage";
+import { getWallets, saveWallets } from "./wallet-storage";
 
 /** Every feature key a demo store may seed; reset removes them so each store reseeds on next read. */
 const DEMO_FEATURE_KEYS = [...LEGACY_FEATURE_KEYS, "finoch_savings_goals_v1", "finoch_budget_allowance_v1"];
@@ -81,11 +81,30 @@ async function demoExpenseCount(): Promise<number> {
   return db.countFromIndex("expenses", "by-user", getDataScope());
 }
 
+// Where a student actually pays from: small cash buys, bills and top-ups from the bank,
+// food delivery and app fees from the e-wallet.
+function walletTypeFor(itemName: string, category: string): "cash" | "bank" | "ewallet" {
+  if (/gofood|grabfood|shopeefood|layanan/i.test(itemName)) return "ewallet";
+  if (category === "Bills & Utilities" || category === "Other") return "bank";
+  return "cash";
+}
+
 async function seed(now: Date): Promise<number> {
   if ((await demoExpenseCount()) > 0) return 0;
-  // Seeds the demo wallets, so each expense is charged to a real default wallet.
-  getWallets();
-  const saved = await expenseStorage.saveExpenses(generateDemoExpenses(now));
+  // Seeds the demo wallets first, so each expense is charged to a real wallet.
+  const wallets = getWallets();
+  const byType = new Map(wallets.map((w) => [w.type, w.id]));
+  const items = generateDemoExpenses(now).map((e) => ({
+    ...e,
+    walletId: byType.get(walletTypeFor(e.itemName, e.category)) ?? null,
+  }));
+  const saved = await expenseStorage.saveExpenses(items);
+
+  // Balances are derived (opening − spending), so lift each demo wallet's opening balance by what
+  // the samples spent from it: the wallet still shows its designed balance instead of going minus.
+  const spent = new Map<string, number>();
+  for (const e of saved) if (e.walletId) spent.set(e.walletId, (spent.get(e.walletId) ?? 0) + e.amount);
+  saveWallets(wallets.map((w) => ({ ...w, openingBalance: (w.openingBalance || 0) + (spent.get(w.id) ?? 0) })));
   return saved.length;
 }
 
