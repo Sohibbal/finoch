@@ -21,30 +21,22 @@ import { formatRupiah } from "@/lib/financial/split-bill-engine";
 import { UktCardMobile } from "@/components/ukt/ukt-card-mobile";
 import { UktBentoDesktop } from "@/components/ukt/ukt-bento-desktop";
 import { UktModal } from "@/components/ukt/ukt-modal";
-import { PageHeader } from "@/components/layout/page-header";
+import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
 
 export default function UktSavingsPage() {
 
   const [plans, setPlans] = useState<UktPlan[]>([]);
-  const [monthlyIncome, setMonthlyIncome] = useState<number>(2000000);
+  const [loaded, setLoaded] = useState(false);
+  const profile = useFinancialProfile();
+  const monthlyIncome = profile.monthlyIncome ?? 0;
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
-  const loadData = useCallback(async () => {
-    try {
-      const profileRes = await fetch("/api/profile");
-      if (profileRes.ok) {
-        const pData = await profileRes.json();
-        if (pData?.profile?.monthlyIncome) {
-          setMonthlyIncome(Number(pData.profile.monthlyIncome));
-        }
-      }
-    } catch {
-      // fallback
-    }
-
+  const loadData = useCallback(() => {
     const loadedPlans = getUktPlans();
     setPlans(loadedPlans);
+    setLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -79,7 +71,22 @@ export default function UktSavingsPage() {
       />
 
       {/* Main Content */}
+      <ProfileGate profile={profile}>
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
+        {loaded && plans.length === 0 ? (
+          <EmptyState
+            icon={GraduationCap}
+            title="Belum ada pos dana kampus"
+            action={
+              <button type="button" onClick={() => setIsAddModalOpen(true)} className={EMPTY_ACTION_CLASS}>
+                Tambah Target UKT / Kampus
+              </button>
+            }
+          >
+            Pecah biaya UKT, praktikum, KKN, atau wisuda jadi setoran harian kecil supaya tidak kaget di akhir semester.
+          </EmptyState>
+        ) : (
+        <>
         {/* MOBILE PWA VIEW (md:hidden) */}
         <div className="md:hidden space-y-4">
           {/* Mobile Summary Banner */}
@@ -142,7 +149,10 @@ export default function UktSavingsPage() {
             onDelete={handleDelete}
           />
         </div>
+        </>
+        )}
       </main>
+      </ProfileGate>
 
       {/* Modal */}
       <UktModal

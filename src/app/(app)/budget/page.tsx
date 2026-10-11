@@ -36,12 +36,18 @@ import { BudgetOverviewCard } from "@/components/budget/budget-overview-card";
 import { BudgetTransferModal } from "@/components/budget/budget-transfer-modal";
 import { BudgetFormModal } from "@/components/budget/budget-form-modal";
 import { BudgetTransferHistory } from "@/components/budget/budget-transfer-history";
-import { PageHeader } from "@/components/layout/page-header";
+import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { useFinancialProfile } from "@/hooks/use-financial-profile";
+import { isDemoMode } from "@/lib/storage/local-storage";
 import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
 
 export default function BudgetPage() {
+  const profile = useFinancialProfile();
+  const allowance = profile.monthlyIncome;
 
   const [rawEnvelopes, setRawEnvelopes] = useState<BudgetEnvelope[]>([]);
+  const [loaded, setLoaded] = useState(false);
+  const hasEnvelopes = rawEnvelopes.length > 0;
   const [expenses, setExpenses] = useState<Array<{ category?: string; amount: number; createdAt?: string }>>([]);
   const [transfers, setTransfers] = useState<EnvelopeTransferRecord[]>([]);
 
@@ -52,28 +58,19 @@ export default function BudgetPage() {
   const [editingEnvelope, setEditingEnvelope] = useState<BudgetEnvelope | null>(null);
 
   // Load expenses and envelopes
+  // Envelopes are sized from (and rescaled to) the real allowance, so wait for the profile.
   const loadData = useCallback(async () => {
-    let allowance = 2000000;
-    try {
-      const profileRes = await fetch("/api/profile");
-      if (profileRes.ok) {
-        const pData = await profileRes.json();
-        if (pData?.profile?.monthlyIncome) {
-          allowance = Number(pData.profile.monthlyIncome);
-        }
-      }
-    } catch {
-      // ignore
-    }
-
+    if (!allowance) return;
     const envs = getEnvelopes(allowance);
     setRawEnvelopes(envs);
+    setLoaded(true);
     setTransfers(getTransferHistory());
 
     // Load expenses from API or IndexedDB
     try {
-      const res = await fetch("/api/expenses");
-      if (res.ok) {
+      // Demo mode shows only local demo rows; the server holds the real expenses.
+      const res = isDemoMode() ? null : await fetch("/api/expenses");
+      if (res?.ok) {
         const data = await res.json();
         if (Array.isArray(data.expenses) && data.expenses.length > 0) {
           setExpenses(
@@ -100,7 +97,7 @@ export default function BudgetPage() {
     } catch {
       // ignore
     }
-  }, []);
+  }, [allowance]);
 
   useEffect(() => {
     loadData();
@@ -185,7 +182,7 @@ export default function BudgetPage() {
 
   const handleResetDefaults = () => {
     if (confirm("Reset seluruh pos amplop ke preset standar mahasiswa?")) {
-      const reset = resetEnvelopesToDefault();
+      const reset = resetEnvelopesToDefault(allowance ?? undefined);
       setRawEnvelopes(reset);
       setTransfers(getTransferHistory());
     }
@@ -229,7 +226,35 @@ export default function BudgetPage() {
       />
 
       {/* Page Body */}
+      <ProfileGate profile={profile}>
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
+        {!hasEnvelopes ? (
+          loaded && (
+          <EmptyState
+            icon={Wallet}
+            title="Belum ada pos amplop"
+            action={
+              <>
+                <button
+                  onClick={() => setRawEnvelopes(resetEnvelopesToDefault(allowance ?? undefined))}
+                  className={EMPTY_ACTION_CLASS}
+                >
+                  Pakai Preset Mahasiswa
+                </button>
+                <button
+                  onClick={handleOpenCreate}
+                  className="px-5 py-2.5 rounded-full border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 font-bold text-xs"
+                >
+                  Buat Pos Sendiri
+                </button>
+              </>
+            }
+          >
+            Bagi uang saku {allowance ? formatRupiah(allowance) : ""} ke pos makan, kos, transport, nongkrong, dan dana darurat, atau buat pos sendiri.
+          </EmptyState>
+          )
+        ) : (
+        <>
         {/* Overview Section */}
         <BudgetOverviewCard
           summary={summary}
@@ -338,9 +363,13 @@ export default function BudgetPage() {
             </div>
           </div>
         </div>
+        </>
+        )}
       </main>
+      </ProfileGate>
 
       {/* MOBILE STICKY FLOATING DOCK (md:hidden) */}
+      {hasEnvelopes && (
       <div className={`md:hidden fixed ${ACTION_BAR_BOTTOM} left-0 right-0 z-30 px-4 pointer-events-none flex justify-center`}>
         <div className="pointer-events-auto w-full max-w-md bg-white/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 rounded-2xl shadow-xl p-2.5 flex items-center justify-between backdrop-blur-xl">
           <div className="pl-2">
@@ -370,6 +399,7 @@ export default function BudgetPage() {
           </div>
         </div>
       </div>
+      )}
 
       {/* Modals */}
       <BudgetTransferModal

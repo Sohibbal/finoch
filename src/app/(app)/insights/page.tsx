@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import { detectSpendingPatterns, getMonthlyCategoryTotals } from "@/lib/insights/pattern-detector";
 import { AiInsightCard } from "@/types/financial-types";
-import { PageHeader } from "@/components/layout/page-header";
+import { EMPTY_ACTION_CLASS, EmptyState, PageHeader } from "@/components/layout/page-header";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { getBills } from "@/lib/storage/bill-storage";
 
@@ -66,21 +66,17 @@ export default function InsightsPage() {
         )}
 
         {insights?.length === 0 && (
-          <div className="max-w-md mx-auto p-6 rounded-3xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-center space-y-3 shadow-sm">
-            <div className="w-12 h-12 mx-auto rounded-2xl bg-cream-100 dark:bg-navy-900 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-navy-700 dark:text-cream-200" />
-            </div>
-            <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">Belum cukup data untuk wawasan</h3>
-            <p className="text-xs text-navy-600 dark:text-cream-300/70">
-              Wawasan muncul setelah ada pengeluaran bulan lalu dan bulan ini untuk dibandingkan, atau tagihan rutin yang tercatat.
-            </p>
-            <Link
-              href="/dashboard"
-              className="inline-block px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs"
-            >
-              Catat Pengeluaran
-            </Link>
-          </div>
+          <EmptyState
+            icon={Sparkles}
+            title="Belum cukup data untuk wawasan"
+            action={
+              <Link href="/dashboard" className={EMPTY_ACTION_CLASS}>
+                Catat Pengeluaran
+              </Link>
+            }
+          >
+            Wawasan muncul setelah ada pengeluaran bulan lalu dan bulan ini untuk dibandingkan, atau tagihan rutin yang tercatat.
+          </EmptyState>
         )}
 
         {/* Insights Grid */}

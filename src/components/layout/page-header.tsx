@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, UserRoundCog, WifiOff } from "lucide-react";
+import { ArrowLeft, UserRoundCog, WifiOff, type LucideIcon } from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Breadcrumbs } from "./breadcrumbs";
@@ -85,53 +85,79 @@ interface ProfileGateProps {
 export function ProfileGate({ profile, children }: ProfileGateProps) {
   if (profile.loading) {
     return (
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-4" aria-busy="true">
-        <div className="h-36 rounded-3xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="h-28 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
-          <div className="h-28 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
-        </div>
+      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3">
+        <ContentSkeleton />
       </main>
     );
   }
   if (!profile.hasProfile) {
     return (
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3">
-        <div className="max-w-md mx-auto mt-6 p-6 rounded-3xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-center space-y-3 shadow-sm">
-          <div className="w-12 h-12 mx-auto rounded-2xl bg-cream-100 dark:bg-navy-900 flex items-center justify-center">
-            {profile.error ? (
-              <WifiOff className="w-5 h-5 text-navy-700 dark:text-cream-200" />
-            ) : (
-              <UserRoundCog className="w-5 h-5 text-navy-700 dark:text-cream-200" />
-            )}
-          </div>
-          <h2 className="text-base font-bold text-navy-950 dark:text-cream-50">
-            {profile.error ? "Profil keuangan belum bisa dimuat" : "Lengkapi profil keuanganmu dulu"}
-          </h2>
-          <p className="text-xs text-navy-600 dark:text-cream-300/70">
-            {profile.error
-              ? "Periksa koneksi internet, lalu coba lagi. Angka di halaman ini dihitung dari uang saku bulananmu."
-              : "Halaman ini dihitung dari uang saku dan pengeluaran tetap bulananmu. Isi sekali, berlaku di semua fitur."}
-          </p>
-          {profile.error ? (
-            <button
-              type="button"
-              onClick={() => window.location.reload()}
-              className="px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs"
-            >
-              Coba Lagi
-            </button>
-          ) : (
-            <Link
-              href="/onboarding"
-              className="inline-block px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs"
-            >
-              Isi Profil Keuangan
-            </Link>
-          )}
-        </div>
+        {profile.error ? (
+          <EmptyState
+            icon={WifiOff}
+            title="Profil keuangan belum bisa dimuat"
+            action={
+              <button type="button" onClick={() => window.location.reload()} className={EMPTY_ACTION_CLASS}>
+                Coba Lagi
+              </button>
+            }
+          >
+            Periksa koneksi internet, lalu coba lagi. Angka di halaman ini dihitung dari uang saku bulananmu.
+          </EmptyState>
+        ) : (
+          <EmptyState
+            icon={UserRoundCog}
+            title="Lengkapi profil keuanganmu dulu"
+            action={
+              <Link href="/onboarding" className={EMPTY_ACTION_CLASS}>
+                Isi Profil Keuangan
+              </Link>
+            }
+          >
+            Halaman ini dihitung dari uang saku dan pengeluaran tetap bulananmu. Isi sekali, berlaku di semua fitur.
+          </EmptyState>
+        )}
       </main>
     );
   }
   return <>{children}</>;
+}
+
+export const EMPTY_ACTION_CLASS =
+  "inline-block px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs transition-colors";
+
+interface EmptyStateProps {
+  icon: LucideIcon;
+  title: string;
+  /** Primary (and optional secondary) action buttons or links. */
+  action?: React.ReactNode;
+  children: React.ReactNode;
+}
+
+/** Shared zero-data card so empty pages read as intentional: icon, short copy, primary action. */
+export function EmptyState({ icon: Icon, title, action, children }: EmptyStateProps) {
+  return (
+    <div className="max-w-md mx-auto mt-6 p-6 rounded-3xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-center space-y-3 shadow-sm">
+      <div className="w-12 h-12 mx-auto rounded-2xl bg-cream-100 dark:bg-navy-900 flex items-center justify-center">
+        <Icon className="w-5 h-5 text-navy-700 dark:text-cream-200" />
+      </div>
+      <h2 className="text-base font-bold text-navy-950 dark:text-cream-50">{title}</h2>
+      <p className="text-xs text-navy-600 dark:text-cream-300/70">{children}</p>
+      {action && <div className="flex flex-wrap justify-center gap-2 pt-1">{action}</div>}
+    </div>
+  );
+}
+
+/** Placeholder blocks while page data loads, instead of zero-filled cards. */
+export function ContentSkeleton() {
+  return (
+    <div className="space-y-4" aria-busy="true">
+      <div className="h-36 rounded-3xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="h-28 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+        <div className="h-28 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+      </div>
+    </div>
+  );
 }

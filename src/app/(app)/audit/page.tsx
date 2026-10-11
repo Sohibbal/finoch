@@ -7,41 +7,31 @@ import {
   RefreshCw,
   Lightbulb,
 } from "lucide-react";
+import Link from "next/link";
 import { LeakAuditSummary } from "@/types/audit-types";
 import { auditMicroExpenses, ExpenseAuditCandidate } from "@/lib/financial/audit-engine";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 
 import { AuditCardMobile } from "@/components/audit/audit-card-mobile";
 import { AuditBentoDesktop } from "@/components/audit/audit-bento-desktop";
-import { PageHeader } from "@/components/layout/page-header";
+import { ContentSkeleton, EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { useFinancialProfile } from "@/hooks/use-financial-profile";
+import { isDemoMode } from "@/lib/storage/local-storage";
 
 export default function AuditPage() {
 
   const [expenses, setExpenses] = useState<ExpenseAuditCandidate[]>([]);
-  const [monthlyAllowance, setMonthlyAllowance] = useState<number>(2000000);
-  const [loading, setLoading] = useState<boolean>(true);
+  const profile = useFinancialProfile();
+  const [loaded, setLoaded] = useState(false);
 
   const loadData = useCallback(async () => {
-    setLoading(true);
     try {
-      const profileRes = await fetch("/api/profile");
-      if (profileRes.ok) {
-        const pData = await profileRes.json();
-        if (pData?.profile?.monthlyIncome) {
-          setMonthlyAllowance(Number(pData.profile.monthlyIncome));
-        }
-      }
-    } catch {
-      // fallback
-    }
-
-    try {
-      const res = await fetch("/api/expenses");
-      if (res.ok) {
+      // Demo mode shows only local demo rows; the server holds the real expenses.
+      const res = isDemoMode() ? null : await fetch("/api/expenses");
+      if (res?.ok) {
         const data = await res.json();
         if (Array.isArray(data.expenses) && data.expenses.length > 0) {
           setExpenses(data.expenses);
-          setLoading(false);
           return;
         }
       }
@@ -61,7 +51,7 @@ export default function AuditPage() {
     } catch {
       // ignore
     } finally {
-      setLoading(false);
+      setLoaded(true);
     }
   }, []);
 
@@ -70,8 +60,8 @@ export default function AuditPage() {
   }, [loadData]);
 
   const auditSummary: LeakAuditSummary = useMemo(() => {
-    return auditMicroExpenses(expenses, monthlyAllowance);
-  }, [expenses, monthlyAllowance]);
+    return auditMicroExpenses(expenses, profile.monthlyIncome ?? 0);
+  }, [expenses, profile.monthlyIncome]);
 
   return (
     <>
@@ -93,7 +83,24 @@ export default function AuditPage() {
       />
 
       {/* Page Body */}
+      <ProfileGate profile={profile}>
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
+        {!loaded ? (
+          <ContentSkeleton />
+        ) : expenses.length === 0 ? (
+          <EmptyState
+            icon={Flame}
+            title="Belum ada jajan yang bisa diaudit"
+            action={
+              <Link href="/dashboard" className={EMPTY_ACTION_CLASS}>
+                Catat Pengeluaran
+              </Link>
+            }
+          >
+            Catat pengeluaran harianmu lewat suara atau foto struk. Finoch akan menandai jajan receh yang diam-diam menggerus uang saku.
+          </EmptyState>
+        ) : (
+        <>
         {/* MOBILE PWA VIEW (md:hidden) */}
         <div className="md:hidden space-y-4">
           <AuditCardMobile summary={auditSummary} />
@@ -103,7 +110,10 @@ export default function AuditPage() {
         <div className="hidden md:block">
           <AuditBentoDesktop summary={auditSummary} />
         </div>
+        </>
+        )}
       </main>
+      </ProfileGate>
     </>
   );
 }

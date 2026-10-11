@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { calculateGoalProjection } from "@/lib/financial/financial-engine";
 import { FinancialGoal } from "@/types/financial-types";
-import { PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { addGoal, deleteGoal, getGoals } from "@/lib/storage/goal-storage";
 import { localDateKeyFromNow } from "@/lib/date";
@@ -151,22 +151,17 @@ export default function GoalsPage() {
         </div>
 
         {goals.length === 0 && (
-          <div className="max-w-md mx-auto p-6 rounded-3xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-center space-y-3 shadow-sm">
-            <div className="w-12 h-12 mx-auto rounded-2xl bg-cream-100 dark:bg-navy-900 flex items-center justify-center">
-              <Target className="w-5 h-5 text-navy-700 dark:text-cream-200" />
-            </div>
-            <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">Belum ada target tabungan</h3>
-            <p className="text-xs text-navy-600 dark:text-cream-300/70">
-              Mulai dari satu tujuan: dana darurat, laptop kuliah, atau biaya wisuda. Finoch hitung apakah tenggatnya realistis.
-            </p>
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs"
-            >
-              Buat Target Pertama
-            </button>
-          </div>
+          <EmptyState
+            icon={Target}
+            title="Belum ada target tabungan"
+            action={
+              <button type="button" onClick={() => setIsModalOpen(true)} className={EMPTY_ACTION_CLASS}>
+                Buat Target Pertama
+              </button>
+            }
+          >
+            Mulai dari satu tujuan: dana darurat, laptop kuliah, atau biaya wisuda. Finoch hitung apakah tenggatnya realistis.
+          </EmptyState>
         )}
 
         {/* Goals Grid */}

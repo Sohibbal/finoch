@@ -9,14 +9,16 @@ import {
 import { ScenarioSlider } from "@/components/simulator/scenario-slider";
 import { SimulationResultCard } from "@/components/simulator/simulation-result-card";
 import { simulateWhatIfScenario } from "@/lib/financial/financial-engine";
-import { PageHeader } from "@/components/layout/page-header";
+import { PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { useFinancialProfile } from "@/hooks/use-financial-profile";
 
 export default function SimulatorPage() {
 
-  // Baseline financial state untuk mahasiswa / anak kost
-  const baselineMonthlyIncome = 2500000;
-  const baselineMonthlyExpense = 1750000;
-  const baselineNetSavings = baselineMonthlyIncome - baselineMonthlyExpense; // 750.000
+  // Baseline dari profil keuangan pengguna (uang saku & pengeluaran tetap bulanan)
+  const profile = useFinancialProfile();
+  const baselineMonthlyIncome = profile.monthlyIncome ?? 0;
+  const baselineMonthlyExpense = profile.fixedExpenses ?? 0;
+  const baselineNetSavings = baselineMonthlyIncome - baselineMonthlyExpense;
 
   // Interactive scenario variables
   const [expenseCuts, setExpenseCuts] = useState(200000); // hemat jajan kopi/sore 200rb
@@ -83,6 +85,7 @@ export default function SimulatorPage() {
       />
 
       {/* Main Content */}
+      <ProfileGate profile={profile}>
       <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
         <div>
           <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
@@ -90,6 +93,9 @@ export default function SimulatorPage() {
           </h2>
           <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
             Simulasi cepat skenario riil mahasiswa: hemat nongkrong/kopi, pendapatan magang, hingga antisipasi kiriman ortu terlambat.
+          </p>
+          <p className="text-xs text-navy-500 dark:text-cream-400 mt-1">
+            Titik awal dari profilmu: pemasukan Rp {baselineMonthlyIncome.toLocaleString("id-ID")}/bulan, pengeluaran tetap Rp {baselineMonthlyExpense.toLocaleString("id-ID")}/bulan.
           </p>
         </div>
 
@@ -200,6 +206,7 @@ export default function SimulatorPage() {
           </div>
         </div>
       </main>
+      </ProfileGate>
     </>
   );
 }
