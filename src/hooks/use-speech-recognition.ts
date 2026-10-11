@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 
 export const SILENCE_TIMEOUT_MS = 2000;
+export const INITIAL_NO_SPEECH_TIMEOUT_MS = 10000;
 export const SPEECH_LANG_ID = "id-ID";
 
 export type SpeechRecognitionErrorType =
@@ -41,7 +42,6 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
-  const isIntentionallyStoppedRef = useRef(false);
 
   // Clear silence timer helper
   const clearSilenceTimer = useCallback(() => {
@@ -53,7 +53,6 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
   // Stop listening implementation
   const stopListening = useCallback(() => {
-    isIntentionallyStoppedRef.current = true;
     clearSilenceTimer();
 
     if (recognitionRef.current) {
@@ -100,7 +99,8 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         setIsListening(true);
         setError(null);
         setErrorMessage(null);
-        resetSilenceTimer();
+        clearSilenceTimer();
+        silenceTimerRef.current = setTimeout(stopListening, INITIAL_NO_SPEECH_TIMEOUT_MS);
       };
 
       recognition.onresult = (event: any) => {
@@ -165,7 +165,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         }
       }
     };
-  }, [clearSilenceTimer, resetSilenceTimer]);
+  }, [clearSilenceTimer, resetSilenceTimer, stopListening]);
 
   const startListening = useCallback(() => {
     if (!isSupported || !recognitionRef.current) {
@@ -180,7 +180,6 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
       return;
     }
 
-    isIntentionallyStoppedRef.current = false;
     setError(null);
     setErrorMessage(null);
 

@@ -33,6 +33,11 @@ describe("useHybridSpeech Hook & Engine Selector", () => {
     expect(mode).toBe("offline-unready");
   });
 
+  it("uses Whisper when the browser has no online speech recognition", () => {
+    expect(determineEngineMode({ isOnline: true, isOnlineSpeechSupported: false, isModelDownloaded: true })).toBe("offline-whisper");
+    expect(determineEngineMode({ isOnline: true, isOnlineSpeechSupported: false, isModelDownloaded: false })).toBe("offline-unready");
+  });
+
   it("exports useHybridSpeech function", async () => {
     const module = await import("@/hooks/use-hybrid-speech");
     expect(typeof module.useHybridSpeech).toBe("function");
