@@ -5,17 +5,29 @@ import { Check, type LucideIcon } from "lucide-react";
 import { Guilloche } from "./guilloche";
 
 /**
- * Note denominations, the one table every page prints from. Fields use the darker ink shade of
- * green/ochre/red so paper-colored type stays AA in both themes, like blue and violet.
+ * Note denominations, the one table every page prints from. Green, ochre and red belong to
+ * status (Aman, Mepet, Habis) only, so notes print in blue, violet, teal or slate. Each passes
+ * AA with paper-colored type in both themes.
  */
-export type Denom = "blue" | "violet" | "green" | "ochre" | "red";
+export type Denom = "blue" | "violet" | "teal" | "slate";
 
 const TABLE: Record<Denom, { field: string; border: string; tint: string; onPaper: string; label: string }> = {
   blue: { field: "bg-denom-blue", border: "border-denom-blue", tint: "bg-denom-blue/20", onPaper: "text-denom-blue", label: "Biru" },
   violet: { field: "bg-denom-violet", border: "border-denom-violet", tint: "bg-denom-violet/20", onPaper: "text-denom-violet", label: "Ungu" },
-  green: { field: "bg-aman-ink", border: "border-aman-ink", tint: "bg-aman/20", onPaper: "text-aman-ink", label: "Hijau" },
-  ochre: { field: "bg-mepet-ink", border: "border-mepet-ink", tint: "bg-mepet/20", onPaper: "text-mepet-ink", label: "Cokelat" },
-  red: { field: "bg-habis-ink", border: "border-habis-ink", tint: "bg-habis/20", onPaper: "text-habis-ink", label: "Merah" },
+  teal: {
+    field: "bg-denom-teal dark:bg-denom-teal-dark",
+    border: "border-denom-teal dark:border-denom-teal-dark",
+    tint: "bg-denom-teal/20 dark:bg-denom-teal-dark/20",
+    onPaper: "text-denom-teal dark:text-denom-teal-dark",
+    label: "Toska",
+  },
+  slate: {
+    field: "bg-denom-slate dark:bg-denom-slate-dark",
+    border: "border-denom-slate dark:border-denom-slate-dark",
+    tint: "bg-denom-slate/20 dark:bg-denom-slate-dark/20",
+    onPaper: "text-denom-slate dark:text-denom-slate-dark",
+    label: "Abu",
+  },
 };
 
 const DENOM_KEYS = Object.keys(TABLE) as Denom[];
@@ -32,19 +44,22 @@ export const DENOM = mapDenoms((d) => ({ field: d.field, ink: "text-paper-sheet"
 /** Pieces for ink-on-paper layouts: field band, soft fill (progress), edge, ink. */
 export const DENOMS = mapDenoms((d) => ({ field: d.field, soft: d.tint, edge: d.border, ink: d.onPaper }));
 
-// Stored color names predate the press palette; they keep working and print as the nearest note.
+// Stored color names predate the press palette; they keep working and print as a non-status note.
 const LEGACY: Record<string, Denom> = {
-  emerald: "green",
   blue: "blue",
   cyan: "blue",
   purple: "violet",
-  amber: "ochre",
-  rose: "red",
+  violet: "violet",
+  emerald: "teal",
+  teal: "teal",
+  amber: "slate",
+  rose: "violet",
+  slate: "slate",
 };
 
-/** The note color for a stored wallet/envelope color name. */
+/** The note color for a stored wallet/envelope color name; unknown names print slate. */
 export function denomOf(color?: string | null): Denom {
-  return (color && LEGACY[color]) || "green";
+  return (color && LEGACY[color]) || "slate";
 }
 
 /** Stable rosette seed per item, so every note carries its own pattern. */
@@ -148,16 +163,15 @@ export function DenomSheet({ denom, seed, children, as: Tag = "article", classNa
   );
 }
 
-/** The colors a wallet or envelope can be printed in, by stored name (cyan is read as blue). */
+/** The colors a wallet or envelope can be printed in, by stored name. */
 export const DENOM_CHOICES: { id: string; denom: Denom }[] = [
   { id: "blue", denom: "blue" },
   { id: "purple", denom: "violet" },
-  { id: "emerald", denom: "green" },
-  { id: "amber", denom: "ochre" },
-  { id: "rose", denom: "red" },
+  { id: "teal", denom: "teal" },
+  { id: "slate", denom: "slate" },
 ];
 
-/** Five note colors as a labelled swatch row; the chosen one is pressed and ticked. */
+/** The note colors as a labelled swatch row; the chosen one is pressed and ticked. */
 export function DenomPicker({ value, onChange }: { value: string; onChange: (id: string) => void }) {
   const current = denomOf(value);
   return (

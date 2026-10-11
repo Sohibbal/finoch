@@ -1,6 +1,7 @@
 import React from "react";
 import { categoryLabel, rupiah } from "@/lib/format";
 import { formatSerial } from "./serial";
+import { unbreakable } from "./print-date";
 
 export interface StubData {
   id: string;
@@ -31,7 +32,8 @@ export function stubStateLabel({ unsynced, deleted, overJatah }: Pick<StubData, 
 export function Stub({ data, className = "" }: { data: StubData; className?: string }) {
   const { id, item, amount, date, category, wallet, time, unsynced, deleted, overJatah } = data;
   const state = stubStateLabel(data);
-  const meta = [wallet, categoryLabel(category), time].filter(Boolean).join(" · ");
+  // The time is often a date ("Kam, 8 Okt"): it never breaks inside.
+  const meta = [wallet, categoryLabel(category), time && unbreakable(time)].filter(Boolean).join(" · ");
   return (
     <li
       className={`relative flex items-start gap-3 pl-4 pr-3 py-3 bg-paper-sheet ${

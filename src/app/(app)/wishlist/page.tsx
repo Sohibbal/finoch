@@ -29,8 +29,7 @@ export default function WishlistPage() {
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedStatus, setSelectedStatus] = useState<Filter>("active");
-  // The tag whose state just changed gets its stamp pressed in; status line for screen readers too.
-  const [stampedId, setStampedId] = useState<string | null>(null);
+  // Status line for screen readers when a tag changes state.
   const [notice, setNotice] = useState("");
 
   const refreshWishlist = () => {
@@ -63,7 +62,6 @@ export default function WishlistPage() {
 
     cancelAndSaveMoney(id);
     refreshWishlist();
-    setStampedId(id);
     setNotice(`${target.name} batal dibeli. ${rupiah(target.price)} tetap di dompet.`);
   };
 
@@ -80,7 +78,6 @@ export default function WishlistPage() {
 
     purchaseWishlistItem(id);
     refreshWishlist();
-    setStampedId(id);
 
     try {
       await expenseStorage.saveExpense({
@@ -174,7 +171,6 @@ export default function WishlistPage() {
                     onCancelAndSave={handleCancelAndSave}
                     onPurchase={handlePurchase}
                     onDelete={handleDelete}
-                    fresh={item.id === stampedId}
                   />
                 </li>
               ))}

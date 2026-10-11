@@ -5,7 +5,8 @@ import { StreakSummary } from "@/types/streak-types";
 import { Guilloche } from "@/components/press/guilloche";
 import { Note } from "@/components/press/note";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
-import { Stamp } from "@/components/press/kampus-press";
+import { Award } from "lucide-react";
+import { StateLabel } from "@/components/press/kampus-press";
 
 interface StreakBadgeCardProps {
   summary: StreakSummary;
@@ -23,7 +24,7 @@ export function StreakBadgeCard({ summary }: StreakBadgeCardProps) {
             <h2 id="streak-title" className="text-body font-semibold text-ink-soft">
               Streak hemat
             </h2>
-            <Stamp label={summary.badge.title} tone={summary.currentStreak > 0 ? "aman" : "ink"} />
+            <StateLabel icon={Award} className="text-ink">{summary.badge.title}</StateLabel>
           </div>
           <p className="font-display font-bold text-ink money flex items-baseline gap-2">
             <span className="text-numeral" aria-hidden="true">

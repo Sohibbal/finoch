@@ -5,7 +5,7 @@ import { MealCalcConfig, MealCalcResult } from "@/types/meal-calc-types";
 import { rupiah } from "@/lib/format";
 import { Guilloche } from "@/components/press/guilloche";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
-import { DENOM, LABEL_CLASS, OptionButton, Perforation, Stamp } from "@/components/press/kampus-press";
+import { DENOM, LABEL_CLASS, OptionButton, Perforation, StateLabel } from "@/components/press/kampus-press";
 
 interface MealCompareProps {
   config: MealCalcConfig;
@@ -50,11 +50,11 @@ function Nota({ title, meta, children }: { title: string; meta: string; children
   );
 }
 
-/** Warteg nota next to the masak-sendiri shopping nota, with the difference printed as a green note. */
+/** Warteg nota next to the masak-sendiri shopping nota, with the difference printed as a teal note. */
 export function MealCompare({ config, result, onChangeMealsPerDay, onChangeOutsideCost }: MealCompareProps) {
   const savings = useRolledNumber(result.monthlySavingsCooking);
   const portionsPerWeek = config.mealsPerDay * config.daysPerWeek;
-  const green = DENOM.green;
+  const note = DENOM.teal;
 
   return (
     <div className="space-y-8">
@@ -96,7 +96,7 @@ export function MealCompare({ config, result, onChangeMealsPerDay, onChangeOutsi
         </fieldset>
       </section>
 
-      <section aria-labelledby="meal-verdict-title" className={`relative overflow-hidden ${green.field} ${green.ink} px-5 sm:px-8 py-6`}>
+      <section aria-labelledby="meal-verdict-title" className={`relative overflow-hidden ${note.field} ${note.ink} px-5 sm:px-8 py-6`}>
         <Guilloche seed={0x3a7e} size={220} families={3} className="absolute -right-14 -bottom-16 !text-navy-900 opacity-30" />
         <div className="relative space-y-1">
           <h2 id="meal-verdict-title" className="text-body font-semibold">
@@ -109,7 +109,7 @@ export function MealCompare({ config, result, onChangeMealsPerDay, onChangeOutsi
             </span>
             <span className="sr-only">{result.monthlySavingsCooking.toLocaleString("id-ID")}</span>
           </p>
-          <p className={`text-body ${green.soft}`}>
+          <p className={`text-body ${note.soft}`}>
             {result.savingsPercentageCooking}% lebih murah dari makan di luar terus · setahun{" "}
             <span className="money font-semibold">{rupiah(result.annualSavingsCooking)}</span>
           </p>
@@ -155,7 +155,7 @@ export function MealCompare({ config, result, onChangeMealsPerDay, onChangeOutsi
           <h2 id="meal-hybrid-title" className="font-display text-head font-bold text-ink">
             Jalan tengah anak kos
           </h2>
-          <Stamp label={`Hemat ${rupiah(result.monthlySavingsHybrid)}/bln`} tone="aman" />
+          <StateLabel className="text-ink money">Hemat {rupiah(result.monthlySavingsHybrid)}/bln</StateLabel>
         </div>
         <p className="text-body text-ink max-w-prose">
           Malas cuci wajan? Masak nasi saja di magic com, lauk dan sayur beli di warteg tanpa nasi. Sekitar 5 menit sehari,{" "}

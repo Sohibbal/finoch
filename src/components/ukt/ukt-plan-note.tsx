@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Trash2 } from "lucide-react";
+import { Check, Trash2, TriangleAlert } from "lucide-react";
 import { UktCategory, UktMetrics, UktPlan } from "@/types/ukt-types";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { Guilloche } from "@/components/press/guilloche";
 import { formatSerial } from "@/components/press/serial";
 import { StatusStamp } from "@/components/press/status-stamp";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
-import { DENOM, type Denom, FIELD_CLASS, LABEL_CLASS, Stamp } from "@/components/press/kampus-press";
+import { DENOM, type Denom, FIELD_CLASS, LABEL_CLASS, Stamp, StateLabel } from "@/components/press/kampus-press";
 
 interface UktPlanNoteProps {
   plan: UktPlan;
@@ -21,9 +22,9 @@ interface UktPlanNoteProps {
 export const UKT_DENOM: Record<UktCategory, Denom> = {
   ukt: "blue",
   praktikum: "violet",
-  kkn: "green",
-  skripsi: "ochre",
-  wisuda: "violet",
+  kkn: "teal",
+  skripsi: "slate",
+  wisuda: "teal",
 };
 
 // One line of personality per plan, from its category (plans have no free-text field for it).
@@ -45,7 +46,7 @@ const seedOf = (id: string) => [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0
 function deadlineLabel(deadline: string): string {
   const d = new Date(`${deadline}T00:00:00`);
   if (isNaN(d.getTime())) return deadline;
-  return d.getFullYear() === new Date().getFullYear() ? shortDate(d) : `${shortDate(d)} ${d.getFullYear()}`;
+  return d.getFullYear() === new Date().getFullYear() ? printDate(d) : `${printDate(d)} ${d.getFullYear()}`;
 }
 
 /** A sinking-fund plan as a note whose denomination color fills up toward the target. */
@@ -94,7 +95,7 @@ export function UktPlanNote({ plan, metrics, onDeposit, onDelete }: UktPlanNoteP
           ) : metrics.feasibilityStatus === "moderat" ? (
             <StatusStamp status="mepet" />
           ) : (
-            <Stamp label="Berat" tone="habis" />
+            <StateLabel icon={TriangleAlert} className="text-ink">Berat</StateLabel>
           )}
         </div>
 

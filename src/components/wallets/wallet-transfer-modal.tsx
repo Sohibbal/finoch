@@ -211,7 +211,7 @@ export function WalletTransferModal({
                   onClick={() => setAdminFee(fee.value)}
                   className={`min-h-[44px] px-3 py-2 rounded-sm text-xs font-medium border text-left flex items-center justify-between transition-all ${
                     adminFee === fee.value
-                      ? "border-aman-ink/40 bg-aman/10 text-aman-ink font-bold"
+                      ? "border-ink bg-ink/5 text-ink font-bold"
                       : "border-ink/20 text-ink hover:bg-ink/5"
                   }`}
                 >

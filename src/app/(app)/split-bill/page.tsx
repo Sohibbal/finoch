@@ -5,6 +5,7 @@ import { Participant, SplitItem, SplitBillConfig } from "@/types/split-bill-type
 import { calculateSplitBill } from "@/lib/financial/split-bill-engine";
 import { addDebt, getDebtSummary } from "@/lib/storage/debt-storage";
 import { expenseStorage } from "@/lib/storage/expense-storage";
+import { printDate } from "@/components/press/print-date";
 
 import { ParticipantManager } from "@/components/split-bill/participant-manager";
 import { BillItemEditor } from "@/components/split-bill/bill-item-editor";
@@ -16,7 +17,6 @@ import { PageHeader } from "@/components/layout/page-header";
 import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
 import { isDemoMode } from "@/lib/storage/local-storage";
-import { shortDate } from "@/lib/format";
 
 export default function SplitBillPage() {
   // 1. Initial State: an empty nota; Mode Demo swaps in the sample bill after mount (storage is client-only).
@@ -165,7 +165,7 @@ export default function SplitBillPage() {
                 placeholder="Nama tempat makan"
                 className="w-full bg-transparent text-center font-display text-head font-bold text-ink placeholder:text-ink-soft border-b border-dashed border-ink/30 focus:outline-none focus-visible:border-ink py-1"
               />
-              <p className="text-meta text-ink-soft">Nota patungan · {shortDate(config.date)}</p>
+              <p className="text-meta text-ink-soft">Nota patungan · {printDate(config.date)}</p>
             </div>
 
             <BillItemEditor

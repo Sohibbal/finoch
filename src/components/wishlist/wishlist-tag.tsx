@@ -1,19 +1,18 @@
 "use client";
 
 import React from "react";
-import { Check, ExternalLink, Hourglass, ShoppingBag, Trash2 } from "lucide-react";
+import { Check, ExternalLink, Hourglass, PiggyBank, ShoppingBag, Trash2 } from "lucide-react";
 import { WishlistItem } from "@/types/wishlist-types";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { formatSerial } from "@/components/press/serial";
-import { Stamp } from "@/components/press/kampus-press";
+import { StateLabel } from "@/components/press/kampus-press";
 
 interface WishlistTagProps {
   item: WishlistItem;
   onCancelAndSave: (id: string) => void;
   onPurchase: (id: string) => void;
   onDelete: (id: string) => void;
-  /** Just changed state: its stamp presses in. */
-  fresh?: boolean;
   now?: Date;
 }
 
@@ -38,6 +37,10 @@ const DEFAULT_PERSONALITY = "Tahan dulu. Minggu depan belum tentu masih pengen."
 
 const PRIORITY_LABELS = { high: "butuh banget", medium: "bagus kalau ada", low: "cuma kepengen" } as const;
 
+// Where the tag stands, in words; only money status gets a stamp.
+const STATE_ICON = { cooling: Hourglass, ready: Check, saved_money: PiggyBank, purchased: ShoppingBag } as const;
+const STATE_WORD = { cooling: "", ready: "Tunda selesai", saved_money: "Diselamatkan", purchased: "Terbeli" } as const;
+
 const DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Whole days left in the cooling-off period, never negative. */
@@ -47,8 +50,8 @@ export function coolingDaysLeft(item: Pick<WishlistItem, "coolingEndDate">, now:
 
 const ACTION = "inline-flex items-center gap-1.5 min-h-11 px-3 rounded-full border text-body font-semibold transition-colors";
 
-/** A wishlist item as a price tag hanging on a string, stamped with its cooling-off countdown. */
-export function WishlistTag({ item, onCancelAndSave, onPurchase, onDelete, fresh = false, now = new Date() }: WishlistTagProps) {
+/** A wishlist item as a price tag hanging on a string, labelled with its cooling-off countdown. */
+export function WishlistTag({ item, onCancelAndSave, onPurchase, onDelete, now = new Date() }: WishlistTagProps) {
   const daysLeft = coolingDaysLeft(item, now);
   const open = item.status === "cooling" || item.status === "ready";
   const elapsed = Math.min(item.coolingDays, item.coolingDays - daysLeft);
@@ -67,22 +70,16 @@ export function WishlistTag({ item, onCancelAndSave, onPurchase, onDelete, fresh
       <span aria-hidden="true" className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 rounded-full bg-paper border border-ink/40" />
 
       <div className="pl-5 pr-4 py-4 space-y-3">
-        <div className="flex items-start justify-between gap-3">
-          <p className="text-meta text-ink-soft min-w-0">
+        <div>
+          <div className="flex items-start justify-between gap-3">
+            <h3 className="text-body font-bold text-ink break-words min-w-0">{item.name}</h3>
+            <StateLabel icon={STATE_ICON[item.status]} className="text-ink">
+              {item.status === "cooling" ? `Tunda ${daysLeft} hari lagi` : STATE_WORD[item.status]}
+            </StateLabel>
+          </div>
+          <p className="text-meta text-ink-soft">
             {CATEGORY_LABELS[item.category] ?? item.category} · {PRIORITY_LABELS[item.priority]}
           </p>
-          {item.status === "cooling" && (
-            <Stamp label={daysLeft === 1 ? "Tunda 1 hari lagi" : `Tunda ${daysLeft} hari lagi`} tone="mepet" icon={Hourglass} fresh={fresh} />
-          )}
-          {item.status === "ready" && <Stamp label="Tunda selesai" tone="aman" icon={Check} fresh={fresh} />}
-          {item.status === "saved_money" && <Stamp label="Diselamatkan" tone="aman" solid fresh={fresh} />}
-          {item.status === "purchased" && <Stamp label="Terbeli" tone="ink" icon={ShoppingBag} fresh={fresh} />}
-        </div>
-
-        <div>
-          <h3 className={`text-body font-bold text-ink break-words ${item.status === "saved_money" ? "line-through decoration-2" : ""}`}>
-            {item.name}
-          </h3>
           <p className="money font-display text-head font-bold text-ink">{rupiah(item.price)}</p>
           <p className="text-meta text-ink-soft italic">{PERSONALITY[item.category] ?? DEFAULT_PERSONALITY}</p>
         </div>
@@ -106,7 +103,7 @@ export function WishlistTag({ item, onCancelAndSave, onPurchase, onDelete, fresh
 
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-dashed border-ink/25 pt-2">
           <p className="text-meta text-ink-soft">
-            <span className="money tracking-[0.12em]">{formatSerial(item.id, item.createdAt)}</span> · dicatat {shortDate(new Date(item.createdAt))}
+            <span className="money tracking-[0.12em]">{formatSerial(item.id, item.createdAt)}</span> · dicatat {printDate(new Date(item.createdAt))}
           </p>
           {item.linkUrl && (
             <a

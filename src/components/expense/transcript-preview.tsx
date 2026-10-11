@@ -18,29 +18,21 @@ export function TranscriptPreview({
   }
 
   return (
-    <div className="w-full max-w-md mx-auto my-3 p-3.5 rounded-2xl bg-white/80 dark:bg-navy-900/60 border border-cream-300 dark:border-navy-800 text-sm shadow-sm">
+    <div className="w-full max-w-md mx-auto my-3 p-3.5 bg-paper-sheet border border-ink/20">
       <div className="flex items-center justify-between mb-1.5">
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-navy-600 dark:text-cream-400">
-          Suara Terdeteksi
-        </span>
+        <span className="text-meta font-semibold text-ink-soft">Yang kedengaran</span>
         {isListening && (
-          <span className="inline-flex items-center gap-1.5 text-[11px] text-rose-600 dark:text-rose-400 font-bold">
-            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-            Live
+          <span className="inline-flex items-center gap-1.5 text-meta font-semibold text-ink">
+            <span aria-hidden="true" className="w-2 h-2 rounded-full bg-ink motion-safe:animate-pulse" />
+            Merekam
           </span>
         )}
       </div>
 
-      <p className="text-navy-900 dark:text-cream-100 leading-relaxed font-medium text-xs sm:text-sm">
+      <p className="text-body text-ink font-medium">
         {transcript}
-        {interimTranscript && (
-          <span className="text-navy-500 dark:text-cream-300/70 italic ml-1">
-            {interimTranscript}
-          </span>
-        )}
-        {!transcript && !interimTranscript && isListening && (
-          <span className="text-navy-400 dark:text-cream-400/60 italic">Mendengarkan ucapan Anda...</span>
-        )}
+        {interimTranscript && <span className="text-ink-soft italic ml-1">{interimTranscript}</span>}
+        {!transcript && !interimTranscript && isListening && <span className="text-ink-soft italic">Ngomong aja, aku dengerin...</span>}
       </p>
     </div>
   );

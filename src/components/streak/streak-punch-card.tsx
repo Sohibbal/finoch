@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { Check, X } from "lucide-react";
 import { DailyCashflowPoint, DayStatus, StreakSummary } from "@/types/streak-types";
 import { rupiah, shortDate } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
 
@@ -126,7 +127,7 @@ export function StreakPunchCard({ summary }: StreakPunchCardProps) {
 
       <section aria-labelledby="punch-day-title" aria-live="polite" className="space-y-3">
         <h2 id="punch-day-title" className="font-display text-head font-bold text-ink border-b border-ink/20 pb-2">
-          {selected ? shortDate(selected.date) : "Pilih tanggal"}
+          {selected ? printDate(selected.date) : "Pilih tanggal"}
           {selected?.isToday && <span className="font-sans text-body font-normal text-ink-soft"> · hari ini</span>}
         </h2>
         {selected ? (
@@ -162,7 +163,7 @@ export function StreakPunchCard({ summary }: StreakPunchCardProps) {
               .map((pt) => (
                 <li key={pt.date} className="flex items-baseline justify-between gap-3 py-2 text-body">
                   <span className="min-w-0">
-                    <span className="text-ink">{shortDate(pt.date)}</span>
+                    <span className="text-ink">{printDate(pt.date)}</span>
                     <span className="block text-meta text-ink-soft">
                       {DAY_STATUS_LABEL[pt.status]} · {pt.transactionsCount} transaksi
                     </span>

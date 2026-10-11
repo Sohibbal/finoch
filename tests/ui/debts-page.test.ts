@@ -48,6 +48,9 @@ describe("Buku Kasbon page", () => {
     expect(piutang).toContain("Ingatkan WA");
     const utang = renderToString(React.createElement(DebtSlip, { debt: debt({ type: "payable" }), onTogglePaid: noop, onDelete: noop }));
     expect(utang).toContain("Kamu utang ke Raka");
+    // The direction is metadata under the heading, never a kicker above it.
+    expect(piutang.indexOf("Raka utang ke kamu")).toBeLessThan(piutang.indexOf("Piutang · uang kembali ke kamu"));
+    expect(utang.indexOf("Kamu utang ke Raka")).toBeLessThan(utang.indexOf("Utang · kamu yang bayar"));
     const lunas = renderToString(React.createElement(DebtSlip, { debt: debt({ status: "paid" }), onTogglePaid: noop, onDelete: noop }));
     expect(lunas).toContain("Lunas");
     expect(lunas).toContain("Batal lunas");

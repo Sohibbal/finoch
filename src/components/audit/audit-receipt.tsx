@@ -1,7 +1,9 @@
 import React from "react";
-import { Cap } from "@/components/press/denom";
+import { Check, Droplet } from "lucide-react";
+import { StateLabel } from "@/components/press/kampus-press";
 import { Serial, formatSerial } from "@/components/press/serial";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { localDateKey, parseDate } from "@/lib/date";
 import type { LeakAuditSummary } from "@/types/audit-types";
 
@@ -39,7 +41,7 @@ export function AuditReceipt({ summary, monthLabel }: { summary: LeakAuditSummar
 
         {clean ? (
           <div className="px-5 py-8 text-center space-y-3">
-            <Cap tone="aman">Bersih</Cap>
+            <StateLabel icon={Check} className="text-ink">Bersih</StateLabel>
             <p className="text-body text-ink">Belum ada jajan receh yang bocor bulan ini. Pertahankan.</p>
           </div>
         ) : (
@@ -48,11 +50,12 @@ export function AuditReceipt({ summary, monthLabel }: { summary: LeakAuditSummar
               {shown.map((item) => (
                 <li key={item.id} className="py-2.5 grid grid-cols-[1fr_auto] gap-x-3 items-baseline">
                   <div className="min-w-0">
-                    <p className="text-body text-ink break-words line-through decoration-habis-ink/70 decoration-2">
+                    <p className="text-body text-ink break-words">
+                      <Droplet className="inline w-3.5 h-3.5 mr-1.5 -mt-0.5 text-ink-soft" strokeWidth={2.5} aria-hidden="true" />
                       {item.name}
                     </p>
                     <p className="text-meta text-ink-soft">
-                      {[shortDate(dayKey(item.date)), item.categoryLabel].filter(Boolean).join(" · ")}
+                      {[printDate(dayKey(item.date)), item.categoryLabel].filter(Boolean).join(" · ")}
                       <span className="sr-only"> · {formatSerial(item.id, dayKey(item.date))}</span>
                     </p>
                   </div>
@@ -104,7 +107,7 @@ export function AuditReceipt({ summary, monthLabel }: { summary: LeakAuditSummar
                     {cat.label} <span className="text-meta text-ink-soft">· {cat.count}x</span>
                   </span>
                   <span className="money text-body font-semibold text-ink">{rupiah(cat.amount)}</span>
-                  <span aria-hidden="true" className="col-span-2 h-1.5 bg-habis/80" style={{ width: `${Math.max(2, cat.percentage)}%` }} />
+                  <span aria-hidden="true" className="col-span-2 h-1.5 bg-ink/60" style={{ width: `${Math.max(2, cat.percentage)}%` }} />
                   <span className="col-span-2 text-meta text-ink-soft">
                     {summary.items.find((i) => i.category === cat.category)?.substitutionTip}
                   </span>

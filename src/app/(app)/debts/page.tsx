@@ -97,12 +97,12 @@ export default function DebtsPage() {
           <dl className="grid grid-cols-2 gap-4">
             <div className="min-w-0">
               <dt className="text-body text-ink-soft">Teman utang ke kamu</dt>
-              <dd className="font-display text-head font-bold text-aman-ink money break-words">{rupiah(summary.totalReceivable)}</dd>
+              <dd className="font-display text-head font-bold text-denom-teal dark:text-denom-teal-dark money break-words">{rupiah(summary.totalReceivable)}</dd>
               <dd className="text-meta text-ink-soft">{summary.unpaidReceivablesCount} orang belum bayar</dd>
             </div>
             <div className="min-w-0">
               <dt className="text-body text-ink-soft">Kamu utang ke teman</dt>
-              <dd className="font-display text-head font-bold text-mepet-ink money break-words">{rupiah(summary.totalPayable)}</dd>
+              <dd className="font-display text-head font-bold text-denom-slate dark:text-denom-slate-dark money break-words">{rupiah(summary.totalPayable)}</dd>
               <dd className="text-meta text-ink-soft">{summary.unpaidPayablesCount} belum kamu lunasi</dd>
             </div>
           </dl>

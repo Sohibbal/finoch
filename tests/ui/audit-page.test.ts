@@ -25,7 +25,7 @@ describe("Micro-Expense Leak Audit Components", () => {
     expect(typeof AuditPageModule.default).toBe("function");
   });
 
-  it("prints leaks as a receipt: struck items, the warteg count, tips only for what was found", async () => {
+  it("prints leaks as a receipt: marked (not struck) items, the warteg count, tips only for what was found", async () => {
     const { AuditReceipt } = await import("@/components/audit/audit-receipt");
     const { auditMicroExpenses } = await import("@/lib/financial/audit-engine");
     const today = new Date().toISOString();
@@ -38,7 +38,9 @@ describe("Micro-Expense Leak Audit Components", () => {
     );
     const html = renderToString(React.createElement(AuditReceipt, { summary, monthLabel: "Oktober 2026" }));
     expect(html).toContain("Parkir Indomaret");
-    expect(html).toContain("line-through");
+    // Strikethrough means "dihapus"; live leaks are marked with a drop instead.
+    expect(html).not.toContain("line-through");
+    expect(html).toContain("lucide-droplet");
     expect(html).toContain("porsi warteg");
     expect(html).not.toContain("galon");
     expect(html).not.toContain("Family Plan");
