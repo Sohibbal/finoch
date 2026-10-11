@@ -16,6 +16,7 @@ import { useAuthContext } from "@/components/layout/auth-provider";
 import { PageHeader } from "@/components/layout/page-header";
 import { invalidateFinancialProfile } from "@/hooks/use-financial-profile";
 import { isDemoMode, setDemoMode } from "@/lib/storage/local-storage";
+import { resetDemoData, seedDemoExpenses } from "@/lib/storage/demo-seed";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -39,11 +40,21 @@ export default function ProfilePage() {
 
   // Read after mount: storage is client-only.
   const [demoMode, setDemoModeState] = useState(false);
+  const [demoBusy, setDemoBusy] = useState(false);
   useEffect(() => setDemoModeState(isDemoMode()), []);
 
   // Pages read storage on mount, so a full reload switches every store to the other namespace.
-  const handleToggleDemo = () => {
+  // Turning demo off keeps its data (scoped and never synced), so turning it back on shows the same samples.
+  const handleToggleDemo = async () => {
+    setDemoBusy(true);
     setDemoMode(!demoMode);
+    if (!demoMode) await seedDemoExpenses().catch((err) => console.error("Gagal mengisi data demo:", err));
+    window.location.reload();
+  };
+
+  const handleResetDemo = async () => {
+    setDemoBusy(true);
+    await resetDemoData().catch((err) => console.error("Gagal mereset data demo:", err));
     window.location.reload();
   };
 
@@ -161,6 +172,16 @@ export default function ProfilePage() {
               <p className="text-xs text-navy-600 dark:text-cream-300/70">
                 Isi aplikasi dengan data contoh untuk presentasi. Data asli aman dan data demo tidak disinkron ke server.
               </p>
+              {demoMode && (
+                <button
+                  type="button"
+                  onClick={handleResetDemo}
+                  disabled={demoBusy}
+                  className="mt-2 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[11px] font-bold hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors disabled:opacity-50"
+                >
+                  Reset data demo
+                </button>
+              )}
             </div>
           </div>
           <button
@@ -169,6 +190,7 @@ export default function ProfilePage() {
             aria-checked={demoMode}
             aria-labelledby="demo-mode-label"
             onClick={handleToggleDemo}
+            disabled={demoBusy}
             className={`relative w-11 h-6 shrink-0 rounded-full transition-colors ${
               demoMode ? "bg-amber-500" : "bg-cream-300 dark:bg-navy-800"
             }`}
