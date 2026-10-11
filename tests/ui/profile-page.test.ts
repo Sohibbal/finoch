@@ -13,11 +13,13 @@ describe("Profile Management Page", () => {
     expect(mod.default).toBeDefined();
   });
 
-  it("offers the demo mode switch with its explanation", async () => {
+  it("renders nickname editing field and account details", async () => {
     const mod = await import("@/app/(app)/profile/page");
     const html = renderToString(React.createElement(mod.default));
-    expect(html).toContain("Mode Demo (data contoh)");
-    expect(html).toContain("tidak disinkron");
-    expect(html).toContain('role="switch"');
+    expect(html).toContain("Nama Panggilan (Nickname)");
+    expect(html).toContain("Informasi Akun");
+    expect(html).toContain("sari@finoch.id");
+    expect(html).toContain("Simpan Panggilan");
+    expect(html).toContain("Keluar dari Akun");
   });
 });

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
-import { validateOnboardingProfile } from "./validator";
 
 export async function GET(req: Request) {
   try {
@@ -10,14 +9,24 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const profile = await prisma.financialProfile.findUnique({
-      where: { userId: session.userId },
-    });
+    const [user, profile] = await Promise.all([
+      prisma.user.findUnique({ where: { id: session.userId }, select: { id: true, email: true, name: true } }),
+      prisma.profile.findUnique({ where: { userId: session.userId } }).catch(() => null),
+    ]);
 
-    return NextResponse.json({ profile }, { status: 200 });
+    return NextResponse.json(
+      {
+        user,
+        profile: {
+          nickname: profile?.nickname || user?.name || "Kawan",
+          userId: session.userId,
+        },
+      },
+      { status: 200 }
+    );
   } catch (error) {
     return NextResponse.json(
-      { error: "Failed to fetch financial profile" },
+      { error: "Gagal memuat profil pengguna" },
       { status: 500 }
     );
   }
@@ -34,49 +43,25 @@ export async function POST(req: Request) {
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ error: "JSON tidak valid." }, { status: 400 });
     }
-    const validation = validateOnboardingProfile(body);
-    if (!validation.success) {
-      return NextResponse.json(
-        { error: "Validation failed", details: validation.errors },
-        { status: 400 }
-      );
+
+    const nickname = typeof body.nickname === "string" && body.nickname.trim()
+      ? body.nickname.trim()
+      : undefined;
+
+    let profile = null;
+    if (nickname) {
+      profile = await prisma.profile.upsert({
+        where: { userId: session.userId },
+        update: { nickname, updatedAt: new Date() },
+        create: { userId: session.userId, nickname },
+      });
     }
 
-    const {
-      monthlyIncome,
-      incomeType,
-      currentSavings,
-      monthlyFixedExpenses,
-      financialPriority,
-      currency,
-    } = body;
-
-    const profile = await prisma.financialProfile.upsert({
-      where: { userId: session.userId },
-      update: {
-        monthlyIncome: Math.round(monthlyIncome),
-        incomeType,
-        currentSavings: Math.round(currentSavings),
-        monthlyFixedExpenses: Math.round(monthlyFixedExpenses),
-        financialPriority: financialPriority || "saving",
-        currency: currency || "IDR",
-        updatedAt: new Date(),
-      },
-      create: {
-        userId: session.userId,
-        monthlyIncome: Math.round(monthlyIncome),
-        incomeType,
-        currentSavings: Math.round(currentSavings),
-        monthlyFixedExpenses: Math.round(monthlyFixedExpenses),
-        financialPriority: financialPriority || "saving",
-        currency: currency || "IDR",
-      },
-    });
-
-    return NextResponse.json({ profile }, { status: 200 });
+    return NextResponse.json({ profile, success: true }, { status: 200 });
   } catch (error) {
+    console.error("Profile update error:", error);
     return NextResponse.json(
-      { error: "Failed to save financial profile" },
+      { error: "Gagal menyimpan profil" },
       { status: 500 }
     );
   }

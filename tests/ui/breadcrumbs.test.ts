@@ -29,14 +29,13 @@ describe("Breadcrumbs Navigation Component", () => {
     expect(html).toContain('aria-current="page"');
   });
 
-  it("renders multi-level breadcrumb with parent category and current item on /ukt-savings", async () => {
+  it("renders multi-level breadcrumb with parent category and current item on /pemasukan", async () => {
     const { Breadcrumbs } = await import("@/components/layout/breadcrumbs");
-    currentPathname = "/ukt-savings";
+    currentPathname = "/pemasukan";
 
     const html = renderToString(React.createElement(Breadcrumbs));
     expect(html).toContain('href="/dashboard"');
-    expect(html).toMatch(/mahasiswa &amp; kost|mahasiswa & kost/i);
-    expect(html).toContain("Tabungan UKT");
+    expect(html).toContain("Pemasukan");
     expect(html).toContain('aria-current="page"');
   });
 

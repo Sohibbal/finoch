@@ -1,4 +1,3 @@
-// tests/ui/desktop-layout.test.ts
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import React from "react";
 import { renderToString } from "react-dom/server";
@@ -22,7 +21,7 @@ describe("Desktop Layout & Navigation", () => {
     expect(module.PwaInstallButton).toBeDefined();
   });
 
-  it("exports BottomNav component for 5-tab mobile navigation", async () => {
+  it("exports BottomNav component for mobile navigation", async () => {
     const module = await import("@/components/layout/bottom-nav");
     expect(module.BottomNav).toBeDefined();
   });
@@ -40,12 +39,10 @@ describe("Desktop Layout & Navigation", () => {
 
     expect(html).toContain('href="/dashboard"');
     expect(html).toMatch(/beranda/i);
-    expect(html).toContain('href="/wallets"');
-    expect(html).toContain('href="/reports"');
-    // Center Catat seal opens the voice sheet; Menu opens every other feature.
-    expect(html).toContain('aria-label="Catat pengeluaran dengan suara"');
-    expect(html).toContain("Menu");
-    expect(html).not.toContain("Menu Fitur");
+    expect(html).toContain('href="/pemasukan"');
+    expect(html).toContain('href="/pengeluaran"');
+    expect(html).toContain('href="/wishlist"');
+    expect(html).toContain('href="/copilot"');
   });
 
   it("renders guest navigation fallback when unauthenticated", async () => {
@@ -65,13 +62,13 @@ describe("Desktop Layout & Navigation", () => {
 
   it("marks the active tab for assistive tech", async () => {
     const { BottomNav } = await import("@/components/layout/bottom-nav");
-    currentPathname = "/wallets";
+    currentPathname = "/pemasukan";
     const html = renderToString(
       React.createElement(BottomNav, {
         onOpenVoice: () => {},
         userEmail: "student@campus.ac.id",
       })
     );
-    expect(html).toMatch(/aria-current="page"[^>]*href="\/wallets"|href="\/wallets"[^>]*aria-current="page"/);
+    expect(html).toMatch(/aria-current="page"[^>]*href="\/pemasukan"|href="\/pemasukan"[^>]*aria-current="page"/);
   });
 });

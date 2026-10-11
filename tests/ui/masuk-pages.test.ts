@@ -51,15 +51,13 @@ describe("landing page", () => {
 });
 
 describe("onboarding", () => {
-  it("defaults to Uang Saku with an empty, properly labelled amount", async () => {
+  it("renders typewriter card asking for user nickname", async () => {
     const { default: Onboarding } = await import("@/app/onboarding/page");
     const html = renderToString(React.createElement(Onboarding));
     expect(html).not.toContain("Digital Twin");
-    expect(html).not.toMatch(/value="3[.]?500[.]?000"/);
-    expect(html).toMatch(/<label[^>]*for="monthly-income"/);
-    expect(html).toMatch(/<input[^>]*id="monthly-income"[^>]*value=""/);
-    expect(html).toMatch(/aria-pressed="true"[^>]*>.*?Uang Saku/);
-    expect(html).toMatch(/aria-pressed="false"[^>]*>.*?Gaji/);
+    expect(html).toContain("FinBot");
+    expect(html).toMatch(/<input[^>]*id="nickname-input"/);
+    expect(html).toContain("Mulai Berteman");
   });
 });
 

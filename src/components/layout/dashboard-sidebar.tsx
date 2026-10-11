@@ -40,8 +40,8 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-ink-soft pointer-events-none" aria-hidden="true" />
           <input
             type="search"
-            placeholder="Cari fitur (UKT, warteg, kasbon)..."
-            aria-label="Cari fitur"
+            placeholder="Cari menu..."
+            aria-label="Cari menu"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full h-10 pl-9 pr-9 text-meta bg-paper-sheet border border-ink/20 placeholder:text-ink-soft text-ink focus:outline-none focus:border-ink"

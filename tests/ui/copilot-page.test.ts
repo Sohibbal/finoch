@@ -15,25 +15,19 @@ describe("Copilot Page Component", () => {
     expect(mod.default).toBeDefined();
   });
 
-  it("greets in the kamu voice, not as a product announcement", async () => {
+  it("greets in the FinBot Gen-Z voice", async () => {
     const mod = await import("@/app/(app)/copilot/page");
     const html = renderToString(React.createElement(mod.default));
-    expect(html).toContain("Hai, aku Finoch.");
-    expect(html).toContain("finoch");
-    expect(html).not.toContain("voicash.id");
-    expect(html).not.toContain("Finoch AI Copilot untuk");
+    expect(html).toContain("FinBot");
+    expect(html).toContain("Gue FinBot");
+    expect(html).toContain("database lo");
   });
 
-  it("fills the empty chat with the questions as printed slips", async () => {
+  it("provides quick prompt suggestions for the user", async () => {
     const mod = await import("@/app/(app)/copilot/page");
     const html = renderToString(React.createElement(mod.default));
-    expect(html).toContain("Jatah jajan hari ini masih aman nggak?");
-    expect(html).toContain("Gimana trik hemat makan biar uang kiriman cukup sebulan?");
-    expect(html).toContain("Aman nggak kalau beli sepatu/baju baru minggu ini?");
-    expect(html).toContain("Kiat bertahan hidup saat krisis tanggal tua");
-    expect(html).toContain("Coba tanya ini");
-    // Only one set of prompts before the first question: the slips, not the bottom chip row too.
-    expect(html).not.toContain("Sering ditanya");
+    expect(html).toContain("Bulan ini gue paling boros apa?");
+    expect(html).toContain("Sisa uang jajan gue masih aman gak?");
+    expect(html).toContain("Kapan wishlist gue bisa kebeli?");
   });
 });
-
