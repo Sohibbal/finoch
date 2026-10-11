@@ -90,8 +90,8 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
       return;
     }
 
-    if (regPassword.length < 6) {
-      setRegError("Password minimal 6 karakter.");
+    if (regPassword.length < 8) {
+      setRegError("Password minimal 8 karakter.");
       return;
     }
 
@@ -354,7 +354,7 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
 
                   <div>
                     <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                      Password (minimal 6 karakter)
+                      Password (minimal 8 karakter)
                     </label>
                     <div className="relative">
                       <input
