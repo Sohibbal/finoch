@@ -19,12 +19,14 @@ import {
   SpendingCategory,
   validateTransactionCandidate,
 } from "@/types/financial-types";
+import { WalletPicker } from "@/components/wallets/wallet-picker";
 
 interface UnifiedConfirmationModalProps {
   isOpen: boolean;
   candidate: TransactionCandidate | null;
   onClose: () => void;
-  onConfirm: (candidate: TransactionCandidate) => Promise<void> | void;
+  /** walletId undefined = the default wallet. */
+  onConfirm: (candidate: TransactionCandidate, walletId?: string) => Promise<void> | void;
   isSubmitting?: boolean;
 }
 
@@ -38,6 +40,7 @@ export function UnifiedConfirmationModal({
   const [formData, setFormData] = useState<TransactionCandidate | null>(null);
   const [showItemDetails, setShowItemDetails] = useState(false);
   const [validationError, setValidationError] = useState<string>("");
+  const [walletId, setWalletId] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     if (isOpen && candidate) {
@@ -51,6 +54,7 @@ export function UnifiedConfirmationModal({
       });
       setShowItemDetails(Boolean(candidate.items && candidate.items.length > 0));
       setValidationError("");
+      setWalletId(undefined);
     }
   }, [isOpen, candidate]);
 
@@ -68,7 +72,7 @@ export function UnifiedConfirmationModal({
       return;
     }
     setValidationError("");
-    await onConfirm(formData);
+    await onConfirm(formData, walletId);
   };
 
   return (
@@ -202,6 +206,8 @@ export function UnifiedConfirmationModal({
               </div>
             </div>
           </div>
+
+          <WalletPicker value={walletId} onChange={setWalletId} />
 
           {/* Item Breakdown (if extracted from OCR) */}
           {formData.items && formData.items.length > 0 && (
