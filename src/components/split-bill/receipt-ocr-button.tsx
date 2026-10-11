@@ -3,6 +3,34 @@
 import React, { useState, useRef } from "react";
 import { Camera, Loader2, Sparkles } from "lucide-react";
 import { SplitItem } from "@/types/split-bill-types";
+import { TransactionCandidate } from "@/types/financial-types";
+
+/**
+ * Maps an OCR transaction candidate to split-bill items: one per receipt line item,
+ * or a single item for the total when no line items were detected.
+ */
+export function candidateToSplitItems(candidate: TransactionCandidate): Omit<SplitItem, "id">[] {
+  const lineItems = (candidate.items ?? []).filter((item) => item.amount > 0);
+  if (lineItems.length > 0) {
+    return lineItems.map((item) => ({
+      name: item.name,
+      price: item.amount,
+      quantity: 1,
+      assignedParticipantIds: [],
+    }));
+  }
+
+  const amount = Number(candidate.amount) || 0;
+  if (amount <= 0) return [];
+  return [
+    {
+      name: candidate.merchant || "Menu Struk",
+      price: amount,
+      quantity: 1,
+      assignedParticipantIds: [],
+    },
+  ];
+}
 
 interface ReceiptOcrButtonProps {
   onItemsExtracted: (items: Omit<SplitItem, "id">[], detectedStore?: string) => void;
@@ -19,7 +47,7 @@ export function ReceiptOcrButton({ onItemsExtracted }: ReceiptOcrButtonProps) {
     setIsScanning(true);
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("image", file);
 
       const res = await fetch("/api/transactions/ocr", {
         method: "POST",
@@ -28,23 +56,11 @@ export function ReceiptOcrButton({ onItemsExtracted }: ReceiptOcrButtonProps) {
 
       if (res.ok) {
         const data = await res.json();
-        const candidate = data.candidate || data;
-        const itemName = candidate.itemName || "Menu Struk";
-        const amount = Number(candidate.amount) || 0;
-        const store = candidate.store || "";
+        const candidate: TransactionCandidate = data.candidate || data;
+        const items = candidateToSplitItems(candidate);
 
-        if (amount > 0) {
-          onItemsExtracted(
-            [
-              {
-                name: itemName,
-                price: amount,
-                quantity: 1,
-                assignedParticipantIds: [],
-              },
-            ],
-            store
-          );
+        if (items.length > 0) {
+          onItemsExtracted(items, candidate.merchant || "");
         } else {
           alert("OCR berhasil membaca teks, namun tidak menemukan nominal yang valid. Silakan masukkan menu manual.");
         }
