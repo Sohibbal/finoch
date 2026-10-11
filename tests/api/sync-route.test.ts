@@ -65,18 +65,24 @@ describe("POST /api/sync", () => {
     });
 
     expect(status).toBe(200);
-    expect(json.appliedIds).toEqual(["ok"]);
+    expect(json.appliedIds).toEqual(["ok", "cat"]);
     expect(json.rejectedIds).toEqual([
       { id: "neg", reason: "invalid_amount" },
       { id: "frac", reason: "invalid_amount" },
       { id: "huge", reason: "invalid_amount" },
-      { id: "cat", reason: "invalid_category" },
       { id: "name", reason: "invalid_item_name" },
       { id: "date", reason: "invalid_date" },
       { id: "act", reason: "invalid_action" },
       { id: "noid", reason: "invalid_id" },
     ]);
-    expect(prismaMock.expense.create).toHaveBeenCalledTimes(1);
+    expect(prismaMock.expense.create).toHaveBeenCalledTimes(2);
+    expect(prismaMock.expense.create.mock.calls[1][0].data.category).toBe("Other");
+  });
+
+  it("maps legacy categories instead of rejecting them", async () => {
+    const { json } = await sync({ clientChanges: [change("shop", { category: "Shopping" })] });
+    expect(json.appliedIds).toEqual(["shop"]);
+    expect(prismaMock.expense.create.mock.calls[0][0].data.category).toBe("Shopping & Lifestyle");
   });
 
   it("rejects changes to another user's record instead of leaving them queued", async () => {

@@ -92,7 +92,7 @@ describe("API security", () => {
     mocks.user.create.mockRejectedValue({ code: "P2002" });
     expect((await register(request({ email: "race@user.test", password: "12345678", name: "A" }))).status).toBe(409);
   });
-  it.each([{ amount: -1 }, { amount: 1.5 }, { amount: 2_000_000_001 }, { amount: "5" }, { category: "unknown" }, { itemName: "a".repeat(201) }, { createdAt: "2026-02-30" }, { createdAt: "bad" }])("validates expenses: %j", async (invalid) => {
+  it.each([{ amount: -1 }, { amount: 1.5 }, { amount: 2_000_000_001 }, { amount: "5" }, { itemName: "a".repeat(201) }, { createdAt: "2026-02-30" }, { createdAt: "bad" }])("validates expenses: %j", async (invalid) => {
     expect((await expenses(request({ itemName: "Makan", amount: 100, category: "Other", ...invalid }))).status).toBe(400);
     expect(mocks.expense.create).not.toHaveBeenCalled();
   });
@@ -123,5 +123,15 @@ describe("API security", () => {
     fetchMock.mockReset().mockResolvedValue(new Response("busy", { status: 429 }));
     await ocr(new Request("http://localhost", { method: "POST", body: form }));
     expect(fetchMock).toHaveBeenCalledTimes(3);
+  });
+});
+
+describe("normalizeExpenseCategory", () => {
+  it.each([
+    ["Food & Drinks", "Food & Drinks"], ["Shopping", "Shopping & Lifestyle"], ["Housing & Bills", "Bills & Utilities"],
+    ["Entertainment & Leisure", "Shopping & Lifestyle"], ["Crypto", "Other"], [undefined, "Other"],
+  ])("%s -> %s", async (input, expected) => {
+    const { normalizeExpenseCategory } = await import("@/app/api/validation");
+    expect(normalizeExpenseCategory(input)).toBe(expected);
   });
 });

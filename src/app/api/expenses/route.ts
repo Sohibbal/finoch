@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { EXPENSE_CATEGORIES } from "../validation";
+import { normalizeExpenseCategory } from "../validation";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
 
@@ -39,7 +39,6 @@ export async function POST(req: Request) {
 
     if (typeof itemName !== "string" || !itemName.trim() || itemName.length > 200
       || typeof amount !== "number" || !Number.isSafeInteger(amount) || amount <= 0 || amount > 2_000_000_000
-      || !EXPENSE_CATEGORIES.includes(category)
       || (createdAt !== undefined && (typeof createdAt !== "string" || !/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(createdAt)
         || !Number.isFinite(Date.parse(createdAt)) || new Date(createdAt.slice(0, 10)).toISOString().slice(0, 10) !== createdAt.slice(0, 10)))) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -51,7 +50,7 @@ export async function POST(req: Request) {
         userId: session.userId,
         itemName: itemName.trim(),
         amount,
-        category,
+        category: normalizeExpenseCategory(category),
         createdAt: createdAt ? new Date(createdAt) : new Date(),
         updatedAt: new Date(),
       },

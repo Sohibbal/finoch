@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
-import { EXPENSE_CATEGORIES } from "@/app/api/validation";
+import { normalizeExpenseCategory } from "@/app/api/validation";
 import type { BatchSyncRequest, BatchSyncResponse, SyncRejection } from "@/lib/types/sync";
 import type { Expense } from "@/lib/types/expense";
 
@@ -26,7 +26,6 @@ function validateChange(change: any): string | null {
   if (change.action === "delete") return null;
   if (typeof p.itemName !== "string" || !p.itemName.trim() || p.itemName.length > 200) return "invalid_item_name";
   if (!Number.isSafeInteger(p.amount) || p.amount < 1 || p.amount > MAX_AMOUNT) return "invalid_amount";
-  if (!EXPENSE_CATEGORIES.includes(p.category)) return "invalid_category";
   if (!isValidDate(p.createdAt) || !isValidDate(p.updatedAt)) return "invalid_date";
   return null;
 }
@@ -79,7 +78,7 @@ export async function POST(req: Request) {
           const data = {
             itemName: payload.itemName.trim(),
             amount: payload.amount,
-            category: payload.category,
+            category: normalizeExpenseCategory(payload.category),
             isDeleted: !!payload.isDeleted,
             updatedAt: clientUpdatedAt,
           };

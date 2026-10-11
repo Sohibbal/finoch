@@ -97,7 +97,7 @@ export default function WishlistPage() {
       await expenseStorage.saveExpense({
         itemName: `Beli Wishlist: ${target.name}`,
         amount: target.price,
-        category: "Shopping",
+        category: "Shopping & Lifestyle",
         userId: user?.id || "guest",
       });
       alert(`Selamat! "${target.name}" (${formatRupiah(target.price)}) berhasil dibeli dan otomatis dicatat ke Pengeluaran Finoch! 🛍️`);
