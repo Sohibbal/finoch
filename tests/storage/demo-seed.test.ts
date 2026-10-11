@@ -49,7 +49,7 @@ describe("demo expense seeding", () => {
     setDemoMode(true);
     const count = await seedDemoExpenses(NOW);
     expect(count).toBeGreaterThanOrEqual(45);
-    expect(count).toBeLessThanOrEqual(70);
+    expect(count).toBeLessThanOrEqual(100);
 
     const expenses = await expenseStorage.getExpenses();
     expect(expenses).toHaveLength(count);
@@ -114,5 +114,14 @@ describe("demo expense seeding", () => {
 
     setDemoMode(false);
     expect((await expenseStorage.getExpenses()).map((e) => e.id)).toEqual([real.id]);
+  });
+});
+
+describe("demo data tells a month-over-month story", () => {
+  it("gives Insight real equal-range changes to report", async () => {
+    const { detectSpendingPatterns, getMonthlyCategoryTotals } = await import("@/lib/insights/pattern-detector");
+    const expenses = generateDemoExpenses(NOW).map((e, i) => ({ ...e, id: `d${i}`, userId: "u", isDeleted: false, syncStatus: "synced", updatedAt: e.createdAt }));
+    const cards = detectSpendingPatterns({ ...getMonthlyCategoryTotals(expenses as never, NOW), recurringExpenses: [] });
+    expect(cards.length).toBeGreaterThanOrEqual(2);
   });
 });

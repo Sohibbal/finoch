@@ -19,6 +19,9 @@ import { ReportPrintableDocument } from "@/components/reports/report-printable-d
 import { ContentSkeleton, EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { isDemoMode } from "@/lib/storage/local-storage";
+import { getBills } from "@/lib/storage/bill-storage";
+import { monthLedger, fixedCostScope } from "@/lib/financial/month-ledger";
+import type { RecurringBill } from "@/types/bill-types";
 
 const SELECT_CLASS =
   "min-h-11 px-3 bg-paper-sheet border border-ink/30 text-body font-semibold text-ink rounded-none focus-visible:outline-offset-2";
@@ -77,10 +80,25 @@ export default function ReportsPage() {
     loadData();
   }, [loadData]);
 
+  // Fixed costs come from the same month ledger as every page, so the closing figure agrees with them.
+  const [bills, setBills] = useState<RecurringBill[]>([]);
+  useEffect(() => setBills(getBills()), []);
+  const fixed = useMemo(
+    () =>
+      monthLedger({
+        monthlyIncome: profile.monthlyIncome ?? 0,
+        profileFixedCosts: profile.fixedExpenses ?? 0,
+        bills,
+        transactions: [],
+        now: new Date(selectedYear, selectedMonth - 1, 1),
+      }),
+    [profile.monthlyIncome, profile.fixedExpenses, bills, selectedMonth, selectedYear]
+  );
+
   // Compute summary for selected month & year
   const summary: MonthlyReportSummary = useMemo(() => {
-    return generateMonthlyReport(expenses, profile.monthlyIncome ?? 0, selectedMonth, selectedYear);
-  }, [expenses, profile.monthlyIncome, selectedMonth, selectedYear]);
+    return generateMonthlyReport(expenses, profile.monthlyIncome ?? 0, selectedMonth, selectedYear, fixed.fixedCosts);
+  }, [expenses, profile.monthlyIncome, selectedMonth, selectedYear, fixed.fixedCosts]);
 
   // Export CSV
   const handleExportCsv = () => {
@@ -188,7 +206,7 @@ export default function ReportsPage() {
             Laporan bulanan dan ekspor LPJ dibuat dari pengeluaran yang kamu catat. Mulai catat, laporan tersusun otomatis.
           </EmptyState>
         ) : (
-          <ReportPrintableDocument summary={summary} expenses={expenses} studentName={studentName} campusName={campusName} />
+          <ReportPrintableDocument summary={summary} expenses={expenses} studentName={studentName} campusName={campusName} fixedCostLabel={fixedCostScope(fixed.fixedCostSource)} />
         )}
       </main>
       </ProfileGate>

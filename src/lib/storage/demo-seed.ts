@@ -56,6 +56,13 @@ export function generateDemoExpenses(now: Date = new Date()): CreateExpenseParam
     if (day % 7 === 1) fixed.push(["Laundry kiloan", "Bills & Utilities", 20000, 30000]);
     if (day % 8 === 4) fixed.push(["Isi ulang galon", "Bills & Utilities", 6000, 7000]);
 
+    // A month-over-month story for Insight: last month had a coffee habit and one flash-sale
+    // checkout; this month the coffee is cut back but ojek to campus goes up.
+    const lastMonth = d.getMonth() !== now.getMonth();
+    if (lastMonth && day % 2 === 0) fixed.push(["Kopi susu kekinian", "Food & Drinks", 20000, 26000]);
+    if (lastMonth && day === 6) fixed.push(["Checkout flash sale sepatu", "Shopping & Lifestyle", 149000, 149000]);
+    if (!lastMonth && day % 2 === 1) fixed.push(["Ojek online pulang kuliah", "Transportation", 12000, 16000]);
+
     // About one day in three has no spending at all, so Streak Hemat has green days.
     if (!fixed.length && rand() < 0.3) continue;
 

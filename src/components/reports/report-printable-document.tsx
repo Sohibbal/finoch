@@ -4,15 +4,17 @@ import { ExpenseRecord } from "@/lib/financial/report-engine";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Note } from "@/components/press/note";
 import { Serial, formatSerial } from "@/components/press/serial";
-import { Cap } from "@/components/press/denom";
 import { categoryLabel, rupiah } from "@/lib/format";
 import { localDateKey, parseDate } from "@/lib/date";
+import { BILL_PAYMENT_PREFIX } from "@/lib/financial/month-ledger";
 
 interface ReportPrintableDocumentProps {
   summary: MonthlyReportSummary;
   expenses: ExpenseRecord[];
   studentName?: string;
   campusName?: string;
+  /** Where the fixed costs come from ("dari tagihan" / "dari profil"). */
+  fixedCostLabel?: string;
 }
 
 const TH = "py-2 pr-3 text-meta font-semibold text-ink-soft text-left";
@@ -24,10 +26,11 @@ const PRINT_INKS =
 
 /** The month's expenses oldest first, each with the balance left after it, like a bank statement. */
 export function statementRows(expenses: ExpenseRecord[], summary: MonthlyReportSummary) {
-  let saldo = summary.totalIncome;
+  // Opens at what is spendable after fixed costs; bill payments are already inside those costs.
+  let saldo = summary.totalIncome - (summary.fixedCosts ?? 0);
   return expenses
     .map((e) => ({ e, d: parseDate(e.createdAt) }))
-    .filter(({ d }) => d && d.getMonth() + 1 === summary.month && d.getFullYear() === summary.year)
+    .filter(({ e, d }) => d && d.getMonth() + 1 === summary.month && d.getFullYear() === summary.year && !(summary.fixedCosts > 0 && e.itemName?.startsWith(BILL_PAYMENT_PREFIX)))
     .sort((a, b) => a.d!.getTime() - b.d!.getTime())
     .map(({ e, d }, i) => {
       saldo -= e.amount || 0;
@@ -42,6 +45,7 @@ export function ReportPrintableDocument({
   expenses,
   studentName = "Mahasiswa Finoch",
   campusName = "Perguruan Tinggi",
+  fixedCostLabel,
 }: ReportPrintableDocumentProps) {
   const isSurplus = summary.netSavings >= 0;
   const rows = statementRows(expenses, summary);
@@ -80,6 +84,14 @@ export function ReportPrintableDocument({
               <dt className="text-body text-ink">Uang saku masuk</dt>
               <dd className="money text-body font-semibold text-ink">{rupiah(summary.totalIncome)}</dd>
             </div>
+            {summary.fixedCosts > 0 && (
+              <div className="flex items-baseline justify-between gap-4 py-2.5">
+                <dt className="text-body text-ink">
+                  Pengeluaran tetap {fixedCostLabel && <span className="text-meta text-ink-soft">· {fixedCostLabel}</span>}
+                </dt>
+                <dd className="money text-body font-semibold text-ink">{rupiah(-summary.fixedCosts)}</dd>
+              </div>
+            )}
             <div className="flex items-baseline justify-between gap-4 py-2.5">
               <dt className="text-body text-ink">
                 Total keluar <span className="text-meta text-ink-soft">· {summary.totalTransactions} transaksi</span>
@@ -89,7 +101,7 @@ export function ReportPrintableDocument({
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
               <dt className="text-body font-bold text-ink flex items-center gap-3">
                 Saldo akhir bulan ini
-                <Cap tone={isSurplus ? "aman" : "habis"}>{isSurplus ? "Surplus" : "Defisit"}</Cap>
+                <span className="text-meta font-semibold text-ink-soft">{isSurplus ? "lebih" : "kurang"}</span>
               </dt>
               <dd className="money font-display text-head font-bold text-ink">{rupiah(summary.netSavings)}</dd>
             </div>

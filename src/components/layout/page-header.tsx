@@ -50,12 +50,13 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
               type="button"
               onClick={() => router.push("/dashboard")}
               className="-ml-2 w-11 h-11 rounded-full flex items-center justify-center text-ink hover:bg-ink/5 transition-colors shrink-0"
-              aria-label="Kembali ke Dashboard"
+              aria-label="Kembali ke Beranda"
             >
               <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <Link href="/dashboard" className="md:hidden shrink-0 flex items-center" aria-label="Finoch Beranda">
+          {/* On phones the mark only sits on Beranda: subpages already have the back arrow, and the title needs the room. */}
+          <Link href="/dashboard" className={`${isDashboard ? "md:hidden" : "hidden"} shrink-0 flex items-center`} aria-label="Finoch Beranda">
             <BrandLogo variant="symbol" className="w-6 h-6 shrink-0" />
           </Link>
           <div className="min-w-0">

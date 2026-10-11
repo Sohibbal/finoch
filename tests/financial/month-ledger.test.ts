@@ -124,3 +124,20 @@ describe("one sisa bulan ini on every consumer", () => {
     expect(getOverallBudgetSummary(envelopes).totalSpent).toBe(0);
   });
 });
+
+describe("Laporan agrees with the month ledger", () => {
+  it("subtracts fixed costs and skips bill payments, like the ledger", async () => {
+    const { generateMonthlyReport } = await import("@/lib/financial/report-engine");
+    const { BILL_PAYMENT_PREFIX } = await import("@/lib/financial/month-ledger");
+    const at = new Date(2026, 9, 5, 12).toISOString();
+    const expenses = [
+      { id: "a", itemName: "Makan warteg", amount: 300000, category: "Food & Drinks", createdAt: at },
+      { id: "b", itemName: `${BILL_PAYMENT_PREFIX}Kos`, amount: 850000, category: "Bills & Utilities", createdAt: at },
+    ];
+    const s = generateMonthlyReport(expenses, 2000000, 10, 2026, 980000);
+    expect(s.fixedCosts).toBe(980000);
+    expect(s.totalExpenses).toBe(300000);
+    expect(s.netSavings).toBe(2000000 - 980000 - 300000);
+    expect(s.savingsRate).toBe(36);
+  });
+});
