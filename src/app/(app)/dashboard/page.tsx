@@ -76,12 +76,14 @@ export default function DashboardPage() {
       local.map((e) => ({ ...e, source: "voice" as const }))
     );
     const walletNames = new Map(getWallets().map((w) => [w.id, w.name]));
+    // Demo rows never sync by design, so they are never "tertunda".
+    const demo = isDemoMode();
     setTransactions(
       merged.map((e) => ({
         ...toTransaction(e, e.source),
         paymentMethod: (e.walletId && walletNames.get(e.walletId)) || undefined,
         at: parseDate(e.createdAt)?.getTime(),
-        unsynced: e.syncStatus === "pending" || e.syncStatus === "failed",
+        unsynced: !demo && (e.syncStatus === "pending" || e.syncStatus === "failed"),
       }))
     );
     setTxLoaded(true);
@@ -268,9 +270,12 @@ export default function DashboardPage() {
                 Ketik manual
               </button>
             </div>
+            <div className="hidden lg:block">
+              <MonthLedger monthTransactions={monthTransactions} />
+            </div>
           </div>
 
-          <section aria-labelledby="stubs-title" className="lg:col-start-3 lg:row-start-1 lg:row-span-2 space-y-3">
+          <section aria-labelledby="stubs-title" className="space-y-3">
             <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-ink/20 pb-2">
               <h2 id="stubs-title" className="font-display text-head font-bold text-ink">
                 Catatan terbaru
@@ -312,7 +317,8 @@ export default function DashboardPage() {
             )}
           </section>
 
-          <div className="lg:col-span-2">
+          {/* Phones read the ledger after the stubs; desktop keeps it under the note. */}
+          <div className="lg:hidden">
             <MonthLedger monthTransactions={monthTransactions} />
           </div>
         </main>

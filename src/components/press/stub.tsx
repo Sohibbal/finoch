@@ -42,7 +42,7 @@ export function Stub({ data, className = "" }: { data: StubData; className?: str
       <span aria-hidden="true" className="absolute left-1.5 top-2 bottom-2 border-l border-dotted border-ink/40" />
       <div className="min-w-0 flex-1">
         <p className={`text-body font-semibold text-ink break-words ${deleted ? "line-through decoration-2" : ""}`}>{item}</p>
-        <p className="text-meta text-ink-soft truncate">{meta}</p>
+        <p className="text-meta text-ink-soft break-words">{meta}</p>
         <p className="text-meta text-ink-soft">
           <span className="money tracking-[0.08em]">{formatSerial(id, date)}</span>
           {state && <span className="font-semibold text-ink"> · {state}</span>}
