@@ -36,7 +36,7 @@ export function StateLabel({ children, icon: Icon, className = "" }: { children:
 }
 
 export const FIELD_CLASS =
-  "w-full min-h-11 px-3 bg-paper-sheet border border-ink/30 text-body text-ink placeholder:text-ink-soft focus:outline-none focus-visible:border-ink focus-visible:ring-2 focus-visible:ring-ink/30";
+  "w-full min-h-11 px-3 bg-paper-sheet border border-ink/30 text-base text-ink placeholder:text-ink-soft focus:outline-none focus-visible:border-ink focus-visible:ring-2 focus-visible:ring-ink/30";
 
 export const LABEL_CLASS = "block text-meta font-semibold text-ink-soft mb-1";
 

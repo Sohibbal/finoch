@@ -159,7 +159,7 @@ export default function ProfilePage() {
                 <Guilloche seed={0x1d0c} size={180} families={3} className="absolute -right-12 -bottom-16 opacity-30" />
                 <div
                   aria-hidden="true"
-                  className="relative w-20 h-24 shrink-0 border border-ink/40 bg-paper-deep flex items-center justify-center font-display text-[3rem] font-bold text-ink"
+                  className="relative w-20 h-24 shrink-0 border border-ink/40 bg-paper-deep flex items-center justify-center font-display text-numeral font-bold text-ink"
                 >
                   {user.name.charAt(0).toUpperCase()}
                 </div>
