@@ -1,12 +1,16 @@
 import { getDatabase } from "./indexed-db";
 import { syncQueue } from "./sync-queue";
 import { GUEST_SCOPE, getDataScope } from "./local-storage";
+import { getWallets } from "./wallet-storage";
+import { getDefaultWalletId } from "../financial/wallet-engine";
 import type { Expense, ExpenseCategory } from "../types/expense";
 
 export interface CreateExpenseParams {
   itemName: string;
   amount: number;
   category: ExpenseCategory;
+  /** Omitted: charged to the default wallet. null: no wallet. */
+  walletId?: string | null;
   userId?: string;
   createdAt?: string;
 }
@@ -22,6 +26,7 @@ export class ExpenseStorage {
       itemName: params.itemName.trim(),
       amount: Math.round(params.amount),
       category: params.category,
+      walletId: params.walletId !== undefined ? params.walletId : getDefaultWalletId(getWallets()),
       createdAt: params.createdAt || now,
       updatedAt: now,
       syncStatus: "pending",

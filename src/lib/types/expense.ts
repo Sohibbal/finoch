@@ -14,6 +14,8 @@ export interface Expense {
   itemName: string;
   amount: number;
   category: ExpenseCategory;
+  /** Wallet the money came out of; null/undefined when the user has no wallets. */
+  walletId?: string | null;
   createdAt: string;
   updatedAt: string;
   syncStatus?: SyncStatus;
