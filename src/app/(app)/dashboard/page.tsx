@@ -1,374 +1,372 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import Link from "next/link";
-import { UnifiedConfirmationModal } from "@/components/transaction/unified-confirmation-modal";
-import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
-import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
-import { RecordSheet, type RecordData } from "@/components/expense/record-sheet";
-import { OPEN_VOICE_EVENT } from "@/components/layout/app-shell";
-import { mergeExpenses, toTransaction, currentMonthTransactions, dailyJatah } from "@/components/dashboard/dashboard-data";
-import { JatahNote } from "@/components/dashboard/jatah-note";
-import { MonthLedger } from "@/components/dashboard/month-ledger";
-import { Stub, type StubData } from "@/components/press/stub";
-import { StatusStamp } from "@/components/press/status-stamp";
-import { localDateKey, parseDate } from "@/lib/date";
-import { rupiah, shortDate } from "@/lib/format";
-import { expenseStorage } from "@/lib/storage/expense-storage";
-import { getWallets } from "@/lib/storage/wallet-storage";
-import { getBills } from "@/lib/storage/bill-storage";
-import { syncManager } from "@/lib/sync/sync-manager";
-import type { TransactionCandidate } from "@/types/financial-types";
-import type { Expense } from "@/lib/types/expense";
-import type { RecurringBill } from "@/types/bill-types";
+import {
+  ArrowDownLeft,
+  ArrowUpRight,
+  Gift,
+  Bot,
+  Plus,
+  Sparkles,
+  ChevronRight,
+  Calendar,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
-import { isDemoMode } from "@/lib/storage/local-storage";
-import { loadFinancialProfile } from "@/hooks/use-financial-profile";
-
-interface FinancialProfileSummary {
-  monthlyIncome: number;
-  currentSavings: number;
-  monthlyFixedExpenses: number;
-}
-
-// The full history lives in Laporan; the dashboard only shows the latest few.
-const RECENT_TX_LIMIT = 8;
-
-// Used only when the profile can't be fetched (offline): never show made-up numbers.
-const EMPTY_PROFILE: FinancialProfileSummary = { monthlyIncome: 0, currentSavings: 0, monthlyFixedExpenses: 0 };
-
-/** A transaction plus what its stub prints (clock time, whether the server has it yet) and its wallet for the record sheet. */
-type DashTx = TransactionCandidate & { at?: number; unsynced?: boolean; walletId?: string | null };
-
-const clock = (d: Date) => `${String(d.getHours()).padStart(2, "0")}.${String(d.getMinutes()).padStart(2, "0")}`;
-
-// Quiet alternatives to Catat: links under the note, never buttons that compete with the seal.
-const QUIET_LINK =
-  "inline-flex items-center min-h-11 font-semibold text-ink underline underline-offset-4 decoration-ink/40 hover:decoration-ink";
+import { rupiah, shortDate } from "@/lib/format";
+import { localDateKey } from "@/lib/date";
+import { useAuthContext } from "@/components/layout/auth-provider";
+import { getTransactions, type LocalTransaction } from "@/lib/storage/transaction-storage";
+import { getWishlistItems, type LocalWishlist } from "@/lib/storage/wishlist-storage";
+import { calculateStreakMetrics } from "@/lib/financial/streak-engine";
+import { generateDailyGenZInsight } from "@/lib/financial/genz-insight-engine";
+import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
+import { GenZInsightCard } from "@/components/dashboard/genz-insight-card";
+import { StreakWidget } from "@/components/dashboard/streak-widget";
 
 export default function DashboardPage() {
-  const router = useRouter();
-  const [isVoiceOpen, setIsVoiceOpen] = useState(false);
-  const [isScannerOpen, setIsScannerOpen] = useState(false);
-  const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [currentCandidate, setCurrentCandidate] = useState<TransactionCandidate | null>(null);
-  const [openRecord, setOpenRecord] = useState<RecordData | null>(null);
-  // Stable: the paper dialogs re-focus themselves whenever onClose changes.
-  const closeVoice = useCallback(() => setIsVoiceOpen(false), []);
-  const closeScanner = useCallback(() => setIsScannerOpen(false), []);
-  const closeConfirm = useCallback(() => setIsConfirmModalOpen(false), []);
-  const closeRecord = useCallback(() => setOpenRecord(null), []);
-  const [isProfileChecking, setIsProfileChecking] = useState(true);
+  const { user } = useAuthContext();
+  const [nickname, setNickname] = useState("Kawan");
+  const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
+  const [wishlists, setWishlists] = useState<LocalWishlist[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [loadedProfile, setLoadedProfile] = useState<FinancialProfileSummary | null>(null);
-  const profile = loadedProfile ?? EMPTY_PROFILE;
+  // Load nickname from local storage or profile
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("finoch_user_nickname");
+      if (stored && stored.trim()) {
+        setNickname(stored.trim());
+      } else if (user?.email) {
+        setNickname(user.email.split("@")[0]);
+      }
+    }
+  }, [user]);
 
-  const [transactions, setTransactions] = useState<DashTx[]>([]);
-  const [txLoaded, setTxLoaded] = useState(false);
-  // Tagihan's bills: when there are any, their total is the month's fixed costs (see monthLedger).
-  const [bills, setBills] = useState<RecurringBill[]>([]);
-
-  // Server rows plus local ones not synced yet, so a just-saved expense doesn't vanish until sync.
-  const loadTransactions = useCallback(async () => {
-    const [server, local] = await Promise.all([
-      // Demo mode shows only sample data: the server holds the user's real expenses.
-      isDemoMode()
-        ? []
-        : fetch("/api/expenses")
-            .then(async (res) => (res.ok ? (await res.json()).expenses : []))
-            .catch(() => []),
-      // Deleted rows too, so a delete not synced yet hides the server's copy (see mergeExpenses).
-      expenseStorage.getExpenses(undefined, { includeDeleted: true }).catch((err) => {
-        console.warn("Could not load local expenses:", err);
-        return [];
-      }),
-    ]);
-    const merged = mergeExpenses(
-      (Array.isArray(server) ? server : []).map((e) => ({ ...e, source: "manual" as const })),
-      local.map((e) => ({ ...e, source: "voice" as const }))
-    );
-    const walletNames = new Map(getWallets().map((w) => [w.id, w.name]));
-    // Demo rows never sync by design, so they are never "tertunda".
-    const demo = isDemoMode();
-    setTransactions(
-      merged.map((e) => ({
-        ...toTransaction(e, e.source),
-        paymentMethod: (e.walletId && walletNames.get(e.walletId)) || undefined,
-        walletId: e.walletId,
-        at: parseDate(e.createdAt)?.getTime(),
-        unsynced: !demo && (e.syncStatus === "pending" || e.syncStatus === "failed"),
-      }))
-    );
-    setBills(getBills());
-    setTxLoaded(true);
+  const loadData = useCallback(async () => {
+    setIsLoading(true);
+    try {
+      const [txData, wData] = await Promise.all([
+        getTransactions(),
+        getWishlistItems(),
+      ]);
+      setTransactions(txData);
+      setWishlists(wData);
+    } finally {
+      setIsLoading(false);
+    }
   }, []);
 
-  // Check authentication & load profile from API
   useEffect(() => {
-    let isMounted = true;
+    loadData();
+  }, [loadData]);
 
-    async function initDashboard() {
-      // Shared loader: one request per load, and the last good profile when offline.
-      // Signed-out users never get here (middleware + app shell redirect them).
-      try {
-        const loaded = await loadFinancialProfile();
-        if (!loaded) {
-          router.push("/onboarding");
-          return;
-        }
-        if (isMounted) {
-          setLoadedProfile({
-            monthlyIncome: loaded.monthlyIncome,
-            currentSavings: loaded.savings,
-            monthlyFixedExpenses: loaded.fixedExpenses,
-          });
-        }
-      } catch (err) {
-        console.warn("Profile fetch error:", err);
-      }
-      // Not reached on a redirect, so the skeleton stays up instead of flashing empty numbers.
-      if (isMounted) {
-        setIsProfileChecking(false);
-      }
+  // Compute Financial Aggregates
+  const financialData = useMemo(() => {
+    let income = 0;
+    let expense = 0;
+    const todayKey = localDateKey(new Date());
+    let todaySpent = 0;
 
-      await loadTransactions();
+    const streakCandidates = [];
+
+    for (const tx of transactions) {
+      if (tx.type === "income") {
+        income += tx.amount;
+      } else if (tx.type === "expense") {
+        expense += tx.amount;
+        streakCandidates.push({
+          id: tx.id,
+          itemName: tx.itemName,
+          amount: tx.amount,
+          category: tx.category,
+          createdAt: tx.transactionDate,
+        });
+
+        if (tx.transactionDate.startsWith(todayKey)) {
+          todaySpent += tx.amount;
+        }
+      }
     }
 
-    initDashboard();
+    const netBalance = income - expense;
+    // Default standard allowance: Rp50.000 / day
+    const dailyAllowance = 50000;
 
-    const unsubscribe = syncManager.subscribe((status) => {
-      if (status === "synced") {
-        loadTransactions();
-      }
+    const streakSummary = calculateStreakMetrics(streakCandidates, dailyAllowance);
+
+    const activeWishlists = wishlists.filter((w) => !w.isAchieved);
+    const topWishlist = activeWishlists[0] || null;
+
+    const insight = generateDailyGenZInsight({
+      nickname,
+      todaySpent,
+      dailyAllowance,
+      topWishlistName: topWishlist?.name,
+      streakDays: streakSummary.currentStreak,
     });
 
-    return () => {
-      isMounted = false;
-      unsubscribe();
+    const recentTx = transactions.slice(0, 5);
+
+    return {
+      income,
+      expense,
+      netBalance,
+      todaySpent,
+      dailyAllowance,
+      streakDays: streakSummary.currentStreak,
+      topWishlist,
+      insight,
+      recentTx,
     };
-  }, [router, loadTransactions]);
+  }, [transactions, wishlists, nickname]);
 
-  useEffect(() => {
-    const openVoice = () => setIsVoiceOpen(true);
-    window.addEventListener(OPEN_VOICE_EVENT, openVoice);
-    return () => window.removeEventListener(OPEN_VOICE_EVENT, openVoice);
-  }, []);
-
-  const todayDateStr = useMemo(() => localDateKey(new Date()), []);
-
-  // Everything below is this local month only; undated expenses never count.
-  const monthTransactions = useMemo(() => currentMonthTransactions(transactions), [transactions]);
-
-  // The one daily number: the note, the header stamp and the stubs all read it.
-  const jatah = useMemo(
-    () =>
-      dailyJatah({
-        monthlyIncome: profile.monthlyIncome,
-        monthlyFixedExpenses: profile.monthlyFixedExpenses,
-        bills,
-        transactions,
-      }),
-    [profile.monthlyIncome, profile.monthlyFixedExpenses, bills, transactions]
-  );
-
-  // Today's stubs from the one that pushed spending past the jatah onwards.
-  const overJatahIds = useMemo(() => {
-    const ids = new Set<string>();
-    if (jatah.jatah <= 0) return ids;
-    let running = 0;
-    const today = transactions.filter((t) => t.date === todayDateStr).sort((x, y) => (x.at ?? 0) - (y.at ?? 0));
-    for (const t of today) {
-      running += t.amount;
-      if (running > jatah.jatah && t.id) ids.add(t.id);
-    }
-    return ids;
-  }, [transactions, todayDateStr, jatah.jatah]);
-
-  // Stubs that appear after the first load slide in; the first paint never animates.
-  const seenIds = useRef<Set<string> | null>(null);
-  useEffect(() => {
-    if (txLoaded) seenIds.current = new Set(transactions.map((t) => t.id ?? ""));
-  }, [transactions, txLoaded]);
-
-  const recent: StubData[] = transactions.slice(0, RECENT_TX_LIMIT).map((t) => ({
-    id: t.id ?? `${t.date}-${t.merchant}`,
-    item: t.merchant || "Pengeluaran",
-    amount: t.amount,
-    date: t.date,
-    category: t.category,
-    wallet: t.paymentMethod,
-    time: t.date === todayDateStr && t.at ? clock(new Date(t.at)) : shortDate(t.date),
-    unsynced: t.unsynced,
-    overJatah: Boolean(t.id && overJatahIds.has(t.id)),
-  }));
-  const hasUnsynced = transactions.some((t) => t.unsynced);
-  const isLoading = isProfileChecking || !txLoaded;
-
-  const handleOpenManualEntry = () => {
-    setCurrentCandidate({
-      merchant: "",
-      amount: 0,
-      category: "Food & Drinks",
-      spendingType: "wants",
-      date: localDateKey(new Date()),
-      source: "manual",
-    });
-    setIsConfirmModalOpen(true);
-  };
-
-  const handleOcrCandidateReceived = (candidate: TransactionCandidate) => {
-    setCurrentCandidate(candidate);
-    setIsConfirmModalOpen(true);
-  };
-
-  // Saves, re-prints the jatah, then hands the saved row back so the modal prints its receipt + Batalkan.
-  const handleConfirmTransaction = async (candidate: TransactionCandidate, walletId?: string): Promise<Expense[]> => {
-    const saved = await expenseStorage.saveExpense({
-      itemName: candidate.merchant || candidate.description || "Pengeluaran",
-      amount: candidate.amount,
-      category: candidate.category || "Other",
-      walletId,
-      createdAt: candidate.date ? new Date(candidate.date).toISOString() : new Date().toISOString(),
-    });
-    syncManager.triggerSync();
-    await loadTransactions();
-    return [saved];
-  };
+  const topProjection = useMemo(() => {
+    if (!financialData.topWishlist) return null;
+    const net = Math.max(0, financialData.netBalance);
+    const dailyRate = Math.max(0, Math.round(net / 30)) || 25000;
+    return calculateWishlistProjection(
+      financialData.topWishlist.targetPrice,
+      net,
+      dailyRate
+    );
+  }, [financialData.topWishlist, financialData.netBalance]);
 
   return (
     <>
       <PageHeader
-        title={
-          <>
-            <span className="sr-only">Beranda, </span>
-            {shortDate(todayDateStr)}
-          </>
-        }
-        actions={isLoading ? null : <StatusStamp status={jatah.status} />}
+        title={`Halo, ${nickname}! 👋`}
+        subtitle="Dashboard finansial santai buat kawal masa depan lo."
       />
 
-      {/* Skeleton until the profile and expenses are known: never flash placeholder numbers */}
-      {isLoading ? (
-        <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-6 sm:py-10 space-y-6" aria-busy="true" aria-label="Memuat dashboard">
-          <div className="h-[46svh] md:h-72 bg-paper-deep motion-safe:animate-pulse" />
-          <div className="h-16 bg-paper-deep motion-safe:animate-pulse" />
-        </main>
-      ) : (
-        <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-10 grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-8">
-          <div className="lg:col-span-2 space-y-4 md:space-y-14">
-            <JatahNote
-              jatah={jatah}
-              today={todayDateStr}
-              turn={transactions.length * 7}
-              onCatat={() => setIsVoiceOpen(true)}
-            />
-            <p className="text-body text-ink-soft flex flex-wrap items-center gap-x-2">
-              Bisa juga
-              <button type="button" onClick={() => setIsScannerOpen(true)} className={QUIET_LINK}>
-                scan struk
-              </button>
-              atau
-              <button type="button" onClick={handleOpenManualEntry} className={QUIET_LINK}>
-                ketik manual
-              </button>
-            </p>
-            <div className="hidden lg:block">
-              <MonthLedger monthTransactions={monthTransactions} />
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-6">
+        {/* Gen-Z Daily Insight Card */}
+        <GenZInsightCard nickname={nickname} insight={financialData.insight} />
+
+        {/* Financial Metrics & Streak Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Financial Balance Card */}
+          <div className="lg:col-span-2 p-6 rounded-3xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 shadow-sm flex flex-col justify-between space-y-6">
+            <div>
+              <p className="text-meta font-medium text-ink-soft dark:text-navy-400">
+                Saldo Bersih Akumulasi
+              </p>
+              <h2 className="text-display font-extrabold text-ink dark:text-white money mt-1">
+                {rupiah(financialData.netBalance)}
+              </h2>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-ink/10 dark:border-navy-800">
+              <div className="space-y-1">
+                <span className="text-meta font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                  <ArrowDownLeft className="w-4 h-4" />
+                  <span>Total Pemasukan</span>
+                </span>
+                <p className="text-head font-bold text-ink dark:text-white money">
+                  +{rupiah(financialData.income)}
+                </p>
+              </div>
+
+              <div className="space-y-1">
+                <span className="text-meta font-semibold text-rose-500 flex items-center gap-1">
+                  <ArrowUpRight className="w-4 h-4" />
+                  <span>Total Pengeluaran</span>
+                </span>
+                <p className="text-head font-bold text-ink dark:text-white money">
+                  -{rupiah(financialData.expense)}
+                </p>
+              </div>
             </div>
           </div>
 
-          <section aria-labelledby="stubs-title" className="space-y-3">
-            <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-ink/20 pb-2">
-              <h2 id="stubs-title" className="font-display text-head font-bold text-ink">
-                Catatan terbaru
-              </h2>
-              <p className="text-meta text-ink-soft">
-                Terpakai hari ini <span className="money text-body font-bold text-ink">{rupiah(jatah.spentToday)}</span>
-              </p>
-            </div>
-            {hasUnsynced && <StatusStamp status="tertunda" />}
+          {/* Streak Widget */}
+          <div className="lg:col-span-1">
+            <StreakWidget
+              streakDays={financialData.streakDays}
+              dailyAllowance={financialData.dailyAllowance}
+              todaySpent={financialData.todaySpent}
+            />
+          </div>
+        </div>
 
-            {recent.length === 0 ? (
-              <div className="py-4 space-y-2">
-                <p className="text-body font-semibold text-ink">Belum ada catatan.</p>
-                <p className="text-body text-ink-soft max-w-prose">
-                  Tekan <span className="font-semibold text-ink">Catat</span>, lalu bilang &ldquo;warteg 15 ribu&rdquo;. Bisa juga
-                  scan struk atau ketik manual.
+        {/* Quick Actions & Navigation */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <Link
+            href="/pemasukan"
+            className="p-5 rounded-2xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 hover:border-emerald-500/50 shadow-sm hover:shadow transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <ArrowDownLeft className="w-5 h-5" />
+            </div>
+            <h4 className="text-body font-bold text-ink dark:text-white">Pemasukan</h4>
+            <p className="text-meta text-ink-soft dark:text-navy-400 mt-0.5">Bicara, Scan, Manual</p>
+          </Link>
+
+          <Link
+            href="/pengeluaran"
+            className="p-5 rounded-2xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 hover:border-rose-500/50 shadow-sm hover:shadow transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <ArrowUpRight className="w-5 h-5" />
+            </div>
+            <h4 className="text-body font-bold text-ink dark:text-white">Pengeluaran</h4>
+            <p className="text-meta text-ink-soft dark:text-navy-400 mt-0.5">Bicara, Scan, Manual</p>
+          </Link>
+
+          <Link
+            href="/wishlist"
+            className="p-5 rounded-2xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 hover:border-amber-500/50 shadow-sm hover:shadow transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <Gift className="w-5 h-5" />
+            </div>
+            <h4 className="text-body font-bold text-ink dark:text-white">Wishlist</h4>
+            <p className="text-meta text-ink-soft dark:text-navy-400 mt-0.5">Target & Proyeksi</p>
+          </Link>
+
+          <Link
+            href="/copilot"
+            className="p-5 rounded-2xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 hover:border-primary-500/50 shadow-sm hover:shadow transition-all group"
+          >
+            <div className="w-10 h-10 rounded-xl bg-primary-500/10 text-primary-600 dark:text-primary-400 flex items-center justify-center mb-3 group-hover:scale-105 transition-transform">
+              <Bot className="w-5 h-5" />
+            </div>
+            <h4 className="text-body font-bold text-ink dark:text-white">FinBot Copilot</h4>
+            <p className="text-meta text-ink-soft dark:text-navy-400 mt-0.5">Tanya Finansial Lo</p>
+          </Link>
+        </div>
+
+        {/* Bottom Split: Recent Transactions & Wishlist Spotlight */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Recent Activity List */}
+          <div className="lg:col-span-2 p-6 rounded-3xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 shadow-sm space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-head font-bold text-ink dark:text-white">
+                Aktivitas Transaksi Terakhir
+              </h3>
+              <Link
+                href="/pengeluaran"
+                className="text-meta font-semibold text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+              >
+                <span>Lihat Semua</span>
+                <ChevronRight className="w-4 h-4" />
+              </Link>
+            </div>
+
+            {financialData.recentTx.length === 0 ? (
+              <div className="py-8 text-center text-ink-soft dark:text-navy-400">
+                <p className="text-body font-medium">Belum ada transaksi tercatat</p>
+                <p className="text-meta mt-1">
+                  Mulai catat lewat tombol Pemasukan atau Pengeluaran di atas!
                 </p>
               </div>
             ) : (
-              <>
-                <ol className="space-y-2">
-                  {recent.map((stub, i) => {
-                    const t = transactions[i];
-                    return (
-                      <Stub
-                        key={stub.id}
-                        data={stub}
-                        onOpen={
-                          t.id
-                            ? () =>
-                                setOpenRecord({
-                                  id: stub.id,
-                                  itemName: stub.item,
-                                  amount: t.amount,
-                                  category: t.category,
-                                  walletId: t.walletId,
-                                  date: t.date || todayDateStr,
-                                })
-                            : undefined
-                        }
-                        className={seenIds.current && !seenIds.current.has(stub.id) ? "animate-stub-in" : ""}
-                      />
-                    );
-                  })}
-                </ol>
-                <Link
-                  href="/reports"
-                  className="inline-flex items-center min-h-11 text-body font-semibold text-ink underline underline-offset-4 decoration-ink/40 hover:decoration-ink"
-                >
-                  {transactions.length > RECENT_TX_LIMIT
-                    ? `Lihat semua ${transactions.length} catatan di Laporan`
-                    : "Riwayat lengkap di Laporan"}
-                </Link>
-              </>
+              <div className="divide-y divide-ink/10 dark:divide-navy-800">
+                {financialData.recentTx.map((tx) => {
+                  const isInc = tx.type === "income";
+                  return (
+                    <div key={tx.id} className="py-3 flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                            isInc
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                          }`}
+                        >
+                          {isInc ? (
+                            <ArrowDownLeft className="w-4 h-4" />
+                          ) : (
+                            <ArrowUpRight className="w-4 h-4" />
+                          )}
+                        </div>
+                        <div>
+                          <p className="text-body font-semibold text-ink dark:text-white">
+                            {tx.itemName}
+                          </p>
+                          <p className="text-meta text-ink-soft dark:text-navy-400">
+                            {tx.category} • {shortDate(tx.transactionDate)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span
+                        className={`text-body font-bold money ${
+                          isInc
+                            ? "text-emerald-600 dark:text-emerald-400"
+                            : "text-ink dark:text-white"
+                        }`}
+                      >
+                        {isInc ? "+" : "-"}
+                        {rupiah(tx.amount)}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
             )}
-          </section>
-
-          {/* Phones read the ledger after the stubs; desktop keeps it under the note. */}
-          <div className="lg:hidden">
-            <MonthLedger monthTransactions={monthTransactions} />
           </div>
-        </main>
-      )}
 
-      {/* Voice Expense Sheet */}
-      <VoiceExpenseSheet
-        isOpen={isVoiceOpen}
-        onClose={closeVoice}
-        onExpenseSaved={loadTransactions}
-        sisaHariIni={loadedProfile ? jatah.sisaHariIni : undefined}
-      />
+          {/* Top Wishlist Highlight Card */}
+          <div className="lg:col-span-1 p-6 rounded-3xl bg-paper-sheet dark:bg-navy-900 border border-ink/15 dark:border-navy-800 shadow-sm flex flex-col justify-between space-y-4">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <Gift className="w-5 h-5 text-amber-500" />
+                <h3 className="text-body font-bold text-ink dark:text-white">
+                  Wishlist Prioritas Utama
+                </h3>
+              </div>
 
-      {openRecord && <RecordSheet key={openRecord.id} record={openRecord} onClose={closeRecord} onChanged={loadTransactions} />}
+              {financialData.topWishlist ? (
+                <div className="space-y-3">
+                  <div>
+                    <h4 className="text-head font-bold text-ink dark:text-white">
+                      {financialData.topWishlist.name}
+                    </h4>
+                    <p className="text-display font-extrabold text-ink dark:text-white money mt-1">
+                      {rupiah(financialData.topWishlist.targetPrice)}
+                    </p>
+                  </div>
 
-      {/* Hybrid Receipt Scanner Modal */}
-      <ReceiptScannerModal
-        isOpen={isScannerOpen}
-        onClose={closeScanner}
-        onScanSuccess={handleOcrCandidateReceived}
-      />
+                  {topProjection && (
+                    <div className="p-3 rounded-2xl bg-ink/5 dark:bg-navy-800 text-meta space-y-1">
+                      <div className="flex items-center gap-1.5 font-semibold text-ink dark:text-white">
+                        <Calendar className="w-4 h-4 text-primary-500" />
+                        <span>
+                          {topProjection.status === "achievable_now"
+                            ? "Tabungan Sudah Cukup! 🎉"
+                            : topProjection.status === "delayed"
+                            ? "Tertunda (Rem Belanja Dulu) ⏳"
+                            : `Estimasi ~${topProjection.estimatedDays} hari lagi 🎯`}
+                        </span>
+                      </div>
+                      <p className="text-ink-soft dark:text-navy-400">
+                        {topProjection.status === "delayed"
+                          ? "Pengeluaran melebihi laju tabungan"
+                          : "Berdasarkan sisa saldo dan laju tabungan harian"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="py-6 text-center text-ink-soft dark:text-navy-400 space-y-2">
+                  <p className="text-body font-medium">Belum ada target wishlist</p>
+                  <p className="text-meta">
+                    Catat barang impian lo biar FinBot bantu hitung target ketercapaiannya!
+                  </p>
+                </div>
+              )}
+            </div>
 
-      {/* Unified Confirmation Modal */}
-      <UnifiedConfirmationModal
-        isOpen={isConfirmModalOpen}
-        candidate={currentCandidate}
-        onClose={closeConfirm}
-        onConfirm={handleConfirmTransaction}
-        onUndone={loadTransactions}
-        sisaHariIni={loadedProfile ? jatah.sisaHariIni : undefined}
-      />
+            <Link
+              href="/wishlist"
+              className="w-full py-2.5 rounded-xl border border-ink/15 dark:border-navy-700 text-center text-meta font-semibold text-ink dark:text-white hover:bg-ink/5 dark:hover:bg-navy-800 transition-colors block"
+            >
+              Buka Wishlist
+            </Link>
+          </div>
+        </div>
+      </div>
     </>
   );
 }
