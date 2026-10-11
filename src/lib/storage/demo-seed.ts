@@ -56,13 +56,6 @@ export function generateDemoExpenses(now: Date = new Date()): CreateExpenseParam
     if (day % 7 === 1) fixed.push(["Laundry kiloan", "Bills & Utilities", 20000, 30000]);
     if (day % 8 === 4) fixed.push(["Isi ulang galon", "Bills & Utilities", 6000, 7000]);
 
-    // A month-over-month story for Insight: last month had a coffee habit and one flash-sale
-    // checkout; this month the coffee is cut back but ojek to campus goes up.
-    const lastMonth = d.getMonth() !== now.getMonth();
-    if (lastMonth && day % 2 === 0) fixed.push(["Kopi susu kekinian", "Food & Drinks", 20000, 26000]);
-    if (lastMonth && day === 6) fixed.push(["Checkout flash sale sepatu", "Shopping & Lifestyle", 149000, 149000]);
-    if (!lastMonth && day % 2 === 1) fixed.push(["Ojek online pulang kuliah", "Transportation", 12000, 16000]);
-
     // About one day in three has no spending at all, so Streak Hemat has green days.
     if (!fixed.length && rand() < 0.3) continue;
 
@@ -79,7 +72,33 @@ export function generateDemoExpenses(now: Date = new Date()): CreateExpenseParam
       result.push({ itemName, amount, category, createdAt: new Date(Math.min(at.getTime(), now.getTime())).toISOString() });
     }
   }
-  return result;
+  return [...result, ...storyExpenses(now)];
+}
+
+/**
+ * A month-over-month story for Insight, on its own random stream so it never shifts the base sample:
+ * last month had a coffee habit, a flash-sale checkout and the odd ojek; this month the coffee
+ * stops but ojek to campus doubles.
+ */
+function storyExpenses(now: Date): CreateExpenseParams[] {
+  const rand = prng(now.getFullYear() * 12 + now.getMonth() + 7919);
+  const between = (min: number, max: number) => min + Math.round((rand() * (max - min)) / 500) * 500;
+  const items: CreateExpenseParams[] = [];
+  const add = (d: Date, hour: number, itemName: string, category: string, amount: number) => {
+    const at = new Date(d.getFullYear(), d.getMonth(), d.getDate(), hour, 15);
+    if (at.getTime() <= now.getTime()) items.push({ itemName, category, amount, createdAt: at.toISOString() });
+  };
+  for (let d = new Date(now.getFullYear(), now.getMonth() - 1, 1); d <= now; d.setDate(d.getDate() + 1)) {
+    const day = d.getDate();
+    if (d.getMonth() !== now.getMonth()) {
+      if (day % 2 === 0) add(d, 15, "Kopi susu kekinian", "Food & Drinks", between(20000, 26000));
+      if (day === 6) add(d, 21, "Checkout flash sale sepatu", "Shopping & Lifestyle", 149000);
+      if (day % 3 === 1) add(d, 17, "Ojek online pulang kuliah", "Transportation", between(12000, 16000));
+    } else if (day % 2 === 1) {
+      add(d, 17, "Ojek online pulang kuliah", "Transportation", between(12000, 16000));
+    }
+  }
+  return items;
 }
 
 async function demoExpenseCount(): Promise<number> {
