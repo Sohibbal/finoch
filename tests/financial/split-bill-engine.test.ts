@@ -87,15 +87,13 @@ describe("Split Bill Engine", () => {
     expect(budiShare.subtotal).toBe(40000);
     expect(sitiShare.subtotal).toBe(20000);
 
-    // Raw:
-    // Saya: 30000 + 3000 - 3333.33 = 29666.67 -> Round up to 500 = 30000
-    expect(sayaShare.finalAmount).toBe(30000);
-
-    // Budi: 40000 + 4000 - 4444.44 = 39555.56 -> Round up to 500 = 40000
-    expect(budiShare.finalAmount).toBe(40000);
-
-    // Siti: 20000 + 2000 - 2222.22 = 19777.78 -> Round up to 500 = 20000
+    // Raw: Saya 29666.67, Budi 39555.56, Siti 19777.78 (sum 89.000 = 178 x 500).
+    // Largest remainder in steps of 500: floors 29500 / 39500 / 19500, the one leftover
+    // step goes to Siti (largest remainder) -> shares sum exactly to the grand total.
+    expect(sayaShare.finalAmount).toBe(29500);
+    expect(budiShare.finalAmount).toBe(39500);
     expect(sitiShare.finalAmount).toBe(20000);
+    expect(result.roundingSurplus).toBe(0);
   });
 
   it("handles edge case when participants or items are empty without NaN or division by zero", () => {
