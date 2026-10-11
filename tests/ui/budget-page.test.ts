@@ -1,4 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
+import React from "react";
+import { renderToString } from "react-dom/server";
+import { rupiah } from "@/lib/format";
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({
@@ -16,26 +19,43 @@ vi.mock("@/components/layout/auth-provider", () => ({
   }),
 }));
 
-describe("Budget Envelopes Page & Components", () => {
-  it("exports BudgetPage component successfully", async () => {
-    const BudgetPageModule = await import("@/app/(app)/budget/page");
-    expect(BudgetPageModule.default).toBeDefined();
-    expect(typeof BudgetPageModule.default).toBe("function");
+const envelope = {
+  id: "env-makan",
+  name: "Makan",
+  icon: "utensils",
+  color: "emerald",
+  allocatedAmount: 500_000,
+  spentAmount: 650_000,
+  categoryAliases: ["Food & Drinks", "Food", "Makan"],
+  updatedAt: "2026-10-11T00:00:00.000Z",
+};
+
+describe("Amplop Anggaran page", () => {
+  it("exports the page and every budget component", async () => {
+    const page = await import("@/app/(app)/budget/page");
+    const { BudgetAmplop } = await import("@/components/budget/budget-amplop");
+    const { BudgetOverviewCard } = await import("@/components/budget/budget-overview-card");
+    const { BudgetTransferModal } = await import("@/components/budget/budget-transfer-modal");
+    const { BudgetFormModal } = await import("@/components/budget/budget-form-modal");
+    const { BudgetTransferHistory } = await import("@/components/budget/budget-transfer-history");
+    expect(typeof page.default).toBe("function");
+    for (const c of [BudgetAmplop, BudgetOverviewCard, BudgetTransferModal, BudgetFormModal, BudgetTransferHistory]) {
+      expect(c).toBeDefined();
+    }
   });
 
-  it("exports all budget child components correctly", async () => {
-    const MobileModule = await import("@/components/budget/budget-envelope-mobile");
-    const DesktopModule = await import("@/components/budget/budget-envelope-desktop");
-    const OverviewModule = await import("@/components/budget/budget-overview-card");
-    const TransferModalModule = await import("@/components/budget/budget-transfer-modal");
-    const FormModalModule = await import("@/components/budget/budget-form-modal");
-    const HistoryModule = await import("@/components/budget/budget-transfer-history");
+  it("names linked categories in Indonesian, once each", async () => {
+    const { envelopeSources } = await import("@/components/budget/budget-amplop");
+    expect(envelopeSources(["Food & Drinks", "Food", "Makan"])).toEqual(["Makan & Minum", "Makan"]);
+  });
 
-    expect(MobileModule.BudgetEnvelopeMobile).toBeDefined();
-    expect(DesktopModule.BudgetEnvelopeDesktop).toBeDefined();
-    expect(OverviewModule.BudgetOverviewCard).toBeDefined();
-    expect(TransferModalModule.BudgetTransferModal).toBeDefined();
-    expect(FormModalModule.BudgetFormModal).toBeDefined();
-    expect(HistoryModule.BudgetTransferHistory).toBeDefined();
+  it("prints an overspent amplop as Jebol with the overspent amount in its ledger", async () => {
+    const { BudgetAmplop } = await import("@/components/budget/budget-amplop");
+    const noop = () => {};
+    const html = renderToString(React.createElement(BudgetAmplop, { envelope, onTransfer: noop, onEdit: noop, onDelete: noop }));
+    expect(html).toContain("Jebol");
+    expect(html).toContain(rupiah(-150_000));
+    expect(html).toContain("Paling rakus di tanggal muda");
+    expect(html).toContain('aria-label="Ubah Makan"');
   });
 });
