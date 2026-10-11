@@ -38,4 +38,36 @@ describe("Wishlist Anti-Impulsif Components", () => {
     expect(coolingDaysLeft({ coolingEndDate: "2026-10-11T11:00:00" }, now)).toBe(1);
     expect(coolingDaysLeft({ coolingEndDate: "2026-10-01T10:00:00" }, now)).toBe(0);
   });
+
+  it("prints the category under the heading and the countdown as words, not a stamp or strike", async () => {
+    const React = await import("react");
+    const { renderToString } = await import("react-dom/server");
+    const { WishlistTag } = await import("@/components/wishlist/wishlist-tag");
+    const noop = () => {};
+    const base = {
+      id: "w1",
+      name: "Sepatu lari",
+      price: 450000,
+      category: "Fashion",
+      priority: "high",
+      coolingDays: 7,
+      createdAt: "2026-10-08T10:00:00",
+      coolingEndDate: "2026-10-15T10:00:00",
+    };
+    const render = (status: string) =>
+      renderToString(
+        React.createElement(WishlistTag, {
+          item: { ...base, status } as never,
+          onCancelAndSave: noop,
+          onPurchase: noop,
+          onDelete: noop,
+          now: new Date("2026-10-11T10:00:00"),
+        })
+      );
+    const cooling = render("cooling");
+    expect(cooling.indexOf("<h3")).toBeLessThan(cooling.indexOf("Fashion &amp; pakaian"));
+    expect(cooling).toContain("Tunda 4 hari lagi");
+    expect(cooling).not.toContain("uppercase tracking-[0.08em]");
+    expect(render("saved_money")).not.toContain("line-through");
+  });
 });

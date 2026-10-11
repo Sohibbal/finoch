@@ -1,14 +1,14 @@
 "use client";
 
 import React, { useState } from "react";
-import { Check, Trash2 } from "lucide-react";
+import { Check, Trash2, TriangleAlert } from "lucide-react";
 import { UktCategory, UktMetrics, UktPlan } from "@/types/ukt-types";
 import { rupiah, shortDate } from "@/lib/format";
 import { Guilloche } from "@/components/press/guilloche";
 import { formatSerial } from "@/components/press/serial";
 import { StatusStamp } from "@/components/press/status-stamp";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
-import { DENOM, type Denom, FIELD_CLASS, LABEL_CLASS, Stamp } from "@/components/press/kampus-press";
+import { DENOM, type Denom, FIELD_CLASS, LABEL_CLASS, Stamp, StateLabel } from "@/components/press/kampus-press";
 
 interface UktPlanNoteProps {
   plan: UktPlan;
@@ -94,7 +94,7 @@ export function UktPlanNote({ plan, metrics, onDeposit, onDelete }: UktPlanNoteP
           ) : metrics.feasibilityStatus === "moderat" ? (
             <StatusStamp status="mepet" />
           ) : (
-            <Stamp label="Berat" tone="habis" />
+            <StateLabel icon={TriangleAlert} className="text-ink">Berat</StateLabel>
           )}
         </div>
 

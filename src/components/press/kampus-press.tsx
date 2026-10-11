@@ -22,6 +22,19 @@ export function Perforation({ className = "" }: { className?: string }) {
   );
 }
 
+/**
+ * A state that is not money status (Tunda 3 hari lagi, Tercatat, Tepat sasaran): plain words with a
+ * glyph. Stamps are kept for Aman · Mepet · Habis · Tertunda sinkron and LUNAS. Color comes from the parent.
+ */
+export function StateLabel({ children, icon: Icon, className = "" }: { children: React.ReactNode; icon?: LucideIcon; className?: string }) {
+  return (
+    <span className={`inline-flex shrink-0 items-center gap-1 text-meta font-semibold whitespace-nowrap ${className}`}>
+      {Icon && <Icon className="w-3.5 h-3.5 shrink-0" strokeWidth={2.5} aria-hidden="true" />}
+      {children}
+    </span>
+  );
+}
+
 export const FIELD_CLASS =
   "w-full min-h-11 px-3 bg-paper-sheet border border-ink/30 text-body text-ink placeholder:text-ink-soft focus:outline-none focus-visible:border-ink focus-visible:ring-2 focus-visible:ring-ink/30";
 

@@ -5,7 +5,7 @@ import { MealCalcConfig, MealCalcResult } from "@/types/meal-calc-types";
 import { rupiah } from "@/lib/format";
 import { Guilloche } from "@/components/press/guilloche";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
-import { DENOM, LABEL_CLASS, OptionButton, Perforation, Stamp } from "@/components/press/kampus-press";
+import { DENOM, LABEL_CLASS, OptionButton, Perforation, StateLabel } from "@/components/press/kampus-press";
 
 interface MealCompareProps {
   config: MealCalcConfig;
@@ -155,7 +155,7 @@ export function MealCompare({ config, result, onChangeMealsPerDay, onChangeOutsi
           <h2 id="meal-hybrid-title" className="font-display text-head font-bold text-ink">
             Jalan tengah anak kos
           </h2>
-          <Stamp label={`Hemat ${rupiah(result.monthlySavingsHybrid)}/bln`} tone="aman" />
+          <StateLabel className="text-ink money">Hemat {rupiah(result.monthlySavingsHybrid)}/bln</StateLabel>
         </div>
         <p className="text-body text-ink max-w-prose">
           Malas cuci wajan? Masak nasi saja di magic com, lauk dan sayur beli di warteg tanpa nasi. Sekitar 5 menit sehari,{" "}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Plus, Target, Trash2, X } from "lucide-react";
+import { Check, Clock, Plus, Target, TrendingUp, Trash2, X, type LucideIcon } from "lucide-react";
 import { calculateGoalProjection } from "@/lib/financial/financial-engine";
 import { FinancialGoal } from "@/types/financial-types";
 import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
@@ -10,7 +10,8 @@ import { addGoal, deleteGoal, getGoals } from "@/lib/storage/goal-storage";
 import { localDateKey, localDateKeyFromNow, parseDate } from "@/lib/date";
 import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
-import { Cap, DENOMS, type CapTone, type Denom } from "@/components/press/denom";
+import { DENOMS, type Denom } from "@/components/press/denom";
+import { StateLabel } from "@/components/press/kampus-press";
 import { rupiah, shortDate } from "@/lib/format";
 
 const DAY_MS = 86400000;
@@ -31,11 +32,12 @@ const GOAL_KIND: Record<string, { denom: Denom; label: string; personality: stri
   other: { denom: "slate", label: "Impian", personality: "pelan-pelan asal kelakon" },
 };
 
-const STATUS: Record<string, { label: string; tone: CapTone }> = {
-  on_track: { label: "Tepat sasaran", tone: "aman" },
-  at_risk: { label: "Perlu dipercepat", tone: "mepet" },
-  behind_target: { label: "Tertunda", tone: "habis" },
-  achieved: { label: "Tercapai", tone: "ink" },
+// Projection words, not stamps: stamps are kept for money status (Aman · Mepet · Habis).
+const STATUS: Record<string, { label: string; icon: LucideIcon }> = {
+  on_track: { label: "Tepat sasaran", icon: Target },
+  at_risk: { label: "Perlu dipercepat", icon: TrendingUp },
+  behind_target: { label: "Ketinggalan", icon: Clock },
+  achieved: { label: "Tercapai", icon: Check },
 };
 
 const FIELD =
@@ -146,16 +148,15 @@ export default function GoalsPage() {
                     serial={<Serial id={g.id ?? g.name} date={due || new Date()} />}
                     className="overflow-hidden"
                   >
-                    {/* The note's colour field: which denomination this goal is printed in. */}
-                    <div aria-hidden="true" className={`h-3 ${denom.field}`} />
-                    <div className="relative">
-                      {/* Progress is the note filling with its own colour, left to right. */}
+                    {/* The note's colour band fills left to right with progress; text never sits on the fill. */}
+                    <div aria-hidden="true" className={`h-4 ${denom.soft}`}>
                       <div
-                        aria-hidden="true"
-                        className={`absolute inset-y-0 left-0 border-r-2 ${denom.soft} ${denom.edge} motion-safe:transition-[width] motion-safe:duration-700`}
+                        className={`h-full ${denom.field} motion-safe:transition-[width] motion-safe:duration-700`}
                         style={{ width: `${progress}%` }}
                       />
-                      <div className="relative px-5 sm:px-8 pt-5 pb-5 space-y-3">
+                    </div>
+                    <div>
+                      <div className="px-5 sm:px-8 pt-5 pb-5 space-y-3">
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <h2 className="font-display text-head font-bold text-ink break-words">{g.name}</h2>
@@ -185,9 +186,9 @@ export default function GoalsPage() {
                             Kurang <span className="money font-semibold">{rupiah(remaining)}</span>
                             {due && <> · tenggat {shortDate(due)}</>}
                           </p>
-                          <Cap tone={status.tone} tilt={idx % 2 ? 4 : -5}>
+                          <StateLabel icon={status.icon} className="text-ink">
                             {status.label}
-                          </Cap>
+                          </StateLabel>
                         </div>
                       </div>
                     </div>

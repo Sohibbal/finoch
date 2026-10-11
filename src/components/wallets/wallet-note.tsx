@@ -1,12 +1,13 @@
 "use client";
 
 import React from "react";
-import { ArrowRightLeft, Pencil, Trash2 } from "lucide-react";
+import { ArrowRightLeft, Pencil, Trash2, TrendingDown } from "lucide-react";
 import { WalletType, WalletWithBalance } from "@/types/wallet-types";
 import { rupiah } from "@/lib/format";
 import { Cap, DenomSheet, denomOf, seedOf } from "@/components/press/denom";
 import { formatSerial } from "@/components/press/serial";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
+import { StateLabel } from "@/components/press/kampus-press";
 
 export const WALLET_TYPE_LABEL: Record<WalletType, string> = {
   cash: "Uang tunai",
@@ -58,7 +59,7 @@ export function WalletNote({ wallet, onTransfer, onEdit, onDelete }: WalletNoteP
             </p>
           </div>
           {wallet.balance < 0 ? (
-            <Cap tone="paper" tilt={8}>Minus</Cap>
+            <StateLabel icon={TrendingDown}>Minus</StateLabel>
           ) : wallet.balance < LOW_BALANCE ? (
             <Cap tone="paper" tilt={8}>Mepet</Cap>
           ) : null}

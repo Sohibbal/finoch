@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Plus, Trash2 } from "lucide-react";
+import { Check, Plus, Trash2 } from "lucide-react";
 import { SplitItem, Participant } from "@/types/split-bill-types";
 import { rupiah } from "@/lib/format";
 import { FIELD_CLASS, LABEL_CLASS } from "@/components/press/kampus-press";
@@ -29,7 +29,7 @@ const PRESETS = [
 const ADD_CLASS =
   "inline-flex items-center justify-center gap-2 min-h-11 px-5 rounded-full border-2 border-ink text-ink font-semibold text-body hover:bg-ink/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 
-const PERSON_TOGGLE = "min-h-11 px-3 border text-body transition-colors";
+const PERSON_TOGGLE = "inline-flex items-center gap-1 min-h-11 px-3 border text-body transition-colors";
 
 /** The nota's menu lines plus the "add a line" row at the bottom. */
 export function BillItemEditor({
@@ -132,9 +132,10 @@ export function BillItemEditor({
                         className={`${PERSON_TOGGLE} ${
                           isAssigned
                             ? "bg-ink text-paper-sheet border-ink font-semibold"
-                            : "bg-transparent text-ink-soft border-ink/25 line-through decoration-ink/50"
+                            : "bg-paper-sheet text-ink-soft border-ink/30"
                         }`}
                       >
+                        {isAssigned && <Check className="w-3.5 h-3.5" aria-hidden="true" />}
                         {p.name}
                       </button>
                     );
@@ -221,7 +222,7 @@ export function BillItemEditor({
                     aria-pressed={isChecked}
                     onClick={() => toggleParticipantForNewItem(p.id)}
                     className={`${PERSON_TOGGLE} ${
-                      isChecked ? "bg-ink text-paper-sheet border-ink font-semibold" : "bg-paper-sheet text-ink border-ink/30"
+                      isChecked ? "bg-ink text-paper-sheet border-ink font-semibold" : "bg-paper-sheet text-ink-soft border-ink/30"
                     }`}
                   >
                     {p.name}

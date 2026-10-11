@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
-import { Check, MessageCircle, RotateCcw, Trash2 } from "lucide-react";
+import { CalendarX, Check, MessageCircle, RotateCcw, Trash2 } from "lucide-react";
 import { DebtItem } from "@/types/debt-types";
 import { generateWhatsAppDebtReminder } from "@/lib/financial/debt-engine";
 import { localDateKey } from "@/lib/date";
 import { rupiah, shortDate } from "@/lib/format";
 import { Cap, DenomSheet, seedOf } from "@/components/press/denom";
 import { formatSerial } from "@/components/press/serial";
+import { StateLabel } from "@/components/press/kampus-press";
 
 /** wa.me link for a reminder; Indonesian 08xx numbers become 628xx. */
 export function whatsAppUrl(debt: DebtItem): string {
@@ -65,10 +66,10 @@ export function DebtSlip({ debt, justPaid, onTogglePaid, onDelete }: DebtSlipPro
       <span aria-hidden="true" className="absolute left-3 right-3 top-2 border-t-2 border-dotted border-current opacity-60" />
       <div className="flex items-start justify-between gap-3 pt-1">
         <div className="min-w-0">
-          <p className="text-meta font-semibold">{receivable ? "Piutang · uang kembali ke kamu" : "Utang · kamu yang bayar"}</p>
           <h3 id={titleId} className="font-display text-head font-bold break-words">
             {receivable ? `${debt.personName} utang ke kamu` : `Kamu utang ke ${debt.personName}`}
           </h3>
+          <p className="text-meta">{receivable ? "Piutang · uang kembali ke kamu" : "Utang · kamu yang bayar"}</p>
         </div>
         {paid ? (
           <Cap tone="aman" tilt={-10} press={justPaid} className="text-body">
@@ -76,7 +77,7 @@ export function DebtSlip({ debt, justPaid, onTogglePaid, onDelete }: DebtSlipPro
             Lunas
           </Cap>
         ) : late ? (
-          <Cap tone="paper" tilt={8}>Lewat janji</Cap>
+          <StateLabel icon={CalendarX}>Lewat janji</StateLabel>
         ) : null}
       </div>
 

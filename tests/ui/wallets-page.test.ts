@@ -58,6 +58,8 @@ describe("Dompet page", () => {
       React.createElement(WalletNote, { wallet: { ...wallet, balance: -5000 }, onTransfer: noop, onEdit: noop, onDelete: noop })
     );
     expect(minus).toContain("Minus");
+    // Minus is a plain label; only Mepet (money status) is stamped.
+    expect(minus).not.toContain("uppercase tracking-[0.08em]");
     expect(minus).toContain("−Rp");
     expect(minus).toContain('aria-label="Hapus Dompet Tunai"');
 
@@ -65,6 +67,7 @@ describe("Dompet page", () => {
       React.createElement(WalletNote, { wallet: { ...wallet, balance: 15000 }, onTransfer: noop, onEdit: noop, onDelete: noop })
     );
     expect(low).toContain("Mepet");
+    expect(low).toContain("uppercase tracking-[0.08em]");
     expect(low).toContain("Paling cepat habis di warteg");
   });
 });

@@ -11,7 +11,7 @@ import {
 } from "@/lib/financial/split-bill-engine";
 import { rupiah } from "@/lib/format";
 import { formatSerial } from "@/components/press/serial";
-import { Perforation, PRIMARY_CLASS, SECONDARY_CLASS, Stamp } from "@/components/press/kampus-press";
+import { Perforation, PRIMARY_CLASS, SECONDARY_CLASS, StateLabel } from "@/components/press/kampus-press";
 
 interface SplitSummaryCardProps {
   result: SplitBillResult;
@@ -94,7 +94,7 @@ export function SplitSummaryCard({
                     {formatSerial(share.participantId, config.date)}
                   </span>
                   {share.isUser ? (
-                    isSaved && <Stamp label="Tercatat" tone="aman" icon={Check} fresh />
+                    isSaved && <StateLabel icon={Check} className="text-ink">Tercatat</StateLabel>
                   ) : (
                     <button
                       type="button"

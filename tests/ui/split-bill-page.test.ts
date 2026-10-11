@@ -59,4 +59,26 @@ describe("initialSplitBill", () => {
     expect(bill.participants.length).toBeGreaterThan(1);
     expect(bill.config.restaurantName).not.toBe("");
   });
+
+  it("shows a friend not sharing a menu line as unselected, never struck through", async () => {
+    const React = await import("react");
+    const { renderToString } = await import("react-dom/server");
+    const { BillItemEditor } = await import("@/components/split-bill/bill-item-editor");
+    const noop = () => {};
+    const html = renderToString(
+      React.createElement(BillItemEditor, {
+        items: [{ id: "i1", name: "Es teh", price: 5000, quantity: 1, assignedParticipantIds: ["a"] }],
+        participants: [
+          { id: "a", name: "Saya", isUser: true },
+          { id: "b", name: "Raka", isUser: false },
+        ],
+        mode: "itemized",
+        onAddItem: noop,
+        onUpdateItem: noop,
+        onDeleteItem: noop,
+      })
+    );
+    expect(html).toContain('aria-pressed="false"');
+    expect(html).not.toContain("line-through");
+  });
 });
