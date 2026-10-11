@@ -147,7 +147,7 @@ export function SentencePress({ onTryMic }: { onTryMic: () => void }) {
               </div>
               <p className="font-display font-bold text-ink money flex items-baseline gap-2">
                 <span className="text-head">Rp</span>
-                <span className="text-[clamp(2.75rem,13vw,4rem)] leading-none tracking-[-0.03em]" aria-hidden="true">
+                <span className="text-numeral" aria-hidden="true">
                   {rolled.toLocaleString("id-ID")}
                 </span>
                 <span className="sr-only">{Math.max(0, left).toLocaleString("id-ID")}</span>

@@ -126,7 +126,7 @@ export default function LandingPage() {
         {/* Hero: what Finoch is, what to do, and the proof right beside it. */}
         <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-14 sm:pb-24 grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,34rem)] gap-x-14 gap-y-10 items-start">
           <div className="space-y-6 lg:pt-10">
-            <h1 className="font-display font-bold text-ink text-[clamp(2.4rem,9vw,4.5rem)] leading-[1.02] tracking-[-0.02em] text-balance">
+            <h1 className="font-display font-bold text-ink text-numeral leading-[1.05] text-balance">
               Ngomong aja, Finoch yang nyatat.
             </h1>
             <p className="text-body text-ink max-w-[34rem]">
@@ -170,7 +170,7 @@ export default function LandingPage() {
         <section id="jatah" aria-labelledby="jatah-title" className="scroll-mt-20 border-t border-ink/15">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-x-14 gap-y-8 items-center">
             <div className="space-y-4 max-w-prose">
-              <h2 id="jatah-title" className="font-display text-[clamp(1.75rem,5vw,2.5rem)] leading-tight font-bold text-ink text-balance">
+              <h2 id="jatah-title" className="font-display text-head font-bold text-ink text-balance">
                 Satu angka buat hari ini, bukan sepuluh grafik.
               </h2>
               <p className="text-body text-ink">
@@ -198,7 +198,7 @@ export default function LandingPage() {
         {/* Three ways in; the scanner works right here too. */}
         <section aria-labelledby="cara-title" className="border-t border-ink/15">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-24 space-y-8">
-            <h2 id="cara-title" className="font-display text-[clamp(1.75rem,5vw,2.5rem)] leading-tight font-bold text-ink max-w-2xl text-balance">
+            <h2 id="cara-title" className="font-display text-head font-bold text-ink max-w-2xl text-balance">
               Nyatat pas lagi bayar, pakai satu tangan.
             </h2>
             <ul className="grid grid-cols-1 md:grid-cols-3 border-t border-ink/20">
@@ -225,7 +225,7 @@ export default function LandingPage() {
         <section id="fitur" aria-labelledby="fitur-title" className="scroll-mt-20 border-t border-ink/15">
           <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-24 space-y-10">
             <div className="space-y-3 max-w-2xl">
-              <h2 id="fitur-title" className="font-display text-[clamp(1.75rem,5vw,2.5rem)] leading-tight font-bold text-ink text-balance">
+              <h2 id="fitur-title" className="font-display text-head font-bold text-ink text-balance">
                 Dibuat buat hidup anak kost.
               </h2>
               <p className="text-body text-ink">
@@ -255,7 +255,7 @@ export default function LandingPage() {
 
         <section id="tanya" aria-labelledby="tanya-title" className="scroll-mt-20 border-t border-ink/15">
           <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-24 space-y-6">
-            <h2 id="tanya-title" className="font-display text-[clamp(1.75rem,5vw,2.5rem)] leading-tight font-bold text-ink">
+            <h2 id="tanya-title" className="font-display text-head font-bold text-ink">
               Yang sering ditanya
             </h2>
             <div className="border-t border-ink/20">
@@ -283,7 +283,7 @@ export default function LandingPage() {
               className="absolute -right-24 -top-16 sm:-right-10 !text-paper-sheet dark:!text-paper opacity-40"
             />
             <div className="relative max-w-xl space-y-5">
-              <h2 id="tutup-title" className="font-display text-[clamp(2rem,7vw,3.25rem)] leading-[1.05] font-bold text-balance">
+              <h2 id="tutup-title" className="font-display text-numeral leading-[1.05] font-bold text-balance">
                 Uang saku awet sampai tanggal tua.
               </h2>
               <p className="text-body max-w-md">
