@@ -5,7 +5,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1288
+    "textLen": 1145
   },
   {
     "file": "wallets-mobile.png",
@@ -13,7 +13,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 893
+    "textLen": 833
   },
   {
     "file": "budget-mobile.png",
@@ -29,7 +29,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1323
+    "textLen": 1320
   },
   {
     "file": "debts-mobile.png",
@@ -37,7 +37,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 573
+    "textLen": 539
   },
   {
     "file": "ukt-savings-mobile.png",
@@ -45,7 +45,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1434
+    "textLen": 1334
   },
   {
     "file": "wishlist-mobile.png",
@@ -77,7 +77,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 669
+    "textLen": 653
   },
   {
     "file": "audit-mobile.png",
@@ -101,7 +101,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1317
+    "textLen": 1249
   },
   {
     "file": "simulator-mobile.png",
@@ -109,7 +109,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1115
+    "textLen": 1083
   },
   {
     "file": "goals-mobile.png",
@@ -117,7 +117,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 481
+    "textLen": 449
   },
   {
     "file": "copilot-mobile.png",
@@ -141,7 +141,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 2810
+    "textLen": 2770
   },
   {
     "file": "dashboard-desktop.png",
@@ -149,7 +149,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1294
+    "textLen": 1151
   },
   {
     "file": "wallets-desktop.png",
@@ -157,7 +157,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 893
+    "textLen": 833
   },
   {
     "file": "budget-desktop.png",
@@ -173,7 +173,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1323
+    "textLen": 1320
   },
   {
     "file": "debts-desktop.png",
@@ -181,7 +181,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 573
+    "textLen": 539
   },
   {
     "file": "ukt-savings-desktop.png",
@@ -189,7 +189,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1434
+    "textLen": 1334
   },
   {
     "file": "wishlist-desktop.png",
@@ -221,7 +221,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 723
+    "textLen": 707
   },
   {
     "file": "audit-desktop.png",
@@ -245,7 +245,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1317
+    "textLen": 1249
   },
   {
     "file": "simulator-desktop.png",
@@ -253,7 +253,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1115
+    "textLen": 1083
   },
   {
     "file": "goals-desktop.png",
@@ -261,7 +261,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 481
+    "textLen": 449
   },
   {
     "file": "copilot-desktop.png",
@@ -285,7 +285,19 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 3063
+    "textLen": 3023
+  },
+  {
+    "file": "catat-1-sheet-mobile.png",
+    "flow": true
+  },
+  {
+    "file": "catat-2-review-mobile.png",
+    "flow": true
+  },
+  {
+    "file": "catat-3-receipt-mobile.png",
+    "flow": true
   },
   {
     "file": "onboarding-mobile.png",
@@ -313,7 +325,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 463
+    "textLen": 480
   },
   {
     "file": "wallets-empty-mobile.png",
@@ -321,7 +333,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 277
+    "textLen": 269
   },
   {
     "file": "budget-empty-mobile.png",
@@ -337,7 +349,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 508
+    "textLen": 505
   },
   {
     "file": "debts-empty-mobile.png",
@@ -377,7 +389,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 469
+    "textLen": 486
   },
   {
     "file": "wallets-empty-desktop.png",
@@ -385,7 +397,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 277
+    "textLen": 269
   },
   {
     "file": "budget-empty-desktop.png",
@@ -401,7 +413,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 508
+    "textLen": 505
   },
   {
     "file": "debts-empty-desktop.png",
