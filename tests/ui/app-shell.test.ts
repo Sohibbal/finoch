@@ -86,4 +86,9 @@ describe("AppShell", () => {
     vi.stubGlobal("navigator", { onLine: false });
     expect(await render()).toContain("ISI HALAMAN");
   });
+
+  it("does not treat a server outage (/api/auth/me 5xx) as signed out", async () => {
+    auth.value = { user: null, isLoading: false, sessionUnavailable: true, logout: () => {} } as typeof auth.value;
+    expect(await render()).toContain("ISI HALAMAN");
+  });
 });

@@ -15,23 +15,25 @@ function isOffline() {
 }
 
 export function AppShell({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuthContext();
+  const { user, isLoading, sessionUnavailable } = useAuthContext();
   const router = useRouter();
   const pathname = usePathname();
 
   // Offline the session check can't reach the server: keep showing the local-first data of the
   // current storage scope instead of bouncing to /login.
-  const canShowPage = Boolean(user) || (!isLoading && isOffline());
+  // A 5xx from /api/auth/me is treated the same way: never log users out because the DB is down.
+  const sessionUnknown = sessionUnavailable || isOffline();
+  const canShowPage = Boolean(user) || (!isLoading && sessionUnknown);
 
   useEffect(() => {
-    if (isLoading || user || isOffline()) return;
+    if (isLoading || user || sessionUnknown) return;
     const next = window.location.pathname + window.location.search;
     // The cookie can still pass middleware while /api/auth/me finds no user (e.g. deleted
     // account): clear it first, or /login would send us straight back here.
     fetch("/api/auth/logout", { method: "POST" })
       .catch(() => {})
       .finally(() => router.replace(`/login?next=${encodeURIComponent(next)}`));
-  }, [isLoading, user, router]);
+  }, [isLoading, user, sessionUnknown, router]);
 
   const openVoice = () => {
     if (pathname === "/dashboard") window.dispatchEvent(new Event(OPEN_VOICE_EVENT));

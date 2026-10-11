@@ -36,7 +36,8 @@ self.addEventListener("install", (event) => {
         STATIC_ASSETS.map(async (asset) => {
           try {
             const response = await fetch(asset, { cache: "reload" });
-            if (response && response.ok) {
+            // A signed-out install gets /login redirects for app routes: never store those as the page.
+            if (response && response.ok && !response.redirected) {
               await cache.put(asset, response);
             }
           } catch (err) {
@@ -97,7 +98,7 @@ self.addEventListener("fetch", (event) => {
     try {
       const response = await fetch(event.request);
       // RSC payloads are deployment-specific: never persist them or use HTML fallbacks.
-      if (response.ok && (strategy === "cache-first" || isNavigation)) {
+      if (response.ok && !response.redirected && (strategy === "cache-first" || isNavigation)) {
         await assetCache.put(event.request, response.clone());
       }
       return response;

@@ -51,6 +51,16 @@ describe("service worker cache isolation and routing", () => {
     expect(sw.cache.match).not.toHaveBeenCalled();
     expect(sw.cache.put).not.toHaveBeenCalled();
   });
+  it("never caches a navigation that was redirected (e.g. to /login)", async () => {
+    const sw = serviceWorker();
+    const redirected = new Response("login page");
+    Object.defineProperty(redirected, "redirected", { value: true });
+    sw.fetch.mockResolvedValue(redirected);
+    let response: Promise<Response> = Promise.resolve(new Response());
+    sw.handlers.fetch({ request: request("/dashboard", { mode: "navigate" }), respondWith: (value: Promise<Response>) => { response = value; } });
+    expect(await (await response).text()).toBe("login page");
+    expect(sw.cache.put).not.toHaveBeenCalled();
+  });
   it("serves a cached wasm without making a network request", async () => {
     const sw = serviceWorker();
     sw.cache.match.mockResolvedValue(new Response("wasm"));

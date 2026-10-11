@@ -17,10 +17,13 @@ export function useAuth() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  // True when the server couldn't answer (offline / 5xx): the session is unknown, not absent.
+  const [sessionUnavailable, setSessionUnavailable] = useState(false);
 
   const checkSession = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me");
+      setSessionUnavailable(res.status >= 500);
       if (res.ok) {
         const data = await res.json();
         setUser(data.user);
@@ -33,6 +36,7 @@ export function useAuth() {
       }
     } catch {
       // Offline: keep the current scope so a logged-in user still sees their local-first data.
+      setSessionUnavailable(true);
       setUser(null);
       syncManager.setAuthenticated(false);
     } finally {
@@ -125,6 +129,7 @@ export function useAuth() {
     user,
     isAuthenticated: !!user,
     isLoading,
+    sessionUnavailable,
     error,
     login,
     register,
