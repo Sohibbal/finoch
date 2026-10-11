@@ -68,3 +68,53 @@ describe("Indonesian Expense Parser Complete Pipeline", () => {
     expect(parseIndonesianExpense("halo selamat pagi")).toHaveLength(0);
   });
 });
+
+describe("Classifier keyword regressions", () => {
+  it.each([
+    ["Tiket Bioskop Malam", "Shopping & Lifestyle"],
+    ["Tagihan Air Pdam", "Bills & Utilities"],
+    ["Aqua Ml", "Food & Drinks"],
+    ["Teh Botol", "Food & Drinks"],
+    ["Es Jeruk", "Food & Drinks"],
+    ["Kerupuk", "Food & Drinks"],
+    ["Soto Ayam", "Food & Drinks"],
+    ["Bakmi", "Food & Drinks"],
+    ["Gofood", "Food & Drinks"],
+    ["Ojek Pangkalan", "Transportation"],
+    ["Taksi Bandara", "Transportation"],
+    ["Bayar Kosan", "Bills & Utilities"],
+    ["Fotocopy Tugas", "Other"],
+    ["Kosmetik", "Other"],
+  ])("classifies %s as %s", (item, expected) => {
+    expect(classifyExpenseCategory(item)).toBe(expected);
+  });
+});
+
+describe("Parser regressions", () => {
+  it("lowers confidence when no category keyword matches", () => {
+    const [known] = parseIndonesianExpense("nasi padang 15 ribu");
+    const [unknown] = parseIndonesianExpense("barang random 15 ribu");
+    expect(unknown.category).toBe("Other");
+    expect(unknown.confidence).toBeLessThan(known.confidence);
+  });
+
+  it("does not turn a bare quantity word into a price", () => {
+    const result = parseIndonesianExpense("es teh dua sama roti 10 ribu");
+    expect(result).toHaveLength(1);
+    expect(result[0].amount).toBe(10000);
+  });
+
+  it("parses README example: nasi padang goceng sama es teh duaribu", () => {
+    const result = parseIndonesianExpense("Beli nasi padang ayam gulai goceng sama es teh duaribu");
+    expect(result.map((r) => r.amount)).toEqual([5000, 2000]);
+    expect(result.every((r) => r.category === "Food & Drinks")).toBe(true);
+    expect(result.reduce((sum, r) => sum + r.amount, 0)).toBe(7000);
+  });
+
+  it("parses README example: top up gopay lima puluh rebu bayar sewa bensin ceban cash", () => {
+    const result = parseIndonesianExpense("Top up gopay lima puluh rebu bayar sewa bensin ceban cash");
+    expect(result.map((r) => r.amount)).toEqual([50000, 10000]);
+    expect(result[0].category).toBe("Shopping & Lifestyle");
+    expect(result[1].category).toBe("Transportation");
+  });
+});

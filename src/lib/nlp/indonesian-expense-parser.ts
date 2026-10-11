@@ -2,7 +2,7 @@ import type { ParsedVoiceItem } from "../types/expense";
 import { splitTransactions } from "./transaction-splitter";
 import { parseIndonesianNumber } from "./number-normalizer";
 import { extractItemName } from "./item-extractor";
-import { classifyExpenseCategory } from "../categorization/expense-category-classifier";
+import { findExpenseCategory } from "../categorization/expense-category-classifier";
 import { calculateConfidence } from "./confidence";
 
 /**
@@ -17,7 +17,7 @@ import { calculateConfidence } from "./confidence";
  *   ↓
  * extractItemName()
  *   ↓
- * classifyExpenseCategory()
+ * findExpenseCategory()
  *   ↓
  * calculateConfidence()
  *   ↓
@@ -43,8 +43,9 @@ export function parseIndonesianExpense(transcript: string): ParsedVoiceItem[] {
     }
 
     const itemName = extractItemName(segment, numResult.matchedText);
-    const category = classifyExpenseCategory(itemName);
-    const confidence = calculateConfidence(itemName, numResult.amount, true);
+    const matchedCategory = findExpenseCategory(itemName);
+    const category = matchedCategory ?? "Other";
+    const confidence = calculateConfidence(itemName, numResult.amount, matchedCategory !== null);
 
     items.push({
       id: `parsed-${Date.now()}-${i}-${Math.random().toString(36).substring(2, 7)}`,
