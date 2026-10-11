@@ -13,7 +13,6 @@ import { Guilloche } from "@/components/press/guilloche";
 import { formatSerial } from "@/components/press/serial";
 import { getBills, getMonthlyBillAmount } from "@/lib/storage/bill-storage";
 import { rupiah } from "@/lib/format";
-import { Cap } from "@/components/press/denom";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -174,12 +173,8 @@ export default function ProfilePage() {
                 </dl>
               </div>
               <div className="px-5 pb-4 flex flex-wrap items-center gap-3">
-                <Cap tone="aman" tilt={-4}>Akun aktif</Cap>
-                {demoMode && (
-                  <Cap tone="mepet" tilt={3}>
-                    Mode Demo
-                  </Cap>
-                )}
+                <span className="text-meta font-semibold text-aman-ink">Akun aktif</span>
+                {demoMode && <span className="text-meta font-semibold text-mepet-ink">Mode Demo</span>}
               </div>
             </Note>
           )}

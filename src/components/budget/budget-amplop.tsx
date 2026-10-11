@@ -91,7 +91,7 @@ export function BudgetAmplop({ envelope, onTransfer, onEdit, onDelete }: BudgetA
             <p className="text-meta text-ink-soft">{envelopePersonality(envelope.icon)}</p>
           </div>
           {status === "exceeded" ? (
-            <Cap tone="paper" tilt={7}>Jebol</Cap>
+            <Cap tone="paper" tilt={7}>Habis</Cap>
           ) : status === "warning" ? (
             <Cap tone="paper" tilt={7}>Mepet</Cap>
           ) : null}
