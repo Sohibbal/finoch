@@ -35,3 +35,8 @@ next-env.d.ts
 
 # Self-signed certs for `pnpm dev:lan`
 /.certs
+
+# Impeccable runtime state (decision pages, live server)
+/.impeccable/questions/
+/.impeccable/live/
+/.playwright-mcp/
