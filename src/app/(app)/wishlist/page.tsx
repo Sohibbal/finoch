@@ -1,17 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
-import {
-  Heart,
-  Plus,
-  Sparkles,
-  Trophy,
-  Clock,
-  CheckCircle2,
-  ShieldCheck,
-  ShoppingBag,
-} from "lucide-react";
-import { WishlistItem, WishlistStatus } from "@/types/wishlist-types";
+import { Plus } from "lucide-react";
+import { WishlistItem } from "@/types/wishlist-types";
 import {
   getWishlist,
   addWishlistItem,
@@ -23,20 +14,24 @@ import {
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { useAuthContext } from "@/components/layout/auth-provider";
 
-import { WishlistCardMobile } from "@/components/wishlist/wishlist-card-mobile";
-import { WishlistCardDesktop } from "@/components/wishlist/wishlist-card-desktop";
+import { WishlistTag } from "@/components/wishlist/wishlist-tag";
 import { WishlistTrophyCard } from "@/components/wishlist/wishlist-trophy-card";
 import { WishlistFormModal } from "@/components/wishlist/wishlist-form-modal";
-import { formatRupiah } from "@/lib/financial/split-bill-engine";
 import { PageHeader } from "@/components/layout/page-header";
-import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
+import { OptionButton, PRIMARY_CLASS } from "@/components/press/kampus-press";
+import { rupiah } from "@/lib/format";
+
+type Filter = "active" | "ready" | "saved_money" | "purchased" | "all";
 
 export default function WishlistPage() {
   const { user } = useAuthContext();
 
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedStatus, setSelectedStatus] = useState<string>("active");
+  const [selectedStatus, setSelectedStatus] = useState<Filter>("active");
+  // The tag whose state just changed gets its stamp pressed in; status line for screen readers too.
+  const [stampedId, setStampedId] = useState<string | null>(null);
+  const [notice, setNotice] = useState("");
 
   const refreshWishlist = () => {
     setItems(getWishlist());
@@ -68,7 +63,8 @@ export default function WishlistPage() {
 
     cancelAndSaveMoney(id);
     refreshWishlist();
-    alert(`Hebat! Kamu berhasil menahan nafsu belanja impulsif dan menyelamatkan ${formatRupiah(target.price)} ke tabungan! 🎉`);
+    setStampedId(id);
+    setNotice(`${target.name} batal dibeli. ${rupiah(target.price)} tetap di dompet.`);
   };
 
   const handlePurchase = async (id: string) => {
@@ -84,6 +80,7 @@ export default function WishlistPage() {
 
     purchaseWishlistItem(id);
     refreshWishlist();
+    setStampedId(id);
 
     try {
       await expenseStorage.saveExpense({
@@ -92,7 +89,7 @@ export default function WishlistPage() {
         category: "Shopping & Lifestyle",
         userId: user?.id || "guest",
       });
-      alert(`Selamat! "${target.name}" (${formatRupiah(target.price)}) berhasil dibeli dan otomatis dicatat ke Pengeluaran Finoch! 🛍️`);
+      setNotice(`${target.name} (${rupiah(target.price)}) terbeli dan sudah dicatat ke Pengeluaran.`);
     } catch (err) {
       console.error("Gagal auto-record wishlist purchase:", err);
     }
@@ -108,180 +105,85 @@ export default function WishlistPage() {
   // Filter items
   const filteredItems = items.filter((item) => {
     if (selectedStatus === "active") return item.status === "cooling" || item.status === "ready";
-    if (selectedStatus === "cooling") return item.status === "cooling";
     if (selectedStatus === "ready") return item.status === "ready";
     if (selectedStatus === "saved_money") return item.status === "saved_money";
     if (selectedStatus === "purchased") return item.status === "purchased";
     return true; // all
   });
 
+  const filters: { id: Filter; label: string; count: number }[] = [
+    { id: "active", label: "Lagi ditunda", count: summary.coolingCount + summary.readyCount },
+    { id: "ready", label: "Tunda selesai", count: summary.readyCount },
+    { id: "saved_money", label: "Diselamatkan", count: summary.savedMoneyCount },
+    { id: "purchased", label: "Terbeli", count: summary.purchasedCount },
+    { id: "all", label: "Semua", count: items.length },
+  ];
+
   return (
     <>
-      <PageHeader
-        title="Wishlist Anti-Impulsif (Aturan Tunda 7 Hari)"
-        subtitle="Kunci godaan belanja online selama masa pikir ulang sebelum checkout"
-        actions={
-          <>
-            <button
-              type="button"
-              onClick={() => setIsModalOpen(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 text-xs font-bold transition-all shadow-sm active:scale-95"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Tambah Incaran</span>
+      <PageHeader title="Wishlist Tunda" subtitle="Tahan dulu 7 hari sebelum checkout. Masih pengen? Baru beli." />
+
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-10 space-y-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-5 items-end">
+          <div className="lg:col-span-2">
+            <WishlistTrophyCard summary={summary} />
+          </div>
+          <div className="space-y-3">
+            <p className="text-body text-ink-soft">
+              Lagi ditahan{" "}
+              <span className="money font-bold text-ink">{rupiah(summary.totalWishlistValue)}</span> dari{" "}
+              {summary.coolingCount + summary.readyCount} barang incaran.
+            </p>
+            <button type="button" onClick={() => setIsModalOpen(true)} className={`${PRIMARY_CLASS} w-full`}>
+              <Plus className="w-4 h-4" aria-hidden="true" />
+              Tambah incaran
             </button>
-          </>
-        }
-      />
-
-      {/* Content Body */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 space-y-5">
-        {/* Trophy Banner */}
-        <WishlistTrophyCard summary={summary} />
-
-        {/* Filter Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
-          <button
-            type="button"
-            onClick={() => setSelectedStatus("active")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0 ${
-              selectedStatus === "active"
-                ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm"
-                : "bg-cream-50 dark:bg-navy-950 text-navy-600 dark:text-cream-300 border-cream-300 dark:border-navy-800"
-            }`}
-          >
-            Sedang Ditunda ({summary.coolingCount + summary.readyCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedStatus("ready")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0 ${
-              selectedStatus === "ready"
-                ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                : "bg-cream-50 dark:bg-navy-950 text-navy-600 dark:text-cream-300 border-cream-300 dark:border-navy-800"
-            }`}
-          >
-            Siap Beli ({summary.readyCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedStatus("saved_money")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0 ${
-              selectedStatus === "saved_money"
-                ? "bg-amber-500 text-white border-amber-500 shadow-sm"
-                : "bg-cream-50 dark:bg-navy-950 text-navy-600 dark:text-cream-300 border-cream-300 dark:border-navy-800"
-            }`}
-          >
-            Diselamatkan ({summary.savedMoneyCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedStatus("purchased")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0 ${
-              selectedStatus === "purchased"
-                ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm"
-                : "bg-cream-50 dark:bg-navy-950 text-navy-600 dark:text-cream-300 border-cream-300 dark:border-navy-800"
-            }`}
-          >
-            Terbeli ({summary.purchasedCount})
-          </button>
-          <button
-            type="button"
-            onClick={() => setSelectedStatus("all")}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-all shrink-0 ${
-              selectedStatus === "all"
-                ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm"
-                : "bg-cream-50 dark:bg-navy-950 text-navy-600 dark:text-cream-300 border-cream-300 dark:border-navy-800"
-            }`}
-          >
-            Semua ({items.length})
-          </button>
+          </div>
         </div>
 
-        {/* ========================================================================= */}
-        {/* 1. MOBILE VIEW (md:hidden) */}
-        {/* ========================================================================= */}
-        <div className="md:hidden space-y-3">
-          {filteredItems.length === 0 ? (
-            <div className="text-center py-12 rounded-2xl border border-cream-200 dark:border-navy-800 bg-white/50 dark:bg-navy-900/50 p-6 space-y-2">
-              <Heart className="w-8 h-8 text-rose-400 mx-auto opacity-50" />
-              <p className="text-xs font-bold text-navy-900 dark:text-cream-100">
-                Belum ada barang di kategori ini
-              </p>
-              <p className="text-[11px] text-navy-500 dark:text-cream-300/60">
-                Gunakan tombol Tambah Incaran untuk mengunci barang incaranmu.
-              </p>
-            </div>
-          ) : (
-            filteredItems.map((item) => (
-              <WishlistCardMobile
-                key={item.id}
-                item={item}
-                onCancelAndSave={handleCancelAndSave}
-                onPurchase={handlePurchase}
-                onDelete={handleDelete}
-              />
-            ))
-          )}
-        </div>
-
-        {/* ========================================================================= */}
-        {/* 2. DESKTOP VIEW (hidden md:grid) */}
-        {/* ========================================================================= */}
-        <div className="hidden md:grid grid-cols-2 gap-4">
-          {filteredItems.length === 0 ? (
-            <div className="col-span-2 text-center py-16 rounded-2xl border border-cream-200 dark:border-navy-800 bg-white dark:bg-navy-900 p-8 space-y-2">
-              <Heart className="w-10 h-10 text-rose-400 mx-auto opacity-40" />
-              <p className="text-sm font-bold text-navy-900 dark:text-cream-100">
-                Tidak ada barang incaran pada filter ini
-              </p>
-              <p className="text-xs text-navy-500 dark:text-cream-300/60">
-                Kunci barang yang ingin kamu beli di e-commerce agar terhindar dari checkout impulsif.
-              </p>
-            </div>
-          ) : (
-            filteredItems.map((item) => (
-              <WishlistCardDesktop
-                key={item.id}
-                item={item}
-                onCancelAndSave={handleCancelAndSave}
-                onPurchase={handlePurchase}
-                onDelete={handleDelete}
-              />
-            ))
-          )}
-        </div>
-      </main>
-
-      {/* Mobile Floating Bottom Summary Dock */}
-      <div className={`md:hidden fixed ${ACTION_BAR_BOTTOM} left-0 right-0 z-30 px-4 py-2 pointer-events-none`}>
-        <div className="pointer-events-auto max-w-md mx-auto bg-navy-950/90 text-white rounded-2xl p-3 shadow-xl backdrop-blur-md border border-white/10 flex items-center justify-between">
-          <div>
-            <span className="text-[10px] text-cream-300/70 block uppercase font-bold tracking-wider">
-              Total Nilai Incaran
-            </span>
-            <span className="text-sm font-black text-emerald-400">
-              {formatRupiah(summary.totalWishlistValue)}
-            </span>
+        <section aria-labelledby="wishlist-tags-title" className="space-y-4">
+          <h2 id="wishlist-tags-title" className="sr-only">
+            Barang incaran
+          </h2>
+          <div className="flex flex-wrap gap-1.5" role="group" aria-label="Saring incaran">
+            {filters.map((f) => (
+              <OptionButton key={f.id} pressed={selectedStatus === f.id} onClick={() => setSelectedStatus(f.id)}>
+                {f.label} <span className="money font-normal">{f.count}</span>
+              </OptionButton>
+            ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsModalOpen(true)}
-            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-bold shadow-sm active:scale-95"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>Tambah</span>
-          </button>
-        </div>
-      </div>
+          <p role="status" className="text-body text-ink min-h-[1.4rem]">
+            {notice}
+          </p>
 
-      {/* Add Modal */}
-      <WishlistFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSubmit={handleAddItem}
-      />
+          {filteredItems.length === 0 ? (
+            <div className="py-6 space-y-2 max-w-prose">
+              <p className="text-body font-semibold text-ink">Belum ada barang di sini.</p>
+              <p className="text-body text-ink-soft">
+                Lihat barang yang bikin kepengen di Shopee atau TikTok? Kunci dulu lewat Tambah incaran, lalu tunggu masa tundanya
+                lewat.
+              </p>
+            </div>
+          ) : (
+            <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+              {filteredItems.map((item) => (
+                <li key={item.id}>
+                  <WishlistTag
+                    item={item}
+                    onCancelAndSave={handleCancelAndSave}
+                    onPurchase={handlePurchase}
+                    onDelete={handleDelete}
+                    fresh={item.id === stampedId}
+                  />
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      </main>
+
+      <WishlistFormModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={handleAddItem} />
     </>
   );
 }
