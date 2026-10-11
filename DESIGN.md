@@ -20,15 +20,22 @@ colors:
   scrim: "#070E1A"
 typography:
   numeral:
-    fontFamily: "Bodoni Moda, Georgia, serif"
+    fontFamily: "Bricolage Grotesque, system-ui, sans-serif"
     fontSize: "clamp(3.5rem, 17vw, 5rem)"
     fontWeight: 700
     lineHeight: 1
     letterSpacing: "-0.03em"
     fontFeature: "\"tnum\" 1, \"lnum\" 1"
     fontVariation: "\"opsz\" auto"
+  numeral-long:
+    fontFamily: "Bricolage Grotesque, system-ui, sans-serif"
+    fontSize: "clamp(2.5rem, 12vw, 5rem)"
+    fontWeight: 700
+    lineHeight: 1
+    letterSpacing: "-0.03em"
+    fontFeature: "\"tnum\" 1, \"lnum\" 1"
   headline:
-    fontFamily: "Bodoni Moda, Georgia, serif"
+    fontFamily: "Bricolage Grotesque, system-ui, sans-serif"
     fontSize: "1.375rem"
     fontWeight: 700
     lineHeight: "1.75rem"
@@ -151,7 +158,7 @@ components:
 
 **Creative North Star: "Lembar Rupiah"**
 
-Money you can hold. Every surface is printed from one press: navy intaglio ink on cream note paper, hairline rules, corner registration marks, procedural guilloche rosettes and serial numbers. Today's allowance is a single banknote-like sheet with one giant engraved numeral, not a grid of equal-weight KPI cards. Wallets, envelopes and goals are notes in their own denomination color; transactions are serial-numbered stubs torn off the note; status is a rubber stamp and the color of the note's security thread.
+Money you can hold. Every surface is printed from one press: navy intaglio ink on cream note paper, hairline rules, corner registration marks, procedural guilloche rosettes and serial numbers. Today's allowance is a single banknote-like sheet with one giant engraved numeral, not a grid of equal-weight KPI cards. Wallets, envelopes and goals are notes in their own denomination color; transactions are stubs torn off the note; status is a rubber stamp and the color of the note's security thread.
 
 Density is calm and ledger-like. Three text sizes and one numeral face carry the whole hierarchy, so a figure's importance is told by size and face, never by a colored tile or chip. State is told by form as well as hue (doubled, dashed, filled, struck) so nothing relies on color alone. Dark mode is the same note printed in reverse: cream ink on navy stock, still matte.
 
@@ -159,7 +166,7 @@ The world is banknote grammar, never banknote reproduction: no Garuda, Bank Indo
 
 **Key Characteristics:**
 - One printed sheet per idea, flat paper with a 1px ink hairline and four registration corners.
-- Bodoni Moda engraved figures for money and headings; Archivo for everything you read or tap.
+- Bricolage Grotesque heavy figures for money and headings (1, 4 and 7 unmistakable at every size); Archivo for everything you read or tap.
 - Green, ochre and red mean money status and nothing else.
 - Every money figure states its scope in words next to it (hari ini, bulan ini, dari tagihan, dari profil).
 - Guilloche rosettes and the wavy microtext rule are the only ornament.
@@ -195,26 +202,27 @@ Dark theme reverses the stock: paper #08121F, sheet #0B192C, deep #102238, ink c
 
 ## Typography
 
-**Display Font:** Bodoni Moda (with Georgia, serif), optical-size axis on
+**Display Font:** Bricolage Grotesque (with system-ui, sans-serif), optical-size axis on
 **Body Font:** Archivo (with system-ui, sans-serif), width axis loaded
 
-**Character:** High-contrast engraved figures like a banknote's denomination, against a sturdy grotesque that stays legible at 12px on a mid-range Android screen.
+**Character:** Heavy, low-contrast figures with a little play, like a stamped denomination, against a sturdy grotesque that stays legible at 12px on a mid-range Android screen. The display face was changed from Bodoni Moda by the owner: its hairlines made a small 4 read as 1, which a money app cannot afford.
 
 ### Hierarchy
-- **Numeral** (700, clamp(3.5rem, 17vw, 5rem), line-height 1, -0.03em, tabular lining): the one giant figure per sheet, e.g. sisa jatah hari ini. The "Rp" before it is set in the headline size.
-- **Headline** (Bodoni Moda 700, 22px / 28px): page titles, section titles, dialog titles, note name plates, and the "Rp" prefix.
+- **Numeral** (700, clamp(3.5rem, 17vw, 5rem), line-height 1, -0.03em, tabular lining): the one giant figure per sheet, e.g. sisa jatah hari ini. The "Rp" before it is set in the headline size and never wraps away from the figure.
+- **Numeral, long** (700, clamp(2.5rem, 12vw, 5rem)): the same figure for 7+ digit amounts (e.g. a UKT total of Rp 1.850.000) so it stays on one line at 342px. Desktop size is identical.
+- **Headline** (Bricolage Grotesque 700, 22px / 28px): page titles, section titles, dialog titles, note name plates, and the "Rp" prefix.
 - **Body** (Archivo 400 to 700, 15px / 22.4px): everything read: sentences, list items, amounts in lists, buttons, fields. Prose capped at max-w-prose.
 - **Label / Meta** (Archivo 600, 12px / 16px, +0.02em): field labels, meta lines under items, subtitles, tab labels.
 - **Stamp** (Archivo 700, 12px, uppercase, +0.08em): only inside a rubber stamp or the Catat seal.
-- **Serial** (Archivo 400, 12px, +0.12em, tabular): FNC·DDMMYY·NNNN on every note and stub.
+- **Serial** (Archivo 400, 12px, +0.12em, tabular): FNC·DDMMYY·NNNN on the jatah note, save receipts, receipts/notas and exports only; list rows do not carry serials.
 
-**The Three Sizes Rule.** Meta 12, body 15, head 22, plus the clamp numeral. Nothing else in the app, and nothing below 12px.
+**The Three Sizes Rule.** Meta 12, body 15, head 22, plus the clamp numeral (and its long variant). Form fields are 16px so phones never zoom on focus. Nothing else in the app, and nothing below 12px. One sanctioned exception: the two side-by-side Simulator result notes size their figure with their own clamp so a full numeral cannot overflow the half-width column.
 
 **The Money Column Rule.** Every rupiah figure is set with tabular lining numerals so amounts align in columns, and dates are glued with no-break spaces so "Kam, 8 Okt" never splits.
 
 **The Scope Rule.** Every money figure states its scope in words beside it: "Sisa jatah hari ini", "Sisa bulan ini", "Terpakai hari ini", "(dari tagihan)". A bare total is not allowed.
 
-**The Named Figure Rule.** An uppercase, tracked 12px line is permitted only as the heading that names the figure directly below it (SISA JATAH HARI INI) or as a navigation group name. It is never a decorative kicker introducing another heading.
+**The Named Figure Rule.** An uppercase, tracked 12px line is permitted only as a navigation group name. The heading that names a figure (Jatah hari ini) is sentence case, body size, semibold. The jatah note keeps its working (uang saku − pengeluaran tetap − terpakai, dibagi sisa hari) folded under "Cara hitung jatah" instead of printed on the face. It is never a decorative kicker introducing another heading.
 
 ## Layout
 
@@ -260,7 +268,7 @@ The sheet every surface is printed on.
 - **Footer:** optional wavy microtext rule above the serial line.
 
 ### Denomination note
-A wallet, amplop, slip or goal printed as a flat color field in its denomination with paper type, a paper-toned guilloche rosette at 35% bleeding off the top-right, registration corners in the current color, and a paper-sheet name plate (headline name, meta personality line) printed onto the field without a border.
+A wallet, amplop, slip or goal printed as a flat color field in its denomination with paper type, a paper-toned guilloche rosette at 35% bleeding off the top-right (kasbon slips opt out with `rosette={false}`: a stack of IOUs reads as paperwork, not currency), registration corners in the current color, and a paper-sheet name plate (headline name, meta personality line) printed onto the field without a border.
 
 ### Stub
 A transaction torn off the note: paper-sheet, 1px ink-at-15% edge, a dotted perforation 6px in from the left, item in body semibold, meta line (wallet, category, time), serial, and the amount right-aligned in body bold. States by form, always repeated as words in the meta line:
@@ -292,7 +300,7 @@ Slides up as a bottom sheet on phones, centers at max 32rem on desktop. Paper-sh
 ### Navigation
 - **Mobile bottom bar:** paper with a top hairline; tabs are 20px glyph plus 12px label in soft ink; the active tab goes ink, bold, underlined 2px. The Catat seal sits in the center slot. Menu opens a full-screen paper sheet listing all 17 features in groups, each with a body-size name and a 12px one-line description.
 - **Sidebar (md+):** paper, grouped list with uppercase 12px group names; the active item is an ink bar with paper type.
-- **Page header:** sticky paper masthead with one hairline below; headline title in Bodoni, a back arrow on subpages, breadcrumbs on md+, and a Mode Demo line under the title when demo data is on.
+- **Page header:** sticky paper masthead with one hairline below; headline title in Bricolage Grotesque, a back arrow on subpages, breadcrumbs on md+, and a Mode Demo line under the title when demo data is on.
 
 ### Catat seal
 The primary action. A round ink button (72px minimum, 80px on the note) with a paper-toned guilloche at 40%, a mic glyph and the word CATAT in stamp type, ringed in 4px of paper. Presses to 95%.
