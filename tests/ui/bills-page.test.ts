@@ -65,4 +65,13 @@ describe("Tagihan Kost page", () => {
     expect(billIncomeShare(750_000, 0)).toBeNull();
     expect(billIncomeShare(750_000, 3_000_000)).toBe(25);
   });
+
+  it("marks a paid day on the calendar with a tick, never a strikethrough (struck means dihapus)", async () => {
+    const React = await import("react");
+    const { renderToString } = await import("react-dom/server");
+    const { BillCalendarMatrix } = await import("@/components/bills/bill-calendar-matrix");
+    const html = renderToString(React.createElement(BillCalendarMatrix, { bills: [bill("kos", 1, true)], today: new Date(2026, 9, 11) }));
+    expect(html).not.toContain("line-through");
+    expect(html).toContain("lunas");
+  });
 });
