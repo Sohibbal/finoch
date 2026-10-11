@@ -82,7 +82,8 @@ export default function DebtsPage() {
         actions={
           <button type="button" onClick={() => setIsModalOpen(true)} className={PRIMARY_ACTION}>
             <Plus className="w-4 h-4" aria-hidden="true" />
-            Catat kasbon
+            <span className="sm:hidden">Tambah</span>
+            <span className="hidden sm:inline">Catat kasbon</span>
           </button>
         }
       />

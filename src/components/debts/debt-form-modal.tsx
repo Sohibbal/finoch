@@ -167,7 +167,7 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
               value={personName}
               onChange={(e) => setPersonName(e.target.value)}
               placeholder="Contoh: Dimas Teman Kost"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
@@ -184,7 +184,7 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
               value={amount || ""}
               onChange={(e) => setAmount(Number(e.target.value))}
               placeholder="50000"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
@@ -198,7 +198,7 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Contoh: Talangan fotokopi modul ujian"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
@@ -211,7 +211,7 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
@@ -225,7 +225,7 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="Contoh: 08123456789"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 

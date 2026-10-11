@@ -46,9 +46,12 @@ export function envelopePersonality(icon: string): string {
   return PERSONALITY[icon] ?? PERSONALITY.sparkles;
 }
 
-/** The stored aliases as the Indonesian category names they pull from, without repeats. */
+// The five categories an expense can carry, by their Indonesian names.
+const KNOWN = new Set(["Food & Drinks", "Transportation", "Bills & Utilities", "Shopping & Lifestyle", "Other"].map(categoryLabel));
+
+/** The categories this envelope pulls from, in Indonesian, once each; free-text aliases stay out. */
 export function envelopeSources(aliases: string[]): string[] {
-  return [...new Set(aliases.map((a) => categoryLabel(a)))];
+  return [...new Set(aliases.map((a) => categoryLabel(a)))].filter((label) => KNOWN.has(label));
 }
 
 interface BudgetAmplopProps {

@@ -45,7 +45,7 @@ describe("Buku Kasbon page", () => {
     const noop = () => {};
     const piutang = renderToString(React.createElement(DebtSlip, { debt: debt({}), onTogglePaid: noop, onDelete: noop }));
     expect(piutang).toContain("Raka utang ke kamu");
-    expect(piutang).toContain("Ingatkan via WA");
+    expect(piutang).toContain("Ingatkan WA");
     const utang = renderToString(React.createElement(DebtSlip, { debt: debt({ type: "payable" }), onTogglePaid: noop, onDelete: noop }));
     expect(utang).toContain("Kamu utang ke Raka");
     const lunas = renderToString(React.createElement(DebtSlip, { debt: debt({ status: "paid" }), onTogglePaid: noop, onDelete: noop }));

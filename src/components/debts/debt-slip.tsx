@@ -100,17 +100,17 @@ export function DebtSlip({ debt, justPaid, onTogglePaid, onDelete }: DebtSlipPro
       <div className="flex flex-wrap items-center gap-2 pt-1">
         {!paid ? (
           <>
-            <button type="button" onClick={() => remind(debt)} className={`${SLIP_ACTION} flex-1 px-4`}>
+            <button type="button" onClick={() => remind(debt)} className={`${SLIP_ACTION} flex-1 px-3 whitespace-nowrap`}>
               <MessageCircle className="w-4 h-4" aria-hidden="true" />
-              Ingatkan via WA
+              Ingatkan WA
             </button>
-            <button type="button" onClick={() => onTogglePaid(debt.id)} className={`${SLIP_ACTION} flex-1 px-4`}>
+            <button type="button" onClick={() => onTogglePaid(debt.id)} className={`${SLIP_ACTION} flex-1 px-3 whitespace-nowrap`}>
               <Check className="w-4 h-4" aria-hidden="true" />
               Tandai lunas
             </button>
           </>
         ) : (
-          <button type="button" onClick={() => onTogglePaid(debt.id)} className={`${SLIP_ACTION} flex-1 px-4`}>
+          <button type="button" onClick={() => onTogglePaid(debt.id)} className={`${SLIP_ACTION} flex-1 px-3 whitespace-nowrap`}>
             <RotateCcw className="w-4 h-4" aria-hidden="true" />
             Batal lunas
           </button>

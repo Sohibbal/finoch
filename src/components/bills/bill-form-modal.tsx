@@ -151,7 +151,7 @@ export function BillFormModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: Kamar Kos Lantai 2 / Laundry Bulanan"
-              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
@@ -196,7 +196,7 @@ export function BillFormModal({
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 placeholder="Contoh: 850000"
-                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink"
+                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               />
             </div>
 
@@ -212,7 +212,7 @@ export function BillFormModal({
                 value={dueDay}
                 onChange={(e) => setDueDay(e.target.value)}
                 placeholder="1"
-                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink text-center"
+                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft text-center"
               />
             </div>
           </div>
@@ -250,7 +250,7 @@ export function BillFormModal({
               value={note}
               onChange={(e) => setNote(e.target.value)}
               placeholder="Contoh: No Rek Ibu Kos BCA 12345 / Bayar via Gopay"
-              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 

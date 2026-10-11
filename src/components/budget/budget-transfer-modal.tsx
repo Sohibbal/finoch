@@ -115,7 +115,7 @@ export function BudgetTransferModal({
             <select
               value={fromId}
               onChange={(e) => setFromId(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             >
               {envelopes.map((env) => (
                 <option key={env.id} value={env.id}>
@@ -133,7 +133,7 @@ export function BudgetTransferModal({
             <select
               value={toId}
               onChange={(e) => setToId(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             >
               {envelopes.map((env) => (
                 <option key={env.id} value={env.id}>
@@ -158,7 +158,7 @@ export function BudgetTransferModal({
                 step="5000"
                 value={amount || ""}
                 onChange={(e) => setAmount(Number(e.target.value))}
-                className="w-full pl-9 pr-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink"
+                className="w-full pl-9 pr-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
                 placeholder="50000"
                 required
               />
@@ -193,7 +193,7 @@ export function BudgetTransferModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Contoh: Sisa jatah kopi dialihkan ke makan akhir bulan"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 

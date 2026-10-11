@@ -44,9 +44,9 @@ describe("Amplop Anggaran page", () => {
     }
   });
 
-  it("names linked categories in Indonesian, once each", async () => {
+  it("names linked categories in Indonesian, once each, without raw aliases", async () => {
     const { envelopeSources } = await import("@/components/budget/budget-amplop");
-    expect(envelopeSources(["Food & Drinks", "Food", "Makan"])).toEqual(["Makan & Minum", "Makan"]);
+    expect(envelopeSources(["Food & Drinks", "Food", "Makan"])).toEqual(["Makan & Minum"]);
   });
 
   it("prints an overspent amplop as Jebol with the overspent amount in its ledger", async () => {

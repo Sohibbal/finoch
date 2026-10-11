@@ -114,8 +114,7 @@ export default function BillsPage() {
         actions={
           <button type="button" onClick={openNew} className={PRIMARY_ACTION}>
             <Plus className="w-4 h-4" aria-hidden="true" />
-            Tambah
-            <span className="sr-only sm:not-sr-only -ml-1">tagihan</span>
+            Tambah<span className="hidden sm:inline"> tagihan</span>
           </button>
         }
       />

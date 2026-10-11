@@ -205,7 +205,7 @@ export function BudgetFormModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: Makan Siang Kampus"
-              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
@@ -221,7 +221,7 @@ export function BudgetFormModal({
               required
               value={allocatedAmount || ""}
               onChange={(e) => setAllocatedAmount(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               placeholder="500000"
             />
           </div>
@@ -272,7 +272,7 @@ export function BudgetFormModal({
               value={aliasesText}
               onChange={(e) => setAliasesText(e.target.value)}
               placeholder="Contoh: Food, Food & Drinks, Groceries"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
             <p className="text-meta text-ink-soft mt-1">
               Transaksi suara/struk yang mencocokkan kata-kata ini akan otomatis memotong amplop ini.
@@ -289,7 +289,7 @@ export function BudgetFormModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Jatah maksimal 15rb per porsi makan warteg"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 

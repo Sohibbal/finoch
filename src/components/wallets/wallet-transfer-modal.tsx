@@ -145,7 +145,7 @@ export function WalletTransferModal({
               <select
                 value={fromId}
                 onChange={(e) => setFromId(e.target.value)}
-                className="w-full min-h-[48px] px-3 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:ring-2 focus:ring-ink"
+                className="w-full min-h-[48px] px-3 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               >
                 {wallets.map((w) => (
                   <option key={w.id} value={w.id}>
@@ -163,7 +163,7 @@ export function WalletTransferModal({
               <select
                 value={toId}
                 onChange={(e) => setToId(e.target.value)}
-                className="w-full min-h-[48px] px-3 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:ring-2 focus:ring-ink"
+                className="w-full min-h-[48px] px-3 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-medium focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               >
                 {wallets.map((w) => (
                   <option key={w.id} value={w.id} disabled={w.id === fromId}>
@@ -193,7 +193,7 @@ export function WalletTransferModal({
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="Contoh: 100000"
-              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               required
             />
           </div>
@@ -232,7 +232,7 @@ export function WalletTransferModal({
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Contoh: Tarik tunai ATM kampus untuk makan siang seminggu"
-              className="w-full min-h-[44px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:ring-2 focus:ring-ink"
+              className="w-full min-h-[44px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 

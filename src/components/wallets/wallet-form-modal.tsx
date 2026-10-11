@@ -199,7 +199,7 @@ export function WalletFormModal({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Contoh: BCA Tabungan Kost, GoPay Kuliah, Dompet Saku"
-              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               required
             />
           </div>
@@ -223,7 +223,7 @@ export function WalletFormModal({
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
               placeholder="0"
-              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               required
             />
           </div>
@@ -239,7 +239,7 @@ export function WalletFormModal({
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
                 placeholder="Contoh: 1234567890 / 08123456789"
-                className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ink"
+                className="w-full min-h-[48px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-mono focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
               />
             </div>
           )}
@@ -262,7 +262,7 @@ export function WalletFormModal({
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Contoh: Khusus jajan mingguan atau beasiswa"
-              className="w-full min-h-[44px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink"
+              className="w-full min-h-[44px] px-4 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
             />
           </div>
 
@@ -272,7 +272,7 @@ export function WalletFormModal({
               type="checkbox"
               checked={isPrimary}
               onChange={(e) => setIsPrimary(e.target.checked)}
-              className="w-4 h-4 rounded text-aman-ink focus:ring-ink border-ink/20"
+              className="w-4 h-4 rounded text-aman-ink focus:ring-ink placeholder:text-ink-soft border-ink/20"
             />
             <span className="text-xs font-medium text-ink">
               Jadikan akun utama (default penerimaan uang bulanan)
@@ -285,7 +285,7 @@ export function WalletFormModal({
               type="checkbox"
               checked={isDefault}
               onChange={(e) => setIsDefault(e.target.checked)}
-              className="w-4 h-4 rounded text-aman-ink focus:ring-ink border-ink/20"
+              className="w-4 h-4 rounded text-aman-ink focus:ring-ink placeholder:text-ink-soft border-ink/20"
             />
             <span className="text-xs font-medium text-ink">
               Jadikan dompet default untuk mencatat pengeluaran
