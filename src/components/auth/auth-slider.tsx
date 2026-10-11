@@ -7,6 +7,7 @@ import { ArrowLeft, Lock, Mail, User, Loader2, LogOut, Sun, Moon } from "lucide-
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
+import { safeNextPath } from "@/lib/auth/safe-next";
 
 interface AuthSliderProps {
   initialMode?: "login" | "register";
@@ -69,7 +70,7 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
         if (res.ok) {
           const data = await res.json();
           if (data?.profile) {
-            router.push("/dashboard");
+            router.push(safeNextPath(searchParams.get("next")));
             return;
           }
         }
