@@ -1,14 +1,17 @@
 import { NextResponse } from "next/server";
-import { jakartaDate } from "../validation";
-import { prisma } from "@/lib/prisma";
 import { getSessionFromRequest } from "@/lib/auth/jwt";
 import { getLlmConfig } from "@/lib/llm/llm-client";
-import { buildCopilotSystemPrompt, FinancialFacts } from "./prompt-builder";
+import {
+  buildUserFinancialSnapshot,
+  type UserFinancialSnapshot,
+} from "@/lib/copilot/context-builder";
+import { buildCopilotSystemPrompt } from "./prompt-builder";
 
 export async function POST(req: Request) {
   try {
     const session = await getSessionFromRequest(req);
     if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const body = await req.json().catch(() => null);
     if (!body || typeof body !== "object" || Array.isArray(body)) {
       return NextResponse.json({ error: "JSON tidak valid." }, { status: 400 });
@@ -22,55 +25,9 @@ export async function POST(req: Request) {
       );
     }
 
-    const defaultFacts: FinancialFacts = {
-      monthlyIncome: 0,
-      monthlyExpense: 0,
-      netSavings: 0,
-      topCategory: "Belum ada pengeluaran",
-      goalName: "Belum ada target",
-      goalStatus: "on_track",
-    };
-
-    let activeFacts: FinancialFacts = defaultFacts;
-
-    // Only server-owned facts may enter the system prompt.
-    if (session.userId) {
-      try {
-        const [year, month] = jakartaDate().split("-").map(Number);
-        const monthStart = new Date(Date.UTC(year, month - 1, 1) - 7 * 60 * 60 * 1000);
-        const nextMonth = new Date(Date.UTC(year, month, 1) - 7 * 60 * 60 * 1000);
-        const [profile, expenses, goals] = await Promise.all([
-          prisma.financialProfile.findUnique({ where: { userId: session.userId } }),
-          prisma.expense.findMany({ where: { userId: session.userId, isDeleted: false, createdAt: { gte: monthStart, lt: nextMonth } } }),
-          prisma.financialGoal.findMany({ where: { userId: session.userId }, orderBy: [{ targetDate: "asc" }, { id: "asc" }] }),
-        ]);
-
-        {
-          const totalExpense = expenses.reduce((sum, e) => sum + e.amount, 0);
-          const catMap = expenses.reduce((acc, e) => {
-            acc[e.category] = (acc[e.category] || 0) + e.amount;
-            return acc;
-          }, {} as Record<string, number>);
-          const topCat = Object.entries(catMap).sort((a, b) => b[1] - a[1])[0];
-          const topCatLabel = topCat
-            ? `${topCat[0]} (Rp${topCat[1].toLocaleString("id-ID")})`
-            : "Konsumsi Harian";
-
-          activeFacts = {
-            monthlyIncome: profile?.monthlyIncome ?? 0,
-            monthlyExpense: totalExpense,
-            netSavings: Math.max(0, (profile?.monthlyIncome ?? 0) - totalExpense),
-            topCategory: topCatLabel,
-            goalName: goals[0]?.name || "Tabungan Impian",
-            goalStatus: goals[0]?.status || "on_track",
-          };
-        }
-      } catch (dbErr) {
-        console.warn("Could not query user facts from DB for Copilot:", dbErr);
-      }
-    }
-
-    const systemPrompt = buildCopilotSystemPrompt(activeFacts);
+    // Grounding on live database snapshot
+    const facts: UserFinancialSnapshot = await buildUserFinancialSnapshot(session.userId);
+    const systemPrompt = buildCopilotSystemPrompt(facts);
     const llmConfig = getLlmConfig();
 
     if (llmConfig) {
@@ -114,7 +71,6 @@ export async function POST(req: Request) {
               `[Copilot LLM ${candidateModel} Error ${res.status}]`,
               errorText
             );
-            // If model does not exist (404), continue trying next candidate
             if (res.status === 404 || errorText.includes("does not exist")) {
               continue;
             }
@@ -129,16 +85,23 @@ export async function POST(req: Request) {
       }
     }
 
-    // Deterministic fallback response based on financial facts
+    // Gen-Z Deterministic fallback response grounded strictly on facts
     const lower = message.toLowerCase();
-    let reply = `Halo! Pemasukanmu saat ini Rp${activeFacts.monthlyIncome.toLocaleString("id-ID")} dan total pengeluaran Rp${activeFacts.monthlyExpense.toLocaleString("id-ID")}. Kamu masih punya sisa bersih Rp${activeFacts.netSavings.toLocaleString("id-ID")} bulan ini.`;
+    const name = facts.nickname || "Kawan";
+    const rupiah = (n: number) => `Rp${(n || 0).toLocaleString("id-ID")}`;
 
-    if (lower.includes("turun") || lower.includes("tabungan")) {
-      reply = `Sisa tabunganmu saat ini Rp${activeFacts.netSavings.toLocaleString("id-ID")}. Pos yang paling banyak menyedot pengeluaran ada di ${activeFacts.topCategory}. Coba kurangi sedikit pos jajan santai lewat What-If Simulator biar tabunganmu lebih tebal!`;
-    } else if (lower.includes("laptop") || lower.includes("beli") || lower.includes("aman")) {
-      reply = `Untuk target "${activeFacts.goalName}", statusmu saat ini [${activeFacts.goalStatus}] dengan sisa dana bulanan Rp${activeFacts.netSavings.toLocaleString("id-ID")}. Kalau mau beli sekarang, pastikan jangan sampai menguras dana daruratmu ya. Kamu bisa cek simulasinya di menu Simulator!`;
-    } else if (lower.includes("makan") || lower.includes("food") || lower.includes("gacoan") || lower.includes("kopi")) {
-      reply = `Pos pengeluaran makanan & minumanmu saat ini tercatat ${activeFacts.topCategory}. Ini memang pos paling dominan, jadi trik simpelnya cukup batasi jajan kopi/kafe di akhir pekan saja biar tetap hemat tanpa tersiksa.`;
+    let reply = `Halo ${name}! Nih rangkuman cepat dari database lo: Saldo bersih saat ini ${rupiah(facts.netBalance)}, pemasukan bulan ini ${rupiah(facts.monthlyIncome)}, dan pengeluaran ${rupiah(facts.monthlyExpense)}.`;
+
+    if (lower.includes("boros") || lower.includes("kategori") || lower.includes("makan") || lower.includes("jajan")) {
+      reply = `Berdasarkan database lo nih ${name}, pos yang paling banyak menyedot pengeluaran ada di ${facts.topExpenseCategory || "pengeluaran harian"}. Biar gak boncos, rem dulu nongkrong gak penting ya!`;
+    } else if (lower.includes("wishlist") || lower.includes("beli") || lower.includes("target")) {
+      reply = `Buat wishlist lo (${facts.wishlistSummary || "belum ada wishlist"}), saldo bersih lo sekarang ${rupiah(facts.netBalance)}. Selalu pastiin ada sisa buat dana darurat sebelum checkout barang incaran lo!`;
+    } else if (lower.includes("aman") || lower.includes("kondisi") || lower.includes("hemat")) {
+      if (facts.netBalance >= 0) {
+        reply = `Kondisi finansial lo masih aman terkendali kok ${name}! Saldo surplus ${rupiah(facts.netBalance)}. Gass pertahanin streak hemat lo!`;
+      } else {
+        reply = `Waduh ${name}, pengeluaran lo bulan ini udah melebihi pemasukan (-${rupiah(Math.abs(facts.netBalance))}). Waktunya pasang rem belanja darurat nih!`;
+      }
     }
 
     return NextResponse.json({
@@ -146,6 +109,7 @@ export async function POST(req: Request) {
       source: "facts_fallback",
     });
   } catch (error) {
+    console.error("Copilot route error:", error);
     return NextResponse.json(
       { error: "Gagal memproses pesan Copilot" },
       { status: 500 }
