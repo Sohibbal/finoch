@@ -33,3 +33,5 @@ next-env.d.ts
 # AI Agents & Local Skills
 .agents/
 
+# Self-signed certs for `pnpm dev:lan`
+/.certs
