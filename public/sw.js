@@ -1,5 +1,5 @@
 // Finoch PWA Service Worker (v3) - Resilient Offline Shell & Full Route Precache
-const CACHE_NAME = "finoch-shell-v3";
+const CACHE_NAME = "finoch-shell-v4";
 
 const STATIC_ASSETS = [
   "/",
@@ -78,7 +78,7 @@ function getFetchStrategy(request, origin) {
   if (request.mode === "navigate" || url.searchParams.has("_rsc") ||
       request.headers.get("RSC") === "1") return "network-first";
   if (["/_next/static/", "/icons/", "/fonts/", "/wasm/"].some(prefix => url.pathname.startsWith(prefix)) ||
-      url.pathname === "/favicon.ico") return "cache-first";
+      /^\/[^/]+\.(svg|png|ico)$/.test(url.pathname)) return "cache-first";
   return "bypass";
 }
 

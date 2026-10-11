@@ -18,11 +18,11 @@ const request = (path: string, options = {}) => ({ url: `https://finoch.test${pa
 describe("service worker cache isolation and routing", () => {
   it("deletes only obsolete app shell versions", async () => {
     const sw = serviceWorker();
-    sw.caches.keys.mockResolvedValue(["finoch-shell-v2", "voicash-shell-v2", "finoch-shell-v3", "transformers-cache", "finoch-whisper-wasm", "other-app"]);
+    sw.caches.keys.mockResolvedValue(["finoch-shell-v3", "voicash-shell-v2", "finoch-shell-v4", "transformers-cache", "finoch-whisper-wasm", "other-app"]);
     let pending: Promise<unknown> = Promise.resolve();
     sw.handlers.activate({ waitUntil: (value: Promise<unknown>) => { pending = value; } });
     await pending;
-    expect(sw.caches.delete.mock.calls).toEqual([["finoch-shell-v2"], ["voicash-shell-v2"]]);
+    expect(sw.caches.delete.mock.calls).toEqual([["finoch-shell-v3"], ["voicash-shell-v2"]]);
   });
   it.each(["/api", "/api/expenses", "/dashboard", "/photo.jpg", "/manifest.webmanifest"])("bypasses %s", path => {
     expect(serviceWorker().route(request(path), "https://finoch.test")).toBe("bypass");
@@ -32,7 +32,7 @@ describe("service worker cache isolation and routing", () => {
     expect(route(request("/", { url: "https://huggingface.co/model.onnx" }), "https://finoch.test")).toBe("bypass");
     expect(route(request("/icons/a.png", { method: "POST" }), "https://finoch.test")).toBe("bypass");
   });
-  it.each(["/_next/static/a.js", "/icons/a.png", "/fonts/a.woff2", "/wasm/a.wasm"])("cache-first for %s", path => {
+  it.each(["/_next/static/a.js", "/icons/a.png", "/fonts/a.woff2", "/wasm/a.wasm", "/finoch-logo.svg", "/favicon.ico"])("cache-first for %s", path => {
     expect(serviceWorker().route(request(path), "https://finoch.test")).toBe("cache-first");
   });
   it("uses the network for navigations and both RSC request forms", () => {
