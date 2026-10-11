@@ -10,7 +10,6 @@ import { expenseStorage } from "@/lib/storage/expense-storage";
 import { getBills, getMonthlyBillAmount } from "@/lib/storage/bill-storage";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { mergeExpenses } from "@/components/dashboard/dashboard-data";
-import { formatSerial } from "@/components/press/serial";
 import { categoryLabel, rupiah } from "@/lib/format";
 import { localDateKey } from "@/lib/date";
 
@@ -135,7 +134,6 @@ export default function InsightsPage() {
                   )}
                   <p className="text-body text-ink">{card.impact}</p>
                   <p className="text-body text-ink">{card.recommendation}</p>
-                  <p className="money text-meta tracking-[0.12em] text-ink-soft">{formatSerial(`insight-${card.type}-${idx}`, today)}</p>
                 </li>
               );
             })}

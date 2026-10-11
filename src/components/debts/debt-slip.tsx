@@ -8,7 +8,6 @@ import { localDateKey } from "@/lib/date";
 import { rupiah } from "@/lib/format";
 import { printDate } from "@/components/press/print-date";
 import { Cap, DenomSheet, seedOf } from "@/components/press/denom";
-import { formatSerial } from "@/components/press/serial";
 import { StateLabel } from "@/components/press/kampus-press";
 
 /** wa.me link for a reminder; Indonesian 08xx numbers become 628xx. */
@@ -97,7 +96,6 @@ export function DebtSlip({ debt, justPaid, onTogglePaid, onDelete }: DebtSlipPro
           .filter(Boolean)
           .join(" · ")}
       </p>
-      <p className="text-meta money tracking-[0.1em]">{formatSerial(debt.id, new Date(debt.createdAt))}</p>
 
       <div className="flex flex-wrap items-center gap-2 pt-1">
         {!paid ? (

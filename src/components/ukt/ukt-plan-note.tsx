@@ -6,7 +6,6 @@ import { UktCategory, UktMetrics, UktPlan } from "@/types/ukt-types";
 import { rupiah } from "@/lib/format";
 import { printDate } from "@/components/press/print-date";
 import { Guilloche } from "@/components/press/guilloche";
-import { formatSerial } from "@/components/press/serial";
 import { StatusStamp } from "@/components/press/status-stamp";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 import { DENOM, type Denom, FIELD_CLASS, LABEL_CLASS, Stamp, StateLabel } from "@/components/press/kampus-press";
@@ -191,8 +190,7 @@ export function UktPlanNote({ plan, metrics, onDeposit, onDelete }: UktPlanNoteP
           </>
         )}
 
-        <div className="flex items-center justify-between gap-3 border-t border-ink/15 pt-1">
-          <span className="money text-meta tracking-[0.12em] text-ink-soft">{formatSerial(plan.id, plan.deadline)}</span>
+        <div className="flex items-center justify-end gap-3 border-t border-ink/15 pt-1">
           <button
             type="button"
             onClick={() => {

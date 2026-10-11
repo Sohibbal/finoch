@@ -6,7 +6,6 @@ import { DailyCashflowPoint, DayStatus, StreakSummary } from "@/types/streak-typ
 import { rupiah, shortDate } from "@/lib/format";
 import { printDate } from "@/components/press/print-date";
 import { Note } from "@/components/press/note";
-import { Serial } from "@/components/press/serial";
 
 const MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 const WEEKDAYS = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
@@ -70,7 +69,6 @@ export function StreakPunchCard({ summary }: StreakPunchCardProps) {
       <Note
         as="section"
         aria-labelledby="punch-title"
-        serial={points[0] ? <Serial id={`streak-${points[0].date}`} date={points[0].date} /> : undefined}
         className="lg:col-span-2"
       >
         <div className="px-4 sm:px-8 pt-6 pb-4 space-y-4">

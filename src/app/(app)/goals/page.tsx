@@ -12,7 +12,6 @@ import { monthLedger } from "@/lib/financial/month-ledger";
 import type { RecurringBill } from "@/types/bill-types";
 import { localDateKey, localDateKeyFromNow, parseDate } from "@/lib/date";
 import { Note } from "@/components/press/note";
-import { Serial } from "@/components/press/serial";
 import { DENOMS, type Denom } from "@/components/press/denom";
 import { StateLabel } from "@/components/press/kampus-press";
 import { rupiah } from "@/lib/format";
@@ -159,7 +158,6 @@ export default function GoalsPage() {
                   <Note
                     as="article"
                     aria-label={g.name}
-                    serial={<Serial id={g.id ?? g.name} date={due || new Date()} />}
                     className="overflow-hidden"
                   >
                     {/* The note's colour band fills left to right with progress; text never sits on the fill. */}

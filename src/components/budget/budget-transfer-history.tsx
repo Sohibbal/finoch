@@ -3,7 +3,6 @@
 import React from "react";
 import { EnvelopeTransferRecord } from "@/types/budget-types";
 import { rupiah, shortDate } from "@/lib/format";
-import { formatSerial } from "@/components/press/serial";
 
 interface BudgetTransferHistoryProps {
   transfers: EnvelopeTransferRecord[];
@@ -39,7 +38,6 @@ export function BudgetTransferHistory({ transfers }: BudgetTransferHistoryProps)
               <p className="text-meta text-ink-soft break-words">
                 {item.reason || "Penyeimbangan anggaran"} · {shortDate(new Date(item.createdAt))}
               </p>
-              <p className="text-meta text-ink-soft money tracking-[0.08em]">{formatSerial(item.id, new Date(item.createdAt))}</p>
             </li>
           ))}
         </ol>

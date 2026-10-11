@@ -22,7 +22,6 @@ import { WalletFormModal } from "@/components/wallets/wallet-form-modal";
 import { WalletTransferModal } from "@/components/wallets/wallet-transfer-modal";
 import { PageHeader } from "@/components/layout/page-header";
 import { Cap } from "@/components/press/denom";
-import { formatSerial } from "@/components/press/serial";
 
 const FILTERS: { id: "all" | WalletType; label: string }[] = [
   { id: "all", label: "Semua" },
@@ -226,7 +225,6 @@ export default function WalletsPage() {
                       .filter(Boolean)
                       .join(" · ")}
                   </p>
-                  <p className="text-meta text-ink-soft money tracking-[0.08em]">{formatSerial(t.id, new Date(t.createdAt))}</p>
                 </li>
               ))}
             </ol>

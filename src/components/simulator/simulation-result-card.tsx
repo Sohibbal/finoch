@@ -3,7 +3,6 @@ import { ArrowDown, ArrowRight } from "lucide-react";
 import { WhatIfSimulationResult } from "@/lib/financial/financial-engine";
 import type { DailyJatah } from "@/components/dashboard/dashboard-data";
 import { Note } from "@/components/press/note";
-import { Serial } from "@/components/press/serial";
 import { Guilloche } from "@/components/press/guilloche";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 import { rupiah } from "@/lib/format";
@@ -25,7 +24,6 @@ function JatahSheet({
   jatah,
   savings,
   monthsToGoal,
-  serialId,
   today,
   seed,
   stamp,
@@ -34,14 +32,13 @@ function JatahSheet({
   jatah: DailyJatah;
   savings: number;
   monthsToGoal: number;
-  serialId: string;
   today: string;
   seed: number;
   stamp?: React.ReactNode;
 }) {
   const rolled = useRolledNumber(jatah.jatah, 500);
   return (
-    <Note as="section" aria-label={title} thread={jatah.status} serial={<Serial id={serialId} date={today} />} className="overflow-hidden flex-1 min-w-0">
+    <Note as="section" aria-label={title} thread={jatah.status} className="overflow-hidden flex-1 min-w-0">
       <div className="relative px-5 sm:px-8 pt-6 pb-5 pr-12 sm:pr-16 space-y-3">
         <Guilloche seed={seed} size={160} families={3} className="absolute -right-10 -top-10 opacity-40" />
         <h2 className="relative text-body font-semibold text-ink-soft">{title}</h2>
@@ -85,7 +82,6 @@ export function SimulationResultCard({ result, before, after, baselineNetSavings
           jatah={before}
           savings={baselineNetSavings}
           monthsToGoal={baselineMonthsToGoal}
-          serialId="sim-now"
           today={today}
           seed={0xc4a3}
         />
@@ -98,7 +94,6 @@ export function SimulationResultCard({ result, before, after, baselineNetSavings
           jatah={after}
           savings={result.simulatedNetSavings}
           monthsToGoal={result.simulatedMonthsToGoal}
-          serialId="sim-after"
           today={today}
           seed={0x51a7}
           stamp={

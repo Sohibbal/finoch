@@ -5,7 +5,6 @@ import { ArrowRightLeft, Pencil, Trash2, TrendingDown } from "lucide-react";
 import { WalletType, WalletWithBalance } from "@/types/wallet-types";
 import { rupiah } from "@/lib/format";
 import { Cap, DenomSheet, denomOf, seedOf } from "@/components/press/denom";
-import { formatSerial } from "@/components/press/serial";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 import { StateLabel } from "@/components/press/kampus-press";
 
@@ -78,10 +77,7 @@ export function WalletNote({ wallet, onTransfer, onEdit, onDelete }: WalletNoteP
 
         {wallet.notes && <p className="text-meta break-words">{wallet.notes}</p>}
 
-        <p className="text-meta money tracking-[0.1em] break-all">
-          {wallet.accountNumber ? `${wallet.accountNumber} · ` : ""}
-          {formatSerial(wallet.id, wallet.updatedAt)}
-        </p>
+        {wallet.accountNumber && <p className="text-meta money break-all">{wallet.accountNumber}</p>}
 
         <div className="flex items-center gap-2 pt-1">
           <button type="button" onClick={() => onTransfer(wallet)} className={`${NOTE_ACTION} flex-1 px-4`}>

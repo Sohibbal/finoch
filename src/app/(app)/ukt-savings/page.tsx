@@ -20,7 +20,6 @@ import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/compo
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { Guilloche } from "@/components/press/guilloche";
 import { Note } from "@/components/press/note";
-import { formatSerial, Serial } from "@/components/press/serial";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 import { PRIMARY_CLASS } from "@/components/press/kampus-press";
 
@@ -95,7 +94,6 @@ export default function UktSavingsPage() {
                   as="section"
                   aria-labelledby="ukt-total-title"
                   microtext
-                  serial={<Serial id={`ukt-${today}`} date={today} />}
                   className="lg:col-span-2 overflow-hidden"
                 >
                   <div className="relative flex items-center gap-6 px-5 sm:px-8 pt-6 pb-4">
@@ -164,9 +162,6 @@ export default function UktSavingsPage() {
                             <p className="text-body font-semibold text-ink break-words">{dep.note}</p>
                             <p className="text-meta text-ink-soft break-words">
                               {planName.get(dep.planId)} · {printDate(new Date(dep.createdAt))}
-                            </p>
-                            <p className="money text-meta tracking-[0.08em] text-ink-soft">
-                              {formatSerial(dep.id, new Date(dep.createdAt))}
                             </p>
                           </div>
                           <p className="money text-body font-bold text-aman-ink whitespace-nowrap">+{rupiah(dep.amount)}</p>
