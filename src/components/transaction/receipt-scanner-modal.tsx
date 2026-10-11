@@ -189,16 +189,16 @@ export function ReceiptScannerModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="bg-cream-50 dark:bg-[#070E1A] rounded-3xl shadow-2xl border border-cream-300 dark:border-navy-800 max-w-md w-full overflow-hidden text-navy-950 dark:text-cream-50 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
+      <div className="bg-paper-sheet rounded-none border border-ink/20 max-w-md w-full overflow-hidden text-ink transition-colors">
         {/* Header */}
         <div className="px-6 py-4 border-b border-cream-200 dark:border-navy-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cream-200/80 dark:bg-navy-900 text-navy-950 dark:text-cream-50 border border-cream-300 dark:border-navy-800">
+            <div className="p-2 rounded-xl bg-cream-200/80 dark:bg-navy-900 text-ink border border-ink/20">
               <Camera className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
+              <h3 className="text-base font-bold text-ink">
                 Scan Struk Belanja
               </h3>
               <p className="text-xs text-navy-600 dark:text-cream-400">
@@ -219,7 +219,7 @@ export function ReceiptScannerModal({
         {/* Content */}
         <div className="p-6 space-y-4 text-center">
           {errorMessage && (
-            <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-xs text-rose-600 dark:text-rose-400 flex items-center gap-2 text-left">
+            <div className="p-3 rounded-sm bg-paper border border-habis-ink text-meta text-habis-ink flex items-center gap-2 text-left">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{errorMessage}</span>
             </div>
@@ -228,7 +228,7 @@ export function ReceiptScannerModal({
           {isScanning ? (
             <div className="py-12 flex flex-col items-center justify-center space-y-3">
               <Loader2 className="w-10 h-10 text-navy-900 dark:text-cream-100 animate-spin" />
-              <div className="text-sm font-bold text-navy-950 dark:text-cream-50">
+              <div className="text-sm font-bold text-ink">
                 Membaca &amp; Mengekstrak Data Struk...
               </div>
               <p className="text-xs text-navy-600 dark:text-cream-400">
@@ -237,7 +237,7 @@ export function ReceiptScannerModal({
             </div>
           ) : useCamera ? (
             <div className="space-y-3">
-              <div className="relative rounded-2xl overflow-hidden bg-black aspect-[4/3] border border-cream-300 dark:border-navy-800">
+              <div className="relative rounded-sm overflow-hidden bg-black aspect-[4/3] border border-ink/20">
                 <video
                   ref={videoRef}
                   autoPlay
@@ -249,14 +249,14 @@ export function ReceiptScannerModal({
                 <button
                   type="button"
                   onClick={capturePhoto}
-                  className="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-sm font-bold text-cream-50 dark:text-navy-950 shadow-sm transition active:scale-95"
+                  className="px-6 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-sm font-bold text-cream-50 dark:text-navy-950 transition active:scale-95"
                 >
                   Ambil Foto Struk
                 </button>
                 <button
                   type="button"
                   onClick={stopCamera}
-                  className="px-4 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 text-sm font-semibold text-navy-800 dark:text-cream-200 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition active:scale-95"
+                  className="px-4 py-2.5 rounded-xl border border-ink/20 text-sm font-semibold text-navy-800 dark:text-cream-200 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition active:scale-95"
                 >
                   Batal
                 </button>
@@ -266,12 +266,12 @@ export function ReceiptScannerModal({
             <div className="space-y-4">
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="cursor-pointer border-2 border-dashed border-cream-300 dark:border-navy-800 hover:border-navy-900 dark:hover:border-cream-300 rounded-2xl p-8 flex flex-col items-center justify-center space-y-2 transition-all group bg-white/40 dark:bg-navy-900/30"
+                className="cursor-pointer border-2 border-dashed border-ink/20 hover:border-navy-900 dark:hover:border-cream-300 rounded-sm p-8 flex flex-col items-center justify-center space-y-2 transition-all group bg-white/40 dark:bg-navy-900/30"
               >
                 <div className="p-3 bg-cream-200/80 dark:bg-navy-900 rounded-full text-navy-800 dark:text-cream-200 group-hover:bg-cream-300 dark:group-hover:bg-navy-800 transition-colors">
                   <UploadCloud className="w-8 h-8" />
                 </div>
-                <div className="text-sm font-bold text-navy-950 dark:text-cream-50">
+                <div className="text-sm font-bold text-ink">
                   Pilih atau Tarik Berkas Foto Struk
                 </div>
                 <p className="text-xs text-navy-600 dark:text-cream-400">
@@ -291,7 +291,7 @@ export function ReceiptScannerModal({
                 <button
                   type="button"
                   onClick={startCamera}
-                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 text-sm font-semibold text-navy-900 dark:text-cream-100 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition-colors"
+                  className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-ink/20 text-sm font-semibold text-navy-900 dark:text-cream-100 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition-colors"
                 >
                   <Camera className="w-4 h-4" />
                   Buka Kamera

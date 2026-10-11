@@ -76,12 +76,12 @@ export function UnifiedConfirmationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-navy-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="bg-cream-50 dark:bg-[#070E1A] rounded-3xl shadow-2xl border border-cream-300 dark:border-navy-800 max-w-lg w-full overflow-hidden transition-all text-navy-950 dark:text-cream-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
+      <div className="bg-paper-sheet rounded-none border border-ink/20 max-w-lg w-full overflow-hidden transition-all text-ink">
         {/* Header */}
         <div className="px-6 py-4 border-b border-cream-200 dark:border-navy-800 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="p-2 rounded-xl bg-cream-200/80 dark:bg-navy-900 text-navy-950 dark:text-cream-50 border border-cream-300 dark:border-navy-800">
+            <div className="p-2 rounded-xl bg-cream-200/80 dark:bg-navy-900 text-ink border border-ink/20">
               {formData.source === "ocr" ? (
                 <Receipt className="w-5 h-5" />
               ) : formData.source === "voice" ? (
@@ -91,7 +91,7 @@ export function UnifiedConfirmationModal({
               )}
             </div>
             <div>
-              <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
+              <h3 className="text-base font-bold text-ink">
                 Konfirmasi Transaksi
               </h3>
               <p className="text-xs text-navy-600 dark:text-cream-400">
@@ -114,7 +114,7 @@ export function UnifiedConfirmationModal({
         {/* Content Body */}
         <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
           {validationError && (
-            <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900 text-xs text-rose-600 dark:text-rose-400">
+            <div className="p-3 rounded-sm bg-paper border border-habis-ink text-meta text-habis-ink">
               {validationError}
             </div>
           )}
@@ -125,7 +125,7 @@ export function UnifiedConfirmationModal({
               Nominal Transaksi
             </label>
             <div className="relative">
-              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-navy-500 dark:text-cream-400 font-bold text-sm">
+              <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-ink-soft font-bold text-sm">
                 Rp
               </span>
               <input
@@ -134,7 +134,7 @@ export function UnifiedConfirmationModal({
                 onChange={(e) =>
                   setFormData({ ...formData, amount: Number(e.target.value) })
                 }
-                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-xl font-black text-navy-950 dark:text-cream-50 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 shadow-sm transition"
+                className="w-full pl-11 pr-4 py-2.5 rounded-xl border border-ink/20 bg-paper text-xl font-black text-ink focus:outline-none focus:ring-2 focus:ring-ink transition"
                 placeholder="0"
               />
             </div>
@@ -151,7 +151,7 @@ export function UnifiedConfirmationModal({
               onChange={(e) =>
                 setFormData({ ...formData, merchant: e.target.value })
               }
-              className="w-full px-3.5 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-sm font-medium text-navy-950 dark:text-cream-50 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 shadow-sm transition"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-ink/20 bg-paper text-sm font-medium text-ink focus:outline-none focus:ring-2 focus:ring-ink transition"
               placeholder="Contoh: Mie Gacoan, Indomaret"
             />
           </div>
@@ -171,7 +171,7 @@ export function UnifiedConfirmationModal({
                       category: e.target.value as SpendingCategory,
                     })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-sm font-medium text-navy-950 dark:text-cream-50 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 appearance-none shadow-sm transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-ink/20 bg-paper text-sm font-medium text-ink focus:outline-none focus:ring-2 focus:ring-ink appearance-none transition"
                 >
                   {[
                     "Food & Drinks",
@@ -200,7 +200,7 @@ export function UnifiedConfirmationModal({
                   onChange={(e) =>
                     setFormData({ ...formData, date: e.target.value })
                   }
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-sm font-medium text-navy-950 dark:text-cream-50 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 shadow-sm transition"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-ink/20 bg-paper text-sm font-medium text-ink focus:outline-none focus:ring-2 focus:ring-ink transition"
                 />
                 <Calendar className="w-4 h-4 text-navy-400 dark:text-cream-400 absolute right-3 top-3 pointer-events-none" />
               </div>
@@ -215,7 +215,7 @@ export function UnifiedConfirmationModal({
               <button
                 type="button"
                 onClick={() => setShowItemDetails(!showItemDetails)}
-                className="w-full flex items-center justify-between text-xs font-semibold text-navy-600 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50 py-1"
+                className="w-full flex items-center justify-between text-xs font-semibold text-ink-soft hover:text-navy-950 dark:hover:text-cream-50 py-1"
               >
                 <span>Daftar Rincian Item ({formData.items.length} item)</span>
                 {showItemDetails ? (
@@ -226,7 +226,7 @@ export function UnifiedConfirmationModal({
               </button>
 
               {showItemDetails && (
-                <div className="mt-2 divide-y divide-cream-200 dark:divide-navy-800 rounded-2xl bg-white/80 dark:bg-navy-900/50 p-3 border border-cream-300 dark:border-navy-800 shadow-sm">
+                <div className="mt-2 divide-y divide-ink/10 rounded-sm bg-paper p-3 border border-ink/20">
                   {formData.items.map((it, idx) => (
                     <div
                       key={idx}
@@ -235,7 +235,7 @@ export function UnifiedConfirmationModal({
                       <span className="font-medium text-navy-800 dark:text-cream-200">
                         {it.name}
                       </span>
-                      <span className="font-bold text-navy-950 dark:text-cream-50">
+                      <span className="font-bold text-ink">
                         Rp {it.amount.toLocaleString("id-ID")}
                       </span>
                     </div>
@@ -252,7 +252,7 @@ export function UnifiedConfirmationModal({
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="px-4 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 text-xs font-semibold text-navy-800 dark:text-cream-300 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition-colors"
+            className="px-4 py-2.5 rounded-xl border border-ink/20 text-xs font-semibold text-navy-800 dark:text-cream-300 hover:bg-cream-200/60 dark:hover:bg-navy-900 transition-colors"
           >
             Batal
           </button>
@@ -260,7 +260,7 @@ export function UnifiedConfirmationModal({
             type="button"
             onClick={handleSave}
             disabled={isSubmitting}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-xs font-bold text-cream-50 dark:text-navy-950 shadow-sm disabled:opacity-50 transition active:scale-95"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-xs font-bold text-cream-50 dark:text-navy-950 disabled:opacity-50 transition active:scale-95"
           >
             <CheckCircle className="w-4 h-4 stroke-[2.2]" />
             {isSubmitting ? "Menyimpan..." : "Konfirmasi & Simpan"}

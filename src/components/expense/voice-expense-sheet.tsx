@@ -246,32 +246,32 @@ export function VoiceExpenseSheet({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-navy-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg rounded-t-[32px] sm:rounded-[32px] bg-cream-50 dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-5 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] flex flex-col overflow-hidden text-navy-950 dark:text-cream-50 transition-colors">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-ink/60 animate-fade-in">
+      <div className="w-full max-w-lg rounded-t-xl sm:rounded-none bg-paper-sheet border border-ink/20 p-5 sm:p-6 max-h-[92vh] flex flex-col overflow-hidden text-ink transition-colors">
         {/* Header */}
         <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-navy-950 dark:text-cream-50">
+              <h2 className="text-base font-bold text-ink">
                 Pencatatan Suara
               </h2>
               {engineMode === "online" && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cream-200/80 dark:bg-navy-800 text-navy-900 dark:text-cream-200 border border-cream-300 dark:border-navy-700">
+                <span className="px-2 py-0.5 rounded-full text-meta font-bold bg-cream-200/80 dark:bg-navy-800 text-navy-900 dark:text-cream-200 border border-cream-300 dark:border-navy-700">
                   Online: Web Speech
                 </span>
               )}
               {engineMode === "offline-whisper" && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cream-200/80 dark:bg-navy-800 text-navy-900 dark:text-cream-200 border border-cream-300 dark:border-navy-700">
+                <span className="px-2 py-0.5 rounded-full text-meta font-bold bg-cream-200/80 dark:bg-navy-800 text-navy-900 dark:text-cream-200 border border-cream-300 dark:border-navy-700">
                   Offline: Whisper AI
                 </span>
               )}
               {engineMode === "offline-unready" && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
+                <span className="px-2 py-0.5 rounded-full text-meta font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
                   Offline: Perlu Model
                 </span>
               )}
             </div>
-            <p className="text-xs text-navy-600 dark:text-cream-300/80">
+            <p className="text-xs text-ink-soft/80">
               Bicara santai, AI otomatis mendeteksi transaksi dan nominal rupiah.
             </p>
           </div>
@@ -305,7 +305,7 @@ export function VoiceExpenseSheet({
 
           {/* Status / Error alert */}
           {statusMessage && (
-            <div className="flex items-center gap-2 p-3 my-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs">
+            <div className="flex items-center gap-2 p-3 my-2 rounded-sm bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs">
               <AlertCircle className="w-4 h-4 shrink-0" />
               <span>{statusMessage}</span>
             </div>
@@ -344,7 +344,7 @@ export function VoiceExpenseSheet({
           {/* Fallback manual input when idle or error */}
           {(voiceState === "idle" || voiceState === "error") && (
             <div className="mt-3 pt-3 border-t border-cream-200 dark:border-navy-800">
-              <span className="block text-center text-[11px] text-navy-500 dark:text-cream-400/80 mb-1 font-medium">
+              <span className="block text-center text-meta text-ink-soft mb-1 font-medium">
                 Atau ketik manual tanpa bicara
               </span>
               <ManualExpenseInput onParsed={handleManualParsed} />
@@ -358,7 +358,7 @@ export function VoiceExpenseSheet({
             <button
               type="button"
               onClick={handleStart}
-              className="py-2.5 px-4 rounded-xl border border-cream-300 dark:border-navy-800 text-xs font-semibold text-navy-800 dark:text-cream-200 hover:bg-cream-200/60 dark:hover:bg-navy-900 flex items-center gap-1.5 transition active:scale-95"
+              className="py-2.5 px-4 rounded-xl border border-ink/20 text-xs font-semibold text-navy-800 dark:text-cream-200 hover:bg-cream-200/60 dark:hover:bg-navy-900 flex items-center gap-1.5 transition active:scale-95"
             >
               <RefreshCw className="w-3.5 h-3.5" />
               Ulangi
@@ -366,7 +366,7 @@ export function VoiceExpenseSheet({
             <button
               type="button"
               onClick={handleConfirmAndSave}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
+              className="flex-1 py-2.5 px-4 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center justify-center gap-2 transition active:scale-95"
             >
               <CheckCircle className="w-4 h-4 stroke-[2.2]" />
               Konfirmasi &amp; Simpan ({parsedItems.length})

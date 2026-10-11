@@ -1,5 +1,4 @@
 import type { TransactionCandidate, TransactionSource } from "@/types/financial-types";
-import type { MonthlyCategorySpendingData } from "./spending-trend-chart";
 import { localDateKey, parseDate } from "@/lib/date";
 
 interface ExpenseRow {
@@ -12,7 +11,16 @@ interface ExpenseRow {
   updatedAt?: string;
 }
 
-type Bucket = Exclude<keyof MonthlyCategorySpendingData, "month">;
+export type Bucket = "food" | "transport" | "bills" | "shopping" | "other";
+
+/** Stored category each bucket is labelled by (see categoryLabel in lib/format). */
+export const BUCKET_CATEGORY: Record<Bucket, string> = {
+  food: "Food & Drinks",
+  transport: "Transportation",
+  bills: "Bills & Utilities",
+  shopping: "Shopping & Lifestyle",
+  other: "Other",
+};
 
 const NEEDS_CATEGORIES = ["Food & Drinks", "Food", "Bills & Utilities", "Housing & Bills", "Bills", "Transportation"];
 
@@ -27,8 +35,6 @@ const BUCKETS: Record<string, Bucket> = {
   "Shopping & Clothing": "shopping",
   "Entertainment & Leisure": "shopping",
 };
-
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
 
 const time = (iso?: string) => parseDate(iso)?.getTime() ?? 0;
 const monthPrefix = (d: Date) => `${localDateKey(d).slice(0, 7)}-`;
@@ -83,18 +89,45 @@ export function sumByBucket(txs: TransactionCandidate[]): Record<Bucket, number>
   return sums;
 }
 
-/** Category totals for the last `months` local months (oldest first); empty when they hold nothing. */
-export function buildMonthlyTrend(
-  txs: TransactionCandidate[],
-  now: Date = new Date(),
-  months = 4
-): MonthlyCategorySpendingData[] {
-  const rows: MonthlyCategorySpendingData[] = [];
-  for (let i = months - 1; i >= 0; i--) {
-    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = MONTH_LABELS[month.getMonth()] + (i === 0 ? " (Ini)" : "");
-    rows.push({ month: label, ...sumByBucket(currentMonthTransactions(txs, month)) });
+export interface DailyJatah {
+  /** Today's allowance: fixed for the whole day, so logging never moves it. */
+  jatah: number;
+  spentToday: number;
+  /** jatah − spentToday; negative once today went past the jatah. */
+  sisaHariIni: number;
+  /** Income − fixed costs − everything spent this month, today included. */
+  sisaBulanIni: number;
+  /** Days left in the month, today included. */
+  daysLeft: number;
+  status: "aman" | "mepet" | "habis";
+}
+
+/**
+ * The one "jatah hari ini" number the app shows:
+ * (income − fixed costs − spent this month before today) / days left including today.
+ * Status comes from the same number: Habis once today's jatah is used up, Mepet from 80%.
+ */
+export function dailyJatah(params: {
+  monthlyIncome: number;
+  monthlyFixedExpenses: number;
+  transactions: TransactionCandidate[];
+  now?: Date;
+}): DailyJatah {
+  const now = params.now ?? new Date();
+  const today = localDateKey(now);
+  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysLeft = daysInMonth - now.getDate() + 1;
+
+  let spentToday = 0;
+  let spentBefore = 0;
+  for (const t of currentMonthTransactions(params.transactions, now)) {
+    if (t.date === today) spentToday += t.amount;
+    else if (t.date < today) spentBefore += t.amount;
   }
-  const hasData = rows.some((r) => r.food + r.transport + r.bills + r.shopping + r.other > 0);
-  return hasData ? rows : [];
+
+  const left = params.monthlyIncome - params.monthlyFixedExpenses - spentBefore;
+  const jatah = Math.max(0, Math.round(left / daysLeft));
+  const sisaHariIni = jatah - spentToday;
+  const status = sisaHariIni <= 0 ? "habis" : spentToday >= jatah * 0.8 ? "mepet" : "aman";
+  return { jatah, spentToday, sisaHariIni, sisaBulanIni: left - spentToday, daysLeft, status };
 }
