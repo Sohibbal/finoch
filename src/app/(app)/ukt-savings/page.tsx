@@ -1,13 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
-import {
-  GraduationCap,
-  Plus,
-  Calendar,
-  Sparkles,
-  ShieldCheck,
-} from "lucide-react";
+import { GraduationCap, Plus } from "lucide-react";
 import { UktPlan } from "@/types/ukt-types";
 import {
   getUktPlans,
@@ -16,14 +10,18 @@ import {
   deleteUktPlan,
 } from "@/lib/storage/ukt-storage";
 import { calculateUktMetrics } from "@/lib/financial/ukt-engine";
-import { formatRupiah } from "@/lib/financial/split-bill-engine";
+import { rupiah, shortDate } from "@/lib/format";
+import { localDateKey } from "@/lib/date";
 
-import { UktCardMobile } from "@/components/ukt/ukt-card-mobile";
-import { UktBentoDesktop } from "@/components/ukt/ukt-bento-desktop";
+import { UktPlanNote } from "@/components/ukt/ukt-plan-note";
 import { UktModal } from "@/components/ukt/ukt-modal";
 import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
-import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
+import { Guilloche } from "@/components/press/guilloche";
+import { Note } from "@/components/press/note";
+import { formatSerial, Serial } from "@/components/press/serial";
+import { useRolledNumber } from "@/components/press/rolling-numeral";
+import { PRIMARY_CLASS } from "@/components/press/kampus-press";
 
 export default function UktSavingsPage() {
 
@@ -62,104 +60,127 @@ export default function UktSavingsPage() {
 
   const totalTarget = plans.reduce((acc, p) => acc + p.targetAmount, 0);
   const totalSaved = plans.reduce((acc, p) => acc + p.currentSaved, 0);
+  const overall = totalTarget > 0 ? Math.round((totalSaved / totalTarget) * 100) : 0;
+  const rolledTotal = useRolledNumber(totalSaved);
+  const planName = new Map(plans.map((p) => [p.id, p.name]));
+  const recentDeposits = plans
+    .flatMap((p) => p.deposits.map((d) => ({ ...d, planId: p.id })))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5);
+  const today = localDateKey(new Date());
 
   return (
     <>
-      <PageHeader
-        title="Sinking Fund UKT & Biaya Kampus"
-        subtitle="Alokasi otomatis harian untuk biaya semester, praktikum, KKN & skripsi"
-      />
+      <PageHeader title="Tabungan UKT" subtitle="Nyicil biaya semesteran sedikit-sedikit tiap hari" />
 
-      {/* Main Content */}
       <ProfileGate profile={profile}>
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
-        {loaded && plans.length === 0 ? (
-          <EmptyState
-            icon={GraduationCap}
-            title="Belum ada pos dana kampus"
-            action={
-              <button type="button" onClick={() => setIsAddModalOpen(true)} className={EMPTY_ACTION_CLASS}>
-                Tambah Target UKT / Kampus
-              </button>
-            }
-          >
-            Pecah biaya UKT, praktikum, KKN, atau wisuda jadi setoran harian kecil supaya tidak kaget di akhir semester.
-          </EmptyState>
-        ) : (
-        <>
-        {/* MOBILE PWA VIEW (md:hidden) */}
-        <div className="md:hidden space-y-4">
-          {/* Mobile Summary Banner */}
-          <div className="p-5 rounded-3xl bg-gradient-to-br from-indigo-900 via-indigo-800 to-navy-950 text-white shadow-xl relative overflow-hidden">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest flex items-center gap-1.5">
-                <GraduationCap className="w-3.5 h-3.5 text-indigo-300" />
-                Total Terkumpul
-              </span>
-              <span className="text-[10px] px-2 py-0.5 rounded-full bg-white/15 text-cream-100 font-bold">
-                {plans.length} Pos Kampus
-              </span>
-            </div>
-
-            <div className="text-3xl font-black tracking-tight text-white mb-2">
-              {formatRupiah(totalSaved)}
-            </div>
-
-            <div className="flex justify-between text-xs text-white/80 pt-2 border-t border-white/15">
-              <span>Dari Total Target:</span>
-              <span className="font-bold text-white">{formatRupiah(totalTarget)}</span>
-            </div>
-          </div>
-
-          {/* Plans Card List */}
-          <div className="space-y-3">
-            {plans.map((plan) => {
-              const metrics = calculateUktMetrics(plan, monthlyIncome);
-              return (
-                <UktCardMobile
-                  key={plan.id}
-                  plan={plan}
-                  metrics={metrics}
-                  onDeposit={handleDeposit}
-                  onDelete={handleDelete}
-                />
-              );
-            })}
-          </div>
-
-          {/* Mobile Floating Action Button (Input-First Ergonomics) */}
-          <div className={`fixed ${ACTION_BAR_BOTTOM} md:bottom-20 left-4 right-4 z-30 flex items-center justify-center`}>
-            <button
-              onClick={() => setIsAddModalOpen(true)}
-              className="w-full min-h-[50px] rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xl shadow-indigo-600/30 active:scale-95 transition-all"
+        <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-10 space-y-8">
+          {loaded && plans.length === 0 ? (
+            <EmptyState
+              icon={GraduationCap}
+              title="Belum ada tabungan kampus"
+              action={
+                <button type="button" onClick={() => setIsAddModalOpen(true)} className={EMPTY_ACTION_CLASS}>
+                  Tambah tabungan UKT
+                </button>
+              }
             >
-              <Plus className="w-4 h-4" />
-              <span>+ Tambah Target UKT / Kampus</span>
-            </button>
-          </div>
-        </div>
+              Pecah biaya UKT, praktikum, KKN, atau wisuda jadi setoran harian kecil supaya tidak kaget di akhir semester.
+            </EmptyState>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-5 items-end">
+                <Note
+                  as="section"
+                  aria-labelledby="ukt-total-title"
+                  microtext
+                  serial={<Serial id={`ukt-${today}`} date={today} />}
+                  className="lg:col-span-2 overflow-hidden"
+                >
+                  <div className="relative flex items-center gap-6 px-5 sm:px-8 pt-6 pb-4">
+                    <Guilloche seed={0x0b17} size={150} className="hidden sm:block shrink-0" />
+                    <div className="min-w-0 space-y-1">
+                      <h2 id="ukt-total-title" className="text-body font-semibold text-ink-soft">
+                        Total tabungan kampus
+                      </h2>
+                      <p className="font-display font-bold text-ink money flex flex-wrap items-baseline gap-x-2">
+                        <span className="text-head">Rp</span>
+                        <span className="text-numeral" aria-hidden="true">
+                          {rolledTotal.toLocaleString("id-ID")}
+                        </span>
+                        <span className="sr-only">{totalSaved.toLocaleString("id-ID")}</span>
+                      </p>
+                      <p className="text-body text-ink">
+                        dari target <span className="money font-semibold">{rupiah(totalTarget)}</span> ·{" "}
+                        <span className="money">{overall}%</span> · {plans.length} tabungan
+                      </p>
+                    </div>
+                  </div>
+                </Note>
+                <div className="space-y-3">
+                  <p className="text-body text-ink-soft">
+                    Tiap tabungan dicetak di warnanya sendiri, dan warnanya terisi penuh begitu targetnya lunas.
+                  </p>
+                  <button type="button" onClick={() => setIsAddModalOpen(true)} className={`${PRIMARY_CLASS} w-full`}>
+                    <Plus className="w-4 h-4" aria-hidden="true" />
+                    Tambah tabungan
+                  </button>
+                </div>
+              </div>
 
-        {/* DESKTOP VIEW (hidden md:block) */}
-        <div className="hidden md:block">
-          <UktBentoDesktop
-            plans={plans}
-            monthlyIncome={monthlyIncome}
-            onOpenAddModal={() => setIsAddModalOpen(true)}
-            onDeposit={handleDeposit}
-            onDelete={handleDelete}
-          />
-        </div>
-        </>
-        )}
-      </main>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-8 items-start">
+                <section aria-labelledby="ukt-plans-title" className="lg:col-span-2 space-y-3">
+                  <h2 id="ukt-plans-title" className="font-display text-head font-bold text-ink border-b border-ink/20 pb-2">
+                    Pos biaya kampus
+                  </h2>
+                  <ul className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                    {plans.map((plan) => (
+                      <li key={plan.id}>
+                        <UktPlanNote
+                          plan={plan}
+                          metrics={calculateUktMetrics(plan, monthlyIncome)}
+                          onDeposit={handleDeposit}
+                          onDelete={handleDelete}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+
+                <section aria-labelledby="ukt-history-title" className="space-y-3">
+                  <h2 id="ukt-history-title" className="font-display text-head font-bold text-ink border-b border-ink/20 pb-2">
+                    Setoran terbaru
+                  </h2>
+                  {recentDeposits.length === 0 ? (
+                    <p className="text-body text-ink-soft">Belum ada setoran. Mulai dari 10 ribu juga sudah jalan.</p>
+                  ) : (
+                    <ol className="space-y-2">
+                      {recentDeposits.map((dep) => (
+                        <li key={dep.id} className="relative flex items-start gap-3 pl-4 pr-3 py-3 bg-paper-sheet border border-ink/15">
+                          {/* Perforation where the stub was torn off. */}
+                          <span aria-hidden="true" className="absolute left-1.5 top-2 bottom-2 border-l border-dotted border-ink/40" />
+                          <div className="min-w-0 flex-1">
+                            <p className="text-body font-semibold text-ink break-words">{dep.note}</p>
+                            <p className="text-meta text-ink-soft break-words">
+                              {planName.get(dep.planId)} · {shortDate(new Date(dep.createdAt))}
+                            </p>
+                            <p className="money text-meta tracking-[0.08em] text-ink-soft">
+                              {formatSerial(dep.id, new Date(dep.createdAt))}
+                            </p>
+                          </div>
+                          <p className="money text-body font-bold text-aman-ink whitespace-nowrap">+{rupiah(dep.amount)}</p>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                </section>
+              </div>
+            </>
+          )}
+        </main>
       </ProfileGate>
 
-      {/* Modal */}
-      <UktModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSave={handleSaveNewPlan}
-      />
+      <UktModal isOpen={isAddModalOpen} onClose={() => setIsAddModalOpen(false)} onSave={handleSaveNewPlan} />
     </>
   );
 }
