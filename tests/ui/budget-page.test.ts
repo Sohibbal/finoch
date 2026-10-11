@@ -58,4 +58,16 @@ describe("Amplop Anggaran page", () => {
     expect(html).toContain("Paling rakus di tanggal muda");
     expect(html).toContain('aria-label="Ubah Makan"');
   });
+
+  it("stamps Habis in a solid form, never dashed (dashed means Tertunda sinkron)", async () => {
+    const { BudgetAmplop } = await import("@/components/budget/budget-amplop");
+    const { Cap } = await import("@/components/press/denom");
+    const noop = () => {};
+    const amplop = renderToString(React.createElement(BudgetAmplop, { envelope, onTransfer: noop, onEdit: noop, onDelete: noop }));
+    expect(amplop).toContain("border-paper-sheet bg-paper-sheet text-ink");
+    const cap = renderToString(React.createElement(Cap, { tone: "habis" }, "Habis"));
+    expect(cap).not.toContain("border-dashed");
+    expect(cap).not.toBe(renderToString(React.createElement(Cap, { tone: "aman" }, "Habis")).replace(/aman/g, "habis"));
+  });
 });
+

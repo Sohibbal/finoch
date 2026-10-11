@@ -72,11 +72,12 @@ export function seedOf(id: string): number {
 export type CapTone = "aman" | "mepet" | "habis" | "ink" | "paper";
 export type StampTone = CapTone;
 
-// Tones differ by outline form as well as hue (single, double, dashed), like StatusStamp.
+// Tones differ by outline form as well as hue (single, double, heavy), like StatusStamp. Dashed is
+// reserved for Tertunda sinkron, so habis never prints dashed.
 const CAP_TONE: Record<CapTone, string> = {
   aman: "border-2 border-aman-ink text-aman-ink",
   mepet: "border-[3px] border-double border-mepet-ink text-mepet-ink",
-  habis: "border-2 border-dashed border-habis-ink text-habis-ink",
+  habis: "border-4 border-habis-ink text-habis-ink",
   ink: "border-2 border-ink text-ink",
   paper: "border-2 border-paper-sheet text-paper-sheet",
 };
