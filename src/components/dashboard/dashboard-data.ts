@@ -7,6 +7,7 @@ interface ExpenseRow {
   itemName: string;
   amount: number;
   category: string;
+  walletId?: string | null;
   createdAt?: string;
   updatedAt?: string;
 }

@@ -16,6 +16,11 @@ function isValidDate(value: unknown): value is string {
   return typeof value === "string" && !Number.isNaN(new Date(value).getTime());
 }
 
+/** Optional: omitted keeps the stored wallet, null clears it. */
+function isValidWalletId(value: unknown): value is string | null | undefined {
+  return value === undefined || value === null || (typeof value === "string" && value.length > 0 && value.length <= 100);
+}
+
 /** Returns a rejection reason, or null when the change is acceptable. */
 function validateChange(change: any): string | null {
   if (!change || typeof change.id !== "string") return "invalid_queue_id";
@@ -27,6 +32,7 @@ function validateChange(change: any): string | null {
   if (typeof p.itemName !== "string" || !p.itemName.trim() || p.itemName.length > 200) return "invalid_item_name";
   if (!Number.isSafeInteger(p.amount) || p.amount < 1 || p.amount > MAX_AMOUNT) return "invalid_amount";
   if (!isValidDate(p.createdAt) || !isValidDate(p.updatedAt)) return "invalid_date";
+  if (!isValidWalletId(p.walletId)) return "invalid_wallet_id";
   return null;
 }
 
@@ -79,6 +85,7 @@ export async function POST(req: Request) {
             itemName: payload.itemName.trim(),
             amount: payload.amount,
             category: normalizeExpenseCategory(payload.category),
+            walletId: payload.walletId,
             isDeleted: !!payload.isDeleted,
             updatedAt: clientUpdatedAt,
           };
@@ -120,6 +127,7 @@ export async function POST(req: Request) {
       itemName: exp.itemName,
       amount: exp.amount,
       category: exp.category,
+      walletId: exp.walletId,
       isDeleted: exp.isDeleted,
       createdAt: exp.createdAt.toISOString(),
       updatedAt: exp.updatedAt.toISOString(),

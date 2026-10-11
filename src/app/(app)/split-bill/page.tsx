@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import {
   Receipt,
   HandCoins,
@@ -8,27 +9,17 @@ import {
 } from "lucide-react";
 import { Participant, SplitItem, SplitBillConfig } from "@/types/split-bill-types";
 import { calculateSplitBill } from "@/lib/financial/split-bill-engine";
-import {
-  getTalanganList,
-  addTalanganRecord,
-  markTalanganAsPaid,
-  deleteTalanganRecord,
-  getTalanganSummary,
-} from "@/lib/storage/talangan-storage";
+import { addDebt, getDebtSummary } from "@/lib/storage/debt-storage";
 import { expenseStorage } from "@/lib/storage/expense-storage";
-import { useAuthContext } from "@/components/layout/auth-provider";
 
 import { ParticipantManager } from "@/components/split-bill/participant-manager";
 import { BillItemEditor } from "@/components/split-bill/bill-item-editor";
 import { TaxDiscountConfig } from "@/components/split-bill/tax-discount-config";
 import { SplitSummaryCard } from "@/components/split-bill/split-summary-card";
-import { TalanganHistoryModal } from "@/components/split-bill/talangan-history-modal";
 import { ReceiptOcrButton } from "@/components/split-bill/receipt-ocr-button";
 import { PageHeader } from "@/components/layout/page-header";
 
 export default function SplitBillPage() {
-  const { user } = useAuthContext();
-
   // 1. Initial State
   const [participants, setParticipants] = useState<Participant[]>([
     { id: "p_user", name: "Saya", isUser: true },
@@ -79,18 +70,12 @@ export default function SplitBillPage() {
   });
 
   const [isSaved, setIsSaved] = useState(false);
-  const [isTalanganModalOpen, setIsTalanganModalOpen] = useState(false);
-  const [talanganRecords, setTalanganRecords] = useState(getTalanganList());
-  const [talanganSummary, setTalanganSummary] = useState(getTalanganSummary());
-
-  // Refresh talangan storage state
-  const refreshTalangan = () => {
-    setTalanganRecords(getTalanganList());
-    setTalanganSummary(getTalanganSummary());
-  };
+  // Friends' shares are receivables in Buku Kasbon; read after mount (localStorage).
+  const [unpaidReceivables, setUnpaidReceivables] = useState(0);
+  const refreshKasbon = () => setUnpaidReceivables(getDebtSummary().unpaidReceivablesCount);
 
   useEffect(() => {
-    refreshTalangan();
+    refreshKasbon();
   }, []);
 
   // 2. Event Handlers
@@ -165,11 +150,10 @@ export default function SplitBillPage() {
           itemName: `Makan di ${config.restaurantName || "Restoran"} (Porsi Saya)`,
           amount: userShare.finalAmount,
           category: "Food & Drinks",
-          userId: user?.id || "guest",
         });
       }
 
-      // Save each friend's share as a talangan record
+      // Each friend's share becomes a receivable ("teman berhutang ke saya") in Buku Kasbon
       const friends = result.shares.filter((s) => !s.isUser && s.finalAmount > 0);
       friends.forEach((friend) => {
         const summary =
@@ -177,18 +161,17 @@ export default function SplitBillPage() {
             ? friend.items.map((i) => i.itemName).join(", ")
             : "Bagi Rata";
 
-        addTalanganRecord({
-          restaurantName: config.restaurantName || "Makan Bareng",
-          date: config.date || new Date().toISOString().split("T")[0],
-          friendName: friend.name,
+        addDebt({
+          type: "receivable",
+          personName: friend.name,
           amount: friend.finalAmount,
-          itemsSummary: summary,
+          description: `Patungan ${config.restaurantName || "Makan Bareng"} · ${summary}`,
         });
       });
 
-      refreshTalangan();
+      refreshKasbon();
       setIsSaved(true);
-      alert("Berhasil menyimpan! Porsi Anda dicatat ke Pengeluaran dan porsi teman dicatat ke Buku Talangan.");
+      alert("Berhasil menyimpan! Porsi Anda dicatat ke Pengeluaran dan porsi teman dicatat ke Buku Kasbon.");
     } catch (err) {
       console.error("Gagal menyimpan ke Finoch:", err);
       alert("Terjadi kesalahan saat menyimpan transaksi.");
@@ -204,20 +187,18 @@ export default function SplitBillPage() {
           <>
             <ReceiptOcrButton onItemsExtracted={handleOcrExtracted} />
 
-            {/* Button to open Talangan Modal */}
-            <button
-              type="button"
-              onClick={() => setIsTalanganModalOpen(true)}
+            <Link
+              href="/debts"
               className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-xs font-bold transition-all active:scale-95"
             >
               <HandCoins className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Buku Talangan</span>
-              {talanganSummary.countUnpaid > 0 && (
+              <span className="hidden sm:inline">Buku Kasbon</span>
+              {unpaidReceivables > 0 && (
                 <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
-                  {talanganSummary.countUnpaid}
+                  {unpaidReceivables}
                 </span>
               )}
-            </button>
+            </Link>
           </>
         }
       />
@@ -275,23 +256,6 @@ export default function SplitBillPage() {
         </div>
       </main>
 
-      {/* Talangan History Modal */}
-      <TalanganHistoryModal
-        isOpen={isTalanganModalOpen}
-        onClose={() => {
-          setIsTalanganModalOpen(false);
-          refreshTalangan();
-        }}
-        records={talanganRecords}
-        onMarkPaid={(id) => {
-          markTalanganAsPaid(id);
-          refreshTalangan();
-        }}
-        onDelete={(id) => {
-          deleteTalanganRecord(id);
-          refreshTalangan();
-        }}
-      />
     </>
   );
 }

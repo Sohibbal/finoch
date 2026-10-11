@@ -12,13 +12,13 @@ import {
   Trash2,
   MoreVertical,
 } from "lucide-react";
-import { StudentWallet, WalletType } from "@/types/wallet-types";
+import { WalletWithBalance, WalletType } from "@/types/wallet-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
 
 interface WalletCardMobileProps {
-  wallet: StudentWallet;
-  onTransfer: (wallet: StudentWallet) => void;
-  onEdit: (wallet: StudentWallet) => void;
+  wallet: WalletWithBalance;
+  onTransfer: (wallet: WalletWithBalance) => void;
+  onEdit: (wallet: WalletWithBalance) => void;
   onDelete: (id: string) => void;
 }
 
@@ -64,6 +64,11 @@ export function WalletCardMobile({
           <div>
             <h3 className="font-bold text-sm text-white leading-tight">
               {wallet.name}
+              {wallet.isDefault && (
+                <span className="ml-1.5 px-1.5 py-0.5 rounded-full bg-white/25 text-[9px] font-bold uppercase tracking-wider align-middle">
+                  Default
+                </span>
+              )}
             </h3>
             <span className="text-[10px] text-white/80 font-medium uppercase tracking-wider">
               {wallet.type === "cash"
@@ -95,7 +100,7 @@ export function WalletCardMobile({
                 className="w-full px-3 py-2 text-left flex items-center gap-2 hover:bg-cream-100 dark:hover:bg-navy-800"
               >
                 <Edit3 className="w-3.5 h-3.5" />
-                <span>Ubah Saldo</span>
+                <span>Ubah Akun</span>
               </button>
               <button
                 onClick={() => {

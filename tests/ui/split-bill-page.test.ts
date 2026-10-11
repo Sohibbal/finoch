@@ -30,14 +30,12 @@ describe("Split Bill Page Components", () => {
     const { BillItemEditor } = await import("@/components/split-bill/bill-item-editor");
     const { TaxDiscountConfig } = await import("@/components/split-bill/tax-discount-config");
     const { SplitSummaryCard } = await import("@/components/split-bill/split-summary-card");
-    const { TalanganHistoryModal } = await import("@/components/split-bill/talangan-history-modal");
     const { ReceiptOcrButton } = await import("@/components/split-bill/receipt-ocr-button");
 
     expect(ParticipantManager).toBeDefined();
     expect(BillItemEditor).toBeDefined();
     expect(TaxDiscountConfig).toBeDefined();
     expect(SplitSummaryCard).toBeDefined();
-    expect(TalanganHistoryModal).toBeDefined();
     expect(ReceiptOcrButton).toBeDefined();
   });
 });

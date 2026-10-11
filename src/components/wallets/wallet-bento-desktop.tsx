@@ -15,7 +15,7 @@ import {
   CreditCard,
 } from "lucide-react";
 import {
-  StudentWallet,
+  WalletWithBalance,
   WalletTransferRecord,
   WalletSummary,
   WalletType,
@@ -24,12 +24,12 @@ import { formatRupiah } from "@/lib/financial/split-bill-engine";
 import { detectCriticalBalances } from "@/lib/financial/wallet-engine";
 
 interface WalletBentoDesktopProps {
-  wallets: StudentWallet[];
+  wallets: WalletWithBalance[];
   summary: WalletSummary;
   transfers: WalletTransferRecord[];
   onOpenAddModal: () => void;
-  onOpenTransferModal: (source?: StudentWallet) => void;
-  onEditWallet: (wallet: StudentWallet) => void;
+  onOpenTransferModal: (source?: WalletWithBalance) => void;
+  onEditWallet: (wallet: WalletWithBalance) => void;
   onDeleteWallet: (id: string) => void;
 }
 
@@ -196,6 +196,11 @@ export function WalletBentoDesktop({
                           {wallet.isPrimary && (
                             <span className="px-2 py-0.5 rounded-full bg-white/25 text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-sm">
                               Utama
+                            </span>
+                          )}
+                          {wallet.isDefault && (
+                            <span className="px-2 py-0.5 rounded-full bg-white/25 text-[10px] font-bold text-white uppercase tracking-wider backdrop-blur-sm">
+                              Default
                             </span>
                           )}
                         </div>

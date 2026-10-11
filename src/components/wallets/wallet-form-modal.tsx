@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { X, Wallet, Landmark, Smartphone, Check } from "lucide-react";
-import { StudentWallet, WalletType } from "@/types/wallet-types";
+import { StudentWallet, WalletType, WalletWithBalance } from "@/types/wallet-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
 
 interface WalletFormModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: Omit<StudentWallet, "id" | "updatedAt">) => void;
-  initialWallet?: StudentWallet | null;
+  initialWallet?: WalletWithBalance | null;
 }
 
 const PRESETS = [
@@ -43,6 +43,7 @@ export function WalletFormModal({
   const [accountNumber, setAccountNumber] = useState("");
   const [notes, setNotes] = useState("");
   const [isPrimary, setIsPrimary] = useState(false);
+  const [isDefault, setIsDefault] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,6 +55,7 @@ export function WalletFormModal({
       setAccountNumber(initialWallet.accountNumber || "");
       setNotes(initialWallet.notes || "");
       setIsPrimary(!!initialWallet.isPrimary);
+      setIsDefault(!!initialWallet.isDefault);
     } else {
       setName("");
       setType("bank");
@@ -62,6 +64,7 @@ export function WalletFormModal({
       setAccountNumber("");
       setNotes("");
       setIsPrimary(false);
+      setIsDefault(false);
     }
     setError(null);
   }, [initialWallet, isOpen]);
@@ -90,15 +93,20 @@ export function WalletFormModal({
 
     const icon = type === "cash" ? "wallet" : type === "bank" ? "landmark" : "smartphone";
 
+    // The user edits the current balance; only the saldo awal is stored, so keep the
+    // wallet's transfers and spending and shift the opening balance instead.
+    const movement = initialWallet ? initialWallet.balance - initialWallet.openingBalance : 0;
+
     onSave({
       name: name.trim(),
       type,
-      balance: numericBalance,
+      openingBalance: numericBalance - movement,
       color,
       icon,
       accountNumber: accountNumber.trim() || undefined,
       notes: notes.trim() || undefined,
       isPrimary,
+      isDefault,
     });
 
     onClose();
@@ -289,6 +297,19 @@ export function WalletFormModal({
             />
             <span className="text-xs font-medium text-navy-800 dark:text-cream-200">
               Jadikan akun utama (default penerimaan uang bulanan)
+            </span>
+          </label>
+
+          {/* Default Wallet Checkbox */}
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={isDefault}
+              onChange={(e) => setIsDefault(e.target.checked)}
+              className="w-4 h-4 rounded text-emerald-600 focus:ring-emerald-500 border-cream-300 dark:border-navy-700"
+            />
+            <span className="text-xs font-medium text-navy-800 dark:text-cream-200">
+              Jadikan dompet default untuk mencatat pengeluaran
             </span>
           </label>
 

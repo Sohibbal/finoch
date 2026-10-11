@@ -35,6 +35,7 @@ import {
 } from "@/components/dashboard/dashboard-data";
 import { localDateKey } from "@/lib/date";
 import { expenseStorage } from "@/lib/storage/expense-storage";
+import { getWallets } from "@/lib/storage/wallet-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
 import {
   calculateCashflowSummary,
@@ -95,7 +96,13 @@ export default function DashboardPage() {
       (Array.isArray(server) ? server : []).map((e) => ({ ...e, source: "manual" as const })),
       local.map((e) => ({ ...e, source: "voice" as const }))
     );
-    setTransactions(merged.map((e) => toTransaction(e, e.source)));
+    const walletNames = new Map(getWallets().map((w) => [w.id, w.name]));
+    setTransactions(
+      merged.map((e) => ({
+        ...toTransaction(e, e.source),
+        paymentMethod: (e.walletId && walletNames.get(e.walletId)) || undefined,
+      }))
+    );
   }, []);
 
   // Check authentication & load profile from API
@@ -229,7 +236,7 @@ export default function DashboardPage() {
     setIsConfirmModalOpen(true);
   };
 
-  const handleConfirmTransaction = async (candidate: TransactionCandidate) => {
+  const handleConfirmTransaction = async (candidate: TransactionCandidate, walletId?: string) => {
     const newTx: TransactionCandidate = {
       ...candidate,
       id: candidate.id || `tx-${Date.now()}`,
@@ -242,6 +249,7 @@ export default function DashboardPage() {
         itemName: candidate.merchant || candidate.description || "Pengeluaran",
         amount: candidate.amount,
         category: candidate.category || "Other",
+        walletId,
         createdAt: candidate.date
           ? new Date(candidate.date).toISOString()
           : new Date().toISOString(),
@@ -426,6 +434,14 @@ export default function DashboardPage() {
                               <span className="text-[10px] font-bold uppercase tracking-wider text-navy-600 dark:text-cream-300/80">
                                 {tx.category || "Lainnya"}
                               </span>
+                              {tx.paymentMethod && (
+                                <>
+                                  <span className="w-1 h-1 rounded-full bg-navy-300 dark:bg-white/20" />
+                                  <span className="text-[10px] font-medium text-navy-500 dark:text-cream-400/70 truncate max-w-[96px]">
+                                    {tx.paymentMethod}
+                                  </span>
+                                </>
+                              )}
                             </div>
                           </div>
                         </div>

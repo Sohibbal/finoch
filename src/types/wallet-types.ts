@@ -4,13 +4,20 @@ export interface StudentWallet {
   id: string;
   name: string;
   type: WalletType;
-  balance: number;
+  /** Saldo awal. The live balance is derived (computeWalletBalances), never stored. */
+  openingBalance: number;
   color: string; // 'emerald' | 'blue' | 'purple' | 'amber' | 'cyan'
   icon: string; // 'wallet' | 'landmark' | 'smartphone' | 'credit-card'
   accountNumber?: string;
   isPrimary?: boolean;
+  /** New expenses are charged to this wallet unless the user picks another. */
+  isDefault?: boolean;
   notes?: string;
   updatedAt: string;
+}
+
+export interface WalletWithBalance extends StudentWallet {
+  balance: number;
 }
 
 export interface WalletTransferRecord {
@@ -30,5 +37,5 @@ export interface WalletSummary {
   cashBalance: number;
   bankBalance: number;
   ewalletBalance: number;
-  criticalWallets: StudentWallet[];
+  criticalWallets: WalletWithBalance[];
 }

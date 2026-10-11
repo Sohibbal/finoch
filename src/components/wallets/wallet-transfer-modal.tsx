@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect } from "react";
 import { X, ArrowRightLeft, AlertCircle, CheckCircle2 } from "lucide-react";
-import { StudentWallet } from "@/types/wallet-types";
+import { WalletWithBalance } from "@/types/wallet-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
 
 interface WalletTransferModalProps {
   isOpen: boolean;
   onClose: () => void;
-  wallets: StudentWallet[];
-  sourceWallet?: StudentWallet | null;
+  wallets: WalletWithBalance[];
+  sourceWallet?: WalletWithBalance | null;
   onTransfer: (
     fromId: string,
     toId: string,

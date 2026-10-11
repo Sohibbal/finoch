@@ -1,9 +1,23 @@
 import { DebtItem, DebtSummary } from "@/types/debt-types";
 import { calculateDebtSummary } from "@/lib/financial/debt-engine";
-import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { getStorage, isDemoMode, readArray } from "@/lib/storage/local-storage";
 import { localDateKeyFromNow } from "@/lib/date";
 
 const DEBT_STORAGE_KEY = "finoch_student_debts_v1";
+/** Split-bill used to keep its own "Buku Talangan"; those records now live in the kasbon list. */
+const TALANGAN_STORAGE_KEY = "finoch_talangan_records";
+
+interface LegacyTalanganRecord {
+  id: string;
+  restaurantName: string;
+  date: string;
+  friendName: string;
+  amount: number;
+  itemsSummary: string;
+  isPaid: boolean;
+  paidAt?: string;
+  createdAt: string;
+}
 
 // Built per call: due dates stay relative to today and callers can mutate freely.
 const createDefaultDebts = (): DebtItem[] => [
@@ -30,16 +44,46 @@ const createDefaultDebts = (): DebtItem[] => [
   },
 ];
 
+/** Converts split-bill talangan records into receivables, skipping any already moved. */
+function mergeTalangan(debts: DebtItem[], records: LegacyTalanganRecord[]): DebtItem[] {
+  const ids = new Set(debts.map((d) => d.id));
+  const moved: DebtItem[] = records
+    .filter((r) => !ids.has(`debt-${r.id}`))
+    .map((r) => ({
+      id: `debt-${r.id}`,
+      type: "receivable",
+      personName: r.friendName,
+      amount: r.amount,
+      description: `Patungan ${r.restaurantName}${r.itemsSummary ? ` · ${r.itemsSummary}` : ""}`,
+      status: r.isPaid ? "paid" : "unpaid",
+      settledAt: r.isPaid ? r.paidAt : undefined,
+      createdAt: r.createdAt,
+    }));
+  return [...moved, ...debts];
+}
+
 /**
- * Loads debts from localStorage.
+ * Loads debts from localStorage; sample debts are seeded in demo mode only.
  */
 export function getDebts(): DebtItem[] {
-  // Defaults only when nothing was ever stored; an emptied list stays empty.
   const stored = readArray<DebtItem>(DEBT_STORAGE_KEY);
-  if (stored) return stored;
-  const defaults = createDefaultDebts();
-  saveDebts(defaults);
-  return defaults;
+  const talangan = readArray<LegacyTalanganRecord>(TALANGAN_STORAGE_KEY);
+  if (stored && !talangan) return stored;
+
+  // Defaults only when nothing was ever stored; an emptied list stays empty.
+  const base = stored ?? (isDemoMode() ? createDefaultDebts() : []);
+  const debts = talangan ? mergeTalangan(base, talangan) : base;
+  if (!stored && debts.length === 0) return debts;
+
+  const storage = getStorage();
+  try {
+    storage?.setItem(DEBT_STORAGE_KEY, JSON.stringify(debts));
+    // Drop the old list only once the receivables are safely written.
+    if (talangan) storage?.removeItem(TALANGAN_STORAGE_KEY);
+  } catch (err) {
+    console.error("Error saving debts to storage:", err);
+  }
+  return debts;
 }
 
 /**

@@ -140,4 +140,26 @@ describe("POST /api/sync", () => {
     const { json } = await sync({ clientChanges: [], lastSyncTimestamp: "2026-10-11T09:59:00.000Z" });
     expect(json.serverChanges.map((e: { id: string }) => e.id)).toEqual(["exp-old"]);
   });
+
+  it("round-trips walletId: stores it on push, returns it on pull, rejects bad values", async () => {
+    prismaMock.expense.findMany.mockResolvedValue([
+      { id: "exp-w", userId: "user-a", itemName: "Kopi", amount: 5000, category: "Food & Drinks", walletId: "wallet-cash-1",
+        isDeleted: false, createdAt: NOW, updatedAt: NOW },
+    ]);
+    const { json } = await sync({
+      clientChanges: [
+        change("w", { walletId: "wallet-cash-1" }),
+        change("none", { walletId: null }),
+        change("long", { walletId: "x".repeat(101) }),
+        change("num", { walletId: 7 }),
+      ],
+    });
+    expect(json.appliedIds).toEqual(["w", "none"]);
+    expect(json.rejectedIds).toEqual([
+      { id: "long", reason: "invalid_wallet_id" },
+      { id: "num", reason: "invalid_wallet_id" },
+    ]);
+    expect(prismaMock.expense.create.mock.calls.map((c) => c[0].data.walletId)).toEqual(["wallet-cash-1", null]);
+    expect(json.serverChanges[0].walletId).toBe("wallet-cash-1");
+  });
 });
