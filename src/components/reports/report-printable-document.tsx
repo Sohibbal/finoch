@@ -101,7 +101,7 @@ export function ReportPrintableDocument({
             <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
               <dt className="text-body font-bold text-ink flex items-center gap-3">
                 Saldo akhir bulan ini
-                <span className="text-meta font-semibold text-ink-soft">{isSurplus ? "lebih" : "kurang"}</span>
+                <span className="text-meta font-semibold text-ink-soft">{isSurplus ? "Masih sisa" : "Tekor"}</span>
               </dt>
               <dd className="money font-display text-head font-bold text-ink">{rupiah(summary.netSavings)}</dd>
             </div>

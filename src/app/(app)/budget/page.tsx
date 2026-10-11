@@ -190,9 +190,10 @@ export default function BudgetPage() {
         subtitle="Uang saku setelah tagihan dibagi ke amplop biar nggak ludes di awal bulan"
         actions={
           hasEnvelopes ? (
-            <button type="button" onClick={() => handleOpenTransfer()} className={PRIMARY_ACTION}>
+            // Icon-only on phones so the title keeps one line; the label returns from sm up.
+            <button type="button" onClick={() => handleOpenTransfer()} aria-label="Pindah isi amplop" className={PRIMARY_ACTION}>
               <ArrowRightLeft className="w-4 h-4" aria-hidden="true" />
-              Pindah isi
+              <span className="hidden sm:inline">Pindah isi</span>
             </button>
           ) : null
         }
