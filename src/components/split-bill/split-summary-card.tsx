@@ -120,6 +120,8 @@ export function SplitSummaryCard({
       )}
 
       <div className="space-y-2 pt-1">
+        {hasBill && (
+          <>
         <button
           type="button"
           onClick={onSaveToTransactionsAndTalangan}
@@ -154,6 +156,8 @@ export function SplitSummaryCard({
             {copied ? "Rincian tersalin" : "Salin rincian"}
           </button>
         </div>
+          </>
+        )}
         <Link
           href="/debts"
           className="inline-flex items-center gap-2 min-h-11 text-body font-semibold text-ink underline underline-offset-4 decoration-ink/40 hover:decoration-ink"

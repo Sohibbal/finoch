@@ -158,7 +158,7 @@ export function BillItemEditor({
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Soto betawi"
+              placeholder="misal soto betawi"
               className={FIELD_CLASS}
             />
           </div>
@@ -172,7 +172,7 @@ export function BillItemEditor({
               inputMode="numeric"
               value={price}
               onChange={(e) => setPrice(e.target.value)}
-              placeholder="20000"
+              placeholder="misal 20000"
               className={`${FIELD_CLASS} money`}
             />
           </div>
