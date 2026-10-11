@@ -2,21 +2,26 @@ import { SignJWT, jwtVerify } from "jose";
 import type { SessionPayload } from "../types/auth";
 
 export const COOKIE_NAME = "voicash_session";
-const SECRET_KEY = new TextEncoder().encode(
-  process.env.JWT_SECRET || "voicash-super-secure-stateless-jwt-secret-minimum-32-characters"
-);
+function getSecretKey(): Uint8Array {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || secret.length < 32) {
+    throw new Error("JWT_SECRET must contain at least 32 characters");
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export async function signSessionToken(payload: SessionPayload): Promise<string> {
   return new SignJWT({ ...payload })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("7d")
-    .sign(SECRET_KEY);
+    .sign(getSecretKey());
 }
 
 export async function verifySessionToken(token: string): Promise<SessionPayload | null> {
+  const secretKey = getSecretKey();
   try {
-    const { payload } = await jwtVerify(token, SECRET_KEY);
+    const { payload } = await jwtVerify(token, secretKey);
     if (!payload.userId || !payload.email) {
       return null;
     }

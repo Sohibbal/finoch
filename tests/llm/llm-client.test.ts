@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import { getLlmConfig } from "@/lib/llm/llm-client";
+import { getLlmConfig, normalizeBaseUrl } from "@/lib/llm/llm-client";
 
 describe("LLM Client Auto Configuration", () => {
   const originalEnv = process.env;
@@ -38,7 +38,7 @@ describe("LLM Client Auto Configuration", () => {
     const config = getLlmConfig();
     expect(config).not.toBeNull();
     expect(config?.provider).toBe("gemini");
-    expect(config?.baseUrl).toBe("https://generativelanguage.googleapis.com/v1beta/openai/");
+    expect(config?.baseUrl).toBe("https://generativelanguage.googleapis.com/v1beta/openai");
     expect(config?.model).toBe("gemini-2.0-flash");
   });
 
@@ -88,4 +88,9 @@ describe("LLM Client Auto Configuration", () => {
     process.env.OPENAI_BASE_URL = "https://ai.botku.id/v1/";
     expect(getLlmConfig()?.baseUrl).toBe("https://ai.botku.id/v1");
   });
+});
+
+it("joins Gemini completions without a double slash", () => {
+  expect(`${normalizeBaseUrl("https://generativelanguage.googleapis.com/v1beta/openai/")}/chat/completions`)
+    .toBe("https://generativelanguage.googleapis.com/v1beta/openai/chat/completions");
 });

@@ -18,7 +18,7 @@ function sanitizeEnvVal(val: string | undefined): string | undefined {
 export function normalizeBaseUrl(url: string): string {
   let cleaned = url.trim();
   if (cleaned.includes("generativelanguage.googleapis.com")) {
-    return cleaned.endsWith("/") ? cleaned : `${cleaned}/`;
+    return cleaned.replace(/\/+$/, "");
   }
   cleaned = cleaned.replace(/\/+$/, "");
   if (!cleaned.endsWith("/v1")) {
