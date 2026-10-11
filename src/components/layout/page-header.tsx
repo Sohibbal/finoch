@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, UserRoundCog, WifiOff, type LucideIcon } from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
+import { seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import { Breadcrumbs } from "./breadcrumbs";
 import { ThemeToggle } from "./theme-toggle";
@@ -23,7 +24,17 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
   const isDashboard = usePathname() === "/dashboard";
   // Read after mount: storage is client-only and the server render must match the first client render.
   const [demo, setDemo] = useState(false);
-  useEffect(() => setDemo(isDemoMode()), []);
+  useEffect(() => {
+    const on = isDemoMode();
+    setDemo(on);
+    if (!on) return;
+    // Every page has this header, so an empty demo scope gets its sample expenses wherever the app opens.
+    seedDemoExpenses()
+      .then((added) => {
+        if (added > 0) window.dispatchEvent(new Event("finoch:data-pulled"));
+      })
+      .catch((err) => console.error("Gagal mengisi data demo:", err));
+  }, []);
 
   return (
     <header className={`sticky top-0 z-40 px-4 sm:px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-2 ${className}`}>
