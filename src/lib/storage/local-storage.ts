@@ -1,3 +1,5 @@
+import { isSyncedDocumentKey } from "@/lib/sync/document-keys";
+
 export const GUEST_SCOPE = "guest";
 
 /** Device-level key remembering whose data is active, so reloads read the right scope before /api/auth/me answers. */
@@ -22,7 +24,7 @@ export const LEGACY_FEATURE_KEYS = [
 
 export type ScopedStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 
-function getRawStorage(): Storage | null {
+export function getRawStorage(): Storage | null {
   if (typeof window !== "undefined" && window.localStorage) return window.localStorage;
   if (typeof localStorage !== "undefined") return localStorage;
   return null;
@@ -98,14 +100,62 @@ export function setStorageScope(userId: string | null | undefined): void {
   }
 }
 
+/** Per-user sync state of each synced feature key on this device: local edit time and whether it still needs uploading. */
+export type DocumentMeta = Record<string, { updatedAt: number; dirty: boolean }>;
+
+export function docMetaKey(userId: string): string {
+  return `finoch_doc_meta::${userId}`;
+}
+
+/** serverTime of the user's last document sync on this device; absent until the first pull. */
+export function docCursorKey(userId: string): string {
+  return `finoch_doc_cursor::${userId}`;
+}
+
+export function readDocumentMeta(userId: string): DocumentMeta {
+  try {
+    const parsed = JSON.parse(getRawStorage()?.getItem(docMetaKey(userId)) ?? "{}");
+    return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+export function writeDocumentMeta(userId: string, meta: DocumentMeta): void {
+  getRawStorage()?.setItem(docMetaKey(userId), JSON.stringify(meta));
+}
+
+/**
+ * Marks a synced feature key as edited by the logged-in user. Guest and demo data never sync.
+ * Writes made before this device's first document pull (template seeding, offline edits right
+ * after login) are stamped 0: the server copy wins over them, so a fresh device can't clobber it.
+ */
+function trackDocumentChange(key: string): void {
+  const userId = getStorageScope();
+  if (userId === GUEST_SCOPE || isDemoMode() || !isSyncedDocumentKey(key)) return;
+  try {
+    const meta = readDocumentMeta(userId);
+    meta[key] = { updatedAt: getRawStorage()?.getItem(docCursorKey(userId)) ? Date.now() : 0, dirty: true };
+    writeDocumentMeta(userId, meta);
+  } catch (err) {
+    console.error("Gagal mencatat perubahan untuk sinkronisasi:", err);
+  }
+}
+
 /** localStorage namespaced by the current scope; every feature store goes through here. */
 export function getStorage(): ScopedStorage | null {
   const raw = getRawStorage();
   if (!raw) return null;
   return {
     getItem: (key) => raw.getItem(scopedKey(key)),
-    setItem: (key, value) => raw.setItem(scopedKey(key), value),
-    removeItem: (key) => raw.removeItem(scopedKey(key)),
+    setItem: (key, value) => {
+      raw.setItem(scopedKey(key), value);
+      trackDocumentChange(key);
+    },
+    removeItem: (key) => {
+      raw.removeItem(scopedKey(key));
+      trackDocumentChange(key);
+    },
   };
 }
 

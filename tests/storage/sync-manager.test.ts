@@ -29,7 +29,8 @@ beforeEach(async () => {
     removeItem: (key: string) => void store.delete(key),
   });
   vi.stubGlobal("navigator", { onLine: true });
-  fetchMock = vi.fn();
+  // The document sync runs after the expense sync; by default the server has nothing for it.
+  fetchMock = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ appliedKeys: [], rejected: [], documents: [], serverTime: "2026-10-11T10:00:00.000Z" }) }));
   vi.stubGlobal("fetch", fetchMock);
   await expenseStorage.clearAll();
   await syncQueue.clearQueue();
