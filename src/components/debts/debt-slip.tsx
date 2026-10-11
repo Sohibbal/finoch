@@ -82,9 +82,9 @@ export function DebtSlip({ debt, justPaid, onTogglePaid, onDelete }: DebtSlipPro
         ) : null}
       </div>
 
-      <p className="font-display font-bold money flex items-baseline gap-1.5">
-        <span className="text-head">Rp</span>
-        <span className="text-[2.75rem] leading-none tracking-[-0.02em]">{Math.round(debt.amount).toLocaleString("id-ID")}</span>
+      <p className="font-display text-head font-bold money flex items-baseline gap-1.5">
+        <span>Rp</span>
+        <span>{Math.round(debt.amount).toLocaleString("id-ID")}</span>
       </p>
 
       <p className="text-body break-words">{debt.description || "Tanpa keterangan"}</p>

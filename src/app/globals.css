@@ -107,9 +107,6 @@ body {
   .animate-stub-in { animation: none; }
 }
 
-/* Double-Bezel Hardware Architecture (Doppelrand) */
-/* Premium Glass & Reflection */
-/* Dicoding-style Animated Wave Background */
 /* Smooth Fade In */
 @keyframes fadeIn {
   from {

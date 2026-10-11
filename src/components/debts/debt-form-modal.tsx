@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { FIELD_CLASS, LABEL_CLASS, OptionButton, PaperDialog, PRIMARY_CLASS, SECONDARY_CLASS } from "@/components/press/kampus-press";
 import { DebtType } from "@/types/debt-types";
 
 interface DebtFormModalProps {
@@ -52,8 +53,6 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
   const [dueDate, setDueDate] = useState("");
   const [phone, setPhone] = useState("");
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!personName.trim() || amount <= 0) return;
@@ -78,175 +77,122 @@ export function DebtFormModal({ isOpen, onClose, onSave }: DebtFormModalProps) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
-      <div className="w-full max-w-md bg-paper-sheet border border-ink/20 rounded-sm p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-ink/20">
-          <div>
-            <h3 className="font-bold text-base text-ink">
-              Catat Kasbon / Hutang Piutang
-            </h3>
-            <p className="text-xs text-ink-soft">
-              Buku catatan pinjam-meminjam uang antar teman mahasiswa
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-ink-soft hover:bg-ink/5"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Quick Presets */}
-        <div>
-          <span className="text-meta font-bold text-ink-soft block mb-1.5">
-            Preset Cepat Mahasiswa:
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            {STUDENT_PRESETS.map((preset, idx) => (
+    <PaperDialog isOpen={isOpen} onClose={onClose} title="Catat kasbon" subtitle="Pinjam-meminjam uang dengan teman">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <fieldset className="space-y-1.5">
+          <legend className={LABEL_CLASS}>Kasbon yang sering terjadi</legend>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            {STUDENT_PRESETS.map((preset) => (
               <button
                 type="button"
-                key={idx}
+                key={preset.desc}
                 onClick={() => applyPreset(preset)}
-                className="p-2 rounded-sm border border-ink/20 bg-paper-sheet hover:bg-ink/5 text-left text-xs transition-all"
+                className="min-h-11 px-3 py-2 border border-ink/25 text-left hover:bg-ink/5 transition-colors"
               >
-                <span className="font-bold text-ink block truncate">
-                  {preset.desc}
-                </span>
-                <span className="text-meta text-ink-soft">
-                  Rp {preset.amount.toLocaleString("id-ID")}
+                <span className="block text-body font-semibold text-ink">{preset.desc}</span>
+                <span className="block text-meta text-ink-soft money">
+                  {preset.type === "receivable" ? "Piutang" : "Hutang"} Rp {preset.amount.toLocaleString("id-ID")}
                 </span>
               </button>
             ))}
           </div>
+        </fieldset>
+
+        <fieldset>
+          <legend className={LABEL_CLASS}>Jenis catatan</legend>
+          <div className="grid grid-cols-2 gap-2">
+            <OptionButton pressed={type === "receivable"} onClick={() => setType("receivable")} className="flex items-center justify-center gap-1.5">
+              <ArrowDownLeft className="w-4 h-4 shrink-0" aria-hidden="true" />
+              Piutang (teman pinjam)
+            </OptionButton>
+            <OptionButton pressed={type === "payable"} onClick={() => setType("payable")} className="flex items-center justify-center gap-1.5">
+              <ArrowUpRight className="w-4 h-4 shrink-0" aria-hidden="true" />
+              Hutang (kamu pinjam)
+            </OptionButton>
+          </div>
+        </fieldset>
+
+        <div>
+          <label htmlFor="debt-person" className={LABEL_CLASS}>
+            Nama teman
+          </label>
+          <input
+            id="debt-person"
+            type="text"
+            required
+            value={personName}
+            onChange={(e) => setPersonName(e.target.value)}
+            placeholder="Dimas teman kos"
+            className={FIELD_CLASS}
+          />
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3.5">
-          {/* Tipe Selector */}
+        <div>
+          <label htmlFor="debt-amount" className={LABEL_CLASS}>
+            Nominal (Rp)
+          </label>
+          <input
+            id="debt-amount"
+            type="number"
+            inputMode="numeric"
+            min="1000"
+            step="5000"
+            required
+            value={amount || ""}
+            onChange={(e) => setAmount(Number(e.target.value))}
+            placeholder="50000"
+            className={`${FIELD_CLASS} money`}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="debt-description" className={LABEL_CLASS}>
+            Buat apa
+          </label>
+          <input
+            id="debt-description"
+            type="text"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Talangan fotokopi modul ujian"
+            className={FIELD_CLASS}
+          />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Jenis Catatan:
+            <label htmlFor="debt-due" className={LABEL_CLASS}>
+              Jatuh tempo (boleh kosong)
             </label>
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                onClick={() => setType("receivable")}
-                className={`py-2 px-3 rounded-sm text-xs font-bold transition-all border flex items-center justify-center gap-1.5 ${
-                  type === "receivable"
-                    ? "bg-ink text-paper-sheet border-transparent"
-                    : "bg-paper-sheet border-ink/20 text-ink"
-                }`}
-              >
-                <ArrowDownLeft className="w-3.5 h-3.5" />
-                <span>Piutang (Teman Pinjam)</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setType("payable")}
-                className={`py-2 px-3 rounded-sm text-xs font-bold transition-all border flex items-center justify-center gap-1.5 ${
-                  type === "payable"
-                    ? "bg-ink text-paper-sheet border-transparent"
-                    : "bg-paper-sheet border-ink/20 text-ink"
-                }`}
-              >
-                <ArrowUpRight className="w-3.5 h-3.5" />
-                <span>Hutang (Saya Pinjam)</span>
-              </button>
-            </div>
+            <input id="debt-due" type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={FIELD_CLASS} />
           </div>
 
-          {/* Nama Pihak */}
           <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Nama Teman / Pihak:
+            <label htmlFor="debt-phone" className={LABEL_CLASS}>
+              No. WhatsApp (boleh kosong)
             </label>
             <input
-              type="text"
-              required
-              value={personName}
-              onChange={(e) => setPersonName(e.target.value)}
-              placeholder="Contoh: Dimas Teman Kost"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-          </div>
-
-          {/* Nominal */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Nominal (Rp):
-            </label>
-            <input
-              type="number"
-              min="1000"
-              step="5000"
-              required
-              value={amount || ""}
-              onChange={(e) => setAmount(Number(e.target.value))}
-              placeholder="50000"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-          </div>
-
-          {/* Deskripsi */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Keperluan / Keterangan:
-            </label>
-            <input
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Contoh: Talangan fotokopi modul ujian"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-          </div>
-
-          {/* Tanggal Jatuh Tempo */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Jatuh Tempo (Opsional):
-            </label>
-            <input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-          </div>
-
-          {/* Nomor WhatsApp */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              No. WhatsApp (Opsional, untuk tombol chat langsung):
-            </label>
-            <input
+              id="debt-phone"
               type="tel"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Contoh: 08123456789"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
+              placeholder="08123456789"
+              aria-describedby="debt-phone-hint"
+              className={`${FIELD_CLASS} money`}
             />
+            <p id="debt-phone-hint" className="mt-1 text-meta text-ink-soft">Buat tombol chat langsung.</p>
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-1/2 py-2.5 rounded-sm border border-ink/20 text-ink font-bold text-xs hover:bg-ink/5"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              className="w-1/2 py-2.5 rounded-sm bg-ink text-paper-sheet font-bold text-xs active:scale-95 transition-all"
-            >
-              Simpan Kasbon
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="pt-4 flex items-center justify-end gap-3 border-t border-ink/15">
+          <button type="button" onClick={onClose} className={SECONDARY_CLASS}>
+            Batal
+          </button>
+          <button type="submit" className={PRIMARY_CLASS}>
+            Simpan kasbon
+          </button>
+        </div>
+      </form>
+    </PaperDialog>
   );
 }

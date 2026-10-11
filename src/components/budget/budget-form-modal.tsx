@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  X,
   Utensils,
   Home,
   Car,
@@ -11,9 +10,9 @@ import {
   BookOpen,
   ShoppingBag,
   Sparkles,
-  Check,
 } from "lucide-react";
 import { DenomPicker } from "@/components/press/denom";
+import { FIELD_CLASS, LABEL_CLASS, OptionButton, PaperDialog, PRIMARY_CLASS, SECONDARY_CLASS } from "@/components/press/kampus-press";
 import { BudgetEnvelope } from "@/types/budget-types";
 
 interface BudgetFormModalProps {
@@ -113,8 +112,6 @@ export function BudgetFormModal({
     }
   }, [isOpen, initialEnvelope]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
@@ -147,188 +144,145 @@ export function BudgetFormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
-      <div className="w-full max-w-lg bg-paper-sheet border border-ink/20 rounded-sm p-6 space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-ink/20">
-          <div>
-            <h3 className="font-bold text-base text-ink">
-              {initialEnvelope ? "Ubah Pos Anggaran" : "Tambah Pos Amplop Baru"}
-            </h3>
-            <p className="text-xs text-ink-soft">
-              Kustomisasi amplop digital agar pas dengan ritme kuliahmu
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-ink-soft hover:bg-ink/5"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Student Fast Presets (Only on Add mode) */}
+    <PaperDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={initialEnvelope ? "Ubah amplop" : "Tambah amplop"}
+      subtitle="Jatah bulanan untuk satu pos pengeluaran"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
         {!initialEnvelope && (
-          <div>
-            <span className="text-meta font-bold text-ink-soft block mb-2">
-              Preset Cepat Mahasiswa:
-            </span>
-            <div className="grid grid-cols-2 gap-2">
-              {STUDENT_PRESETS.map((preset, idx) => (
+          <fieldset className="space-y-1.5">
+            <legend className={LABEL_CLASS}>Amplop yang sering dipakai mahasiswa</legend>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {STUDENT_PRESETS.map((preset) => (
                 <button
                   type="button"
-                  key={idx}
+                  key={preset.name}
                   onClick={() => applyPreset(preset)}
-                  className="p-2 rounded-sm border border-ink/20 bg-paper-sheet hover:bg-ink/5 text-left transition-all"
+                  className="min-h-11 px-3 py-2 border border-ink/25 text-left hover:bg-ink/5 transition-colors"
                 >
-                  <span className="font-bold text-xs text-ink block">
-                    {preset.name}
-                  </span>
-                  <span className="text-meta text-ink-soft">
-                    Rp {preset.amount.toLocaleString("id-ID")}
-                  </span>
+                  <span className="block text-body font-semibold text-ink">{preset.name}</span>
+                  <span className="block text-meta text-ink-soft money">Rp {preset.amount.toLocaleString("id-ID")} sebulan</span>
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Nama Pos */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Nama Pos Anggaran:
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Contoh: Makan Siang Kampus"
-              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-          </div>
+        <div>
+          <label htmlFor="envelope-name" className={LABEL_CLASS}>
+            Nama amplop
+          </label>
+          <input
+            id="envelope-name"
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Makan siang kampus"
+            className={FIELD_CLASS}
+          />
+        </div>
 
-          {/* Jatah Nominal */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Jatah Alokasi Bulanan (Rp):
-            </label>
-            <input
-              type="number"
-              min="10000"
-              step="10000"
-              required
-              value={allocatedAmount || ""}
-              onChange={(e) => setAllocatedAmount(Number(e.target.value))}
-              className="w-full px-3.5 py-2.5 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-sm font-bold focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-              placeholder="500000"
-            />
-          </div>
+        <div>
+          <label htmlFor="envelope-amount" className={LABEL_CLASS}>
+            Jatah sebulan (Rp)
+          </label>
+          <input
+            id="envelope-amount"
+            type="number"
+            inputMode="numeric"
+            min="10000"
+            step="10000"
+            required
+            value={allocatedAmount || ""}
+            onChange={(e) => setAllocatedAmount(Number(e.target.value))}
+            className={`${FIELD_CLASS} money`}
+            placeholder="500000"
+          />
+        </div>
 
-          {/* Icon Selector */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1.5">
-              Pilih Ikon Amplop:
-            </label>
-            <div className="flex flex-wrap gap-2">
-              {AVAILABLE_ICONS.map((item) => {
-                const Icon = item.icon;
-                const isSelected = icon === item.id;
-                return (
-                  <button
-                    type="button"
-                    key={item.id}
-                    onClick={() => setIcon(item.id)}
-                    className={`w-9 h-9 rounded-sm flex items-center justify-center border transition-all ${
-                      isSelected
-                        ? "bg-ink text-paper-sheet border-transparent"
-                        : "bg-paper-deep border-ink/20 text-ink-soft hover:bg-ink/5"
-                    }`}
-                    title={item.label}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </button>
-                );
-              })}
-            </div>
+        <fieldset>
+          <legend className={LABEL_CLASS}>Ikon</legend>
+          <div className="flex flex-wrap gap-2">
+            {AVAILABLE_ICONS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <OptionButton
+                  key={item.id}
+                  pressed={icon === item.id}
+                  onClick={() => setIcon(item.id)}
+                  aria-label={item.label}
+                  className="w-11 flex items-center justify-center px-0"
+                >
+                  <Icon className="w-5 h-5" aria-hidden="true" />
+                </OptionButton>
+              );
+            })}
           </div>
+        </fieldset>
 
-          {/* Color Selector */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1.5">
-              Warna amplop
-            </label>
-            <DenomPicker value={color} onChange={setColor} />
-          </div>
+        <div>
+          <p className={LABEL_CLASS}>Warna amplop</p>
+          <DenomPicker value={color} onChange={setColor} />
+          <p className="mt-1 text-meta text-ink-soft">Warna cuma penanda biar amplop gampang dibedakan, bukan status jatah.</p>
+        </div>
 
-          {/* Category Aliases */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Kategori Pengeluaran Terhubung (Pisahkan dengan koma):
-            </label>
-            <input
-              type="text"
-              value={aliasesText}
-              onChange={(e) => setAliasesText(e.target.value)}
-              placeholder="Contoh: Food, Food & Drinks, Groceries"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-            <p className="text-meta text-ink-soft mt-1">
-              Transaksi suara/struk yang mencocokkan kata-kata ini akan otomatis memotong amplop ini.
-            </p>
-          </div>
+        <div>
+          <label htmlFor="envelope-aliases" className={LABEL_CLASS}>
+            Kategori yang masuk amplop ini (pisahkan dengan koma)
+          </label>
+          <input
+            id="envelope-aliases"
+            type="text"
+            value={aliasesText}
+            onChange={(e) => setAliasesText(e.target.value)}
+            placeholder="Food, Food & Drinks, Groceries"
+            aria-describedby="envelope-aliases-hint"
+            className={FIELD_CLASS}
+          />
+          <p id="envelope-aliases-hint" className="text-meta text-ink-soft mt-1">
+            Catatan suara atau struk dengan kategori ini otomatis memotong amplop ini.
+          </p>
+        </div>
 
-          {/* Notes */}
-          <div>
-            <label className="text-xs font-semibold text-ink block mb-1">
-              Catatan / Pengingat (Opsional):
-            </label>
-            <input
-              type="text"
-              value={notes}
-              onChange={(e) => setNotes(e.target.value)}
-              placeholder="Contoh: Jatah maksimal 15rb per porsi makan warteg"
-              className="w-full px-3.5 py-2 rounded-sm border border-ink/20 bg-paper-sheet text-ink text-xs focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-          </div>
+        <div>
+          <label htmlFor="envelope-notes" className={LABEL_CLASS}>
+            Catatan (boleh kosong)
+          </label>
+          <input
+            id="envelope-notes"
+            type="text"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="Maksimal 15rb sekali makan di warteg"
+            className={FIELD_CLASS}
+          />
+        </div>
 
-          {/* Rollover Toggle */}
-          <div className="flex items-center justify-between p-3 rounded-sm bg-paper-deep border border-ink/20">
-            <div>
-              <span className="text-xs font-bold text-ink block">
-                Akumulasi Sisa Saldo (Rollover)
-              </span>
-              <span className="text-meta text-ink-soft">
-                Sisa saldo yang tidak terpakai ditambahkan ke bulan depan
-              </span>
-            </div>
-            <input
-              type="checkbox"
-              checked={rollover}
-              onChange={(e) => setRollover(e.target.checked)}
-              className="w-4 h-4 accent-ink rounded"
-            />
-          </div>
+        <label className="flex items-start gap-3 min-h-11 py-1 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={rollover}
+            onChange={(e) => setRollover(e.target.checked)}
+            className="mt-0.5 w-5 h-5 shrink-0 accent-ink"
+          />
+          <span>
+            <span className="block text-body font-semibold text-ink">Sisa jatah dibawa ke bulan depan</span>
+            <span className="block text-meta text-ink-soft">Yang tidak terpakai bulan ini ditambahkan ke jatah bulan depan.</span>
+          </span>
+        </label>
 
-          {/* Action Buttons */}
-          <div className="flex gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="w-1/2 py-2.5 rounded-sm border border-ink/20 text-ink font-bold text-xs hover:bg-ink/5"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              className="w-1/2 py-2.5 rounded-sm bg-ink hover:bg-ink/90 text-paper-sheet font-bold text-xs active:scale-98 transition-all"
-            >
-              Simpan Amplop
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="pt-4 flex items-center justify-end gap-3 border-t border-ink/15">
+          <button type="button" onClick={onClose} className={SECONDARY_CLASS}>
+            Batal
+          </button>
+          <button type="submit" className={PRIMARY_CLASS}>
+            Simpan amplop
+          </button>
+        </div>
+      </form>
+    </PaperDialog>
   );
 }

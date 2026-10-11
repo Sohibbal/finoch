@@ -46,7 +46,7 @@ export function BudgetOverviewCard({ summary, month, suggestions = [], onApplySu
             <dd className="money text-body font-semibold text-ink break-words">{rupiah(month.spent)}</dd>
           </div>
         </dl>
-        <p className="text-meta text-ink-soft">
+        <p className="text-meta text-ink-soft max-w-prose">
           Uang saku <span className="money">{rupiah(month.income)}</span> (dari profil) − pengeluaran tetap{" "}
           <span className="money">{rupiah(month.fixedCosts)}</span> ({fixedCostScope(month.fixedCostSource)}).
           {unsplit > 0 && <> Masih <span className="money">{rupiah(unsplit)}</span> yang belum masuk amplop.</>}

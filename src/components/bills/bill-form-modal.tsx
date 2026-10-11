@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, Plus, Calendar, Home, Zap, Tv, GraduationCap, Package } from "lucide-react";
+import { Home, Zap, Tv, GraduationCap, Package } from "lucide-react";
+import { FIELD_CLASS, LABEL_CLASS, OptionButton, PaperDialog, PRIMARY_CLASS } from "@/components/press/kampus-press";
 import { RecurringBill, BillCategory } from "@/types/bill-types";
 
 interface BillFormModalProps {
@@ -42,8 +43,6 @@ export function BillFormModal({
     }
   }, [initialData, isOpen]);
 
-  if (!isOpen) return null;
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const numAmount = Number(amount.replace(/[^0-9]/g, ""));
@@ -82,189 +81,145 @@ export function BillFormModal({
     { key: "other", label: "Lainnya", icon: Package },
   ];
 
+  const presets: { label: string; name: string; category: BillCategory; amount: number; day: number }[] = [
+    { label: "Kos 850rb, tgl 1", name: "Kamar Kos", category: "kos", amount: 850000, day: 1 },
+    { label: "WiFi 45rb, tgl 10", name: "WiFi Kosan", category: "utilities", amount: 45000, day: 10 },
+    { label: "Listrik 60rb, tgl 15", name: "Token Listrik", category: "utilities", amount: 60000, day: 15 },
+    { label: "Spotify 25rb, tgl 25", name: "Spotify Family", category: "subscription", amount: 25000, day: 25 },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/60 animate-fade-in">
-      <div className="bg-paper-sheet border border-ink/20 rounded-sm w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden transition-colors">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 sm:p-5 border-b border-ink/20">
-          <h2 className="text-sm sm:text-base font-bold text-ink">
-            {initialData ? "Edit Tagihan Rutin" : "Tambah Tagihan Rutin Mahasiswa"}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-1 rounded-sm text-ink-soft hover:text-ink transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-
-        {/* Content */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-4 sm:p-5 space-y-4">
-          {/* Quick Presets for Students */}
-          {!initialData && (
-            <div className="space-y-1.5">
-              <span className="text-meta font-bold text-ink-soft">
-                Preset Cepat Anak Kost:
-              </span>
-              <div className="flex flex-wrap gap-1.5">
+    <PaperDialog
+      isOpen={isOpen}
+      onClose={onClose}
+      title={initialData ? "Ubah tagihan" : "Tambah tagihan rutin"}
+      subtitle="Ditagih tiap bulan di tanggal yang sama"
+    >
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {!initialData && (
+          <fieldset className="space-y-1.5">
+            <legend className={LABEL_CLASS}>Tagihan anak kos yang umum</legend>
+            <div className="flex flex-wrap gap-1.5">
+              {presets.map((p) => (
                 <button
+                  key={p.label}
                   type="button"
-                  onClick={() => applyPreset("Kamar Kos", "kos", 850000, 1)}
-                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
+                  onClick={() => applyPreset(p.name, p.category, p.amount, p.day)}
+                  className="min-h-11 px-3 rounded-full border border-ink/25 text-body text-ink hover:bg-ink/5 transition-colors"
                 >
-                  Uang Kos (850k - Tgl 1)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => applyPreset("WiFi Kosan", "utilities", 45000, 10)}
-                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
-                >
-                  WiFi (45k - Tgl 10)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => applyPreset("Token Listrik", "utilities", 60000, 15)}
-                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
-                >
-                  Listrik (60k - Tgl 15)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => applyPreset("Spotify Family", "subscription", 25000, 25)}
-                  className="text-meta px-2.5 py-1 rounded-sm bg-paper-deep hover:bg-ink/5 text-ink border border-ink/20"
-                >
-                  Spotify (25k)
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Name */}
-          <div>
-            <label className="block text-xs font-bold text-ink mb-1">
-              Nama Tagihan
-            </label>
-            <input
-              type="text"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Contoh: Kamar Kos Lantai 2 / Laundry Bulanan"
-              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-            />
-          </div>
-
-          {/* Category */}
-          <div>
-            <label className="block text-xs font-bold text-ink mb-1">
-              Kategori
-            </label>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-              {categories.map((cat) => {
-                const CatIcon = cat.icon;
-                const isSelected = category === cat.key;
-                return (
-                  <button
-                    key={cat.key}
-                    type="button"
-                    onClick={() => setCategory(cat.key)}
-                    className={`flex items-center gap-1.5 p-2 rounded-sm text-xs font-medium border transition-all ${
-                      isSelected
-                        ? "bg-ink text-paper-sheet border-transparent font-bold"
-                        : "bg-paper-sheet text-ink border-ink/20"
-                    }`}
-                  >
-                    <CatIcon className="w-3.5 h-3.5" />
-                    <span className="truncate">{cat.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Amount & Due Date */}
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-bold text-ink mb-1">
-                Nominal (Rp)
-              </label>
-              <input
-                type="number"
-                required
-                min="1000"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="Contoh: 850000"
-                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold text-ink mb-1">
-                Jatuh Tempo (Tgl 1-31)
-              </label>
-              <input
-                type="number"
-                required
-                min="1"
-                max="31"
-                value={dueDay}
-                onChange={(e) => setDueDay(e.target.value)}
-                placeholder="1"
-                className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs sm:text-sm text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft text-center"
-              />
-            </div>
-          </div>
-
-          {/* Reminder days */}
-          <div>
-            <label className="block text-xs font-bold text-ink mb-1">
-              Ingatkan Berapa Hari Sebelum Jatuh Tempo?
-            </label>
-            <div className="flex gap-2">
-              {[1, 2, 3, 5, 7].map((days) => (
-                <button
-                  key={days}
-                  type="button"
-                  onClick={() => setReminderDaysBefore(String(days))}
-                  className={`flex-1 py-1.5 rounded-sm text-xs font-semibold border transition-all ${
-                    Number(reminderDaysBefore) === days
-                      ? "bg-ink text-paper-sheet border-aman-ink/40"
-                      : "bg-paper-sheet text-ink border-ink/20"
-                  }`}
-                >
-                  H-{days}
+                  {p.label}
                 </button>
               ))}
             </div>
-          </div>
+          </fieldset>
+        )}
 
-          {/* Note */}
+        <div>
+          <label htmlFor="bill-name" className={LABEL_CLASS}>
+            Nama tagihan
+          </label>
+          <input
+            id="bill-name"
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Kamar kos lantai 2, laundry bulanan"
+            className={FIELD_CLASS}
+          />
+        </div>
+
+        <fieldset>
+          <legend className={LABEL_CLASS}>Kategori</legend>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            {categories.map((cat) => {
+              const CatIcon = cat.icon;
+              return (
+                <OptionButton
+                  key={cat.key}
+                  pressed={category === cat.key}
+                  onClick={() => setCategory(cat.key)}
+                  className="flex items-center gap-1.5 text-left"
+                >
+                  <CatIcon className="w-4 h-4 shrink-0" />
+                  <span className="truncate">{cat.label}</span>
+                </OptionButton>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-bold text-ink mb-1">
-              Catatan Pembayaran (Opsional)
+            <label htmlFor="bill-amount" className={LABEL_CLASS}>
+              Nominal per bulan (Rp)
             </label>
             <input
-              type="text"
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Contoh: No Rek Ibu Kos BCA 12345 / Bayar via Gopay"
-              className="w-full px-3 py-2 bg-paper-sheet border border-ink/20 rounded-sm text-xs text-ink focus:outline-none focus:ring-2 focus:ring-ink placeholder:text-ink-soft"
+              id="bill-amount"
+              type="number"
+              inputMode="numeric"
+              required
+              min="1000"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="850000"
+              className={`${FIELD_CLASS} money`}
             />
           </div>
 
-          {/* Action Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              className="w-full py-2.5 rounded-sm bg-ink hover:bg-ink/90 text-paper-sheet text-xs font-bold transition-all active:scale-95"
-            >
-              {initialData ? "Simpan Perubahan Tagihan" : "Tambahkan ke Tagihan Rutin"}
-            </button>
+          <div>
+            <label htmlFor="bill-due" className={LABEL_CLASS}>
+              Jatuh tempo (tgl 1–31)
+            </label>
+            <input
+              id="bill-due"
+              type="number"
+              inputMode="numeric"
+              required
+              min="1"
+              max="31"
+              value={dueDay}
+              onChange={(e) => setDueDay(e.target.value)}
+              placeholder="1"
+              className={`${FIELD_CLASS} money`}
+            />
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+
+        <fieldset>
+          <legend className={LABEL_CLASS}>Ingatkan berapa hari sebelumnya</legend>
+          <div className="grid grid-cols-5 gap-2">
+            {[1, 2, 3, 5, 7].map((days) => (
+              <OptionButton
+                key={days}
+                pressed={Number(reminderDaysBefore) === days}
+                onClick={() => setReminderDaysBefore(String(days))}
+                aria-label={`${days} hari sebelumnya`}
+              >
+                H-{days}
+              </OptionButton>
+            ))}
+          </div>
+        </fieldset>
+
+        <div>
+          <label htmlFor="bill-note" className={LABEL_CLASS}>
+            Catatan bayar (boleh kosong)
+          </label>
+          <input
+            id="bill-note"
+            type="text"
+            value={note}
+            onChange={(e) => setNote(e.target.value)}
+            placeholder="Rek BCA ibu kos 12345, atau bayar via GoPay"
+            className={FIELD_CLASS}
+          />
+        </div>
+
+        <button type="submit" className={`${PRIMARY_CLASS} w-full`}>
+          {initialData ? "Simpan tagihan" : "Tambah ke tagihan rutin"}
+        </button>
+      </form>
+    </PaperDialog>
   );
 }

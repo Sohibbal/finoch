@@ -21,6 +21,15 @@ describe("landing page", () => {
     }
   });
 
+  it("sets every landing heading in the press scale (head or the numeral clamp), no clamp of its own", () => {
+    expect(source).not.toMatch(/text-\[clamp/);
+    expect(source).toContain("text-numeral");
+  });
+
+  it("keeps no generator comments in the global stylesheet", () => {
+    expect(readFileSync("src/app/globals.css", "utf8")).not.toMatch(/Bezel|Premium Glass|Dicoding/);
+  });
+
   it("prints the signature sentence into two stubs with the real parser", async () => {
     const { pressSentence, SAMPLE_SENTENCES } = await import("@/components/landing/sentence-press");
     const stubs = pressSentence(SAMPLE_SENTENCES[0], "2026-10-11", 1);

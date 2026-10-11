@@ -70,4 +70,23 @@ describe("Dompet page", () => {
     expect(low).toContain("uppercase tracking-[0.08em]");
     expect(low).toContain("Paling cepat habis di warteg");
   });
+
+  it("prints the wallet balance in the head size, not a fourth size of its own", async () => {
+    const { WalletNote } = await import("@/components/wallets/wallet-note");
+    const html = renderToString(
+      React.createElement(WalletNote, { wallet: { ...wallet, balance: 250_000 }, onTransfer: noopFn, onEdit: noopFn, onDelete: noopFn })
+    );
+    expect(html).not.toMatch(/text-\[[\d.]+rem\]/);
+    expect(html).toContain("text-head");
+  });
+
+  it("leaves the empty transfer history without a count", async () => {
+    const page = await import("@/app/(app)/wallets/page");
+    const html = renderToString(React.createElement(page.default));
+    expect(html).toContain("Riwayat pindah saldo");
+    expect(html).not.toMatch(/>0(<!-- -->)? ?kali/);
+  });
 });
+
+const noopFn = () => {};
+

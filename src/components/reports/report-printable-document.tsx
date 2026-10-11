@@ -106,7 +106,7 @@ export function ReportPrintableDocument({
               <dd className="money font-display text-head font-bold text-ink">{rupiah(summary.netSavings)}</dd>
             </div>
           </dl>
-          <p className="text-meta text-ink-soft">
+          <p className="text-meta text-ink-soft max-w-prose">
             Rasio tabungan {summary.savingsRate}% · dengan laju belanja sekarang, sisa saldo cukup sekitar {summary.runwayDays} hari
           </p>
         </section>

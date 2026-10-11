@@ -67,9 +67,10 @@ export function WalletNote({ wallet, onTransfer, onEdit, onDelete }: WalletNoteP
 
         <p className="text-body">{walletPersonality(wallet)}</p>
 
-        <p className="font-display font-bold money flex items-baseline gap-1.5 flex-wrap">
-          <span className="text-head">{wallet.balance < 0 ? "−Rp" : "Rp"}</span>
-          <span className="text-[2.75rem] leading-none tracking-[-0.02em]" aria-hidden="true">
+        {/* Head size, the same as the total above: a wallet's figure never outranks the page's. */}
+        <p className="font-display text-head font-bold money flex items-baseline gap-1.5 flex-wrap">
+          <span>{wallet.balance < 0 ? "−Rp" : "Rp"}</span>
+          <span aria-hidden="true">
             {Math.abs(shown).toLocaleString("id-ID")}
           </span>
           <span className="sr-only">{Math.abs(wallet.balance).toLocaleString("id-ID")}</span>

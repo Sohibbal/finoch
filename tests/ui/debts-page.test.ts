@@ -54,6 +54,8 @@ describe("Buku Kasbon page", () => {
     const lunas = renderToString(React.createElement(DebtSlip, { debt: debt({ status: "paid" }), onTogglePaid: noop, onDelete: noop }));
     expect(lunas).toContain("Lunas");
     expect(lunas).toContain("Batal lunas");
+    // The amount sits on the press scale (head), not a size of its own.
+    expect(piutang).not.toMatch(/text-\[[\d.]+rem\]/);
   });
 
   it("sends WhatsApp reminders to 62 numbers", async () => {
