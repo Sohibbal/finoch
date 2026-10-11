@@ -56,3 +56,12 @@ it("reports a user without a profile so pages can link to onboarding", async () 
   await flush();
   expect(renderHook(useFinancialProfile)).toMatchObject({ loading: false, error: false, hasProfile: false, monthlyIncome: null });
 });
+
+it("falls back to the last loaded profile when offline (airplane-mode demo)", async () => {
+  await loadFinancialProfile();
+  invalidateFinancialProfile();
+  fetchMock.mockImplementation(() => Promise.reject(new TypeError("Failed to fetch")));
+  await expect(loadFinancialProfile()).resolves.toMatchObject({ monthlyIncome: 3200000 });
+  setStorageScope("user-2");
+  await expect(loadFinancialProfile()).rejects.toThrow();
+});

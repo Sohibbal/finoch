@@ -48,6 +48,8 @@ import {
 } from "@/types/financial-types";
 import type { ExpenseCategory } from "@/lib/types/expense";
 import { PageHeader } from "@/components/layout/page-header";
+import { isDemoMode } from "@/lib/storage/local-storage";
+import { loadFinancialProfile } from "@/hooks/use-financial-profile";
 
 // Recharts measures the DOM: render the charts on the client only.
 const SpendingTrendChart = dynamic(
@@ -84,9 +86,12 @@ export default function DashboardPage() {
   // Server rows plus local ones not synced yet, so a just-saved expense doesn't vanish until sync.
   const loadTransactions = useCallback(async () => {
     const [server, local] = await Promise.all([
-      fetch("/api/expenses")
-        .then(async (res) => (res.ok ? (await res.json()).expenses : []))
-        .catch(() => []),
+      // Demo mode shows only sample data: the server holds the user's real expenses.
+      isDemoMode()
+        ? []
+        : fetch("/api/expenses")
+            .then(async (res) => (res.ok ? (await res.json()).expenses : []))
+            .catch(() => []),
       expenseStorage.getExpenses().catch((err) => {
         console.warn("Could not load local expenses:", err);
         return [];
@@ -110,25 +115,20 @@ export default function DashboardPage() {
     let isMounted = true;
 
     async function initDashboard() {
+      // Shared loader: one request per load, and the last good profile when offline.
+      // Signed-out users never get here (middleware + app shell redirect them).
       try {
-        const res = await fetch("/api/profile");
-        if (res.status === 401) {
-          router.push("/login");
+        const loaded = await loadFinancialProfile();
+        if (!loaded) {
+          router.push("/onboarding");
           return;
         }
-        if (res.ok) {
-          const data = await res.json();
-          if (!data?.profile) {
-            router.push("/onboarding");
-            return;
-          }
-          if (isMounted) {
-            setLoadedProfile({
-              monthlyIncome: data.profile.monthlyIncome,
-              currentSavings: data.profile.currentSavings,
-              monthlyFixedExpenses: data.profile.monthlyFixedExpenses,
-            });
-          }
+        if (isMounted) {
+          setLoadedProfile({
+            monthlyIncome: loaded.monthlyIncome,
+            currentSavings: loaded.savings,
+            monthlyFixedExpenses: loaded.fixedExpenses,
+          });
         }
       } catch (err) {
         console.warn("Profile fetch error:", err);
