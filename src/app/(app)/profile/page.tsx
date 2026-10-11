@@ -11,6 +11,7 @@ import {
   Shield,
   Bot,
   Save,
+  Trash2,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuthContext } from "@/components/layout/auth-provider";
@@ -93,6 +94,23 @@ export default function ProfilePage() {
     if (confirm("Apakah lo yakin ingin keluar dari akun ini?")) {
       await logout();
       router.push("/login");
+    }
+  };
+
+  const handleResetLocalData = async () => {
+    if (
+      confirm(
+        "Peringatan: Ini akan menghapus semua data transaksi lokal, wishlist, nickname, dan cache browser. Lanjutkan?"
+      )
+    ) {
+      if (typeof window !== "undefined") {
+        localStorage.clear();
+        sessionStorage.clear();
+        indexedDB.deleteDatabase("finoch_db");
+        indexedDB.deleteDatabase("voicash_db");
+      }
+      await logout().catch(() => {});
+      window.location.href = "/onboarding";
     }
   };
 
@@ -206,8 +224,17 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Logout Action */}
-        <div className="pt-2">
+        {/* Reset Data & Logout Actions */}
+        <div className="pt-2 space-y-3">
+          <button
+            type="button"
+            onClick={handleResetLocalData}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl border border-amber-500/30 text-amber-600 dark:text-amber-400 hover:bg-amber-500/10 font-semibold text-body transition-colors"
+          >
+            <Trash2 className="w-5 h-5" />
+            <span>Reset Semua Data Browser (Mulai dari Nol)</span>
+          </button>
+
           <button
             type="button"
             onClick={handleLogout}
