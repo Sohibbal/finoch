@@ -1,0 +1,454 @@
+[
+  {
+    "file": "dashboard-mobile.png",
+    "url": "/dashboard",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1158
+  },
+  {
+    "file": "wallets-mobile.png",
+    "url": "/wallets",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 893
+  },
+  {
+    "file": "budget-mobile.png",
+    "url": "/budget",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1793
+  },
+  {
+    "file": "bills-mobile.png",
+    "url": "/bills",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1044
+  },
+  {
+    "file": "debts-mobile.png",
+    "url": "/debts",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 575
+  },
+  {
+    "file": "ukt-savings-mobile.png",
+    "url": "/ukt-savings",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1425
+  },
+  {
+    "file": "wishlist-mobile.png",
+    "url": "/wishlist",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 863
+  },
+  {
+    "file": "split-bill-mobile.png",
+    "url": "/split-bill",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1031
+  },
+  {
+    "file": "meal-calc-mobile.png",
+    "url": "/meal-calc",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1501
+  },
+  {
+    "file": "streak-mobile.png",
+    "url": "/streak",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 669
+  },
+  {
+    "file": "audit-mobile.png",
+    "url": "/audit",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1679
+  },
+  {
+    "file": "reports-mobile.png",
+    "url": "/reports",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 2163
+  },
+  {
+    "file": "insights-mobile.png",
+    "url": "/insights",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1762
+  },
+  {
+    "file": "simulator-mobile.png",
+    "url": "/simulator",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1100
+  },
+  {
+    "file": "goals-mobile.png",
+    "url": "/goals",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 481
+  },
+  {
+    "file": "copilot-mobile.png",
+    "url": "/copilot",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 587
+  },
+  {
+    "file": "profile-mobile.png",
+    "url": "/profile",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 953
+  },
+  {
+    "file": "landing-mobile.png",
+    "url": "/",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 2810
+  },
+  {
+    "file": "dashboard-desktop.png",
+    "url": "/dashboard",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1164
+  },
+  {
+    "file": "wallets-desktop.png",
+    "url": "/wallets",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 893
+  },
+  {
+    "file": "budget-desktop.png",
+    "url": "/budget",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1793
+  },
+  {
+    "file": "bills-desktop.png",
+    "url": "/bills",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1044
+  },
+  {
+    "file": "debts-desktop.png",
+    "url": "/debts",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 575
+  },
+  {
+    "file": "ukt-savings-desktop.png",
+    "url": "/ukt-savings",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1425
+  },
+  {
+    "file": "wishlist-desktop.png",
+    "url": "/wishlist",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 863
+  },
+  {
+    "file": "split-bill-desktop.png",
+    "url": "/split-bill",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1031
+  },
+  {
+    "file": "meal-calc-desktop.png",
+    "url": "/meal-calc",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1501
+  },
+  {
+    "file": "streak-desktop.png",
+    "url": "/streak",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 720
+  },
+  {
+    "file": "audit-desktop.png",
+    "url": "/audit",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1679
+  },
+  {
+    "file": "reports-desktop.png",
+    "url": "/reports",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 2416
+  },
+  {
+    "file": "insights-desktop.png",
+    "url": "/insights",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1762
+  },
+  {
+    "file": "simulator-desktop.png",
+    "url": "/simulator",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1100
+  },
+  {
+    "file": "goals-desktop.png",
+    "url": "/goals",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 481
+  },
+  {
+    "file": "copilot-desktop.png",
+    "url": "/copilot",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 587
+  },
+  {
+    "file": "profile-desktop.png",
+    "url": "/profile",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 953
+  },
+  {
+    "file": "landing-desktop.png",
+    "url": "/",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 2810
+  },
+  {
+    "file": "onboarding-mobile.png",
+    "url": "/onboarding",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 462
+  },
+  {
+    "file": "onboarding-desktop.png",
+    "url": "/onboarding",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 462
+  },
+  {
+    "file": "(profile POST)",
+    "status": 200
+  },
+  {
+    "file": "dashboard-empty-mobile.png",
+    "url": "/dashboard",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 368
+  },
+  {
+    "file": "wallets-empty-mobile.png",
+    "url": "/wallets",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 277
+  },
+  {
+    "file": "budget-empty-mobile.png",
+    "url": "/budget",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1758
+  },
+  {
+    "file": "bills-empty-mobile.png",
+    "url": "/bills",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 483
+  },
+  {
+    "file": "debts-empty-mobile.png",
+    "url": "/debts",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 325
+  },
+  {
+    "file": "goals-empty-mobile.png",
+    "url": "/goals",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 262
+  },
+  {
+    "file": "wishlist-empty-mobile.png",
+    "url": "/wishlist",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 401
+  },
+  {
+    "file": "ukt-savings-empty-mobile.png",
+    "url": "/ukt-savings",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 156
+  },
+  {
+    "file": "dashboard-empty-desktop.png",
+    "url": "/dashboard",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 374
+  },
+  {
+    "file": "wallets-empty-desktop.png",
+    "url": "/wallets",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 277
+  },
+  {
+    "file": "budget-empty-desktop.png",
+    "url": "/budget",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 1758
+  },
+  {
+    "file": "bills-empty-desktop.png",
+    "url": "/bills",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 483
+  },
+  {
+    "file": "debts-empty-desktop.png",
+    "url": "/debts",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 325
+  },
+  {
+    "file": "goals-empty-desktop.png",
+    "url": "/goals",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 262
+  },
+  {
+    "file": "wishlist-empty-desktop.png",
+    "url": "/wishlist",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 401
+  },
+  {
+    "file": "ukt-savings-empty-desktop.png",
+    "url": "/ukt-savings",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 156
+  },
+  {
+    "file": "login-mobile.png",
+    "url": "/login",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 265
+  },
+  {
+    "file": "login-desktop.png",
+    "url": "/login",
+    "busy": false,
+    "loggedOut": false,
+    "overflow": false,
+    "textLen": 265
+  }
+]
