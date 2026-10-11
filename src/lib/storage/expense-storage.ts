@@ -3,6 +3,7 @@ import { syncQueue } from "./sync-queue";
 import { GUEST_SCOPE, getDataScope } from "./local-storage";
 import { getWallets } from "./wallet-storage";
 import { getDefaultWalletId } from "../financial/wallet-engine";
+import { localDateKey } from "../date";
 import type { Expense, ExpenseCategory } from "../types/expense";
 
 export interface CreateExpenseParams {
@@ -13,6 +14,22 @@ export interface CreateExpenseParams {
   walletId?: string | null;
   userId?: string;
   createdAt?: string;
+}
+
+/** What the record sheet can change; `date` is a local YYYY-MM-DD. */
+export interface ExpenseEdit {
+  itemName?: string;
+  amount?: number;
+  category?: ExpenseCategory;
+  walletId?: string | null;
+  date?: string;
+}
+
+/** The same local clock time on another local day. */
+function onDay(iso: string, day: string): string {
+  const d = new Date(iso);
+  const [y, m, dd] = day.split("-").map(Number);
+  return new Date(y, m - 1, dd, d.getHours(), d.getMinutes(), d.getSeconds()).toISOString();
 }
 
 export class ExpenseStorage {
@@ -49,13 +66,14 @@ export class ExpenseStorage {
   }
 
   // Defaults to the current storage scope so a shared device never lists another user's rows.
-  async getExpenses(userId: string = getDataScope()): Promise<Expense[]> {
+  // includeDeleted: soft-deleted rows too, so a merge with the server list can hide their copy until sync.
+  async getExpenses(userId: string = getDataScope(), { includeDeleted = false } = {}): Promise<Expense[]> {
     const db = await getDatabase();
     const all = await db.getAllFromIndex("expenses", "by-user", userId);
 
     // Filter out soft-deleted items and sort newest first
     return all
-      .filter(item => !item.isDeleted)
+      .filter(item => includeDeleted || !item.isDeleted)
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
@@ -68,7 +86,7 @@ export class ExpenseStorage {
     return undefined;
   }
 
-  async updateExpense(id: string, updates: Partial<Pick<Expense, "itemName" | "amount" | "category" | "syncStatus">>): Promise<Expense | null> {
+  async updateExpense(id: string, updates: Partial<Pick<Expense, "itemName" | "amount" | "category" | "walletId" | "syncStatus">>): Promise<Expense | null> {
     const db = await getDatabase();
     const existing = await db.get("expenses", id);
     if (!existing) return null;
@@ -104,9 +122,38 @@ export class ExpenseStorage {
     };
 
     await db.put("expenses", deleted);
+    // The delete supersedes everything still queued for this expense: an unsynced create never uploads.
+    // The delete itself stays queued in case that create is already in flight (unknown ids are a no-op server-side).
+    await syncQueue.removeExpenseItems(id);
     await syncQueue.enqueue("delete", deleted);
 
     return true;
+  }
+
+  /** Undo of a save: deletes exactly these expenses. */
+  async deleteExpenses(ids: string[]): Promise<void> {
+    for (const id of ids) await this.deleteExpense(id);
+  }
+
+  /**
+   * The record sheet's save. A new day re-prints the record (delete + create) because the sync
+   * update never carries createdAt. Null when this device doesn't hold the record.
+   */
+  async editExpense(id: string, { date, ...updates }: ExpenseEdit): Promise<Expense | null> {
+    const existing = await this.getExpense(id);
+    if (!existing) return null;
+    if (date && date !== localDateKey(new Date(existing.createdAt))) {
+      await this.deleteExpense(id);
+      return this.saveExpense({
+        itemName: updates.itemName ?? existing.itemName,
+        amount: updates.amount ?? existing.amount,
+        category: updates.category ?? existing.category,
+        walletId: updates.walletId !== undefined ? updates.walletId : existing.walletId ?? null,
+        userId: existing.userId,
+        createdAt: onDay(existing.createdAt, date),
+      });
+    }
+    return this.updateExpense(id, updates);
   }
 
   async claimGuestExpenses(newUserId: string): Promise<number> {

@@ -25,6 +25,12 @@ const tx = (date: string, amount: number, category = "Food & Drinks", spendingTy
 });
 
 describe("mergeExpenses", () => {
+  it("hides a server row once this device deleted it (undo, record sheet) until sync catches up", () => {
+    const server = [row("a", "2026-10-01T10:00:00Z"), row("b", "2026-10-01T09:00:00Z")];
+    const local = [{ ...row("a", "2026-10-01T10:05:00Z"), isDeleted: true }];
+    expect(mergeExpenses(server, local).map((e) => e.id)).toEqual(["b"]);
+  });
+
   it("keeps unsynced local expenses next to server ones", () => {
     const merged = mergeExpenses([row("a", "2026-10-01T10:00:00Z")], [row("b", "2026-10-02T10:00:00Z")]);
     expect(merged.map((e) => e.id)).toEqual(["b", "a"]);

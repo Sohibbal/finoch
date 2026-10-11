@@ -67,6 +67,12 @@ export class SyncQueueManager {
     }
   }
 
+  async removeExpenseItems(expenseId: string): Promise<void> {
+    const db = await getDatabase();
+    const ids = (await db.getAll("sync_queue")).filter((item) => item.expenseId === expenseId).map((item) => item.id);
+    if (ids.length > 0) await this.removeItems(ids);
+  }
+
   async clearQueue(): Promise<void> {
     const db = await getDatabase();
     await db.clear("sync_queue");
