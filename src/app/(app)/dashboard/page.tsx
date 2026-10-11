@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Camera, PenLine } from "lucide-react";
 import { UnifiedConfirmationModal } from "@/components/transaction/unified-confirmation-modal";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
 import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
+import { RecordSheet, type RecordData } from "@/components/expense/record-sheet";
 import { OPEN_VOICE_EVENT } from "@/components/layout/app-shell";
 import { mergeExpenses, toTransaction, currentMonthTransactions, dailyJatah } from "@/components/dashboard/dashboard-data";
 import { JatahNote } from "@/components/dashboard/jatah-note";
@@ -20,6 +20,7 @@ import { getWallets } from "@/lib/storage/wallet-storage";
 import { getBills } from "@/lib/storage/bill-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
 import type { TransactionCandidate } from "@/types/financial-types";
+import type { Expense } from "@/lib/types/expense";
 import type { RecurringBill } from "@/types/bill-types";
 import { PageHeader } from "@/components/layout/page-header";
 import { isDemoMode } from "@/lib/storage/local-storage";
@@ -37,13 +38,14 @@ const RECENT_TX_LIMIT = 8;
 // Used only when the profile can't be fetched (offline): never show made-up numbers.
 const EMPTY_PROFILE: FinancialProfileSummary = { monthlyIncome: 0, currentSavings: 0, monthlyFixedExpenses: 0 };
 
-/** A transaction plus what its stub prints: clock time and whether the server has it yet. */
-type DashTx = TransactionCandidate & { at?: number; unsynced?: boolean };
+/** A transaction plus what its stub prints (clock time, whether the server has it yet) and its wallet for the record sheet. */
+type DashTx = TransactionCandidate & { at?: number; unsynced?: boolean; walletId?: string | null };
 
 const clock = (d: Date) => `${String(d.getHours()).padStart(2, "0")}.${String(d.getMinutes()).padStart(2, "0")}`;
 
-const SECONDARY_ACTION =
-  "inline-flex items-center gap-2 min-h-11 px-4 rounded-full border border-ink/30 text-ink text-body font-semibold hover:bg-ink/5 transition-colors";
+// Quiet alternatives to Catat: links under the note, never buttons that compete with the seal.
+const QUIET_LINK =
+  "inline-flex items-center min-h-11 font-semibold text-ink underline underline-offset-4 decoration-ink/40 hover:decoration-ink";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -51,6 +53,12 @@ export default function DashboardPage() {
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [currentCandidate, setCurrentCandidate] = useState<TransactionCandidate | null>(null);
+  const [openRecord, setOpenRecord] = useState<RecordData | null>(null);
+  // Stable: the paper dialogs re-focus themselves whenever onClose changes.
+  const closeVoice = useCallback(() => setIsVoiceOpen(false), []);
+  const closeScanner = useCallback(() => setIsScannerOpen(false), []);
+  const closeConfirm = useCallback(() => setIsConfirmModalOpen(false), []);
+  const closeRecord = useCallback(() => setOpenRecord(null), []);
   const [isProfileChecking, setIsProfileChecking] = useState(true);
 
   const [loadedProfile, setLoadedProfile] = useState<FinancialProfileSummary | null>(null);
@@ -70,7 +78,8 @@ export default function DashboardPage() {
         : fetch("/api/expenses")
             .then(async (res) => (res.ok ? (await res.json()).expenses : []))
             .catch(() => []),
-      expenseStorage.getExpenses().catch((err) => {
+      // Deleted rows too, so a delete not synced yet hides the server's copy (see mergeExpenses).
+      expenseStorage.getExpenses(undefined, { includeDeleted: true }).catch((err) => {
         console.warn("Could not load local expenses:", err);
         return [];
       }),
@@ -86,6 +95,7 @@ export default function DashboardPage() {
       merged.map((e) => ({
         ...toTransaction(e, e.source),
         paymentMethod: (e.walletId && walletNames.get(e.walletId)) || undefined,
+        walletId: e.walletId,
         at: parseDate(e.createdAt)?.getTime(),
         unsynced: !demo && (e.syncStatus === "pending" || e.syncStatus === "failed"),
       }))
@@ -212,31 +222,18 @@ export default function DashboardPage() {
     setIsConfirmModalOpen(true);
   };
 
-  const handleConfirmTransaction = async (candidate: TransactionCandidate, walletId?: string) => {
-    const newTx: DashTx = {
-      ...candidate,
-      id: candidate.id || `tx-${Date.now()}`,
-      at: Date.now(),
-      unsynced: true,
-    };
-    setTransactions((prev) => [newTx, ...prev]);
-    setIsConfirmModalOpen(false);
-
-    try {
-      await expenseStorage.saveExpense({
-        itemName: candidate.merchant || candidate.description || "Pengeluaran",
-        amount: candidate.amount,
-        category: candidate.category || "Other",
-        walletId,
-        createdAt: candidate.date
-          ? new Date(candidate.date).toISOString()
-          : new Date().toISOString(),
-      });
-      syncManager.triggerSync();
-      await loadTransactions();
-    } catch (err) {
-      console.warn("Could not persist transaction:", err);
-    }
+  // Saves, re-prints the jatah, then hands the saved row back so the modal prints its receipt + Batalkan.
+  const handleConfirmTransaction = async (candidate: TransactionCandidate, walletId?: string): Promise<Expense[]> => {
+    const saved = await expenseStorage.saveExpense({
+      itemName: candidate.merchant || candidate.description || "Pengeluaran",
+      amount: candidate.amount,
+      category: candidate.category || "Other",
+      walletId,
+      createdAt: candidate.date ? new Date(candidate.date).toISOString() : new Date().toISOString(),
+    });
+    syncManager.triggerSync();
+    await loadTransactions();
+    return [saved];
   };
 
   return (
@@ -266,16 +263,16 @@ export default function DashboardPage() {
               turn={transactions.length * 7}
               onCatat={() => setIsVoiceOpen(true)}
             />
-            <div className="flex flex-wrap gap-2">
-              <button type="button" onClick={() => setIsScannerOpen(true)} className={SECONDARY_ACTION}>
-                <Camera className="w-4 h-4" aria-hidden="true" />
-                Scan struk
+            <p className="text-body text-ink-soft flex flex-wrap items-center gap-x-2">
+              Bisa juga
+              <button type="button" onClick={() => setIsScannerOpen(true)} className={QUIET_LINK}>
+                scan struk
               </button>
-              <button type="button" onClick={handleOpenManualEntry} className={SECONDARY_ACTION}>
-                <PenLine className="w-4 h-4" aria-hidden="true" />
-                Ketik manual
+              atau
+              <button type="button" onClick={handleOpenManualEntry} className={QUIET_LINK}>
+                ketik manual
               </button>
-            </div>
+            </p>
             <div className="hidden lg:block">
               <MonthLedger monthTransactions={monthTransactions} />
             </div>
@@ -303,13 +300,29 @@ export default function DashboardPage() {
             ) : (
               <>
                 <ol className="space-y-2">
-                  {recent.map((stub) => (
-                    <Stub
-                      key={stub.id}
-                      data={stub}
-                      className={seenIds.current && !seenIds.current.has(stub.id) ? "animate-stub-in" : ""}
-                    />
-                  ))}
+                  {recent.map((stub, i) => {
+                    const t = transactions[i];
+                    return (
+                      <Stub
+                        key={stub.id}
+                        data={stub}
+                        onOpen={
+                          t.id
+                            ? () =>
+                                setOpenRecord({
+                                  id: stub.id,
+                                  itemName: stub.item,
+                                  amount: t.amount,
+                                  category: t.category,
+                                  walletId: t.walletId,
+                                  date: t.date || todayDateStr,
+                                })
+                            : undefined
+                        }
+                        className={seenIds.current && !seenIds.current.has(stub.id) ? "animate-stub-in" : ""}
+                      />
+                    );
+                  })}
                 </ol>
                 <Link
                   href="/reports"
@@ -333,17 +346,17 @@ export default function DashboardPage() {
       {/* Voice Expense Sheet */}
       <VoiceExpenseSheet
         isOpen={isVoiceOpen}
-        onClose={() => setIsVoiceOpen(false)}
-        onExpenseSaved={() => {
-          setIsVoiceOpen(false);
-          loadTransactions();
-        }}
+        onClose={closeVoice}
+        onExpenseSaved={loadTransactions}
+        sisaHariIni={loadedProfile ? jatah.sisaHariIni : undefined}
       />
+
+      {openRecord && <RecordSheet key={openRecord.id} record={openRecord} onClose={closeRecord} onChanged={loadTransactions} />}
 
       {/* Hybrid Receipt Scanner Modal */}
       <ReceiptScannerModal
         isOpen={isScannerOpen}
-        onClose={() => setIsScannerOpen(false)}
+        onClose={closeScanner}
         onScanSuccess={handleOcrCandidateReceived}
       />
 
@@ -351,8 +364,10 @@ export default function DashboardPage() {
       <UnifiedConfirmationModal
         isOpen={isConfirmModalOpen}
         candidate={currentCandidate}
-        onClose={() => setIsConfirmModalOpen(false)}
+        onClose={closeConfirm}
         onConfirm={handleConfirmTransaction}
+        onUndone={loadTransactions}
+        sisaHariIni={loadedProfile ? jatah.sisaHariIni : undefined}
       />
     </>
   );

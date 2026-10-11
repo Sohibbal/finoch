@@ -11,6 +11,7 @@ interface ExpenseRow {
   walletId?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  isDeleted?: boolean;
 }
 
 export type Bucket = "food" | "transport" | "bills" | "shopping" | "other";
@@ -41,14 +42,14 @@ const BUCKETS: Record<string, Bucket> = {
 const time = (iso?: string) => parseDate(iso)?.getTime() ?? 0;
 const monthPrefix = (d: Date) => `${localDateKey(d).slice(0, 7)}-`;
 
-/** Server rows plus local rows the server hasn't seen yet; for the same id the newer updatedAt wins. */
+/** Server rows plus local rows the server hasn't seen yet; for the same id the newer updatedAt wins, and a winning delete hides the row. */
 export function mergeExpenses<T extends ExpenseRow>(server: T[], local: T[]): T[] {
   const byId = new Map<string, T>();
   for (const e of [...server, ...local]) {
     const prev = byId.get(e.id);
     if (!prev || time(e.updatedAt) > time(prev.updatedAt)) byId.set(e.id, e);
   }
-  return [...byId.values()].sort((a, b) => time(b.createdAt) - time(a.createdAt));
+  return [...byId.values()].filter((e) => !e.isDeleted).sort((a, b) => time(b.createdAt) - time(a.createdAt));
 }
 
 export function toTransaction(e: ExpenseRow, source: TransactionSource): TransactionCandidate {
