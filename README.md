@@ -6,7 +6,7 @@
 
   <p>
     <a href="https://github.com/Sohibbal/finoch/actions"><img src="https://img.shields.io/badge/Build-Passing-10B981?style=for-the-badge&logo=githubactions&logoColor=white" alt="Build Status" /></a>
-    <a href="https://vitest.dev/"><img src="https://img.shields.io/badge/Vitest-210%20Passed-2563EB?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest 210 Passed" /></a>
+    <a href="https://vitest.dev/"><img src="https://img.shields.io/badge/Vitest-539%20Passed-2563EB?style=for-the-badge&logo=vitest&logoColor=white" alt="Vitest 539 Passed" /></a>
     <a href="https://nextjs.org/"><img src="https://img.shields.io/badge/Next.js%2015-App%20Router-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" alt="Next.js 15" /></a>
     <a href="https://react.dev/"><img src="https://img.shields.io/badge/React%2019-Strict%20Mode-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19" /></a>
     <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript%205.8-Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5.8" /></a>
@@ -19,7 +19,7 @@
     <a href="#-arsitektur-sistem--diagram">Arsitektur</a> •
     <a href="#-teknologi-dan-stack">Tech Stack</a> •
     <a href="#-panduan-instalasi--menjalankan">Instalasi</a> •
-    <a href="#-cakupan-pengujian-210-tests">Pengujian</a> •
+    <a href="#-cakupan-pengujian-539-tests">Pengujian</a> •
     <a href="#-privasi--keamanan">Privasi</a>
   </p>
 
@@ -65,6 +65,7 @@ Foto atau unggah struk belanja dari Indomaret, Alfamart, minimarket kampus, atau
 ### 3. 💳 Multi-Account Dompet Mahasiswa (Student Wallets)
 Kelola alokasi saldo fisik dan digital secara terpisah:
 - **Kategori Akun**: Uang Tunai (Cash di Dompet), Rekening Bank (BCA, Mandiri, BRI, Bank Jago), dan E-Wallet (GoPay, ShopeePay, DANA, OVO).
+- **Saldo Terhubung ke Pengeluaran**: Setiap pengeluaran (suara, struk, manual) dibebankan ke dompet default atau dompet pilihan, sehingga saldo otomatis berkurang. Saldo dihitung dari saldo awal ± transfer − pengeluaran, jadi edit/hapus transaksi langsung terkoreksi.
 - **Transfer Antar-Akun**: Catat mutasi pemindahan dana (misal: tarik tunai ATM atau *top-up* e-wallet) dengan perhitungan saldo riil otomatis.
 - **Tampilan Fleksibel**: Tampilan kartu ringkas untuk mobile dan *Bento Grid 3-kolom* untuk layar desktop.
 
@@ -85,7 +86,7 @@ Perisai perlindungan pengeluaran wajib bulanan agar uang sewa kamar tidak terpak
 ### 6. 🤝 Buku Kasbon & Split Bill Resto (Kalkulator Talangan)
 Solusi tuntas masalah patungan makan bareng tanpa rasa canggung:
 - **Kalkulator Resto Proporsional**: Masukkan harga makanan masing-masing teman, diskon promo, pajak restoran (PB1 10%), dan *service charge*.
-- **Pencatat Piutang Otomatis**: Transaksi talangan langsung dicatat ke buku piutang (*Receivables Ledger*).
+- **Pencatat Piutang Otomatis**: Bagian teman dari split bill langsung masuk ke **Buku Kasbon** sebagai piutang (satu buku utang-piutang, bukan dua).
 - **Generator Pesan WhatsApp Instan**: Buat draf pesan rincian tagihan yang rapi, transparan, dan sopan dalam sekali klik untuk dikirim ke grup WhatsApp.
 
 ### 7. ⏳ Wishlist Tunda (Anti-Impulsive 7-Day Cooling Off)
@@ -193,18 +194,19 @@ flowchart TD
 
 ```text
 finoch/
-├── .github/                  # Konfigurasi GitHub Actions & Workflows
 ├── prisma/                   # Skema basis data Prisma & migrasi PostgreSQL
-│   └── schema.prisma         # Model User, Expense, Wallet, Debt, SinkingFund
+│   ├── schema.prisma         # Model User, Expense, FinancialProfile, UserDocument, dll.
+│   └── migrations/           # Migrasi SQL (jalankan `prisma migrate deploy`)
 ├── public/                   # Aset publik, favicon, manifest PWA, dan ikon
 │   ├── finoch-logo.svg       # Master SVG Logo resmi Finoch
 │   ├── finoch-symbol.svg     # Master SVG Symbol resmi
-│   ├── manifest.json         # Konfigurasi instalasi PWA
 │   └── sw.js                 # Service worker cache offline
 ├── logo-design/              # Spesifikasi vektor brand identity & tipografi
-├── scripts/                  # Skrip utilitas build (copy WebAssembly, dll)
+├── scripts/                  # Skrip utilitas (copy WebAssembly, dev:lan HTTPS untuk tes di HP)
 ├── src/
 │   ├── app/                  # Rute Halaman Next.js App Router
+│   │   ├── (app)/            # Halaman aplikasi (wajib login) dengan satu layout & AppShell bersama
+│   │   ├── api/              # Route handler: auth, expenses, sync (+ sync/documents), copilot, OCR
 │   │   ├── audit/            # Halaman Audit Bocor Halus
 │   │   ├── bills/            # Halaman Tagihan Kost Shield
 │   │   ├── budget/           # Halaman Amplop Pos Anggaran
@@ -222,6 +224,7 @@ finoch/
 │   │   ├── ukt-savings/      # Halaman Tabungan Sinking Fund UKT
 │   │   ├── wallets/          # Halaman Dompet Multi-Akun
 │   │   ├── wishlist/         # Halaman Wishlist Tunda (Anti-Impulsif)
+│   │   ├── manifest.ts       # Web app manifest PWA (dihasilkan Next.js)
 │   │   ├── layout.tsx        # Layout root aplikasi (PWA provider & brand)
 │   │   └── page.tsx          # Landing page publik interaktif
 │   ├── components/           # Komponen UI Modular
@@ -240,11 +243,13 @@ finoch/
 │   │   └── dashboard/        # Runway Card, Survival Mode Card, Bento Stats
 │   ├── lib/                  # Logika Bisnis & Mesin Perhitungan
 │   │   ├── financial/        # Engine Perhitungan Matematika Finansial
-│   │   ├── storage/          # Layer Akses Penyimpanan IndexedDB
+│   │   ├── storage/          # IndexedDB (pengeluaran) & localStorage per-user (fitur lain)
+│   │   ├── sync/             # Sinkronisasi pengeluaran & dokumen fitur ke server
 │   │   ├── nlp/              # Indonesian Slang Parser & Number Normalizer
 │   │   └── ocr/              # Tesseract Struk Parser
 │   └── types/                # Kontrak Tipe Data TypeScript
-└── tests/                    # 65 File Test Suite (210 Vitest Unit & UI Tests)
+├── src/middleware.ts         # Proteksi rute aplikasi (verifikasi JWT)
+└── tests/                    # 94 File Test Suite (539 Vitest Unit, API & UI Tests)
 ```
 
 ---
@@ -253,8 +258,8 @@ finoch/
 
 ### Prasyarat
 - **Node.js**: Versi `18.18.0` atau yang lebih baru (disarankan Node.js 20 LTS atau 22).
-- **npm** atau **pnpm** / **yarn**.
-- **Docker** *(opsional, untuk menjalankan PostgreSQL lokal secara instan)*.
+- **pnpm** (lockfile proyek adalah `pnpm-lock.yaml`).
+- **PostgreSQL** lokal, atau **Docker** untuk menjalankannya secara instan.
 
 ### 1. Kloning Repositori
 ```bash
@@ -264,7 +269,7 @@ cd finoch
 
 ### 2. Instal Dependensi
 ```bash
-npm install
+pnpm install
 ```
 > *Catatan:* Perintah `postinstall` akan secara otomatis menjalankan skrip `copy-wasm.mjs` untuk menyalin modul WebAssembly Whisper ke direktori `public/wasm/`.
 
@@ -278,7 +283,8 @@ Sesuaikan variabel di dalam `.env`:
 # PostgreSQL Database URL
 DATABASE_URL="postgresql://postgres:postgrespassword@localhost:5432/voicash?schema=public"
 
-# Secret key untuk JWT Session (minimal 32 karakter)
+# Secret key untuk JWT Session — WAJIB, minimal 32 karakter (server menolak jalan tanpa ini)
+# Buat acak, misalnya: openssl rand -hex 32
 JWT_SECRET="ganti-dengan-kunci-rahasia-jwt-kamu-yang-panjang-dan-aman"
 
 # Environment
@@ -293,44 +299,58 @@ Jika ingin menggunakan basis data lokal via Docker:
 ```bash
 docker-compose up -d
 ```
-Lalu terapkan skema Prisma ke basis data:
+Lalu terapkan migrasi ke basis data:
 ```bash
-npx prisma db push
+npx prisma migrate deploy
 ```
+> *Basis data lama yang dulu dibuat dengan `prisma db push`:* tandai dulu migrasi baseline sebagai sudah diterapkan, lalu deploy:
+> `npx prisma migrate resolve --applied 20261011000000_baseline && npx prisma migrate deploy`
 
 ### 5. Jalankan Server Pengembangan
 ```bash
-npm run dev
+pnpm dev
 ```
-Buka peramban di [http://localhost:3000](http://localhost:3000). Aplikasi siap digunakan!
+Buka peramban di [http://localhost:3000](http://localhost:3000). Semua halaman aplikasi wajib login; daftar akun, isi onboarding, lalu mulai mencatat.
+
+### 6. Tes Langsung di HP (Wi-Fi yang sama)
+```bash
+pnpm dev:lan
+```
+Terminal menampilkan alamat seperti `https://192.168.x.x:3100`. Buka di HP, lalu pilih **Lanjutan → Lanjutkan** pada peringatan sertifikat (sertifikat self-signed dibuat otomatis di `.certs/`). HTTPS diperlukan karena mikrofon & kamera (Bicara, Scan Struk) hanya aktif di origin aman.
+
+### 7. Mode Demo (untuk presentasi)
+Aktifkan **Mode Demo (data contoh)** di halaman **Profil**. Aplikasi terisi dompet, kasbon, tagihan, UKT, wishlist, target, dan ±70 pengeluaran contoh selama 2 bulan. Data demo disimpan terpisah: data asli tetap aman, tidak tercampur, dan data demo tidak pernah disinkron ke server. Tombol **Reset data demo** mengembalikan data contoh ke awal.
 
 ---
 
-## 🧪 Cakupan Pengujian (210 Tests)
+## 🧪 Cakupan Pengujian (539 Tests)
 
 Finoch mengutamakan keandalan matematika finansial dan integritas data pengguna. Seluruh modul diuji secara ketat menggunakan **Vitest** dengan mock IndexedDB (`fake-indexeddb`):
 
 ```bash
 # Menjalankan seluruh test suite sekali jalan
-npm test
+pnpm test
 
 # Menjalankan test dalam mode watch interaktif
-npm run test:watch
+pnpm test:watch
+
+# Pemeriksaan tipe & lint
+pnpm typecheck
+pnpm lint
 ```
 
 ### Rangkuman Distribusi Pengujian
 ```text
-Test Files  65 passed (65)
-Tests       210 passed (210)
+Test Files  94 passed (94)
+Tests       539 passed (539)
 Status      100% Passed
 ```
 
-- **Financial Engines (13 test files)**: Verifikasi kalkulasi matematika alokasi dompet, batas amplop, simulasi bunga/beban talangan, proyeksi tabungan UKT, perbandingan masak vs warteg, estimasi runway, dan alokasi mode survival.
-- **Storage Layer (8 test files)**: Verifikasi operasi CRUD lokal, integritas state IndexedDB, dan logika settlement utang.
-- **NLP & Audio Processing (9 test files)**: Pengujian akurasi parsing frasa gaul Indonesia, pembagian kalimat transaksi majemuk, normalisasi angka, dan ekstraksi struk belanja.
-- **UI & Page Components (28 test files)**: Pengujian render komponen React, responsivitas navigasi sidebar, breadcrumbs dinamis, dan modal interaktif.
-- **PWA & Manifest (2 test files)**: Verifikasi konfigurasi web app manifest, cache offline service worker, dan launcher icon maskable.
-- **API & Security (5 test files)**: Verifikasi validasi stateless JWT, proteksi route handlers, dan algoritma rekonsiliasi sinkronisasi.
+- **Financial Engines**: Kalkulasi saldo dompet turunan, amplop, split bill (pembagian pas ke total), tagihan, UKT, runway, streak, audit bocor halus — termasuk tanggal lokal WIB.
+- **Storage & Sync**: Isolasi data per user di perangkat bersama, mode demo terpisah, antrean sync dengan batas retry, sinkronisasi dokumen dua perangkat (last-write-wins, perangkat baru tidak menimpa data server).
+- **NLP & OCR**: Angka bahasa Indonesia ("seratus lima puluh ribu", "dua setengah juta", "goceng"), pemisah transaksi majemuk, total & desimal struk.
+- **API & Security**: Middleware rute, JWT wajib, rate limit login, validasi input, guard open-redirect, OCR & LLM endpoint.
+- **UI, PWA & Hooks**: App shell bersama, dashboard, service worker (cache aman), siklus hidup mikrofon & Whisper.
 
 ---
 
@@ -356,6 +376,8 @@ Logo resmi dan panduan aset vektor lengkap tersimpan di direktori [`logo-design/
 - **Zero-Telemetry Tracking**: Finoch tidak melacak data analitik perilaku pengguna dan tidak menyematkan tracker pihak ketiga.
 - **On-Device Audio Processing**: Rekaman suara untuk pencatatan diolah di browser pengguna. Suara tidak disimpan atau diperjualbelikan.
 - **Offline First**: Catatan keuangan Anda adalah milik Anda. Aplikasi tetap dapat berfungsi penuh mencatat pengeluaran meskipun sedang tidak memiliki kuota internet.
+- **Sinkronisasi Akun**: Saat login, pengeluaran dan data fitur (dompet, kasbon, tagihan, amplop, UKT, wishlist, target) disinkron ke server milik Anda agar aman saat ganti HP. Data di satu perangkat dipisah per akun, sehingga perangkat bersama tidak membocorkan data antar pengguna.
+- **Keamanan Sesi**: Cookie sesi `httpOnly`, rute aplikasi diproteksi middleware, `JWT_SECRET` wajib, dan percobaan login dibatasi.
 
 ---
 
