@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, Lock, Mail, User, Loader2, LogOut, Sun, Moon } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { useTheme } from "@/hooks/use-theme";
 import { useAuth } from "@/hooks/use-auth";
 
 interface AuthSliderProps {
@@ -35,27 +36,7 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
   const [regError, setRegError] = useState<string | null>(null);
   const [isRegSubmitting, setIsRegSubmitting] = useState(false);
 
-  // Theme state
-  const [isDark, setIsDark] = useState(false);
-
-  useEffect(() => {
-    const isDarkTheme = document.documentElement.classList.contains("dark");
-    setIsDark(isDarkTheme);
-  }, []);
-
-  const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("voicash_theme", "dark");
-      localStorage.setItem("finra_theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("voicash_theme", "light");
-      localStorage.setItem("finra_theme", "light");
-    }
-  };
+  const { isDark, toggleTheme } = useTheme();
 
   const handleSwitchMode = (newMode: "login" | "register") => {
     setMode(newMode);

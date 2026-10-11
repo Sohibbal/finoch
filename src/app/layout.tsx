@@ -14,7 +14,7 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Finoch - Finansial Anak Kost Rapi Sekali Bicara",
   description: "Asisten finansial cerdas anak kost berbasis AI & suara (PWA, Local-first, Offline-ready, 100% Gratis untuk Seluruh Mahasiswa Indonesia).",
-  manifest: "/manifest.json",
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -55,15 +55,15 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
+                var saved;
                 try {
-                  var saved = localStorage.getItem('finoch_theme') || localStorage.getItem('voicash_theme') || localStorage.getItem('finra_theme');
-                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                  if (saved === 'dark' || (!saved && prefersDark)) {
-                    document.documentElement.classList.add('dark');
-                  } else {
-                    document.documentElement.classList.remove('dark');
+                  saved = localStorage.getItem('finoch_theme');
+                  if (saved === null) {
+                    saved = localStorage.getItem('voicash_theme') || localStorage.getItem('finra_theme');
                   }
                 } catch (e) {}
+                var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                document.documentElement.classList.toggle('dark', saved === 'dark' || (saved !== 'light' && saved !== 'dark' && prefersDark));
               })();
             `,
           }}
@@ -79,7 +79,7 @@ export default function RootLayout({
         <PwaInstallButton />
 
         {/* Client-side Service Worker registration for PWA offline shell */}
-        <script
+        {process.env.NODE_ENV === "production" && <script
           dangerouslySetInnerHTML={{
             __html: `
               if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
@@ -97,7 +97,7 @@ export default function RootLayout({
               }
             `,
           }}
-        />
+        />}
       </body>
     </html>
   );
