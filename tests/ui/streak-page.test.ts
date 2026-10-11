@@ -23,13 +23,39 @@ describe("Streak & No-Spend Challenge Components", () => {
     expect(typeof StreakPageModule.default).toBe("function");
   });
 
-  it("exports StreakBadgeCard, StreakStripMobile, and StreakCalendarDesktop", async () => {
+  it("exports StreakBadgeCard and StreakPunchCard", async () => {
     const BadgeModule = await import("@/components/streak/streak-badge-card");
-    const StripModule = await import("@/components/streak/streak-strip-mobile");
-    const CalendarModule = await import("@/components/streak/streak-calendar-desktop");
+    const PunchModule = await import("@/components/streak/streak-punch-card");
 
     expect(BadgeModule.StreakBadgeCard).toBeDefined();
-    expect(StripModule.StreakStripMobile).toBeDefined();
-    expect(CalendarModule.StreakCalendarDesktop).toBeDefined();
+    expect(PunchModule.StreakPunchCard).toBeDefined();
+  });
+});
+
+describe("punch card layout", () => {
+  const point = (date: string, dayNumber: number) => ({
+    date,
+    dayNumber,
+    dayName: "",
+    totalSpent: 0,
+    wantsSpent: 0,
+    status: "no_spend" as const,
+    transactionsCount: 0,
+    isToday: false,
+    isFuture: false,
+  });
+
+  it("puts each day under its weekday: October 2026 starts on a Thursday", async () => {
+    const { punchCardCells } = await import("@/components/streak/streak-punch-card");
+    const cells = punchCardCells([point("2026-10-01", 1), point("2026-10-02", 2)]);
+    // Min, Sen, Sel, Rab blank; the 1st lands in the Kam column.
+    expect(cells.slice(0, 4)).toEqual([null, null, null, null]);
+    expect(cells[4]?.dayNumber).toBe(1);
+  });
+
+  it("names the month from the data instead of a fixed Oktober", async () => {
+    const { punchCardMonth } = await import("@/components/streak/streak-punch-card");
+    expect(punchCardMonth([point("2026-11-01", 1)])).toBe("November 2026");
+    expect(punchCardMonth([point("2027-02-01", 1)])).toBe("Februari 2027");
   });
 });
