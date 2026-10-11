@@ -13,7 +13,6 @@ import {
   getEffectiveDueDay,
   getMonthlyBillAmount,
 } from "@/lib/storage/bill-storage";
-import { getTalanganList } from "@/lib/storage/talangan-storage";
 import { getWishlist } from "@/lib/storage/wishlist-storage";
 import { RecurringBill } from "@/types/bill-types";
 
@@ -81,12 +80,12 @@ describe("#2 deleting the last item does not resurrect demo data", () => {
 });
 
 describe("#3 corrupt JSON does not crash", () => {
-  it("bills / talangan / wishlist return [] on corrupt storage", () => {
+  it("bills / legacy talangan / wishlist return [] on corrupt storage", () => {
     mockStore["finoch_recurring_bills::guest"] = "{oops";
     mockStore["finoch_talangan_records::guest"] = "[{";
     mockStore["finoch_student_wishlist::guest"] = "nope";
     expect(getBills()).toEqual([]);
-    expect(getTalanganList()).toEqual([]);
+    expect(getDebts()).toEqual([]);
     expect(getWishlist()).toEqual([]);
   });
 });
@@ -141,18 +140,19 @@ describe("#5 envelope transfer never creates money", () => {
 
 describe("#6 wallet / debt validation", () => {
   it("transfer rejects negative admin fee and NaN amount", () => {
-    const [a, b] = getWallets();
+    const wallet = { type: "cash" as const, color: "emerald", icon: "wallet", openingBalance: 50000 };
+    const a = addWallet({ ...wallet, name: "A" });
+    const b = addWallet({ ...wallet, name: "B" });
     expect(() => transferWalletFunds(a.id, b.id, 1000, -500)).toThrow();
     expect(() => transferWalletFunds(a.id, b.id, NaN)).toThrow();
     expect(() => transferWalletFunds(a.id, b.id, 1000, NaN)).toThrow();
-    const total = getWallets().reduce((s, w) => s + w.balance, 0);
-    expect(total).toBe(120000 + 1450000 + 85000);
+    expect(readArray("finoch_student_wallet_transfers_v1")).toBeNull();
   });
 
   it("addWallet / addDebt reject invalid amounts", () => {
     const wallet = { name: "W", type: "cash" as const, color: "emerald", icon: "wallet", isPrimary: false };
-    expect(() => addWallet({ ...wallet, balance: NaN })).toThrow();
-    expect(() => addWallet({ ...wallet, balance: -1 })).toThrow();
+    expect(() => addWallet({ ...wallet, openingBalance: NaN })).toThrow();
+    expect(() => addWallet({ ...wallet, openingBalance: -1 })).toThrow();
     const debt = { type: "payable" as const, personName: "A", description: "d", dueDate: "2026-12-01" };
     expect(() => addDebt({ ...debt, amount: 0 })).toThrow();
     expect(() => addDebt({ ...debt, amount: NaN })).toThrow();

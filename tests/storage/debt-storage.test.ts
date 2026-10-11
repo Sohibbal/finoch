@@ -6,6 +6,7 @@ import {
   deleteDebt,
   getDebtSummary,
 } from "@/lib/storage/debt-storage";
+import { setDemoMode } from "@/lib/storage/local-storage";
 
 describe("Student Debt Storage Engine", () => {
   let mockStore: Record<string, string> = {};
@@ -44,10 +45,46 @@ describe("Student Debt Storage Engine", () => {
     }
   });
 
-  it("loads pre-populated student default debts when empty", () => {
+  it("seeds sample debts only in demo mode", () => {
+    expect(getDebts()).toEqual([]);
+    expect(mockStore["finoch_student_debts_v1::guest"]).toBeUndefined();
+
+    setDemoMode(true);
     const list = getDebts();
     expect(list.length).toBeGreaterThanOrEqual(2);
     expect(list.some((d) => d.personName.includes("Bagas"))).toBe(true);
+  });
+
+  it("moves split-bill talangan records into receivables once", () => {
+    const talangan = [
+      { id: "talangan_1", restaurantName: "Mie Gacoan", date: "2026-10-05", friendName: "Budi", amount: 30000,
+        itemsSummary: "Mie Level 2", isPaid: false, createdAt: "2026-10-05T00:00:00.000Z" },
+      { id: "talangan_2", restaurantName: "Warteg", date: "2026-10-04", friendName: "Citra", amount: 20000,
+        itemsSummary: "", isPaid: true, paidAt: "2026-10-06T00:00:00.000Z", createdAt: "2026-10-04T00:00:00.000Z" },
+    ];
+    mockStore["finoch_student_debts_v1::guest"] = JSON.stringify([
+      { id: "debt-x", type: "payable", personName: "Ibu Kost", amount: 5000, description: "", status: "unpaid", createdAt: "" },
+    ]);
+    mockStore["finoch_talangan_records::guest"] = JSON.stringify(talangan);
+
+    const debts = getDebts();
+    expect(debts.map((d) => d.id)).toEqual(["debt-talangan_1", "debt-talangan_2", "debt-x"]);
+    expect(debts[0]).toMatchObject({ type: "receivable", personName: "Budi", amount: 30000, status: "unpaid" });
+    expect(debts[1]).toMatchObject({ status: "paid", settledAt: "2026-10-06T00:00:00.000Z" });
+    expect(mockStore["finoch_talangan_records::guest"]).toBeUndefined();
+    expect(getDebtSummary().totalReceivable).toBe(30000);
+
+    // A stale copy reappearing (e.g. an interrupted earlier run) must not duplicate entries.
+    mockStore["finoch_talangan_records::guest"] = JSON.stringify(talangan);
+    expect(getDebts().map((d) => d.id)).toEqual(["debt-talangan_1", "debt-talangan_2", "debt-x"]);
+  });
+
+  it("migrates talangan for a user with no stored debts outside demo mode", () => {
+    mockStore["finoch_talangan_records::guest"] = JSON.stringify([
+      { id: "t", restaurantName: "Kopi", date: "", friendName: "Dono", amount: 18000, itemsSummary: "Americano",
+        isPaid: false, createdAt: "" },
+    ]);
+    expect(getDebts().map((d) => d.personName)).toEqual(["Dono"]);
   });
 
   it("adds a new debt record properly", () => {
@@ -66,8 +103,7 @@ describe("Student Debt Storage Engine", () => {
   });
 
   it("toggles paid status with markDebtAsPaid", () => {
-    const list = getDebts();
-    const target = list[0];
+    const target = addDebt({ type: "receivable", personName: "Bagas", amount: 35000, description: "Fotokopi" });
 
     const updated = markDebtAsPaid(target.id);
     expect(updated?.status).toBe("paid");
