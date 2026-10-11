@@ -203,7 +203,7 @@ export default function WalletsPage() {
             <h2 id="mutasi-title" className="font-display text-head font-bold text-ink">
               Riwayat pindah saldo
             </h2>
-            <p className="text-meta text-ink-soft">{transfers.length} kali</p>
+            {transfers.length > 0 && <p className="text-meta text-ink-soft">{transfers.length} kali</p>}
           </div>
           {transfers.length === 0 ? (
             <p className="text-body text-ink-soft py-2">
