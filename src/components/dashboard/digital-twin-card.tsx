@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useState } from "react";
 import { Wallet, ArrowDownRight, ArrowUpRight, ShieldCheck, Sparkles } from "lucide-react";
 import { DigitalTwinMetrics } from "@/types/financial-types";
 
@@ -19,17 +19,18 @@ export function DigitalTwinCard({ metrics }: DigitalTwinCardProps) {
   const isSurplus = netSavings >= 0;
 
   // New Feature: Safe to Spend (Batas Aman Harian)
-  const safeToSpendDaily = useMemo(() => {
+  // Days left depend on the viewer's clock: compute after mount so SSR and hydration match.
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
+  useEffect(() => {
     const today = new Date();
     const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
-    const daysLeft = Math.max(1, daysInMonth - today.getDate() + 1);
-    
-    // Asumsikan target tabungan 20% dari income
-    const targetSavings = monthlyIncome * 0.2;
-    const availableBudget = monthlyIncome - targetSavings - monthlyExpenses;
-    
-    return Math.max(0, availableBudget / daysLeft);
-  }, [monthlyIncome, monthlyExpenses]);
+    setDaysLeft(Math.max(1, daysInMonth - today.getDate() + 1));
+  }, []);
+
+  // Asumsikan target tabungan 20% dari income
+  const targetSavings = monthlyIncome * 0.2;
+  const availableBudget = monthlyIncome - targetSavings - monthlyExpenses;
+  const safeToSpendDaily = daysLeft === null ? null : Math.max(0, availableBudget / daysLeft);
 
   return (
     <div className="group relative">
@@ -122,7 +123,7 @@ export function DigitalTwinCard({ metrics }: DigitalTwinCardProps) {
                 <ShieldCheck className="w-4 h-4 text-emerald-400" />
               </div>
               <div className="text-2xl font-black text-white tracking-tight relative z-10">
-                Rp {safeToSpendDaily.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
+                Rp {safeToSpendDaily === null ? "–" : safeToSpendDaily.toLocaleString("id-ID", { maximumFractionDigits: 0 })}
               </div>
               <div className="text-[11px] font-medium text-cream-300/60 mt-1 relative z-10">
                 Sisa hari ini untuk tetap surplus
