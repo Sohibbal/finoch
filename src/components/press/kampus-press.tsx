@@ -84,15 +84,24 @@ export function PaperDialog({ isOpen, onClose, title, subtitle, children }: Pape
   const titleId = useId();
   const sheetRef = useRef<HTMLDivElement>(null);
 
+  // Latest onClose without re-running the open effect, so a new callback identity never steals focus.
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     if (!isOpen) return;
+    // Focus moves into the sheet on open and back to whatever opened it on close.
+    const opener = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     window.addEventListener("keydown", onKey);
     sheetRef.current?.focus();
-    return () => window.removeEventListener("keydown", onKey);
-  }, [isOpen, onClose]);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      opener?.focus();
+    };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
