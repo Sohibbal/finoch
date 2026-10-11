@@ -17,8 +17,12 @@ import {
   syncExpensesToEnvelopes,
   findReallocationSuggestions,
 } from "@/lib/financial/budget-engine";
+import { monthLedger } from "@/lib/financial/month-ledger";
 import { expenseStorage } from "@/lib/storage/expense-storage";
+import { getBills } from "@/lib/storage/bill-storage";
+import { mergeExpenses, toTransaction } from "@/components/dashboard/dashboard-data";
 import { rupiah } from "@/lib/format";
+import type { RecurringBill } from "@/types/bill-types";
 
 import { BudgetAmplop } from "@/components/budget/budget-amplop";
 import { BudgetOverviewCard } from "@/components/budget/budget-overview-card";
@@ -34,14 +38,18 @@ const PRIMARY_ACTION =
 const SECONDARY_ACTION =
   "inline-flex items-center gap-2 min-h-11 px-4 rounded-full border border-ink/30 text-ink text-body font-semibold hover:bg-ink/5 transition-colors";
 
+type ExpenseRow = { id: string; itemName: string; category: string; amount: number; createdAt?: string; updatedAt?: string };
+
 export default function BudgetPage() {
   const profile = useFinancialProfile();
   const allowance = profile.monthlyIncome;
+  const profileFixed = profile.fixedExpenses ?? 0;
 
   const [rawEnvelopes, setRawEnvelopes] = useState<BudgetEnvelope[]>([]);
   const [loaded, setLoaded] = useState(false);
   const hasEnvelopes = rawEnvelopes.length > 0;
-  const [expenses, setExpenses] = useState<Array<{ category?: string; amount: number; createdAt?: string }>>([]);
+  const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
+  const [bills, setBills] = useState<RecurringBill[]>([]);
   const [transfers, setTransfers] = useState<EnvelopeTransferRecord[]>([]);
 
   // Modals state
@@ -50,47 +58,28 @@ export default function BudgetPage() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingEnvelope, setEditingEnvelope] = useState<BudgetEnvelope | null>(null);
 
-  // Load expenses and envelopes
-  // Envelopes are sized from (and rescaled to) the real allowance, so wait for the profile.
+  // Envelopes split what the month can spend after fixed costs (the ledger's spendable), so wait for the profile.
   const loadData = useCallback(async () => {
     if (!allowance) return;
-    const envs = getEnvelopes(allowance);
-    setRawEnvelopes(envs);
+    const currentBills = getBills();
+    setBills(currentBills);
+    const { spendable } = monthLedger({ monthlyIncome: allowance, profileFixedCosts: profileFixed, bills: currentBills, transactions: [] });
+    setRawEnvelopes(getEnvelopes(Math.max(0, spendable)));
     setLoaded(true);
     setTransfers(getTransferHistory());
 
-    // Load expenses from API or IndexedDB
-    try {
+    // Server rows plus local ones not synced yet: the same rows the dashboard reads.
+    const [server, local] = await Promise.all([
       // Demo mode shows only local demo rows; the server holds the real expenses.
-      const res = isDemoMode() ? null : await fetch("/api/expenses");
-      if (res?.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.expenses) && data.expenses.length > 0) {
-          setExpenses(
-            data.expenses.map((e: { category?: string; amount: number; createdAt?: string }) => ({
-              category: e.category,
-              amount: e.amount,
-              createdAt: e.createdAt,
-            }))
-          );
-          return;
-        }
-      }
-
-      const local = await expenseStorage.getExpenses();
-      if (local && local.length > 0) {
-        setExpenses(
-          local.map((e) => ({
-            category: e.category,
-            amount: e.amount,
-            createdAt: e.createdAt,
-          }))
-        );
-      }
-    } catch {
-      // ignore
-    }
-  }, [allowance]);
+      isDemoMode()
+        ? []
+        : fetch("/api/expenses")
+            .then(async (res) => (res.ok ? (await res.json()).expenses : []))
+            .catch(() => []),
+      expenseStorage.getExpenses().catch(() => []),
+    ]);
+    setExpenses(mergeExpenses(Array.isArray(server) ? server : [], local));
+  }, [allowance, profileFixed]);
 
   useEffect(() => {
     loadData();
@@ -100,6 +89,19 @@ export default function BudgetPage() {
   const envelopes = useMemo(() => {
     return syncExpensesToEnvelopes(rawEnvelopes, expenses);
   }, [rawEnvelopes, expenses]);
+
+  // The month ledger every page prints "sisa bulan ini" from.
+  const month = useMemo(
+    () =>
+      monthLedger({
+        monthlyIncome: allowance ?? 0,
+        profileFixedCosts: profileFixed,
+        bills,
+        transactions: expenses.map((e) => toTransaction(e, "manual")),
+      }),
+    [allowance, profileFixed, bills, expenses]
+  );
+  const spendable = Math.max(0, month.spendable);
 
   // Overall summary
   const summary = useMemo(() => {
@@ -175,7 +177,7 @@ export default function BudgetPage() {
 
   const handleResetDefaults = () => {
     if (confirm("Reset seluruh pos amplop ke preset standar mahasiswa?")) {
-      const reset = resetEnvelopesToDefault(allowance ?? undefined);
+      const reset = resetEnvelopesToDefault(spendable);
       setRawEnvelopes(reset);
       setTransfers(getTransferHistory());
     }
@@ -185,7 +187,7 @@ export default function BudgetPage() {
     <>
       <PageHeader
         title="Amplop Anggaran"
-        subtitle="Uang saku dibagi ke amplop biar nggak ludes di awal bulan"
+        subtitle="Uang saku setelah tagihan dibagi ke amplop biar nggak ludes di awal bulan"
         actions={
           hasEnvelopes ? (
             <button type="button" onClick={() => handleOpenTransfer()} className={PRIMARY_ACTION}>
@@ -207,7 +209,7 @@ export default function BudgetPage() {
                   <>
                     <button
                       type="button"
-                      onClick={() => setRawEnvelopes(resetEnvelopesToDefault(allowance ?? undefined))}
+                      onClick={() => setRawEnvelopes(resetEnvelopesToDefault(spendable))}
                       className={EMPTY_ACTION_CLASS}
                     >
                       Pakai Preset Mahasiswa
@@ -218,13 +220,13 @@ export default function BudgetPage() {
                   </>
                 }
               >
-                Bagi uang saku {allowance ? rupiah(allowance) : ""} ke amplop makan, kos, transport, nongkrong, dan dana
-                darurat, atau buat amplop sendiri.
+                Bagi {rupiah(spendable)} yang bisa dibelanjakan bulan ini (uang saku dikurangi pengeluaran tetap) ke amplop
+                makan, kebutuhan kos, transport, nongkrong, dan dana darurat, atau buat amplop sendiri.
               </EmptyState>
             )
           ) : (
             <>
-              <BudgetOverviewCard summary={summary} suggestions={suggestions} onApplySuggestion={handleApplySuggestion} />
+              <BudgetOverviewCard summary={summary} month={month} suggestions={suggestions} onApplySuggestion={handleApplySuggestion} />
 
               <section aria-labelledby="amplop-list-title" className="space-y-3">
                 <h2 id="amplop-list-title" className="font-display text-head font-bold text-ink border-b border-ink/20 pb-2">
@@ -264,7 +266,7 @@ export default function BudgetPage() {
                     Cara kerja amplop
                   </h2>
                   <p className="text-body text-ink">
-                    Di awal bulan, uang saku dibagi ke amplop-amplop terpisah. Tiap kali kamu catat pengeluaran (suara,
+                    Di awal bulan, sewa dan tagihan rutin disisihkan dulu. Sisanya dibagi ke amplop-amplop terpisah. Tiap kali kamu catat pengeluaran (suara,
                     foto struk, atau ketik), isi amplop yang cocok berkurang sendiri.
                   </p>
                   <p className="text-body text-ink">

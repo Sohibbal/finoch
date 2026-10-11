@@ -4,7 +4,7 @@ import { getStorage, readArray } from "@/lib/storage/local-storage";
 
 const ENVELOPES_STORAGE_KEY = "finoch_budget_envelopes_v1";
 const TRANSFERS_STORAGE_KEY = "finoch_budget_transfers_v1";
-/** Allowance the stored allocations were sized for, so they can follow the profile when it changes. */
+/** Amount the stored allocations were sized for (the month's spendable), so they follow it when it changes. */
 const ALLOWANCE_STORAGE_KEY = "finoch_budget_allowance_v1";
 
 function saveAllowanceBase(monthlyAllowance: number | undefined): void {
@@ -43,6 +43,12 @@ export function getEnvelopes(monthlyAllowance?: number): BudgetEnvelope[] {
   const ratio = monthlyAllowance / base;
   const now = new Date().toISOString();
   const rescaled = stored.map((e) => ({ ...e, allocatedAmount: Math.round(e.allocatedAmount * ratio), updatedAt: now }));
+  // Envelopes that split the whole old amount split the whole new one: rounding leftovers go to the largest.
+  const storedTotal = stored.reduce((sum, e) => sum + e.allocatedAmount, 0);
+  if (storedTotal === base) {
+    const largest = rescaled.reduce((max, e) => (e.allocatedAmount > max.allocatedAmount ? e : max));
+    largest.allocatedAmount += monthlyAllowance - rescaled.reduce((sum, e) => sum + e.allocatedAmount, 0);
+  }
   saveEnvelopes(rescaled);
   saveAllowanceBase(monthlyAllowance);
   return rescaled;

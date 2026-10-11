@@ -5,7 +5,6 @@ import type { DailyJatah } from "@/components/dashboard/dashboard-data";
 import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
 import { Guilloche } from "@/components/press/guilloche";
-import { Cap } from "@/components/press/denom";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 import { rupiah } from "@/lib/format";
 
@@ -104,10 +103,10 @@ export function SimulationResultCard({ result, before, after, baselineNetSavings
           seed={0x51a7}
           stamp={
             delta !== 0 && (
-              <Cap tone={delta > 0 ? "aman" : "habis"} tilt={-7}>
+              <span className={`money text-meta font-semibold ${delta > 0 ? "text-aman-ink" : "text-habis-ink"}`}>
                 {delta > 0 ? "+" : "−"}
-                {rupiah(Math.abs(delta)).replace("Rp ", "Rp")}/hari
-              </Cap>
+                {rupiah(Math.abs(delta))}/hari
+              </span>
             )
           }
         />

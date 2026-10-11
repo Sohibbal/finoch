@@ -7,6 +7,7 @@ import { Seal } from "@/components/press/seal";
 import { Serial } from "@/components/press/serial";
 import { useRolledNumber } from "@/components/press/rolling-numeral";
 import { rupiah } from "@/lib/format";
+import { fixedCostScope } from "@/lib/financial/month-ledger";
 import type { DailyJatah } from "./dashboard-data";
 
 interface JatahNoteProps {
@@ -66,6 +67,12 @@ export function JatahNote({ jatah, today, turn, onCatat }: JatahNoteProps) {
           <p className="text-body text-ink-soft">
             Sisa bulan ini <span className="money font-semibold text-ink">{rupiah(jatah.sisaBulanIni)}</span> ·{" "}
             {jatah.daysLeft === 1 ? "hari terakhir bulan ini" : `${jatah.daysLeft} hari lagi`}
+          </p>
+          {/* Where "sisa bulan ini" comes from, so it reads the same as Amplop, Tagihan and Simulator. */}
+          <p className="text-meta text-ink-soft max-w-prose">
+            Uang saku <span className="money">{rupiah(jatah.month.income)}</span> − pengeluaran tetap{" "}
+            <span className="money">{rupiah(jatah.month.fixedCosts)}</span> ({fixedCostScope(jatah.month.fixedCostSource)}) −
+            terpakai bulan ini <span className="money">{rupiah(jatah.month.spent)}</span>
           </p>
         </div>
       </div>

@@ -1,5 +1,7 @@
 import type { TransactionCandidate, TransactionSource } from "@/types/financial-types";
+import type { RecurringBill } from "@/types/bill-types";
 import { localDateKey, parseDate } from "@/lib/date";
+import { monthLedger, type MonthFigures } from "@/lib/financial/month-ledger";
 
 interface ExpenseRow {
   id: string;
@@ -95,39 +97,38 @@ export interface DailyJatah {
   spentToday: number;
   /** jatah − spentToday; negative once today went past the jatah. */
   sisaHariIni: number;
-  /** Income − fixed costs − everything spent this month, today included. */
+  /** month.remaining: income − fixed costs − everything spent this month, today included. */
   sisaBulanIni: number;
   /** Days left in the month, today included. */
   daysLeft: number;
   status: "aman" | "mepet" | "habis";
+  /** The month ledger the jatah is cut from, so its figures print with their scope. */
+  month: MonthFigures;
 }
 
 /**
- * The one "jatah hari ini" number the app shows:
- * (income − fixed costs − spent this month before today) / days left including today.
+ * The one "jatah hari ini" number the app shows, cut from the month ledger:
+ * (spendable this month − spent before today) / days left including today.
  * Status comes from the same number: Habis once today's jatah is used up, Mepet from 80%.
  */
 export function dailyJatah(params: {
   monthlyIncome: number;
+  /** The profile's fixed costs; the Tagihan total replaces it when `bills` is non-empty. */
   monthlyFixedExpenses: number;
+  bills?: RecurringBill[];
   transactions: TransactionCandidate[];
   now?: Date;
 }): DailyJatah {
-  const now = params.now ?? new Date();
-  const today = localDateKey(now);
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const daysLeft = daysInMonth - now.getDate() + 1;
-
-  let spentToday = 0;
-  let spentBefore = 0;
-  for (const t of currentMonthTransactions(params.transactions, now)) {
-    if (t.date === today) spentToday += t.amount;
-    else if (t.date < today) spentBefore += t.amount;
-  }
-
-  const left = params.monthlyIncome - params.monthlyFixedExpenses - spentBefore;
-  const jatah = Math.max(0, Math.round(left / daysLeft));
+  const month = monthLedger({
+    monthlyIncome: params.monthlyIncome,
+    profileFixedCosts: params.monthlyFixedExpenses,
+    bills: params.bills,
+    transactions: params.transactions,
+    now: params.now,
+  });
+  const { spentToday, daysLeft } = month;
+  const jatah = Math.max(0, Math.round((month.spendable - month.spentBefore) / daysLeft));
   const sisaHariIni = jatah - spentToday;
   const status = sisaHariIni <= 0 ? "habis" : spentToday >= jatah * 0.8 ? "mepet" : "aman";
-  return { jatah, spentToday, sisaHariIni, sisaBulanIni: left - spentToday, daysLeft, status };
+  return { jatah, spentToday, sisaHariIni, sisaBulanIni: month.remaining, daysLeft, status, month };
 }

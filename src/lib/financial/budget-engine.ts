@@ -1,5 +1,6 @@
 import { BudgetEnvelope, BudgetSummary, EnvelopeStatus, ReallocationSuggestion } from "@/types/budget-types";
 import { isSameLocalMonth, parseDate } from "@/lib/date";
+import { BILL_PAYMENT_PREFIX } from "@/lib/financial/month-ledger";
 
 /**
  * Calculates progress, remaining rupiah, overspent rupiah, and status for a single envelope.
@@ -68,11 +69,12 @@ export function getOverallBudgetSummary(envelopes: BudgetEnvelope[]): BudgetSumm
 /**
  * Aggregates this month's expenses into envelopes. Each expense lands in exactly one envelope:
  * the first whose categoryAliases contain its category (case-insensitive exact match), otherwise
- * the envelope holding the "Other" alias. Empty category counts as "Other".
+ * the envelope holding the "Other" alias. Empty category counts as "Other". Bill payments logged by
+ * Tagihan are skipped: fixed costs are taken out before the envelopes are filled (see monthLedger).
  */
 export function syncExpensesToEnvelopes(
   envelopes: BudgetEnvelope[],
-  expenses: Array<{ category?: string; amount: number; createdAt?: string }>,
+  expenses: Array<{ category?: string; amount: number; createdAt?: string; itemName?: string }>,
   referenceDate: Date = new Date()
 ): BudgetEnvelope[] {
   const normalize = (value: string) => value.toLowerCase().trim();
@@ -84,6 +86,7 @@ export function syncExpensesToEnvelopes(
     // Undated expenses are treated as current (callers may strip dates); others must be this month
     const date = exp.createdAt ? parseDate(exp.createdAt) : referenceDate;
     if (!date || !isSameLocalMonth(date, referenceDate)) continue;
+    if (exp.itemName?.startsWith(BILL_PAYMENT_PREFIX)) continue;
     const amount = Number.isFinite(exp.amount) && exp.amount > 0 ? exp.amount : 0;
 
     const cat = normalize(exp.category || "") || "other";
@@ -140,18 +143,20 @@ export function findReallocationSuggestions(
 }
 
 /**
- * Default preset envelopes for an Indonesian college student / anak kost.
+ * Default preset envelopes for an Indonesian college student / anak kost. `monthlyAllowance` is what
+ * the month can spend after fixed costs (monthLedger's spendable): rent and bills are already set
+ * aside, so the envelopes split exactly that amount, to the rupiah.
  */
 export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): BudgetEnvelope[] {
-  const base = Math.max(500000, monthlyAllowance);
+  const base = Math.max(0, Math.round(monthlyAllowance));
 
-  return [
+  const envelopes: BudgetEnvelope[] = [
     {
       id: "env-makan",
       name: "Makan & Minum Harian",
       icon: "utensils",
       color: "emerald",
-      allocatedAmount: Math.round(base * 0.4), // 40%
+      allocatedAmount: Math.round(base * 0.45), // 45%
       spentAmount: 0,
       categoryAliases: ["Food & Drinks", "Food", "Groceries", "Makan", "Minum"],
       rollover: true,
@@ -160,14 +165,14 @@ export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): 
     },
     {
       id: "env-kost",
-      name: "Kost & Utilitas",
+      name: "Kebutuhan Kos & Pulsa",
       icon: "home",
       color: "blue",
-      allocatedAmount: Math.round(base * 0.3), // 30%
+      allocatedAmount: Math.round(base * 0.15), // 15%
       spentAmount: 0,
       categoryAliases: ["Bills & Utilities", "Bills", "Housing & Bills", "Housing", "Subscription", "Kost", "Listrik"],
       rollover: false,
-      notes: "Sewa kamar, token listrik, iuran kebersihan",
+      notes: "Laundry, galon, pulsa. Sewa dan tagihan rutin sudah disisihkan di Tagihan",
       updatedAt: new Date().toISOString(),
     },
     {
@@ -175,7 +180,7 @@ export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): 
       name: "Bensin & Transportasi",
       icon: "car",
       color: "amber",
-      allocatedAmount: Math.round(base * 0.1), // 10%
+      allocatedAmount: Math.round(base * 0.15), // 15%
       spentAmount: 0,
       categoryAliases: ["Transportation", "Transport", "Bensin", "Gojek", "Grab"],
       rollover: true,
@@ -199,7 +204,7 @@ export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): 
       name: "Dana Darurat & Obat",
       icon: "shield",
       color: "rose",
-      allocatedAmount: Math.round(base * 0.1), // 10%
+      allocatedAmount: Math.round(base * 0.15), // 15%
       spentAmount: 0,
       // "Other" also catches categories no envelope claims (e.g. Shopping, Education & Career)
       categoryAliases: ["Health & Personal Care", "Health", "Other", "Obat", "Dokter"],
@@ -208,4 +213,7 @@ export function getDefaultStudentEnvelopes(monthlyAllowance: number = 2000000): 
       updatedAt: new Date().toISOString(),
     },
   ];
+  // Rounding leftovers go to the first envelope so the split adds up to the base exactly.
+  envelopes[0].allocatedAmount += base - envelopes.reduce((sum, e) => sum + e.allocatedAmount, 0);
+  return envelopes;
 }
