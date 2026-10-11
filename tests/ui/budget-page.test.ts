@@ -69,5 +69,21 @@ describe("Amplop Anggaran page", () => {
     expect(cap).not.toContain("border-dashed");
     expect(cap).not.toBe(renderToString(React.createElement(Cap, { tone: "aman" }, "Habis")).replace(/aman/g, "habis"));
   });
+
+  it("keeps envelope actions scrolled clear of the mobile bottom bar and Catat seal", async () => {
+    const { BudgetAmplop } = await import("@/components/budget/budget-amplop");
+    const noop = () => {};
+    const html = renderToString(React.createElement(BudgetAmplop, { envelope, onTransfer: noop, onEdit: noop, onDelete: noop }));
+    const pindah = html.match(/<button[^>]*>(?:(?!<\/button>).)*Pindah isi/s)?.[0] ?? "";
+    expect(pindah).toContain("scroll-mb-[calc(6.25rem+env(safe-area-inset-bottom))]");
+  });
+
+  it("caps the scope line under the month total at a readable measure", async () => {
+    const { readFileSync } = await import("node:fs");
+    const card = readFileSync("src/components/budget/budget-overview-card.tsx", "utf8");
+    const report = readFileSync("src/components/reports/report-printable-document.tsx", "utf8");
+    expect(card).toMatch(/max-w-prose">\s*Uang saku/);
+    expect(report).toMatch(/max-w-prose">\s*Rasio tabungan/);
+  });
 });
 

@@ -61,8 +61,10 @@ interface BudgetAmplopProps {
   onDelete: (id: string) => void;
 }
 
+// On phones the scroll margin matches ACTION_BAR_BOTTOM (bottom bar plus the Catat seal), so a focused or
+// scrolled-to envelope action always stops above the seal instead of under it.
 const AMPLOP_ACTION =
-  "inline-flex items-center justify-center gap-2 min-h-11 border border-current text-body font-semibold hover:bg-paper-sheet/15 transition-colors";
+  "inline-flex items-center justify-center gap-2 min-h-11 border border-current text-body font-semibold hover:bg-paper-sheet/15 transition-colors scroll-mb-[calc(6.25rem+env(safe-area-inset-bottom))] md:scroll-mb-0";
 
 /** An envelope printed as an amplop: a flap fold, a name plate, and its month as a small ledger. */
 export function BudgetAmplop({ envelope, onTransfer, onEdit, onDelete }: BudgetAmplopProps) {
