@@ -23,8 +23,7 @@ describe("What-If Simulator Page", () => {
   it("renders Finoch branding and student presets", async () => {
     const mod = await import("@/app/(app)/simulator/page");
     const html = renderToString(React.createElement(mod.default));
-    expect(html).toContain("Finoch What-If Simulator");
-    expect(html).toContain("finoch");
+    expect(html).toContain("Simulator Kas");
     expect(html).not.toContain("voicash.id");
 
     // Student presets
@@ -39,6 +38,14 @@ describe("What-If Simulator Page", () => {
     // Baseline comes from the user's profile
     expect(html).toContain("2.400.000");
     expect(html).toContain("1.300.000");
+  });
+
+  it("prints today's jatah from the dashboard's dailyJatah, the one daily number", async () => {
+    const mod = await import("@/app/(app)/simulator/page");
+    const { dailyJatah } = await import("@/components/dashboard/dashboard-data");
+    const html = renderToString(React.createElement(mod.default));
+    const { jatah } = dailyJatah({ monthlyIncome: 2400000, monthlyFixedExpenses: 1300000, transactions: [] });
+    expect(html).toContain(`<span class="sr-only">${jatah.toLocaleString("id-ID")}</span>`);
   });
 
   it("shows a skeleton while loading and an onboarding link without a profile, never made-up numbers", async () => {

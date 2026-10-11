@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useId } from "react";
+import { rupiah } from "@/lib/format";
 
 interface ScenarioSliderProps {
   label: string;
@@ -14,54 +15,35 @@ interface ScenarioSliderProps {
   formatValue?: (value: number) => string;
 }
 
-export function ScenarioSlider({
-  label,
-  description,
-  value,
-  min,
-  max,
-  step,
-  unit = "IDR",
-  onChange,
-  formatValue,
-}: ScenarioSliderProps) {
-  const displayVal = formatValue
-    ? formatValue(value)
-    : unit === "IDR"
-    ? `Rp ${value.toLocaleString("id-ID")}`
-    : `${value} ${unit}`;
+/** One scenario knob printed as a ledger line: label, amount, the slider as an ink rule. */
+export function ScenarioSlider({ label, description, value, min, max, step, unit = "IDR", onChange, formatValue }: ScenarioSliderProps) {
+  const id = useId();
+  const format = formatValue ?? ((v: number) => (unit === "IDR" ? rupiah(v) : `${v} ${unit}`));
 
   return (
-    <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-5 border border-cream-300 dark:border-navy-800 space-y-3 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <label className="text-xs sm:text-sm font-bold text-navy-950 dark:text-cream-50">
-            {label}
-          </label>
-          {description && (
-            <p className="text-[11px] text-navy-600 dark:text-cream-300/70 mt-0.5">
-              {description}
-            </p>
-          )}
-        </div>
-        <div className="text-xs font-black text-navy-950 dark:text-cream-50 bg-cream-100 dark:bg-navy-900 px-3 py-1 rounded-full border border-cream-300 dark:border-navy-800">
-          {displayVal}
-        </div>
+    <div className="py-4 border-b border-ink/15 space-y-2">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+        <label htmlFor={id} className="text-body font-semibold text-ink">
+          {label}
+        </label>
+        <output htmlFor={id} className="money text-body font-bold text-ink">
+          {format(value)}
+        </output>
       </div>
-
+      {description && <p className="text-meta text-ink-soft">{description}</p>}
       <input
+        id={id}
         type="range"
         min={min}
         max={max}
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-cream-200 dark:bg-navy-800 rounded-lg appearance-none cursor-pointer accent-navy-900 dark:accent-cream-100"
+        className="w-full h-11 cursor-pointer accent-[rgb(var(--ink))]"
       />
-
-      <div className="flex justify-between text-[11px] text-navy-400 dark:text-cream-400/60 font-medium">
-        <span>{formatValue ? formatValue(min) : min.toLocaleString("id-ID")}</span>
-        <span>{formatValue ? formatValue(max) : max.toLocaleString("id-ID")}</span>
+      <div className="flex justify-between text-meta text-ink-soft money">
+        <span>{format(min)}</span>
+        <span>{format(max)}</span>
       </div>
     </div>
   );

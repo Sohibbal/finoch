@@ -1,143 +1,124 @@
-"use client";
-
 import React from "react";
-import {
-  TrendingUp,
-  AlertTriangle,
-  ShieldCheck,
-} from "lucide-react";
+import { ArrowDown, ArrowRight } from "lucide-react";
 import { WhatIfSimulationResult } from "@/lib/financial/financial-engine";
+import type { DailyJatah } from "@/components/dashboard/dashboard-data";
+import { Note } from "@/components/press/note";
+import { Serial } from "@/components/press/serial";
+import { Guilloche } from "@/components/press/guilloche";
+import { Cap } from "@/components/press/analisis-press";
+import { useRolledNumber } from "@/components/press/rolling-numeral";
+import { rupiah } from "@/lib/format";
 
 interface SimulationResultCardProps {
   result: WhatIfSimulationResult;
+  /** Today's jatah from the real profile, and the same number under the scenario. */
+  before: DailyJatah;
+  after: DailyJatah;
   baselineNetSavings: number;
   baselineMonthsToGoal: number;
+  today: string;
 }
 
-export function SimulationResultCard({
-  result,
-  baselineNetSavings,
-  baselineMonthsToGoal,
-}: SimulationResultCardProps) {
-  const { simulatedNetSavings, deltaMonthlySavings, simulatedMonthsToGoal } =
-    result;
+const months = (n: number) => (Number.isFinite(n) && n <= 1200 ? `${n} bulan` : "belum kekejar");
 
-  const isPositiveDelta = deltaMonthlySavings >= 0;
-  const isDeficit = simulatedNetSavings <= 0;
-  const isInfinite = !isFinite(simulatedMonthsToGoal) || simulatedMonthsToGoal > 1200;
+function JatahSheet({
+  title,
+  jatah,
+  savings,
+  monthsToGoal,
+  serialId,
+  today,
+  seed,
+  stamp,
+}: {
+  title: string;
+  jatah: DailyJatah;
+  savings: number;
+  monthsToGoal: number;
+  serialId: string;
+  today: string;
+  seed: number;
+  stamp?: React.ReactNode;
+}) {
+  const rolled = useRolledNumber(jatah.jatah, 500);
+  return (
+    <Note as="section" aria-label={title} thread={jatah.status} serial={<Serial id={serialId} date={today} />} className="overflow-hidden flex-1 min-w-0">
+      <div className="relative px-5 sm:px-8 pt-6 pb-5 pr-12 sm:pr-16 space-y-3">
+        <Guilloche seed={seed} size={160} families={3} className="absolute -right-10 -top-10 opacity-40" />
+        <div className="relative flex items-start justify-between gap-3">
+          <h2 className="text-body font-semibold text-ink-soft">{title}</h2>
+          {stamp}
+        </div>
+        <p className="relative font-display font-bold text-ink money flex items-baseline gap-2">
+          <span className="text-head">Rp</span>
+          <span className="text-[clamp(2.75rem,12vw,4rem)] leading-none tracking-[-0.03em]" aria-hidden="true">
+            {rolled.toLocaleString("id-ID")}
+          </span>
+          <span className="sr-only">{jatah.jatah.toLocaleString("id-ID")}</span>
+        </p>
+        <p className="relative text-body text-ink">jatah per hari · {jatah.daysLeft} hari lagi</p>
+        <dl className="relative grid grid-cols-[1fr_auto] gap-x-4 gap-y-1 border-t border-ink/15 pt-3">
+          <dt className="text-body text-ink-soft">Sisa bulan ini</dt>
+          <dd className="money text-body font-semibold text-ink text-right">{rupiah(jatah.sisaBulanIni)}</dd>
+          <dt className="text-body text-ink-soft">Bisa ditabung per bulan</dt>
+          <dd className="money text-body font-semibold text-ink text-right">{rupiah(savings)}</dd>
+          <dt className="text-body text-ink-soft">Target kekejar dalam</dt>
+          <dd className="text-body font-semibold text-ink text-right">{months(monthsToGoal)}</dd>
+        </dl>
+      </div>
+    </Note>
+  );
+}
 
-  const monthsDifference =
-    isFinite(baselineMonthsToGoal) && !isInfinite
-      ? baselineMonthsToGoal - simulatedMonthsToGoal
+/** What-if as two notes: today's jatah as it is, and the same number reprinted under the scenario. */
+export function SimulationResultCard({ result, before, after, baselineNetSavings, baselineMonthsToGoal, today }: SimulationResultCardProps) {
+  const delta = after.jatah - before.jatah;
+  const faster =
+    Number.isFinite(baselineMonthsToGoal) && Number.isFinite(result.simulatedMonthsToGoal)
+      ? baselineMonthsToGoal - result.simulatedMonthsToGoal
       : 0;
 
   return (
-    <div className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-6">
-      <div className="flex items-center justify-between pb-4 border-b border-cream-200 dark:border-navy-800/80">
-        <div>
-          <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
-            Hasil Simulasi Finansial
-          </h3>
-          <p className="text-xs text-navy-600 dark:text-cream-300/70">
-            Dampak perubahan anggaran terhadap percepatan target finansial Anda
-          </p>
+    <div className="space-y-4">
+      <div className="flex flex-col md:flex-row md:items-stretch gap-3 md:gap-4">
+        <JatahSheet
+          title="Sekarang"
+          jatah={before}
+          savings={baselineNetSavings}
+          monthsToGoal={baselineMonthsToGoal}
+          serialId="sim-now"
+          today={today}
+          seed={0xc4a3}
+        />
+        <div aria-hidden="true" className="flex items-center justify-center text-ink-soft">
+          <ArrowDown className="w-5 h-5 md:hidden" />
+          <ArrowRight className="w-5 h-5 hidden md:block" />
         </div>
-
-        {isDeficit ? (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
-            <AlertTriangle className="w-3.5 h-3.5" />
-            Defisit Anggaran
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-            <ShieldCheck className="w-3.5 h-3.5" />
-            Simulasi Sehat
-          </span>
-        )}
+        <JatahSheet
+          title="Kalau skenario ini jalan"
+          jatah={after}
+          savings={result.simulatedNetSavings}
+          monthsToGoal={result.simulatedMonthsToGoal}
+          serialId="sim-after"
+          today={today}
+          seed={0x51a7}
+          stamp={
+            delta !== 0 && (
+              <Cap tone={delta > 0 ? "aman" : "habis"} tilt={-7}>
+                {delta > 0 ? "+" : "−"}
+                {rupiah(Math.abs(delta)).replace("Rp ", "Rp")}/hari
+              </Cap>
+            )
+          }
+        />
       </div>
-
-      {/* Main Stats Comparison */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {/* Tabungan Bersih Bulanan */}
-        <div className="p-4 rounded-xl bg-cream-50/70 dark:bg-navy-900/50 border border-cream-200 dark:border-navy-800/60 space-y-2">
-          <div className="text-xs text-navy-600 dark:text-cream-400 font-medium">
-            Proyeksi Tabungan per Bulan
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span
-              className={`text-2xl font-black ${
-                isDeficit
-                  ? "text-rose-600 dark:text-rose-400"
-                  : "text-navy-950 dark:text-cream-50"
-              }`}
-            >
-              Rp {simulatedNetSavings.toLocaleString("id-ID")}
-            </span>
-            <span
-              className={`text-xs font-bold ${
-                isPositiveDelta
-                  ? "text-emerald-600 dark:text-emerald-400"
-                  : "text-rose-600 dark:text-rose-400"
-              }`}
-            >
-              {isPositiveDelta ? "+" : ""}
-              Rp {deltaMonthlySavings.toLocaleString("id-ID")}
-            </span>
-          </div>
-          <div className="text-[11px] text-navy-400 dark:text-cream-400/60">
-            Baseline saat ini: Rp {baselineNetSavings.toLocaleString("id-ID")}/bln
-          </div>
-        </div>
-
-        {/* Waktu Mencapai Target Goal */}
-        <div className="p-4 rounded-xl bg-cream-50/70 dark:bg-navy-900/50 border border-cream-200 dark:border-navy-800/60 space-y-2">
-          <div className="text-xs text-navy-600 dark:text-cream-400 font-medium">
-            Estimasi Waktu Capai Target
-          </div>
-          <div className="flex items-baseline gap-2">
-            <span className="text-2xl font-black text-navy-950 dark:text-cream-50">
-              {isInfinite ? "Tidak Tercapai" : `${simulatedMonthsToGoal} Bulan`}
-            </span>
-            {monthsDifference > 0 && !isInfinite && (
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                {monthsDifference} Bulan Lebih Cepat!
-              </span>
-            )}
-            {monthsDifference < 0 && !isInfinite && (
-              <span className="text-xs font-bold text-rose-600 dark:text-rose-400">
-                {Math.abs(monthsDifference)} Bulan Lebih Lambat
-              </span>
-            )}
-          </div>
-          <div className="text-[11px] text-navy-400 dark:text-cream-400/60">
-            Baseline estimasi:{" "}
-            {isFinite(baselineMonthsToGoal)
-              ? `${baselineMonthsToGoal} Bulan`
-              : "Belum Ditentukan"}
-          </div>
-        </div>
-      </div>
-
-      {/* Visual Transformation Banner */}
-      <div className="p-4 rounded-2xl bg-cream-100 dark:bg-navy-900 border border-cream-300 dark:border-navy-800 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="p-2 bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 rounded-xl">
-            <TrendingUp className="w-4 h-4" />
-          </div>
-          <div>
-            <div className="text-sm font-bold text-navy-950 dark:text-cream-50">
-              {monthsDifference > 0
-                ? `Strategi ini memajukan target finansial Anda ${monthsDifference} bulan!`
-                : monthsDifference < 0
-                ? "Waspada: Perubahan ini menunda tercapainya target finansial Anda."
-                : "Anggaran berjalan seimbang dengan ritme saat ini."}
-            </div>
-            <div className="text-xs text-navy-600 dark:text-cream-300/70">
-              Setiap rupiah yang dialihkan mempercepat kebebasan finansial Anda.
-            </div>
-          </div>
-        </div>
-      </div>
+      <p className="text-body text-ink max-w-prose">
+        {delta > 0
+          ? `Jatahmu naik ${rupiah(delta)} sehari${faster > 0 ? ` dan target kekejar ${faster} bulan lebih cepat` : ""}.`
+          : delta < 0
+          ? `Jatahmu turun ${rupiah(-delta)} sehari${faster < 0 ? `, target mundur ${-faster} bulan` : ""}. Siapin rem dari sekarang.`
+          : "Belum ada perubahan. Geser angka di bawah atau pilih skenario."}
+      </p>
     </div>
   );
 }
