@@ -1,4 +1,5 @@
 import { AiInsightCard } from "@/types/financial-types";
+import { isSameLocalMonth, parseDate } from "@/lib/date";
 
 export interface PatternDetectorInput {
   currentCategoryTotals: Record<string, number>;
@@ -78,4 +79,27 @@ export function detectSpendingPatterns(input: PatternDetectorInput): AiInsightCa
   }
 
   return insights;
+}
+
+/** Per-category spending of the local month containing `now` and of the month before it. */
+export function getMonthlyCategoryTotals(
+  expenses: Array<{ category?: string; amount: number; createdAt?: string | Date }>,
+  now: Date = new Date()
+): Pick<PatternDetectorInput, "currentCategoryTotals" | "previousCategoryTotals"> {
+  const previousMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+  const currentCategoryTotals: Record<string, number> = {};
+  const previousCategoryTotals: Record<string, number> = {};
+  for (const e of expenses) {
+    const at = e.createdAt instanceof Date ? e.createdAt : parseDate(e.createdAt);
+    if (!at || !(e.amount > 0)) continue;
+    const bucket = isSameLocalMonth(at, now)
+      ? currentCategoryTotals
+      : isSameLocalMonth(at, previousMonth)
+        ? previousCategoryTotals
+        : null;
+    if (!bucket) continue;
+    const category = e.category || "Other";
+    bucket[category] = (bucket[category] || 0) + e.amount;
+  }
+  return { currentCategoryTotals, previousCategoryTotals };
 }

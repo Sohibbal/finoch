@@ -8,6 +8,7 @@ import {
   Trophy,
   TrendingDown,
 } from "lucide-react";
+import Link from "next/link";
 import { StreakSummary } from "@/types/streak-types";
 import { calculateStreakMetrics, StreakExpenseCandidate } from "@/lib/financial/streak-engine";
 import { expenseStorage } from "@/lib/storage/expense-storage";
@@ -15,30 +16,22 @@ import { expenseStorage } from "@/lib/storage/expense-storage";
 import { StreakBadgeCard } from "@/components/streak/streak-badge-card";
 import { StreakStripMobile } from "@/components/streak/streak-strip-mobile";
 import { StreakCalendarDesktop } from "@/components/streak/streak-calendar-desktop";
-import { PageHeader } from "@/components/layout/page-header";
+import { ContentSkeleton, EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { useFinancialProfile } from "@/hooks/use-financial-profile";
+import { isDemoMode } from "@/lib/storage/local-storage";
 
 export default function StreakPage() {
 
   const [expenses, setExpenses] = useState<StreakExpenseCandidate[]>([]);
-  const [dailyLimit, setDailyLimit] = useState<number>(50000);
+  const profile = useFinancialProfile();
+  const [loaded, setLoaded] = useState(false);
+  const dailyLimit = Math.round((profile.monthlyIncome ?? 0) / 30);
 
   const loadData = useCallback(async () => {
     try {
-      const profileRes = await fetch("/api/profile");
-      if (profileRes.ok) {
-        const pData = await profileRes.json();
-        if (pData?.profile?.monthlyIncome) {
-          const allowance = Number(pData.profile.monthlyIncome);
-          setDailyLimit(Math.round(allowance / 30));
-        }
-      }
-    } catch {
-      // fallback
-    }
-
-    try {
-      const res = await fetch("/api/expenses");
-      if (res.ok) {
+      // Demo mode shows only local demo rows; the server holds the real expenses.
+      const res = isDemoMode() ? null : await fetch("/api/expenses");
+      if (res?.ok) {
         const data = await res.json();
         if (Array.isArray(data.expenses) && data.expenses.length > 0) {
           setExpenses(data.expenses);
@@ -60,6 +53,8 @@ export default function StreakPage() {
       }
     } catch {
       // ignore
+    } finally {
+      setLoaded(true);
     }
   }, []);
 
@@ -79,7 +74,24 @@ export default function StreakPage() {
       />
 
       {/* Page Body */}
+      <ProfileGate profile={profile}>
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
+        {!loaded ? (
+          <ContentSkeleton />
+        ) : expenses.length === 0 ? (
+          <EmptyState
+            icon={Flame}
+            title="Streak belum dimulai"
+            action={
+              <Link href="/dashboard" className={EMPTY_ACTION_CLASS}>
+                Catat Pengeluaran
+              </Link>
+            }
+          >
+            Streak puasa jajan dihitung dari catatan pengeluaranmu. Catat pengeluaran pertama, lalu tantang dirimu untuk hari tanpa jajan.
+          </EmptyState>
+        ) : (
+        <>
         {/* Gamified Badge Banner */}
         <StreakBadgeCard summary={summary} />
 
@@ -146,7 +158,10 @@ export default function StreakPage() {
         <div className="hidden md:block">
           <StreakCalendarDesktop summary={summary} />
         </div>
+        </>
+        )}
       </main>
+      </ProfileGate>
     </>
   );
 }

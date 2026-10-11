@@ -1,36 +1,44 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Sparkles,
   Lightbulb,
   ShieldAlert,
   CheckCircle,
 } from "lucide-react";
-import { detectSpendingPatterns } from "@/lib/insights/pattern-detector";
+import { detectSpendingPatterns, getMonthlyCategoryTotals } from "@/lib/insights/pattern-detector";
 import { AiInsightCard } from "@/types/financial-types";
-import { PageHeader } from "@/components/layout/page-header";
+import { EMPTY_ACTION_CLASS, EmptyState, PageHeader } from "@/components/layout/page-header";
+import { expenseStorage } from "@/lib/storage/expense-storage";
+import { getBills } from "@/lib/storage/bill-storage";
 
 export default function InsightsPage() {
-  const [insights] = useState<AiInsightCard[]>(() =>
-    detectSpendingPatterns({
-      currentCategoryTotals: {
-        Food: 920000,
-        Groceries: 450000,
-        Entertainment: 350000,
-      },
-      previousCategoryTotals: {
-        Food: 720000,
-        Groceries: 580000,
-        Entertainment: 310000,
-      },
-      recurringExpenses: [
-        { name: "Netflix", amount: 65000, frequency: "monthly" },
-        { name: "Spotify Family", amount: 45000, frequency: "monthly" },
-        { name: "Sewa Kost", amount: 900000, frequency: "monthly" },
-      ],
-    })
-  );
+  // null while loading: the user's own expenses (this vs last month) and recurring bills.
+  const [insights, setInsights] = useState<AiInsightCard[] | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    expenseStorage
+      .getExpenses()
+      .catch((err) => {
+        console.warn("Gagal memuat pengeluaran lokal:", err);
+        return [];
+      })
+      .then((expenses) => {
+        if (!active) return;
+        setInsights(
+          detectSpendingPatterns({
+            ...getMonthlyCategoryTotals(expenses),
+            recurringExpenses: getBills().map((b) => ({ name: b.name, amount: b.amount, frequency: b.frequency })),
+          })
+        );
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <>
@@ -50,9 +58,30 @@ export default function InsightsPage() {
           </p>
         </div>
 
+        {insights === null && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6" aria-busy="true">
+            <div className="h-56 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+            <div className="h-56 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+          </div>
+        )}
+
+        {insights?.length === 0 && (
+          <EmptyState
+            icon={Sparkles}
+            title="Belum cukup data untuk wawasan"
+            action={
+              <Link href="/dashboard" className={EMPTY_ACTION_CLASS}>
+                Catat Pengeluaran
+              </Link>
+            }
+          >
+            Wawasan muncul setelah ada pengeluaran bulan lalu dan bulan ini untuk dibandingkan, atau tagihan rutin yang tercatat.
+          </EmptyState>
+        )}
+
         {/* Insights Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {insights.map((card, idx) => (
+          {insights?.map((card, idx) => (
             <div
               key={idx}
               className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4 flex flex-col justify-between transition-colors"

@@ -1,5 +1,5 @@
 import { RecurringBill, BillSummary } from "@/types/bill-types";
-import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { getStorage, isDemoMode, readArray } from "@/lib/storage/local-storage";
 import { isSameLocalMonth, parseDate } from "@/lib/date";
 
 const BILLS_STORAGE_KEY = "finoch_recurring_bills";
@@ -81,10 +81,11 @@ export function getMonthlyBillAmount(bill: RecurringBill, currentDate: Date = ne
 }
 
 export function getBills(currentDate: Date = new Date()): RecurringBill[] {
+  // Sample bills only in demo mode; a real user starts with an empty list.
   let bills = readArray<RecurringBill>(BILLS_STORAGE_KEY);
   if (!bills) {
-    bills = createDefaultStudentBills(new Date().toISOString());
-    saveBills(bills);
+    bills = isDemoMode() ? createDefaultStudentBills(new Date().toISOString()) : [];
+    if (bills.length > 0) saveBills(bills);
   }
   return bills.map((bill) => ({ ...bill, isPaidThisMonth: isBillPaidInMonth(bill, currentDate) }));
 }

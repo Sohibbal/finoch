@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import { invalidateFinancialProfile } from "@/hooks/use-financial-profile";
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/brand-logo";
 import {
@@ -62,6 +63,7 @@ export default function OnboardingPage() {
         throw new Error(data.error || "Gagal menyimpan profil finansial");
       }
 
+      invalidateFinancialProfile();
       router.push("/dashboard");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Terjadi kesalahan saat menyimpan data";

@@ -122,4 +122,25 @@ describe("Budget Storage Module", () => {
     expect(history.length).toBeGreaterThan(0);
     expect(history[0].id).toBe(record.id);
   });
+
+  it("sizes the template from the allowance and rescales it when the allowance changes", () => {
+    const initial = getEnvelopes(3000000);
+    expect(initial.reduce((sum, e) => sum + e.allocatedAmount, 0)).toBe(3000000);
+    const makan = initial.find((e) => e.id === "env-makan")!.allocatedAmount;
+
+    // Same allowance: untouched. Mutations (no allowance) never rescale.
+    expect(getEnvelopes(3000000)).toEqual(getEnvelopes());
+
+    const rescaled = getEnvelopes(1500000);
+    expect(rescaled.reduce((sum, e) => sum + e.allocatedAmount, 0)).toBe(1500000);
+    expect(rescaled.find((e) => e.id === "env-makan")!.allocatedAmount).toBe(makan / 2);
+    // Persisted and recorded: loading again with the same allowance changes nothing.
+    expect(getEnvelopes(1500000)).toEqual(rescaled);
+  });
+
+  it("rescales envelopes saved before the allowance was recorded from their total", () => {
+    getEnvelopes(); // seeded from the engine's pure default (2.000.000) with no allowance recorded
+    const rescaled = getEnvelopes(4000000);
+    expect(rescaled.reduce((sum, e) => sum + e.allocatedAmount, 0)).toBe(4000000);
+  });
 });

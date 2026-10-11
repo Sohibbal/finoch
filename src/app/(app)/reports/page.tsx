@@ -13,6 +13,7 @@ import {
   PieChart,
   FileSpreadsheet,
 } from "lucide-react";
+import Link from "next/link";
 import { MonthlyReportSummary } from "@/types/report-types";
 import {
   generateMonthlyReport,
@@ -28,7 +29,9 @@ import { useAuthContext } from "@/components/layout/auth-provider";
 import { ReportSummaryCard } from "@/components/reports/report-summary-card";
 import { ReportWhatsAppModal } from "@/components/reports/report-whatsapp-modal";
 import { ReportPrintableDocument } from "@/components/reports/report-printable-document";
-import { PageHeader } from "@/components/layout/page-header";
+import { ContentSkeleton, EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
+import { useFinancialProfile } from "@/hooks/use-financial-profile";
+import { isDemoMode } from "@/lib/storage/local-storage";
 import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
 
 export default function ReportsPage() {
@@ -37,8 +40,9 @@ export default function ReportsPage() {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState<number>(now.getMonth() + 1);
   const [selectedYear, setSelectedYear] = useState<number>(now.getFullYear());
-  const [monthlyAllowance, setMonthlyAllowance] = useState<number>(2000000);
-  const [studentName, setStudentName] = useState<string>("Mahasiswa Finoch");
+  const profile = useFinancialProfile();
+  const [loaded, setLoaded] = useState(false);
+  const studentName = user?.name || user?.email?.split("@")[0] || "Mahasiswa Finoch";
   const [campusName, setCampusName] = useState<string>("Kampus Indonesia");
 
   const [expenses, setExpenses] = useState<ExpenseRecord[]>([]);
@@ -47,27 +51,9 @@ export default function ReportsPage() {
   // Load profile and expenses
   const loadData = useCallback(async () => {
     try {
-      const profileRes = await fetch("/api/profile");
-      if (profileRes.ok) {
-        const pData = await profileRes.json();
-        if (pData?.profile) {
-          if (pData.profile.monthlyIncome) {
-            setMonthlyAllowance(Number(pData.profile.monthlyIncome));
-          }
-          if (pData.profile.fullName) {
-            setStudentName(pData.profile.fullName);
-          } else if (user?.email) {
-            setStudentName(user.email.split("@")[0]);
-          }
-        }
-      }
-    } catch {
-      // fallback
-    }
-
-    try {
-      const res = await fetch("/api/expenses");
-      if (res.ok) {
+      // Demo mode shows only local demo rows; the server holds the real expenses.
+      const res = isDemoMode() ? null : await fetch("/api/expenses");
+      if (res?.ok) {
         const data = await res.json();
         if (Array.isArray(data.expenses) && data.expenses.length > 0) {
           setExpenses(data.expenses);
@@ -89,8 +75,10 @@ export default function ReportsPage() {
       }
     } catch {
       // ignore
+    } finally {
+      setLoaded(true);
     }
-  }, [user]);
+  }, []);
 
   useEffect(() => {
     loadData();
@@ -98,8 +86,8 @@ export default function ReportsPage() {
 
   // Compute summary for selected month & year
   const summary: MonthlyReportSummary = useMemo(() => {
-    return generateMonthlyReport(expenses, monthlyAllowance, selectedMonth, selectedYear);
-  }, [expenses, monthlyAllowance, selectedMonth, selectedYear]);
+    return generateMonthlyReport(expenses, profile.monthlyIncome ?? 0, selectedMonth, selectedYear);
+  }, [expenses, profile.monthlyIncome, selectedMonth, selectedYear]);
 
   // Export CSV
   const handleExportCsv = () => {
@@ -213,7 +201,24 @@ export default function ReportsPage() {
       />
 
       {/* Page Body */}
+      <ProfileGate profile={profile}>
       <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
+        {!loaded ? (
+          <ContentSkeleton />
+        ) : expenses.length === 0 ? (
+          <EmptyState
+            icon={FileText}
+            title="Belum ada transaksi untuk dilaporkan"
+            action={
+              <Link href="/dashboard" className={EMPTY_ACTION_CLASS}>
+                Catat Pengeluaran
+              </Link>
+            }
+          >
+            Laporan bulanan dan ekspor LPJ dibuat dari pengeluaran yang kamu catat. Mulai catat, laporan tersusun otomatis.
+          </EmptyState>
+        ) : (
+        <>
         {/* Summary Metric Cards */}
         <div className="print:hidden">
           <ReportSummaryCard summary={summary} />
@@ -294,7 +299,10 @@ export default function ReportsPage() {
             onExportCsv={handleExportCsv}
           />
         </div>
+        </>
+        )}
       </main>
+      </ProfileGate>
 
       {/* MOBILE STICKY FLOATING DOCK (md:hidden, hidden on print) */}
       <div className={`md:hidden fixed ${ACTION_BAR_BOTTOM} left-0 right-0 z-30 px-4 pointer-events-none flex justify-center print:hidden`}>
