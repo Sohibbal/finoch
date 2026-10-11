@@ -33,7 +33,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 // One line of character per envelope, from what it is for (its icon).
 const PERSONALITY: Record<string, string> = {
   utensils: "Paling rakus di tanggal muda.",
-  home: "Paling disiplin, ditagih tiap awal bulan tanpa ampun.",
+  home: "Kecil-kecil tapi rutin: laundry, galon, pulsa.",
   car: "Diam-diam boros kalau hujan dan ojol jadi pilihan.",
   coffee: "Paling gampang dirayu “ngopi bentar yuk”.",
   shield: "Jangan disentuh kecuali beneran darurat.",

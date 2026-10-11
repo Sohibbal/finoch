@@ -11,6 +11,8 @@ import { resetDemoData, seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { Note } from "@/components/press/note";
 import { Guilloche } from "@/components/press/guilloche";
 import { formatSerial } from "@/components/press/serial";
+import { getBills, getMonthlyBillAmount } from "@/lib/storage/bill-storage";
+import { rupiah } from "@/lib/format";
 import { Cap } from "@/components/press/denom";
 
 export default function ProfilePage() {
@@ -37,6 +39,13 @@ export default function ProfilePage() {
   const [demoMode, setDemoModeState] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   useEffect(() => setDemoModeState(isDemoMode()), []);
+
+  // With bills in Tagihan, their total is the month's fixed costs (monthLedger); say so next to the field.
+  const [billsInfo, setBillsInfo] = useState<{ count: number; total: number }>({ count: 0, total: 0 });
+  useEffect(() => {
+    const bills = getBills();
+    setBillsInfo({ count: bills.length, total: bills.reduce((sum, b) => sum + getMonthlyBillAmount(b), 0) });
+  }, []);
 
   // Pages read storage on mount, so a full reload switches every store to the other namespace.
   // Turning demo off keeps its data (scoped and never synced), so turning it back on shows the same samples.
@@ -279,7 +288,11 @@ export default function ProfilePage() {
 
               <MoneyField
                 label="Pengeluaran tetap per bulan"
-                hint="Sewa kos, listrik, pulsa data, dan kebutuhan pokok"
+                hint={
+                  billsInfo.count > 0
+                    ? `Tidak dipakai selama ada tagihan: jatah harian dan amplop memakai total ${billsInfo.count} tagihan rutin di Tagihan (${rupiah(billsInfo.total)}/bulan).`
+                    : "Sewa kos, listrik, pulsa data, dan kebutuhan pokok. Dipakai untuk jatah harian selama belum ada tagihan rutin di Tagihan."
+                }
                 value={formData.monthlyFixedExpenses}
                 onChange={(v) => setFormData({ ...formData, monthlyFixedExpenses: v })}
               />

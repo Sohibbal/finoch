@@ -10,9 +10,12 @@ import { PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { isDemoMode } from "@/lib/storage/local-storage";
+import { getBills } from "@/lib/storage/bill-storage";
+import { fixedCostScope } from "@/lib/financial/month-ledger";
 import { localDateKey } from "@/lib/date";
 import { rupiah } from "@/lib/format";
 import type { TransactionCandidate } from "@/types/financial-types";
+import type { RecurringBill } from "@/types/bill-types";
 
 type Preset = "default" | "cut_coffee" | "internship" | "delayed_allowance" | "rent_hike";
 
@@ -24,21 +27,21 @@ const PRESETS: Array<{ id: Exclude<Preset, "default">; title: string; note: stri
 ];
 
 export default function SimulatorPage() {
-  // Baseline dari profil keuangan pengguna (uang saku & pengeluaran tetap bulanan)
+  // Baseline: uang saku from the profile, fixed costs from the month ledger (Tagihan, else the profile).
   const profile = useFinancialProfile();
   const baselineMonthlyIncome = profile.monthlyIncome ?? 0;
-  const baselineMonthlyExpense = profile.fixedExpenses ?? 0;
-  const baselineNetSavings = baselineMonthlyIncome - baselineMonthlyExpense;
 
   // Interactive scenario variables
   const [expenseCuts, setExpenseCuts] = useState(200000); // hemat jajan kopi/sore 200rb
   const [incomeAddition, setIncomeAddition] = useState(0); // job magang/freelance
   const [goalAmount, setGoalAmount] = useState(6000000); // Laptop Kuliah / Dana Darurat Kos
 
-  // This month's expenses, the same rows the dashboard reads, so both notes print the dashboard's jatah.
+  // This month's expenses and bills, the same rows the dashboard reads, so both notes print the dashboard's jatah.
   const [transactions, setTransactions] = useState<TransactionCandidate[]>([]);
+  const [bills, setBills] = useState<RecurringBill[]>([]);
   useEffect(() => {
     let active = true;
+    setBills(getBills());
     Promise.all([
       // Demo mode shows only sample data: the server holds the user's real expenses.
       isDemoMode()
@@ -62,6 +65,21 @@ export default function SimulatorPage() {
     setIncomeAddition(p?.add ?? 0);
   };
 
+  const today = useMemo(() => localDateKey(new Date()), []);
+  const before = dailyJatah({
+    monthlyIncome: baselineMonthlyIncome,
+    monthlyFixedExpenses: profile.fixedExpenses ?? 0,
+    bills,
+    transactions,
+  });
+  const baselineMonthlyExpense = before.month.fixedCosts;
+  const baselineNetSavings = before.month.spendable;
+  const after = dailyJatah({
+    monthlyIncome: baselineMonthlyIncome + incomeAddition,
+    monthlyFixedExpenses: Math.max(0, baselineMonthlyExpense - expenseCuts),
+    transactions,
+  });
+
   // Run deterministic calculation
   const simulation = simulateWhatIfScenario({
     currentMonthlyIncome: baselineMonthlyIncome,
@@ -72,14 +90,6 @@ export default function SimulatorPage() {
   });
 
   const baselineMonthsToGoal = baselineNetSavings > 0 ? Math.ceil(goalAmount / baselineNetSavings) : Infinity;
-
-  const today = useMemo(() => localDateKey(new Date()), []);
-  const before = dailyJatah({ monthlyIncome: baselineMonthlyIncome, monthlyFixedExpenses: baselineMonthlyExpense, transactions });
-  const after = dailyJatah({
-    monthlyIncome: baselineMonthlyIncome + incomeAddition,
-    monthlyFixedExpenses: Math.max(0, baselineMonthlyExpense - expenseCuts),
-    transactions,
-  });
 
   return (
     <>
@@ -137,8 +147,8 @@ export default function SimulatorPage() {
                 })}
               </ul>
               <p className="text-meta text-ink-soft">
-                Titik awal dari profilmu: uang saku {rupiah(baselineMonthlyIncome)}/bulan, pengeluaran tetap{" "}
-                {rupiah(baselineMonthlyExpense)}/bulan.
+                Titik awal: uang saku {rupiah(baselineMonthlyIncome)}/bulan (dari profil), pengeluaran tetap{" "}
+                {rupiah(baselineMonthlyExpense)}/bulan ({fixedCostScope(before.month.fixedCostSource)}).
               </p>
             </section>
 

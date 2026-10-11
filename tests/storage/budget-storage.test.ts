@@ -143,4 +143,10 @@ describe("Budget Storage Module", () => {
     const rescaled = getEnvelopes(4000000);
     expect(rescaled.reduce((sum, e) => sum + e.allocatedAmount, 0)).toBe(4000000);
   });
+
+  it("rescales to the rupiah: envelopes that split the old amount split the whole new one", () => {
+    getEnvelopes(2000000);
+    const rescaled = getEnvelopes(1020001); // an odd spendable no ratio rounds to exactly
+    expect(rescaled.reduce((sum, e) => sum + e.allocatedAmount, 0)).toBe(1020001);
+  });
 });

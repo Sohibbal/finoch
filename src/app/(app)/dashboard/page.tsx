@@ -17,8 +17,10 @@ import { localDateKey, parseDate } from "@/lib/date";
 import { rupiah, shortDate } from "@/lib/format";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { getWallets } from "@/lib/storage/wallet-storage";
+import { getBills } from "@/lib/storage/bill-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
 import type { TransactionCandidate } from "@/types/financial-types";
+import type { RecurringBill } from "@/types/bill-types";
 import { PageHeader } from "@/components/layout/page-header";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { loadFinancialProfile } from "@/hooks/use-financial-profile";
@@ -56,6 +58,8 @@ export default function DashboardPage() {
 
   const [transactions, setTransactions] = useState<DashTx[]>([]);
   const [txLoaded, setTxLoaded] = useState(false);
+  // Tagihan's bills: when there are any, their total is the month's fixed costs (see monthLedger).
+  const [bills, setBills] = useState<RecurringBill[]>([]);
 
   // Server rows plus local ones not synced yet, so a just-saved expense doesn't vanish until sync.
   const loadTransactions = useCallback(async () => {
@@ -86,6 +90,7 @@ export default function DashboardPage() {
         unsynced: !demo && (e.syncStatus === "pending" || e.syncStatus === "failed"),
       }))
     );
+    setBills(getBills());
     setTxLoaded(true);
   }, []);
 
@@ -151,9 +156,10 @@ export default function DashboardPage() {
       dailyJatah({
         monthlyIncome: profile.monthlyIncome,
         monthlyFixedExpenses: profile.monthlyFixedExpenses,
+        bills,
         transactions,
       }),
-    [profile.monthlyIncome, profile.monthlyFixedExpenses, transactions]
+    [profile.monthlyIncome, profile.monthlyFixedExpenses, bills, transactions]
   );
 
   // Today's stubs from the one that pushed spending past the jatah onwards.

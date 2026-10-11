@@ -13,6 +13,7 @@ import { BillCalendarMatrix } from "@/components/bills/bill-calendar-matrix";
 import { BillShieldCard } from "@/components/bills/bill-shield-card";
 import { BillFormModal } from "@/components/bills/bill-form-modal";
 import { rupiah } from "@/lib/format";
+import { BILL_PAYMENT_PREFIX, monthLedger } from "@/lib/financial/month-ledger";
 import { PageHeader } from "@/components/layout/page-header";
 
 const PRIMARY_ACTION =
@@ -46,6 +47,17 @@ export default function BillsPage() {
 
   const summary = useMemo(() => getBillSummary(today), [bills, today]);
   const schedule = useMemo(() => billSchedule(bills, today), [bills, today]);
+  // Spendable only: the ledger skips bill payments, so no expenses are needed here.
+  const month =
+    profile.monthlyIncome === null
+      ? undefined
+      : monthLedger({
+          monthlyIncome: profile.monthlyIncome,
+          profileFixedCosts: profile.fixedExpenses ?? 0,
+          bills,
+          transactions: [],
+          now: today,
+        });
 
   const query = search.trim().toLowerCase();
   const rows = schedule.filter(({ bill }) => {
@@ -86,7 +98,7 @@ export default function BillsPage() {
     // Auto-record to Finoch local expenses
     try {
       await expenseStorage.saveExpense({
-        itemName: `Bayar Tagihan: ${target.name}`,
+        itemName: `${BILL_PAYMENT_PREFIX}${target.name}`,
         amount: target.amount,
         category: "Bills & Utilities",
         userId: user?.id || "guest",
@@ -121,7 +133,12 @@ export default function BillsPage() {
 
       <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-8 items-start">
         <div className="lg:col-span-2 space-y-5">
-          <BillShieldCard summary={summary} monthlyIncome={profile.monthlyIncome ?? undefined} />
+          <BillShieldCard
+            summary={summary}
+            monthlyIncome={profile.monthlyIncome ?? undefined}
+            month={month}
+            profileFixedCosts={profile.fixedExpenses ?? undefined}
+          />
 
           <div className="flex flex-col sm:flex-row sm:items-center gap-3">
             <div role="group" aria-label="Saring status tagihan" className="flex flex-wrap gap-2">
