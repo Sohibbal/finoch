@@ -37,16 +37,21 @@ export function calculateFinancialRunway(params: {
   const daysPassed = Math.max(1, day);
   const daysRemainingInMonth = Math.max(1, totalDaysInMonth - day + 1);
 
-  const remainingCash = Math.max(0, params.totalIncome - params.totalExpensesThisMonth);
+  // Negative/NaN totals are invalid input: treating them as 0 keeps them from inflating cash
+  const sanitize = (value: number) => (Number.isFinite(value) && value > 0 ? value : 0);
+  const totalIncome = sanitize(params.totalIncome);
+  const totalExpensesThisMonth = sanitize(params.totalExpensesThisMonth);
+
+  const remainingCash = Math.max(0, totalIncome - totalExpensesThisMonth);
 
   // If deficit
   if (remainingCash <= 0) {
     return {
       runwayDays: 0,
       remainingCash: 0,
-      currentBurnRate: Math.round(params.totalExpensesThisMonth / daysPassed),
+      currentBurnRate: Math.round(totalExpensesThisMonth / daysPassed),
       targetDailyToSurvive: 0,
-      dailyCutNeeded: Math.round(params.totalExpensesThisMonth / daysPassed),
+      dailyCutNeeded: Math.round(totalExpensesThisMonth / daysPassed),
       daysPassed,
       daysRemainingInMonth,
       totalDaysInMonth,
@@ -59,11 +64,11 @@ export function calculateFinancialRunway(params: {
 
   // Calculate burn rate per day
   let currentBurnRate = 0;
-  if (params.totalExpensesThisMonth > 0) {
-    currentBurnRate = Math.round(params.totalExpensesThisMonth / daysPassed);
+  if (totalExpensesThisMonth > 0) {
+    currentBurnRate = Math.round(totalExpensesThisMonth / daysPassed);
   } else {
     // If no expenses yet, estimate based on expected uniform monthly pace
-    currentBurnRate = Math.round(params.totalIncome / totalDaysInMonth);
+    currentBurnRate = Math.round(totalIncome / totalDaysInMonth);
   }
 
   // Avoid division by zero

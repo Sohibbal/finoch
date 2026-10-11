@@ -1,5 +1,6 @@
 import { MicroLeakItem, LeakAuditSummary, LeakCategory } from "@/types/audit-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
+import { isSameLocalMonth, parseDate } from "@/lib/date";
 
 export interface ExpenseAuditCandidate {
   id?: string;
@@ -53,16 +54,29 @@ const LEAK_PATTERNS: Array<{
   },
 ];
 
+// Whole-word matchers so "coffee" doesn't hit "fee" and "badminton" doesn't hit "admin".
+const LEAK_MATCHERS = LEAK_PATTERNS.map((pattern) => ({
+  pattern,
+  regexes: pattern.keywords.map(
+    (kw) => new RegExp(`\\b${kw.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\b`, "i")
+  ),
+}));
+
 /**
  * Analyzes expenses for micro-leaks ("bocor halus") and computes shock-value metrics.
  */
 export function auditMicroExpenses(
   expenses: ExpenseAuditCandidate[],
-  monthlyAllowance: number = 2000000
+  monthlyAllowance: number = 2000000,
+  referenceDate: Date = new Date()
 ): LeakAuditSummary {
   const detectedItems: MicroLeakItem[] = [];
 
   for (const exp of expenses) {
+    // Only this month's expenses count toward the monthly leak total (undated = today, as below)
+    const date = exp.createdAt ? parseDate(exp.createdAt) : referenceDate;
+    if (!date || !isSameLocalMonth(date, referenceDate)) continue;
+
     const name = (exp.itemName || "").toLowerCase();
     const cat = (exp.category || "").toLowerCase();
     const amount = exp.amount || 0;
@@ -70,10 +84,8 @@ export function auditMicroExpenses(
     let matched = false;
 
     // Check specific patterns
-    for (const pattern of LEAK_PATTERNS) {
-      const isKeywordMatch = pattern.keywords.some(
-        (kw) => name.includes(kw) || cat.includes(kw)
-      );
+    for (const { pattern, regexes } of LEAK_MATCHERS) {
+      const isKeywordMatch = regexes.some((re) => re.test(name) || re.test(cat));
 
       if (isKeywordMatch && amount <= pattern.maxAmount) {
         detectedItems.push({
