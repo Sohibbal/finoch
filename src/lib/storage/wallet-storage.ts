@@ -1,6 +1,7 @@
-import { StudentWallet, WalletTransferRecord, WalletSummary } from "@/types/wallet-types";
-import { calculateWalletSummary } from "@/lib/financial/wallet-engine";
-import { getStorage, readArray } from "@/lib/storage/local-storage";
+import { StudentWallet, WalletTransferRecord } from "@/types/wallet-types";
+import type { Expense } from "@/lib/types/expense";
+import { computeWalletBalances } from "@/lib/financial/wallet-engine";
+import { getStorage, isDemoMode, readArray } from "@/lib/storage/local-storage";
 
 const WALLETS_STORAGE_KEY = "finoch_student_wallets_v1";
 const WALLET_TRANSFERS_STORAGE_KEY = "finoch_student_wallet_transfers_v1";
@@ -11,7 +12,7 @@ const createDefaultWallets = (): StudentWallet[] => [
     id: "wallet-cash-1",
     name: "Dompet Tunai Fisik",
     type: "cash",
-    balance: 120000,
+    openingBalance: 120000,
     color: "emerald",
     icon: "wallet",
     isPrimary: false,
@@ -22,7 +23,7 @@ const createDefaultWallets = (): StudentWallet[] => [
     id: "wallet-bank-1",
     name: "Rekening BCA Utama",
     type: "bank",
-    balance: 1450000,
+    openingBalance: 1450000,
     color: "blue",
     icon: "landmark",
     accountNumber: "1234-5678-90",
@@ -34,7 +35,7 @@ const createDefaultWallets = (): StudentWallet[] => [
     id: "wallet-ewallet-1",
     name: "GoPay & ShopeePay",
     type: "ewallet",
-    balance: 85000,
+    openingBalance: 85000,
     color: "purple",
     icon: "smartphone",
     isPrimary: false,
@@ -44,12 +45,36 @@ const createDefaultWallets = (): StudentWallet[] => [
 ];
 
 /**
- * Loads wallets from localStorage or defaults.
+ * Wallets stored before balances were derived kept a mutable `balance` that already included every
+ * transfer. That balance minus the transfer history becomes the saldo awal, so the derived balance
+ * re-applies each transfer exactly once. Returns null when nothing needs migrating.
+ */
+function migrateStoredBalances(wallets: StudentWallet[]): StudentWallet[] | null {
+  if (wallets.every((w) => typeof w.openingBalance === "number")) return null;
+  const transferDelta = computeWalletBalances(
+    wallets.map((w) => ({ ...w, openingBalance: 0 })),
+    getWalletTransferHistory(),
+    []
+  );
+  return wallets.map((w, i) => {
+    if (typeof w.openingBalance === "number") return w;
+    const { balance, ...rest } = w as StudentWallet & { balance?: number };
+    return { ...rest, openingBalance: (Number(balance) || 0) - transferDelta[i].balance };
+  });
+}
+
+/**
+ * Loads wallets from localStorage; sample wallets are seeded in demo mode only.
  */
 export function getWallets(): StudentWallet[] {
   // Defaults only when nothing was ever stored; an emptied list stays empty.
   const stored = readArray<StudentWallet>(WALLETS_STORAGE_KEY);
-  if (stored) return stored;
+  if (stored) {
+    const migrated = migrateStoredBalances(stored);
+    if (migrated) saveWallets(migrated);
+    return migrated ?? stored;
+  }
+  if (!isDemoMode()) return [];
   const defaults = createDefaultWallets();
   saveWallets(defaults);
   return defaults;
@@ -75,10 +100,10 @@ export function saveWallets(wallets: StudentWallet[]): void {
 export function addWallet(
   data: Omit<StudentWallet, "id" | "updatedAt">
 ): StudentWallet {
-  if (!Number.isFinite(data.balance) || data.balance < 0) {
+  if (!Number.isFinite(data.openingBalance) || data.openingBalance < 0) {
     throw new Error("Saldo awal dompet tidak valid");
   }
-  const wallets = getWallets();
+  const wallets = data.isDefault ? clearDefault(getWallets()) : getWallets();
   const newWallet: StudentWallet = {
     ...data,
     id: `wallet-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
@@ -97,7 +122,7 @@ export function updateWallet(
   id: string,
   updates: Partial<Omit<StudentWallet, "id">>
 ): StudentWallet | null {
-  const wallets = getWallets();
+  const wallets = updates.isDefault ? clearDefault(getWallets()) : getWallets();
   const index = wallets.findIndex((w) => w.id === id);
   if (index === -1) return null;
 
@@ -111,6 +136,11 @@ export function updateWallet(
   return wallets[index];
 }
 
+/** Only one wallet can be the default. */
+function clearDefault(wallets: StudentWallet[]): StudentWallet[] {
+  return wallets.map((w) => (w.isDefault ? { ...w, isDefault: false } : w));
+}
+
 /**
  * Deletes a wallet.
  */
@@ -121,14 +151,17 @@ export function deleteWallet(id: string): void {
 }
 
 /**
- * Transfers funds between wallets (e.g. Tarik Tunai atau Top-up e-wallet) and records transfer log.
+ * Transfers funds between wallets (e.g. Tarik Tunai atau Top-up e-wallet) by recording it in the
+ * transfer log; balances are derived from that log. `expenses` are the user's current expenses,
+ * needed to check the source wallet's live balance.
  */
 export function transferWalletFunds(
   fromId: string,
   toId: string,
   amount: number,
   adminFee: number = 0,
-  reason: string = "Pindah saldo dompet"
+  reason: string = "Pindah saldo dompet",
+  expenses: Expense[] = []
 ): WalletTransferRecord {
   if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error("Nominal transfer harus lebih dari Rp 0");
@@ -140,39 +173,31 @@ export function transferWalletFunds(
     throw new Error("Tidak bisa transfer ke dompet yang sama");
   }
 
-  const wallets = getWallets();
-  const fromIndex = wallets.findIndex((w) => w.id === fromId);
-  const toIndex = wallets.findIndex((w) => w.id === toId);
+  const transfers = getWalletTransferHistory();
+  const wallets = computeWalletBalances(getWallets(), transfers, expenses);
+  const from = wallets.find((w) => w.id === fromId);
+  const to = wallets.find((w) => w.id === toId);
 
-  if (fromIndex === -1 || toIndex === -1) {
+  if (!from || !to) {
     throw new Error("Dompet asal atau tujuan tidak ditemukan");
   }
 
-  const totalDeduction = amount + adminFee;
-  if (wallets[fromIndex].balance < totalDeduction) {
-    throw new Error(`Saldo ${wallets[fromIndex].name} tidak mencukupi untuk transfer nominal + biaya admin`);
+  if (from.balance < amount + adminFee) {
+    throw new Error(`Saldo ${from.name} tidak mencukupi untuk transfer nominal + biaya admin`);
   }
-
-  wallets[fromIndex].balance -= totalDeduction;
-  wallets[toIndex].balance += amount;
-  wallets[fromIndex].updatedAt = new Date().toISOString();
-  wallets[toIndex].updatedAt = new Date().toISOString();
-
-  saveWallets(wallets);
 
   const record: WalletTransferRecord = {
     id: `wtr-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
     fromWalletId: fromId,
-    fromWalletName: wallets[fromIndex].name,
+    fromWalletName: from.name,
     toWalletId: toId,
-    toWalletName: wallets[toIndex].name,
+    toWalletName: to.name,
     amount,
     adminFee,
     reason,
     createdAt: new Date().toISOString(),
   };
 
-  const transfers = getWalletTransferHistory();
   const storage = getStorage();
   if (storage) {
     storage.setItem(WALLET_TRANSFERS_STORAGE_KEY, JSON.stringify([record, ...transfers]));
@@ -186,11 +211,4 @@ export function transferWalletFunds(
  */
 export function getWalletTransferHistory(): WalletTransferRecord[] {
   return readArray<WalletTransferRecord>(WALLET_TRANSFERS_STORAGE_KEY) ?? [];
-}
-
-/**
- * Gets aggregated summary.
- */
-export function getWalletSummary(): WalletSummary {
-  return calculateWalletSummary(getWallets());
 }

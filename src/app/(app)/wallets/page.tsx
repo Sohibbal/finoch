@@ -16,7 +16,9 @@ import {
   WalletSummary,
   WalletTransferRecord,
   WalletType,
+  WalletWithBalance,
 } from "@/types/wallet-types";
+import type { Expense } from "@/lib/types/expense";
 import {
   getWallets,
   addWallet,
@@ -24,9 +26,13 @@ import {
   deleteWallet,
   transferWalletFunds,
   getWalletTransferHistory,
-  getWalletSummary,
 } from "@/lib/storage/wallet-storage";
-import { detectCriticalBalances } from "@/lib/financial/wallet-engine";
+import { expenseStorage } from "@/lib/storage/expense-storage";
+import {
+  calculateWalletSummary,
+  computeWalletBalances,
+  detectCriticalBalances,
+} from "@/lib/financial/wallet-engine";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
 
 import { WalletCardMobile } from "@/components/wallets/wallet-card-mobile";
@@ -38,31 +44,39 @@ import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
 
 export default function WalletsPage() {
 
-  const [wallets, setWallets] = useState<StudentWallet[]>([]);
+  const [storedWallets, setStoredWallets] = useState<StudentWallet[]>([]);
   const [transfers, setTransfers] = useState<WalletTransferRecord[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
   const [filterType, setFilterType] = useState<"all" | WalletType>("all");
 
   // Modal states
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingWallet, setEditingWallet] = useState<StudentWallet | null>(null);
+  const [editingWallet, setEditingWallet] = useState<WalletWithBalance | null>(null);
 
   const [isTransferOpen, setIsTransferOpen] = useState(false);
-  const [transferSourceWallet, setTransferSourceWallet] = useState<StudentWallet | null>(null);
+  const [transferSourceWallet, setTransferSourceWallet] = useState<WalletWithBalance | null>(null);
 
   const loadData = useCallback(() => {
     const loadedWallets = getWallets();
     const loadedTransfers = getWalletTransferHistory();
-    setWallets(loadedWallets);
+    setStoredWallets(loadedWallets);
     setTransfers(loadedTransfers);
   }, []);
 
   useEffect(() => {
     loadData();
+    expenseStorage.getExpenses().then(setExpenses).catch((err) => {
+      console.error("Gagal memuat pengeluaran:", err);
+    });
   }, [loadData]);
 
-  const summary: WalletSummary = useMemo(() => {
-    return getWalletSummary();
-  }, [wallets]);
+  // Balances are derived: saldo awal + transfers - admin fees - spending charged to each wallet.
+  const wallets: WalletWithBalance[] = useMemo(
+    () => computeWalletBalances(storedWallets, transfers, expenses),
+    [storedWallets, transfers, expenses]
+  );
+
+  const summary: WalletSummary = useMemo(() => calculateWalletSummary(wallets), [wallets]);
 
   const filteredWallets = useMemo(() => {
     if (filterType === "all") return wallets;
@@ -95,7 +109,7 @@ export default function WalletsPage() {
     adminFee: number,
     reason: string
   ) => {
-    transferWalletFunds(fromId, toId, amount, adminFee, reason);
+    transferWalletFunds(fromId, toId, amount, adminFee, reason, expenses);
     loadData();
   };
 
@@ -104,12 +118,12 @@ export default function WalletsPage() {
     setIsFormOpen(true);
   };
 
-  const handleOpenEdit = (wallet: StudentWallet) => {
+  const handleOpenEdit = (wallet: WalletWithBalance) => {
     setEditingWallet(wallet);
     setIsFormOpen(true);
   };
 
-  const handleOpenTransfer = (source?: StudentWallet) => {
+  const handleOpenTransfer = (source?: WalletWithBalance) => {
     setTransferSourceWallet(source || null);
     setIsTransferOpen(true);
   };
