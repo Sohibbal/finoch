@@ -4,7 +4,6 @@ import {
   toTransaction,
   currentMonthTransactions,
   splitNeedsWants,
-  buildMonthlyTrend,
 } from "@/components/dashboard/dashboard-data";
 import type { TransactionCandidate } from "@/types/financial-types";
 
@@ -26,6 +25,12 @@ const tx = (date: string, amount: number, category = "Food & Drinks", spendingTy
 });
 
 describe("mergeExpenses", () => {
+  it("hides a server row once this device deleted it (undo, record sheet) until sync catches up", () => {
+    const server = [row("a", "2026-10-01T10:00:00Z"), row("b", "2026-10-01T09:00:00Z")];
+    const local = [{ ...row("a", "2026-10-01T10:05:00Z"), isDeleted: true }];
+    expect(mergeExpenses(server, local).map((e) => e.id)).toEqual(["b"]);
+  });
+
   it("keeps unsynced local expenses next to server ones", () => {
     const merged = mergeExpenses([row("a", "2026-10-01T10:00:00Z")], [row("b", "2026-10-02T10:00:00Z")]);
     expect(merged.map((e) => e.id)).toEqual(["b", "a"]);
@@ -76,27 +81,5 @@ describe("month scoping", () => {
 
   it("splits needs/wants from the same month-scoped list", () => {
     expect(splitNeedsWants(currentMonthTransactions(txs, now))).toEqual({ needs: 100, wants: 200 });
-  });
-});
-
-describe("buildMonthlyTrend", () => {
-  it("is empty when there is nothing to chart", () => {
-    expect(buildMonthlyTrend([], new Date(2026, 9, 15))).toEqual([]);
-    expect(buildMonthlyTrend([tx("2024-01-01", 100)], new Date(2026, 9, 15))).toEqual([]);
-  });
-
-  it("sums real expenses per month and category for the last 4 months", () => {
-    const trend = buildMonthlyTrend(
-      [
-        tx("2026-10-02", 100, "Food & Drinks"),
-        tx("2026-10-03", 50, "Transportation"),
-        tx("2026-08-10", 300, "Bills & Utilities"),
-        tx("2026-01-10", 999, "Food & Drinks"),
-      ],
-      new Date(2026, 9, 15)
-    );
-    expect(trend.map((m) => m.month)).toEqual(["Jul", "Agu", "Sep", "Okt (Ini)"]);
-    expect(trend[3]).toMatchObject({ food: 100, transport: 50, bills: 0 });
-    expect(trend[1]).toMatchObject({ bills: 300 });
   });
 });

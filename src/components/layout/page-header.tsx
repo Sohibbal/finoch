@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, UserRoundCog, WifiOff, type LucideIcon } from "lucide-react";
+import { ArrowLeft, FlaskConical, UserRoundCog, WifiOff, type LucideIcon } from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { BrandLogo } from "@/components/brand/brand-logo";
@@ -18,7 +18,10 @@ interface PageHeaderProps {
   className?: string;
 }
 
-/** Floating glass "pill" header shared by every app page. */
+/**
+ * Printed masthead shared by every app page: solid paper, one hairline rule, no glass.
+ * The title wraps instead of truncating; on narrow screens the actions drop below it.
+ */
 export function PageHeader({ title, subtitle, actions, className = "" }: PageHeaderProps) {
   const router = useRouter();
   const isDashboard = usePathname() === "/dashboard";
@@ -37,48 +40,47 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
   }, []);
 
   return (
-    <header className={`sticky top-0 z-40 px-4 sm:px-6 pt-[calc(1rem+env(safe-area-inset-top))] pb-2 ${className}`}>
-      <div className="max-w-6xl mx-auto rounded-full bg-white/70 dark:bg-black/50 backdrop-blur-2xl border border-white/20 dark:border-white/10 px-4 py-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.04)] flex items-center justify-between gap-2 transition-all">
-        {/* Left: Back Button, Mobile Brand & Title */}
-        <div className="flex items-center gap-2.5 min-w-0">
+    <header
+      className={`sticky top-0 z-40 bg-paper border-b border-ink/15 pt-[env(safe-area-inset-top)] print:static ${className}`}
+    >
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1 basis-48">
           {!isDashboard && (
             <button
               type="button"
               onClick={() => router.push("/dashboard")}
-              className="w-8 h-8 rounded-full flex items-center justify-center text-navy-700 dark:text-cream-200 hover:bg-cream-200/60 dark:hover:bg-white/10 transition-colors shrink-0"
-              aria-label="Kembali ke Dashboard"
+              className="-ml-2 w-11 h-11 rounded-full flex items-center justify-center text-ink hover:bg-ink/5 transition-colors shrink-0"
+              aria-label="Kembali ke Beranda"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-5 h-5" />
             </button>
           )}
-          <Link href="/dashboard" className="md:hidden shrink-0 flex items-center" aria-label="Finoch Beranda">
-            <BrandLogo variant="symbol" className="w-5 h-5 shrink-0" />
+          {/* On phones the mark only sits on Beranda: subpages already have the back arrow, and the title needs the room. */}
+          <Link href="/dashboard" className={`${isDashboard ? "md:hidden" : "hidden"} shrink-0 flex items-center`} aria-label="Finoch Beranda">
+            <BrandLogo variant="symbol" className="w-6 h-6 shrink-0" />
           </Link>
           <div className="min-w-0">
             {!isDashboard && <Breadcrumbs className="hidden md:flex mb-0.5" />}
-            <div className="flex items-center gap-2 min-w-0">
-              <h1 className="text-sm font-bold text-navy-950 dark:text-white tracking-wide truncate">{title}</h1>
-              {demo && (
-                <Link
-                  href="/profile"
-                  title="Data contoh aktif. Matikan di halaman Profil."
-                  className="shrink-0 px-2 py-0.5 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold border border-amber-200 dark:border-amber-800"
-                >
-                  Mode Demo
-                </Link>
-              )}
-            </div>
-            {subtitle && (
-              <p className="text-[10px] text-navy-500 dark:text-cream-400 hidden sm:block truncate">{subtitle}</p>
-            )}
+            <h1 className="font-display text-head font-bold text-ink break-words">{title}</h1>
+            {subtitle && <p className="text-meta text-ink-soft hidden sm:block">{subtitle}</p>}
           </div>
         </div>
 
-        {/* Right: Actions */}
-        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-          <ThemeToggle />
+        <div className="flex items-center gap-2 shrink-0 ml-auto">
+          <ThemeToggle className="hidden md:inline-flex" />
           {actions}
         </div>
+
+        {/* Its own line under the title row, so a wrapped title never collides with it. Ink, not a status hue. */}
+        {demo && (
+          <p className="basis-full text-meta text-ink-soft">
+            <Link href="/profile" className="inline-flex items-center gap-1 min-h-6 font-semibold text-ink underline underline-offset-2 decoration-ink/40 hover:decoration-ink">
+              <FlaskConical className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              Mode Demo
+            </Link>{" "}
+            · data contoh, matikan di Profil
+          </p>
+        )}
       </div>
     </header>
   );
@@ -136,7 +138,7 @@ export function ProfileGate({ profile, children }: ProfileGateProps) {
 }
 
 export const EMPTY_ACTION_CLASS =
-  "inline-block px-5 py-2.5 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs transition-colors";
+  "inline-flex items-center min-h-11 px-5 rounded-full bg-ink hover:bg-ink/90 text-paper-sheet dark:text-paper font-semibold text-body transition-colors";
 
 interface EmptyStateProps {
   icon: LucideIcon;
@@ -146,15 +148,13 @@ interface EmptyStateProps {
   children: React.ReactNode;
 }
 
-/** Shared zero-data card so empty pages read as intentional: icon, short copy, primary action. */
+/** Shared zero-data sheet so empty pages read as intentional: icon, short copy, primary action. */
 export function EmptyState({ icon: Icon, title, action, children }: EmptyStateProps) {
   return (
-    <div className="max-w-md mx-auto mt-6 p-6 rounded-3xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 text-center space-y-3 shadow-sm">
-      <div className="w-12 h-12 mx-auto rounded-2xl bg-cream-100 dark:bg-navy-900 flex items-center justify-center">
-        <Icon className="w-5 h-5 text-navy-700 dark:text-cream-200" />
-      </div>
-      <h2 className="text-base font-bold text-navy-950 dark:text-cream-50">{title}</h2>
-      <p className="text-xs text-navy-600 dark:text-cream-300/70">{children}</p>
+    <div className="max-w-md mx-auto mt-6 p-6 bg-paper-sheet border border-ink/20 text-center space-y-3">
+      <Icon className="w-6 h-6 mx-auto text-ink" />
+      <h2 className="font-display text-head font-bold text-ink">{title}</h2>
+      <p className="text-body text-ink-soft">{children}</p>
       {action && <div className="flex flex-wrap justify-center gap-2 pt-1">{action}</div>}
     </div>
   );
@@ -164,10 +164,10 @@ export function EmptyState({ icon: Icon, title, action, children }: EmptyStatePr
 export function ContentSkeleton() {
   return (
     <div className="space-y-4" aria-busy="true">
-      <div className="h-36 rounded-3xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+      <div className="h-36 bg-paper-deep motion-safe:animate-pulse" />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="h-28 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
-        <div className="h-28 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+        <div className="h-28 bg-paper-deep motion-safe:animate-pulse" />
+        <div className="h-28 bg-paper-deep motion-safe:animate-pulse" />
       </div>
     </div>
   );

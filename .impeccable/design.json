@@ -1,0 +1,514 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-11T07:47:33.996Z",
+  "title": "Design System: Finoch",
+  "extensions": {
+    "colorMeta": {
+      "paper": {
+        "role": "neutral",
+        "displayName": "Note Paper",
+        "canonical": "oklch(95.3% 0.021 88.7)",
+        "dark": "#08121F",
+        "tonalRamp": [
+          "#0F0B03",
+          "#282418",
+          "#443F33",
+          "#625D50",
+          "#858072",
+          "#AAA496",
+          "#D0CABC",
+          "#F4EEDF"
+        ]
+      },
+      "paper-sheet": {
+        "role": "neutral",
+        "displayName": "Printed Sheet",
+        "canonical": "oklch(98.0% 0.010 87.5)",
+        "dark": "#0B192C",
+        "tonalRamp": [
+          "#0D0B07",
+          "#26241F",
+          "#423F3A",
+          "#605D57",
+          "#83807A",
+          "#A7A49E",
+          "#CDCAC3",
+          "#F1EEE7"
+        ]
+      },
+      "paper-deep": {
+        "role": "neutral",
+        "displayName": "Pressed Paper",
+        "canonical": "oklch(92.0% 0.028 88.8)",
+        "dark": "#102238",
+        "tonalRamp": [
+          "#100A01",
+          "#292314",
+          "#463F2F",
+          "#645D4C",
+          "#87806E",
+          "#ACA491",
+          "#D2CAB6",
+          "#F6EEDA"
+        ]
+      },
+      "ink": {
+        "role": "primary",
+        "displayName": "Intaglio Navy",
+        "canonical": "oklch(21.2% 0.043 256.5)",
+        "dark": "#F5EFE0",
+        "tonalRamp": [
+          "#020B1D",
+          "#162538",
+          "#314156",
+          "#4E5F76",
+          "#70829A",
+          "#94A6C0",
+          "#B9CCE7",
+          "#E5EFFE"
+        ]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "Soft Ink",
+        "canonical": "oklch(48.1% 0.059 253.3)",
+        "dark": "#A9B8CC",
+        "tonalRamp": [
+          "#000B1E",
+          "#0D2540",
+          "#28415E",
+          "#46607F",
+          "#6783A3",
+          "#8BA7C9",
+          "#B0CDF1",
+          "#E4F0FE"
+        ]
+      },
+      "aman": {
+        "role": "secondary",
+        "displayName": "Status Green (Aman), fill",
+        "canonical": "oklch(62.1% 0.115 157.8)",
+        "dark": "#5BB487",
+        "tonalRamp": [
+          "#000F06",
+          "#002D18",
+          "#004D2D",
+          "#057044",
+          "#379565",
+          "#5FBA88",
+          "#86E1AE",
+          "#C4FFDB"
+        ]
+      },
+      "aman-ink": {
+        "role": "secondary",
+        "displayName": "Status Green (Aman), text",
+        "canonical": "oklch(50.6% 0.095 158.3)",
+        "dark": "#5BB487",
+        "tonalRamp": [
+          "#000F06",
+          "#002D18",
+          "#034D2E",
+          "#226D49",
+          "#49916B",
+          "#6EB78E",
+          "#94DEB3",
+          "#C4FFDB"
+        ]
+      },
+      "mepet": {
+        "role": "secondary",
+        "displayName": "Status Ochre (Mepet), fill",
+        "canonical": "oklch(62.1% 0.115 72.8)",
+        "dark": "#D19A46",
+        "tonalRamp": [
+          "#130900",
+          "#341F00",
+          "#593800",
+          "#805304",
+          "#A97422",
+          "#D0984C",
+          "#F8BF72",
+          "#FEEBD4"
+        ]
+      },
+      "mepet-ink": {
+        "role": "secondary",
+        "displayName": "Status Ochre (Mepet), text",
+        "canonical": "oklch(51.7% 0.098 72.7)",
+        "dark": "#D19A46",
+        "tonalRamp": [
+          "#130900",
+          "#341F00",
+          "#583802",
+          "#7F530C",
+          "#A47638",
+          "#CA9B5D",
+          "#F2C182",
+          "#FFEBD4"
+        ]
+      },
+      "habis": {
+        "role": "secondary",
+        "displayName": "Status Red (Habis), fill",
+        "canonical": "oklch(59.0% 0.178 27.9)",
+        "dark": "#E36A60",
+        "tonalRamp": [
+          "#1F0000",
+          "#4B0002",
+          "#7C0206",
+          "#AB1D1A",
+          "#D6493F",
+          "#FF7265",
+          "#FFB5AB",
+          "#FEE9E6"
+        ]
+      },
+      "habis-ink": {
+        "role": "secondary",
+        "displayName": "Status Red (Habis), text",
+        "canonical": "oklch(51.9% 0.165 28.3)",
+        "dark": "#E36A60",
+        "tonalRamp": [
+          "#1F0000",
+          "#4B0102",
+          "#7D0004",
+          "#A72720",
+          "#D05044",
+          "#FB7667",
+          "#FEB5AB",
+          "#FEE9E6"
+        ]
+      },
+      "denom-blue": {
+        "role": "tertiary",
+        "displayName": "Denomination Blue",
+        "canonical": "oklch(53.5% 0.128 253.1)",
+        "dark": "#6FA0DA",
+        "tonalRamp": [
+          "#000B1E",
+          "#002449",
+          "#003F79",
+          "#1D5EA3",
+          "#4383CA",
+          "#68A8F3",
+          "#A6CEFE",
+          "#E4F0FF"
+        ]
+      },
+      "denom-violet": {
+        "role": "tertiary",
+        "displayName": "Denomination Violet",
+        "canonical": "oklch(51.2% 0.131 307.5)",
+        "dark": "#A988C8",
+        "tonalRamp": [
+          "#140023",
+          "#350153",
+          "#522674",
+          "#724696",
+          "#9569BC",
+          "#BB8DE4",
+          "#DDB9FF",
+          "#F4EAFE"
+        ]
+      },
+      "denom-teal": {
+        "role": "tertiary",
+        "displayName": "Denomination Teal",
+        "canonical": "oklch(48.6% 0.073 205.1)",
+        "dark": "#5FB3B9",
+        "tonalRamp": [
+          "#000E10",
+          "#012A2E",
+          "#04494F",
+          "#1B6971",
+          "#448D95",
+          "#6AB2BB",
+          "#90D9E1",
+          "#C9F9FE"
+        ]
+      },
+      "denom-slate": {
+        "role": "tertiary",
+        "displayName": "Denomination Slate",
+        "canonical": "oklch(44.7% 0.034 261.3)",
+        "dark": "#AEB8C6",
+        "tonalRamp": [
+          "#040B19",
+          "#1B2435",
+          "#364052",
+          "#535E71",
+          "#758195",
+          "#99A5BB",
+          "#BECBE2",
+          "#E6EFFE"
+        ]
+      },
+      "scrim": {
+        "role": "neutral",
+        "displayName": "Scrim (used at 50%)",
+        "canonical": "oklch(16.3% 0.028 259.9)",
+        "dark": "#070E1A",
+        "tonalRamp": [
+          "#050B17",
+          "#1C2432",
+          "#37404F",
+          "#545E6E",
+          "#778191",
+          "#9BA5B7",
+          "#C0CBDD",
+          "#E6EFFE"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "numeral": {
+        "displayName": "Numeral",
+        "purpose": "The one giant engraved money figure per sheet; Rp prefix set at headline size."
+      },
+      "headline": {
+        "displayName": "Head (22)",
+        "purpose": "Page, section and dialog titles, note name plates."
+      },
+      "body": {
+        "displayName": "Body (15)",
+        "purpose": "Everything read or tapped; list amounts."
+      },
+      "label": {
+        "displayName": "Meta (12)",
+        "purpose": "Field labels, meta lines, tab labels; the 12px floor."
+      },
+      "stamp": {
+        "displayName": "Stamp",
+        "purpose": "Uppercase only inside rubber stamps and the Catat seal."
+      },
+      "serial": {
+        "displayName": "Serial",
+        "purpose": "FNC·DDMMYY·NNNN on every note and stub."
+      }
+    },
+    "shadows": [
+      {
+        "name": "seal-paper-ring",
+        "value": "0 0 0 4px rgb(var(--paper))",
+        "purpose": "Cuts the Catat seal out of the bar or note it overlaps. The only shadow in the system."
+      },
+      {
+        "name": "field-focus-ring",
+        "value": "0 0 0 2px rgb(var(--ink) / 0.3)",
+        "purpose": "Focus on text fields, with the border going full ink."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-press",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "Every print motion: stub slide-in, rosette turn, stamp thump."
+      },
+      {
+        "name": "stub-in",
+        "value": "450ms ease-press, translateY(-10px) to 0 with fade",
+        "purpose": "A new stub joins today's stack."
+      },
+      {
+        "name": "numeral-roll",
+        "value": "700ms exponential ease-out count",
+        "purpose": "The jatah numeral rolls to its new value after a log."
+      },
+      {
+        "name": "rosette-turn",
+        "value": "700ms ease-press rotate",
+        "purpose": "The note's rosette turns a few degrees per log."
+      },
+      {
+        "name": "stamp-thump",
+        "value": "300ms ease-press, scale 1.6 to 1 with fade",
+        "purpose": "LUNAS lands the moment something is paid."
+      },
+      {
+        "name": "thread-recolor",
+        "value": "500ms color",
+        "purpose": "Security thread changes status color."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "instant swap",
+        "purpose": "All of the above collapse to an instant change under prefers-reduced-motion."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "sm",
+        "value": "640px",
+        "purpose": "Wider gutters and note padding."
+      },
+      {
+        "name": "md",
+        "value": "768px",
+        "purpose": "Sidebar replaces the bottom bar; the seal moves onto the note's edge."
+      },
+      {
+        "name": "lg",
+        "value": "1024px",
+        "purpose": "Three-column dashboard: note spans two, stubs in the right column."
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Pressed-ink pill for the main action of a sheet or dialog.",
+      "html": "<button class=\"ds-btn-primary\">Simpan</button>",
+      "css": ".ds-btn-primary { font-family: var(--font-ui), Archivo, system-ui, sans-serif; font-size: 0.9375rem; font-weight: 600; min-height: 44px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background-color .15s; padding: 0 20px; border: none; background: rgb(var(--ink, 11 25 44)); color: rgb(var(--paper-sheet, 251 248 241)); } .ds-btn-primary:hover { background: rgb(var(--ink, 11 25 44) / 0.9); } .ds-btn-primary:focus-visible { outline: 2px solid rgb(var(--ink, 11 25 44)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Hairline pill for secondary paths (Scan struk, Ketik manual).",
+      "html": "<button class=\"ds-btn-secondary\">Ketik manual</button>",
+      "css": ".ds-btn-secondary { font-family: var(--font-ui), Archivo, system-ui, sans-serif; font-size: 0.9375rem; font-weight: 600; min-height: 44px; border-radius: 9999px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: background-color .15s; padding: 0 16px; background: transparent; color: rgb(var(--ink, 11 25 44)); border: 1px solid rgb(var(--ink, 11 25 44) / 0.3); } .ds-btn-secondary:hover { background: rgb(var(--ink, 11 25 44) / 0.05); } .ds-btn-secondary:focus-visible { outline: 2px solid rgb(var(--ink, 11 25 44)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Option Button",
+      "kind": "chip",
+      "refersTo": "option-button",
+      "description": "One choice in a set; pressed reads as ink-filled.",
+      "html": "<div class=\"ds-opts\"><button class=\"ds-opt\" aria-pressed=\"true\">10%</button><button class=\"ds-opt\" aria-pressed=\"false\">11%</button></div>",
+      "css": ".ds-opts { display: flex; gap: 8px; } .ds-opt { min-height: 44px; padding: 0 12px; border: 1px solid rgb(var(--ink, 11 25 44) / 0.3); background: rgb(var(--paper-sheet, 251 248 241)); color: rgb(var(--ink, 11 25 44)); font: 600 0.9375rem/1.4rem var(--font-ui), Archivo, sans-serif; cursor: pointer; } .ds-opt:hover { background: rgb(var(--ink, 11 25 44) / 0.05); } .ds-opt[aria-pressed=\"true\"] { background: rgb(var(--ink, 11 25 44)); color: rgb(var(--paper-sheet, 251 248 241)); border-color: rgb(var(--ink, 11 25 44)); } .ds-opt:focus-visible { outline: 2px solid rgb(var(--ink, 11 25 44)); outline-offset: 2px; }"
+    },
+    {
+      "name": "Input Field",
+      "kind": "input",
+      "refersTo": "input-field",
+      "description": "Square paper field with a 12px label above.",
+      "html": "<label class=\"ds-field\"><span>Nominal</span><input placeholder=\"Rp 15.000\" /></label>",
+      "css": ".ds-field span { display: block; margin-bottom: 4px; font: 600 0.75rem/1rem var(--font-ui), Archivo, sans-serif; color: rgb(var(--ink-soft, 70 96 127)); } .ds-field input { width: 100%; min-height: 44px; padding: 0 12px; background: rgb(var(--paper-sheet, 251 248 241)); border: 1px solid rgb(var(--ink, 11 25 44) / 0.3); color: rgb(var(--ink, 11 25 44)); font: 400 0.9375rem/1.4rem var(--font-ui), Archivo, sans-serif; border-radius: 0; } .ds-field input::placeholder { color: rgb(var(--ink-soft, 70 96 127)); } .ds-field input:focus-visible { outline: none; border-color: rgb(var(--ink, 11 25 44)); box-shadow: 0 0 0 2px rgb(var(--ink, 11 25 44) / 0.3); }"
+    },
+    {
+      "name": "Jatah Note",
+      "kind": "card",
+      "refersTo": "note-sheet",
+      "description": "The banknote sheet: registration corners, scope label, giant numeral, status thread, serial.",
+      "html": "<section class=\"ds-note\"><i class=\"c tl\"></i><i class=\"c tr\"></i><i class=\"c bl\"></i><i class=\"c br\"></i><span class=\"thread\"></span><h2>Sisa jatah hari ini</h2><p class=\"num\"><small>Rp</small>20.643</p><p class=\"body\">Sisa bulan ini <b>Rp 603.500</b> · 21 hari lagi</p><p class=\"serial\">FNC·111026·5297</p></section>",
+      "css": ".ds-note { position: relative; max-width: 360px; padding: 32px 56px 16px 20px; background: rgb(var(--paper-sheet, 251 248 241)); border: 1px solid rgb(var(--ink, 11 25 44) / 0.2); color: rgb(var(--ink, 11 25 44)); font-family: var(--font-ui), Archivo, sans-serif; } .ds-note .c { position: absolute; width: 12px; height: 12px; border: 0 solid rgb(var(--ink, 11 25 44) / 0.5); } .ds-note .tl { top: -1px; left: -1px; border-top-width: 1px; border-left-width: 1px; } .ds-note .tr { top: -1px; right: -1px; border-top-width: 1px; border-right-width: 1px; } .ds-note .bl { bottom: -1px; left: -1px; border-bottom-width: 1px; border-left-width: 1px; } .ds-note .br { bottom: -1px; right: -1px; border-bottom-width: 1px; border-right-width: 1px; } .ds-note .thread { position: absolute; top: 0; bottom: 0; right: 20px; border-left: 6px dashed rgb(var(--aman, 62 155 107)); transition: border-color .5s; } .ds-note h2 { margin: 0; font-size: 0.75rem; font-weight: 600; color: rgb(var(--ink-soft, 70 96 127)); } .ds-note .num { margin: 12px 0; font: 700 clamp(3.5rem, 17vw, 5rem)/1 var(--font-display), \"Bricolage Grotesque\", system-ui, sans-serif; letter-spacing: -0.03em; font-variant-numeric: tabular-nums lining-nums; display: flex; align-items: baseline; gap: 8px; } .ds-note .num small { font-size: 1.375rem; } .ds-note .body { font-size: 0.9375rem; line-height: 1.4rem; margin: 0 0 16px; } .ds-note .serial { font-size: 0.75rem; letter-spacing: 0.12em; color: rgb(var(--ink-soft, 70 96 127)); font-variant-numeric: tabular-nums; margin: 0; }"
+    },
+    {
+      "name": "Stub",
+      "kind": "custom",
+      "refersTo": "stub",
+      "description": "A transaction torn off the note; dashed edge = belum sinkron, struck = dihapus, doubled bottom = melewati jatah.",
+      "html": "<ol class=\"ds-stubs\"><li class=\"ds-stub\"><div><p class=\"it\">Indomie telur</p><p class=\"m\">Dompet Tunai · Makan &amp; Minum · 10.31</p><p class=\"m\">FNC·111026·7174</p></div><p class=\"amt\">Rp 8.500</p></li><li class=\"ds-stub unsynced\"><div><p class=\"it\">Es teh</p><p class=\"m\">FNC·111026·0042 <b>· belum sinkron</b></p></div><p class=\"amt\">Rp 5.000</p></li></ol>",
+      "css": ".ds-stubs { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; max-width: 360px; font-family: var(--font-ui), Archivo, sans-serif; } .ds-stub { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 12px 12px 12px 16px; background: rgb(var(--paper-sheet, 251 248 241)); border: 1px solid rgb(var(--ink, 11 25 44) / 0.15); color: rgb(var(--ink, 11 25 44)); } .ds-stub::before { content: \"\"; position: absolute; left: 6px; top: 8px; bottom: 8px; border-left: 1px dotted rgb(var(--ink, 11 25 44) / 0.4); } .ds-stub.unsynced { border: 1px dashed rgb(var(--ink, 11 25 44) / 0.5); } .ds-stub div { flex: 1; min-width: 0; } .ds-stub p { margin: 0; } .ds-stub .it { font-size: 0.9375rem; font-weight: 600; } .ds-stub .m { font-size: 0.75rem; color: rgb(var(--ink-soft, 70 96 127)); } .ds-stub .m b { color: rgb(var(--ink, 11 25 44)); } .ds-stub .amt { font-size: 0.9375rem; font-weight: 700; white-space: nowrap; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Status Stamps",
+      "kind": "chip",
+      "refersTo": "status-stamp-aman",
+      "description": "The only rubber stamps: Aman, Mepet, Habis, Tertunda sinkron (LUNAS uses the aman tone).",
+      "html": "<div class=\"ds-stamps\"><span class=\"ds-stamp aman\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg>Aman</span><span class=\"ds-stamp mepet\">Mepet</span><span class=\"ds-stamp habis\">Habis</span><span class=\"ds-stamp tunda\">Tertunda sinkron</span></div>",
+      "css": ".ds-stamps { display: flex; gap: 12px; flex-wrap: wrap; } .ds-stamp { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 2px; transform: rotate(-2deg); font-family: var(--font-ui), Archivo, sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; } .ds-stamp.aman { border: 1px solid rgb(var(--aman-ink, 43 117 80)); color: rgb(var(--aman-ink, 43 117 80)); } .ds-stamp.mepet { border: 3px double rgb(var(--mepet-ink, 138 94 28)); color: rgb(var(--mepet-ink, 138 94 28)); } .ds-stamp.habis { border: 1px solid rgb(var(--habis, 210 70 60)); background: rgb(var(--habis, 210 70 60)); color: rgb(var(--paper-sheet, 251 248 241)); } .ds-stamp.tunda { border: 1px dashed rgb(var(--ink-soft, 70 96 127)); color: rgb(var(--ink-soft, 70 96 127)); }"
+    },
+    {
+      "name": "Catat Seal",
+      "kind": "button",
+      "refersTo": "catat-seal",
+      "description": "The round primary log action, center of the mobile bottom bar.",
+      "html": "<button class=\"ds-seal\" aria-label=\"Catat pengeluaran dengan suara\"><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z\"/><path d=\"M19 10v2a7 7 0 0 1-14 0v-2\"/><line x1=\"12\" x2=\"12\" y1=\"19\" y2=\"22\"/></svg><span>Catat</span></button>",
+      "css": ".ds-seal { width: 72px; height: 72px; border-radius: 9999px; border: none; background: rgb(var(--ink, 11 25 44)); color: rgb(var(--paper-sheet, 251 248 241)); box-shadow: 0 0 0 4px rgb(var(--paper, 245 239 224)); display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; transition: transform .2s; } .ds-seal span { font: 700 0.75rem/1rem var(--font-ui), Archivo, sans-serif; text-transform: uppercase; letter-spacing: 0.1em; } .ds-seal:active { transform: scale(.95); } .ds-seal:focus-visible { outline: 2px solid rgb(var(--ink, 11 25 44)); outline-offset: 4px; }"
+    },
+    {
+      "name": "Denomination Note",
+      "kind": "card",
+      "refersTo": "denom-note-blue",
+      "description": "A wallet or envelope printed as a flat denomination field with a paper name plate.",
+      "html": "<article class=\"ds-denom\"><div class=\"plate\"><h3>Rekening BCA Utama</h3><p>Rekening bank · Utama</p></div><p class=\"amt\"><small>Rp</small>1.450.000</p><p class=\"serial\">FNC·111026·6807</p></article>",
+      "css": ".ds-denom { position: relative; max-width: 340px; padding: 20px; background: rgb(var(--denom-blue, 47 111 181)); color: rgb(var(--paper-sheet, 251 248 241)); font-family: var(--font-ui), Archivo, sans-serif; } .ds-denom .plate { display: inline-block; background: rgb(var(--paper-sheet, 251 248 241)); color: rgb(var(--ink, 11 25 44)); padding: 8px 12px; } .ds-denom h3 { margin: 0; font: 700 1.375rem/1.75rem var(--font-display), \"Bricolage Grotesque\", system-ui, sans-serif; } .ds-denom .plate p { margin: 0; font-size: 0.75rem; color: rgb(var(--ink-soft, 70 96 127)); } .ds-denom .amt { margin: 16px 0 8px; font: 700 clamp(3.5rem, 17vw, 5rem)/1 var(--font-display), \"Bricolage Grotesque\", system-ui, sans-serif; font-variant-numeric: tabular-nums; display: flex; gap: 6px; align-items: baseline; } .ds-denom .amt small { font-size: 1.375rem; } .ds-denom .serial { margin: 0; font-size: 0.75rem; letter-spacing: 0.1em; }"
+    },
+    {
+      "name": "Bottom Bar Tab",
+      "kind": "nav",
+      "refersTo": "navigation",
+      "description": "Mobile tab: glyph plus 12px label; active is ink, bold, underlined.",
+      "html": "<nav class=\"ds-tabs\"><a aria-current=\"page\" href=\"#\">Beranda</a><a href=\"#\">Dompet</a><a href=\"#\">Laporan</a></nav>",
+      "css": ".ds-tabs { display: flex; justify-content: space-around; height: 64px; align-items: center; background: rgb(var(--paper, 245 239 224)); border-top: 1px solid rgb(var(--ink, 11 25 44) / 0.2); font: 500 0.75rem/1rem var(--font-ui), Archivo, sans-serif; } .ds-tabs a { min-height: 48px; display: inline-flex; align-items: center; color: rgb(var(--ink-soft, 70 96 127)); text-decoration: none; } .ds-tabs a:hover { color: rgb(var(--ink, 11 25 44)); } .ds-tabs a[aria-current=\"page\"] { color: rgb(var(--ink, 11 25 44)); font-weight: 700; text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; } .ds-tabs a:focus-visible { outline: 2px solid rgb(var(--ink, 11 25 44)); outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Lembar Rupiah",
+    "overview": "Money you can hold. Every surface is printed from one press: navy intaglio ink on cream note paper, hairline rules, corner registration marks, procedural guilloche rosettes and serial numbers. Today's allowance is a single banknote-like sheet with one giant engraved numeral, not a grid of equal-weight KPI cards. Wallets, envelopes and goals are notes in their own denomination color; transactions are serial-numbered stubs torn off the note; status is a rubber stamp and the color of the note's security thread.\n\nDensity is calm and ledger-like. Three text sizes and one numeral face carry the whole hierarchy, so a figure's importance is told by size and face, never by a colored tile or chip. State is told by form as well as hue (doubled, dashed, filled, struck) so nothing relies on color alone. Dark mode is the same note printed in reverse: cream ink on navy stock, still matte.\n\nThe world is banknote grammar, never banknote reproduction: no Garuda, Bank Indonesia marks, portraits or real Rupiah artwork. Rejected outright: the fintech dashboard of equal cards, chips and charts; gradients, glass, glow and drop shadows; nested cards.",
+    "keyCharacteristics": [
+      "One printed sheet per idea, flat paper with a 1px ink hairline and four registration corners.",
+      "Bricolage Grotesque heavy figures for money and headings (1, 4 and 7 unmistakable at every size); Archivo for everything you read or tap.",
+      "Green, ochre and red mean money status and nothing else.",
+      "Every money figure states its scope in words next to it (hari ini, bulan ini, dari tagihan, dari profil).",
+      "Guilloche rosettes and the wavy microtext rule are the only ornament.",
+      "Logging re-prints the note: the numeral rolls, the rosette turns, a stub slides into the stack."
+    ],
+    "rules": [
+      {
+        "name": "The Status-Only Rule",
+        "body": "Green, ochre and red are reserved for Aman, Mepet and Habis. A wallet, envelope, goal, category or decoration never prints in them; it takes a denomination (blue, violet, teal, slate).",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Ink Rule",
+        "body": "Outside status and denominations, everything is ink or soft ink on paper. No Tailwind default palette, no tinted icon tiles.",
+        "section": "colors"
+      },
+      {
+        "name": "The Three Sizes Rule",
+        "body": "Meta 12, body 15, head 22, plus the clamp numeral. Nothing else in the app, and nothing below 12px.",
+        "section": "typography"
+      },
+      {
+        "name": "The Money Column Rule",
+        "body": "Every rupiah figure is set with tabular lining numerals so amounts align in columns, and dates are glued with no-break spaces so \"Kam, 8 Okt\" never splits.",
+        "section": "typography"
+      },
+      {
+        "name": "The Scope Rule",
+        "body": "Every money figure states its scope in words beside it: \"Sisa jatah hari ini\", \"Sisa bulan ini\", \"Terpakai hari ini\", \"(dari tagihan)\". A bare total is not allowed.",
+        "section": "typography"
+      },
+      {
+        "name": "The Named Figure Rule",
+        "body": "An uppercase, tracked 12px line is permitted only as the heading that names the figure directly below it (SISA JATAH HARI INI) or as a navigation group name. It is never a decorative kicker introducing another heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Thumb Seal Rule",
+        "body": "On phones (<768px) the Catat seal lives in the center of the bottom bar on every page. On md+ it overlaps the jatah note's lower edge. One seal per screen, never two microphones.",
+        "section": "layout"
+      },
+      {
+        "name": "The Printed Depth Rule",
+        "body": "No drop shadows, gradients, glass, blur or glow. If something must sit above something else, give it a hairline or a paper ring.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do print wallets, envelopes, slips and goals in blue, violet, teal or slate, with paper-colored type.",
+      "Do state the scope of every money figure in words next to it (hari ini, bulan ini, dari tagihan, dari profil).",
+      "Do use exactly three text sizes (meta 12, body 15, head 22) plus the clamp numeral, with 12px as the floor.",
+      "Do show state by form as well as hue, and repeat it in words: doubled = mepet or melewati jatah, dashed record edge = belum sinkron, struck = dihapus, solid fill = habis or LUNAS.",
+      "Do keep every touch target at least 44px and the Catat seal at least 72px.",
+      "Do put a serial (FNC·DDMMYY·NNNN) on every note and stub.",
+      "Do honor reduced motion: the numeral swaps instantly, stubs and stamps appear without movement."
+    ],
+    "donts": [
+      "Don't use green, ochre or red for anything but Aman, Mepet and Habis.",
+      "Don't use the rubber-stamp form for anything but Aman, Mepet, Habis, Tertunda sinkron and LUNAS; every other state is a plain StateLabel.",
+      "Don't strike through anything that is not dihapus.",
+      "Don't put a dashed edge on a record unless it is belum sinkron.",
+      "Don't use gradients, glass or backdrop blur, glow, or drop shadows.",
+      "Don't nest a bordered card inside a card; one sheet per idea, divided by hairlines.",
+      "Don't put a small uppercase kicker above a heading.",
+      "Don't set any text below 12px or outside the three sizes and the numeral.",
+      "Don't show a money figure without its scope.",
+      "Don't reproduce real Rupiah artwork (Garuda, Bank Indonesia marks, portraits)."
+    ]
+  }
+}

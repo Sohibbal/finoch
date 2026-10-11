@@ -1,110 +1,93 @@
 "use client";
 
 import React from "react";
-import { Calendar, AlertCircle } from "lucide-react";
+import { Check } from "lucide-react";
 import { RecurringBill } from "@/types/bill-types";
+import { billSchedule, type BillState } from "./bill-schedule";
 
 interface BillCalendarMatrixProps {
   bills: RecurringBill[];
-  currentDay: number;
-  totalDaysInMonth?: number;
+  today: Date;
 }
 
-export function BillCalendarMatrix({
-  bills,
-  currentDay,
-  totalDaysInMonth = 31,
-}: BillCalendarMatrixProps) {
-  // Map day (1-31) to array of bills due on that day
-  const dueMap: Record<number, RecurringBill[]> = {};
-  bills.forEach((bill) => {
-    const d = Math.max(1, Math.min(31, bill.dueDay));
-    if (!dueMap[d]) dueMap[d] = [];
-    dueMap[d].push(bill);
-  });
+const WEEKDAYS = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"];
+const MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
 
-  const days = Array.from({ length: totalDaysInMonth }, (_, i) => i + 1);
+// Same forms as the schedule leaves: filled = telat, doubled = mepet, ticked = lunas (struck means dihapus only).
+const DAY: Record<BillState, string> = {
+  telat: "bg-habis-ink text-paper-sheet font-bold",
+  "hari-ini": "bg-ink text-paper-sheet font-bold",
+  mepet: "border-[3px] border-double border-mepet-ink text-ink font-bold",
+  nanti: "border border-ink/50 text-ink font-semibold",
+  lunas: "gap-0.5 text-aman-ink font-semibold",
+};
+
+/** This month printed as a wall calendar, Monday first, with every due day marked by its state. */
+export function BillCalendarMatrix({ bills, today }: BillCalendarMatrixProps) {
+  const year = today.getFullYear();
+  const month = today.getMonth();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const lead = (new Date(year, month, 1).getDay() + 6) % 7;
+
+  // The most urgent state wins when several bills share a day (schedule order is urgency order).
+  const byDay = new Map<number, { state: BillState; names: string[] }>();
+  for (const row of billSchedule(bills, today)) {
+    const day = byDay.get(row.dueDay);
+    if (day) day.names.push(row.bill.name);
+    else byDay.set(row.dueDay, { state: row.state, names: [row.bill.name] });
+  }
+
+  const cells = [...Array<null>(lead).fill(null), ...Array.from({ length: daysInMonth }, (_, i) => i + 1)];
 
   return (
-    <div className="bg-white dark:bg-navy-900 border border-cream-300 dark:border-navy-800 rounded-2xl p-4 sm:p-5 shadow-sm space-y-3 transition-colors">
-      <div className="flex items-center justify-between border-b border-cream-200 dark:border-navy-800 pb-2.5">
-        <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <h2 className="text-xs sm:text-sm font-bold text-navy-950 dark:text-cream-50 uppercase tracking-wider">
-            Matriks Jatuh Tempo Bulan Ini
-          </h2>
-        </div>
-        <span className="text-[11px] text-navy-500 dark:text-cream-300/60 font-semibold">
-          Hari ini: Tgl {currentDay}
-        </span>
+    <section aria-labelledby="kalender-title" className="space-y-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-ink/20 pb-2">
+        <h2 id="kalender-title" className="font-display text-head font-bold text-ink">
+          {MONTHS[month]} {year}
+        </h2>
+        <p className="text-meta text-ink-soft">Hari ini tanggal {today.getDate()}</p>
       </div>
 
-      {/* Grid of days 1 to 31 */}
-      <div className="grid grid-cols-7 gap-1.5 pt-1">
-        {days.map((day) => {
-          const isToday = day === currentDay;
-          const billsOnDay = dueMap[day] || [];
-          const hasBills = billsOnDay.length > 0;
-          const hasUnpaid = billsOnDay.some((b) => !b.isPaidThisMonth);
-          const isPast = day < currentDay;
-
+      <div className="grid grid-cols-7 gap-1 text-center">
+        {WEEKDAYS.map((d) => (
+          <span key={d} className="text-meta text-ink-soft py-1">
+            {d}
+          </span>
+        ))}
+        {cells.map((day, i) => {
+          if (day === null) return <span key={`lead-${i}`} aria-hidden="true" />;
+          const mark = byDay.get(day);
+          const isToday = day === today.getDate();
           return (
-            <div
+            <span
               key={day}
-              title={
-                hasBills
-                  ? `Tgl ${day}: ${billsOnDay.map((b) => b.name).join(", ")}`
-                  : `Tgl ${day}`
-              }
-              className={`relative flex flex-col items-center justify-center p-1.5 rounded-xl border text-center transition-all ${
-                isToday
-                  ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 border-transparent font-black shadow-sm ring-2 ring-emerald-500/40"
-                  : hasBills
-                  ? hasUnpaid
-                    ? isPast
-                      ? "bg-rose-500/10 border-rose-500/30 text-rose-700 dark:text-rose-300 font-bold"
-                      : "bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-200 font-bold"
-                    : "bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 font-semibold"
-                  : "bg-cream-50/50 dark:bg-navy-950/40 border-cream-200/60 dark:border-navy-800/60 text-navy-600 dark:text-cream-300/60 text-xs"
-              }`}
+              title={mark ? `Tanggal ${day}: ${mark.names.join(", ")}${mark.state === "lunas" ? " (lunas)" : ""}` : undefined}
+              className={`money text-meta h-9 flex items-center justify-center ${
+                mark ? DAY[mark.state] : "text-ink"
+              } ${isToday && (!mark || mark.state !== "hari-ini") ? "outline outline-2 outline-ink -outline-offset-2" : ""}`}
             >
-              <span className="text-xs">{day}</span>
-              {hasBills && (
-                <div className="flex items-center gap-0.5 mt-0.5">
-                  {billsOnDay.map((b, idx) => (
-                    <span
-                      key={idx}
-                      className={`w-1.5 h-1.5 rounded-full ${
-                        b.isPaidThisMonth
-                          ? "bg-emerald-500"
-                          : day < currentDay
-                          ? "bg-rose-500"
-                          : "bg-amber-500"
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
+              {day}
+              {mark?.state === "lunas" && <Check className="w-3 h-3 shrink-0" strokeWidth={3} aria-hidden="true" />}
+              {mark && <span className="sr-only">: {mark.names.join(", ")}{mark.state === "lunas" && ", lunas"}</span>}
+            </span>
           );
         })}
       </div>
 
-      {/* Legend */}
-      <div className="flex flex-wrap items-center justify-between text-[10px] text-navy-500 dark:text-cream-300/60 pt-2 border-t border-cream-200 dark:border-navy-800 gap-2">
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-amber-500" />
-          <span>Akan Datang</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-rose-500" />
-          <span>Telat / Overdue</span>
-        </div>
-        <div className="flex items-center gap-1.5">
-          <span className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span>Lunas</span>
-        </div>
-      </div>
-    </div>
+      <ul className="flex flex-wrap gap-x-4 gap-y-1 text-meta text-ink-soft">
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="w-3 h-3 bg-habis-ink" /> Telat
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="w-3 h-3 border-[3px] border-double border-mepet-ink" /> Mepet
+        </li>
+        <li className="flex items-center gap-1.5">
+          <span aria-hidden="true" className="w-3 h-3 border border-ink/50" /> Nanti
+        </li>
+        <li className="flex items-center gap-1.5">
+          <Check aria-hidden="true" className="w-3 h-3 text-aman-ink" strokeWidth={3} /> Lunas
+        </li>
+      </ul>
+    </section>
   );
 }

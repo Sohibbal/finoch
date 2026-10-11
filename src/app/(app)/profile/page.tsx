@@ -2,21 +2,17 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  User,
-  Wallet,
-  PiggyBank,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  Save,
-  FlaskConical,
-} from "lucide-react";
+import { AlertCircle, CheckCircle2, Loader2 } from "lucide-react";
 import { useAuthContext } from "@/components/layout/auth-provider";
 import { PageHeader } from "@/components/layout/page-header";
 import { invalidateFinancialProfile } from "@/hooks/use-financial-profile";
 import { isDemoMode, setDemoMode } from "@/lib/storage/local-storage";
 import { resetDemoData, seedDemoExpenses } from "@/lib/storage/demo-seed";
+import { Note } from "@/components/press/note";
+import { Guilloche } from "@/components/press/guilloche";
+import { formatSerial } from "@/components/press/serial";
+import { getBills, getMonthlyBillAmount } from "@/lib/storage/bill-storage";
+import { rupiah } from "@/lib/format";
 
 export default function ProfilePage() {
   const router = useRouter();
@@ -42,6 +38,13 @@ export default function ProfilePage() {
   const [demoMode, setDemoModeState] = useState(false);
   const [demoBusy, setDemoBusy] = useState(false);
   useEffect(() => setDemoModeState(isDemoMode()), []);
+
+  // With bills in Tagihan, their total is the month's fixed costs (monthLedger); say so next to the field.
+  const [billsInfo, setBillsInfo] = useState<{ count: number; total: number }>({ count: 0, total: 0 });
+  useEffect(() => {
+    const bills = getBills();
+    setBillsInfo({ count: bills.length, total: bills.reduce((sum, b) => sum + getMonthlyBillAmount(b), 0) });
+  }, []);
 
   // Pages read storage on mount, so a full reload switches every store to the other namespace.
   // Turning demo off keeps its data (scoped and never synced), so turning it back on shows the same samples.
@@ -124,7 +127,7 @@ export default function ProfilePage() {
       invalidateFinancialProfile();
       setFeedback({
         type: "success",
-        message: "Profil finansial Anda berhasil disimpan dan diperbarui.",
+        message: "Tersimpan. Jatah harianmu dihitung ulang dari angka baru.",
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Terjadi kesalahan.";
@@ -134,276 +137,218 @@ export default function ProfilePage() {
     }
   };
 
+  const optionClass = (on: boolean) =>
+    `min-h-11 px-3 py-2 text-left border transition-colors ${
+      on ? "border-ink bg-ink text-paper-sheet dark:text-paper" : "border-ink/30 text-ink hover:bg-ink/5"
+    }`;
+
   return (
     <>
-      <PageHeader
-        title="Profil & Pengaturan Finansial"
-        subtitle="Ubah data penghasilan, komitmen wajib, dan target yang diinputkan saat onboarding"
-      />
+      <PageHeader title="Profil" subtitle="Uang saku, Mode Demo, akun" />
 
-      {/* Content Body */}
-      <main className="max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
-        {/* Identity Box */}
-        {user && (
-          <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 flex items-center gap-4 transition-colors shadow-sm">
-            <div className="w-12 h-12 rounded-xl bg-cream-200 dark:bg-navy-900 text-navy-950 dark:text-cream-100 flex items-center justify-center font-black text-lg">
-              {user.name.charAt(0).toUpperCase()}
-            </div>
-            <div>
-              <h2 className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                {user.name}
-              </h2>
-              <p className="text-xs text-navy-600 dark:text-cream-300/70">{user.email}</p>
-              <span className="inline-block mt-1 text-[10px] px-2.5 py-0.5 rounded-full bg-cream-100 dark:bg-navy-900 text-navy-800 dark:text-cream-200 font-semibold border border-cream-200 dark:border-navy-800">
-                Akun Aktif
-              </span>
-            </div>
-          </div>
-        )}
-
-        {/* Demo Mode */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 flex items-center justify-between gap-4 transition-colors shadow-sm">
-          <div className="flex items-start gap-3 min-w-0">
-            <FlaskConical className="w-4 h-4 mt-0.5 shrink-0 text-amber-600 dark:text-amber-400" />
-            <div className="min-w-0">
-              <h3 id="demo-mode-label" className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                Mode Demo (data contoh)
-              </h3>
-              <p className="text-xs text-navy-600 dark:text-cream-300/70">
-                Isi aplikasi dengan data contoh untuk presentasi. Data asli aman dan data demo tidak disinkron ke server.
-              </p>
-              {demoMode && (
-                <button
-                  type="button"
-                  onClick={handleResetDemo}
-                  disabled={demoBusy}
-                  className="mt-2 px-3 py-1 rounded-full border border-amber-300 dark:border-amber-800 text-amber-800 dark:text-amber-300 text-[11px] font-bold hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors disabled:opacity-50"
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-10 grid grid-cols-1 lg:grid-cols-[minmax(0,26rem)_1fr] gap-x-12 gap-y-10 items-start">
+        <div className="space-y-8 lg:sticky lg:top-24">
+          {user && (
+            <Note as="section" aria-label="Kartu anggota" className="overflow-hidden">
+              {/* KTM-style colour field across the top of the card. */}
+              <div className="bg-denom-blue text-paper-sheet dark:text-paper px-5 py-2.5 flex items-baseline justify-between gap-3">
+                <span className="text-body font-semibold">Kartu Anak Kost</span>
+                <span className="text-meta font-semibold">finoch.id</span>
+              </div>
+              <div className="relative px-5 pt-5 pb-4 flex gap-4">
+                <Guilloche seed={0x1d0c} size={180} families={3} className="absolute -right-12 -bottom-16 opacity-30" />
+                <div
+                  aria-hidden="true"
+                  className="relative w-20 h-24 shrink-0 border border-ink/40 bg-paper-deep flex items-center justify-center font-display text-numeral font-bold text-ink"
                 >
-                  Reset data demo
-                </button>
-              )}
-            </div>
-          </div>
-          <button
-            type="button"
-            role="switch"
-            aria-checked={demoMode}
-            aria-labelledby="demo-mode-label"
-            onClick={handleToggleDemo}
-            disabled={demoBusy}
-            className={`relative w-11 h-6 shrink-0 rounded-full transition-colors ${
-              demoMode ? "bg-amber-500" : "bg-cream-300 dark:bg-navy-800"
-            }`}
-          >
-            <span
-              className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${
-                demoMode ? "translate-x-5" : ""
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* Feedback Alert */}
-        {feedback && (
-          <div
-            className={`p-4 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all ${
-              feedback.type === "success"
-                ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800"
-                : "bg-rose-50 dark:bg-rose-950/40 text-rose-800 dark:text-rose-300 border border-rose-200 dark:border-rose-800"
-            }`}
-          >
-            {feedback.type === "success" ? (
-              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-            ) : (
-              <AlertCircle className="w-4 h-4 shrink-0 text-rose-600 dark:text-rose-400" />
-            )}
-            <span>{feedback.message}</span>
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="p-12 text-center text-navy-400 dark:text-cream-400/60">
-            <Loader2 className="w-6 h-6 animate-spin mx-auto text-navy-800 dark:text-cream-200" />
-            <p className="text-xs mt-2 font-medium">Memuat profil finansial Anda...</p>
-          </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Section 1: Penghasilan */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 space-y-4 transition-colors shadow-sm">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-cream-200 dark:border-navy-800/80">
-                <Wallet className="w-4 h-4 text-navy-800 dark:text-cream-200" />
-                <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                  Pemasukan Bulanan
-                </h3>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                    Nominal Penghasilan Rutin per Bulan (IDR)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
-                      Rp
-                    </span>
-                    <input
-                      type="number"
-                      value={formData.monthlyIncome || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          monthlyIncome: Number(e.target.value),
-                        })
-                      }
-                      className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      required
-                    />
-                  </div>
+                  {user.name.charAt(0).toUpperCase()}
                 </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-2">
-                    Sumber Pemasukan Utama
-                  </label>
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                    {incomeTypeOptions.map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() =>
-                          setFormData({ ...formData, incomeType: opt.id })
-                        }
-                        className={`p-3 text-left rounded-xl border text-xs transition-colors ${
-                          formData.incomeType === opt.id
-                            ? "border-navy-900 bg-navy-900 text-cream-50 dark:border-cream-100 dark:bg-cream-100 dark:text-navy-950 font-semibold shadow-sm"
-                            : "border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/30 text-navy-700 dark:text-cream-300 hover:border-navy-400"
-                        }`}
-                      >
-                        <div className="font-bold">{opt.label}</div>
-                        <div className="text-[10px] opacity-75 mt-0.5">
-                          {opt.desc}
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                <dl className="relative min-w-0 space-y-1.5">
+                  <dt className="sr-only">Nama</dt>
+                  <dd className="font-display text-head font-bold text-ink break-words">{user.name}</dd>
+                  <dt className="sr-only">Email</dt>
+                  <dd className="text-body text-ink break-all">{user.email}</dd>
+                  <dt className="text-meta text-ink-soft">No. anggota</dt>
+                  <dd className="money text-body text-ink tracking-[0.08em]">{formatSerial(user.id, new Date()).replace(/·\d{6}·/, "·KOST·")}</dd>
+                </dl>
               </div>
-            </div>
-
-            {/* Section 2: Tabungan & Pengeluaran Wajib */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 space-y-4 transition-colors shadow-sm">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-cream-200 dark:border-navy-800/80">
-                <PiggyBank className="w-4 h-4 text-navy-800 dark:text-cream-200" />
-                <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                  Tabungan & Komitmen Wajib
-                </h3>
+              <div className="px-5 pb-4 flex flex-wrap items-center gap-3">
+                <span className="text-meta font-semibold text-aman-ink">Akun aktif</span>
+                {demoMode && <span className="text-meta font-semibold text-ink">Mode Demo</span>}
               </div>
+            </Note>
+          )}
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                    Total Cadangan Tabungan Saat Ini (IDR)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
-                      Rp
-                    </span>
-                    <input
-                      type="number"
-                      value={formData.currentSavings || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          currentSavings: Number(e.target.value),
-                        })
-                      }
-                      className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      required
-                    />
-                  </div>
-                  <p className="mt-1 text-[11px] text-navy-500 dark:text-cream-400">
-                    Saldo rekening atau dompet digital cadangan
-                  </p>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                    Pengeluaran Tetap per Bulan (IDR)
-                  </label>
-                  <div className="relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-xs font-bold text-navy-400 dark:text-cream-400">
-                      Rp
-                    </span>
-                    <input
-                      type="number"
-                      value={formData.monthlyFixedExpenses || ""}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          monthlyFixedExpenses: Number(e.target.value),
-                        })
-                      }
-                      className="w-full pl-10 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 font-semibold text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      required
-                    />
-                  </div>
-                  <p className="mt-1 text-[11px] text-navy-500 dark:text-cream-400">
-                    Sewa kos, listrik, pulsa data, dan kebutuhan pokok
-                  </p>
-                </div>
+          <section aria-labelledby="demo-mode-label" className="border-y border-ink/20 py-4 space-y-3">
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <h2 id="demo-mode-label" className="text-body font-semibold text-ink">
+                  Mode Demo (data contoh)
+                </h2>
+                <p className="text-meta text-ink-soft">
+                  Isi aplikasi dengan data contoh untuk presentasi. Data asli aman dan data demo tidak disinkron ke server.
+                </p>
               </div>
-            </div>
-
-            {/* Section 3: Prioritas Finansial */}
-            <div className="p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 space-y-4 transition-colors shadow-sm">
-              <div className="flex items-center gap-2.5 pb-2 border-b border-cream-200 dark:border-navy-800/80">
-                <User className="w-4 h-4 text-navy-800 dark:text-cream-200" />
-                <h3 className="text-sm font-bold text-navy-950 dark:text-cream-50">
-                  Prioritas Finansial Utama
-                </h3>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {priorityOptions.map((opt) => (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() =>
-                      setFormData({ ...formData, financialPriority: opt.id })
-                    }
-                    className={`p-3 text-left rounded-xl border text-xs transition-colors ${
-                      formData.financialPriority === opt.id
-                        ? "border-navy-900 bg-navy-900 text-cream-50 dark:border-cream-100 dark:bg-cream-100 dark:text-navy-950 font-semibold shadow-sm"
-                        : "border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/30 text-navy-700 dark:text-cream-300 hover:border-navy-400"
-                    }`}
-                  >
-                    <div className="font-bold">{opt.label}</div>
-                    <div className="text-[10px] opacity-75 mt-0.5">
-                      {opt.desc}
-                    </div>
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <div className="flex justify-end pt-2">
               <button
-                type="submit"
-                disabled={isSaving}
-                className="px-6 py-3 rounded-full bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center gap-2 shadow-sm transition-all active:scale-[0.98] disabled:opacity-50"
+                type="button"
+                role="switch"
+                aria-checked={demoMode}
+                aria-labelledby="demo-mode-label"
+                onClick={handleToggleDemo}
+                disabled={demoBusy}
+                className={`relative w-14 h-11 shrink-0 disabled:opacity-50 before:absolute before:inset-x-0 before:top-2.5 before:h-6 before:rounded-full before:border-2 before:transition-colors ${
+                  demoMode ? "before:border-ink before:bg-ink/15" : "before:border-ink/50 before:bg-transparent"
+                }`}
               >
-                {isSaving ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Save className="w-4 h-4" />
-                )}
-                <span>Simpan Perubahan Profil</span>
+                <span
+                  aria-hidden="true"
+                  className={`absolute top-3.5 left-1 w-4 h-4 rounded-full motion-safe:transition-transform ${
+                    demoMode ? "translate-x-7 bg-ink" : "bg-ink/60"
+                  }`}
+                />
               </button>
             </div>
-          </form>
-        )}
+            {demoMode && (
+              <button
+                type="button"
+                onClick={handleResetDemo}
+                disabled={demoBusy}
+                className="min-h-11 px-4 rounded-full border border-ink text-ink text-body font-semibold hover:bg-ink/5 transition-colors disabled:opacity-50"
+              >
+                Reset data demo
+              </button>
+            )}
+          </section>
+        </div>
+
+        <section aria-labelledby="money-title" className="space-y-4 min-w-0">
+          <h2 id="money-title" className="font-display text-head font-bold text-ink border-b border-ink/20 pb-2">
+            Uang saku & komitmen
+          </h2>
+
+          {feedback && (
+            <p
+              role="status"
+              className={`flex items-center gap-2 text-body font-semibold ${feedback.type === "success" ? "text-aman-ink" : "text-habis-ink"}`}
+            >
+              {feedback.type === "success" ? (
+                <CheckCircle2 className="w-4 h-4 shrink-0" aria-hidden="true" />
+              ) : (
+                <AlertCircle className="w-4 h-4 shrink-0" aria-hidden="true" />
+              )}
+              {feedback.message}
+            </p>
+          )}
+
+          {isLoading ? (
+            <div className="space-y-3" aria-busy="true" aria-label="Memuat profil">
+              <div className="h-16 bg-paper-deep motion-safe:animate-pulse" />
+              <div className="h-16 bg-paper-deep motion-safe:animate-pulse" />
+              <div className="h-16 bg-paper-deep motion-safe:animate-pulse" />
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="divide-y divide-ink/15">
+              <MoneyField
+                label="Uang saku / pemasukan per bulan"
+                value={formData.monthlyIncome}
+                onChange={(v) => setFormData({ ...formData, monthlyIncome: v })}
+              />
+
+              <div className="py-4">
+              <fieldset>
+                <legend className="text-body font-semibold text-ink mb-2">Sumber pemasukan utama</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {incomeTypeOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      aria-pressed={formData.incomeType === opt.id}
+                      onClick={() => setFormData({ ...formData, incomeType: opt.id })}
+                      className={optionClass(formData.incomeType === opt.id)}
+                    >
+                      <span className="block text-body font-semibold">{opt.label}</span>
+                      <span className="block text-meta opacity-80">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              </div>
+
+              <MoneyField
+                label="Tabungan cadangan saat ini"
+                hint="Saldo rekening atau dompet digital cadangan"
+                value={formData.currentSavings}
+                onChange={(v) => setFormData({ ...formData, currentSavings: v })}
+              />
+
+              <MoneyField
+                label="Pengeluaran tetap per bulan"
+                hint={
+                  billsInfo.count > 0
+                    ? `Tidak dipakai selama ada tagihan: jatah harian dan amplop memakai total ${billsInfo.count} tagihan rutin di Tagihan (${rupiah(billsInfo.total)}/bulan).`
+                    : "Sewa kos, listrik, pulsa data, dan kebutuhan pokok. Dipakai untuk jatah harian selama belum ada tagihan rutin di Tagihan."
+                }
+                value={formData.monthlyFixedExpenses}
+                onChange={(v) => setFormData({ ...formData, monthlyFixedExpenses: v })}
+              />
+
+              <div className="py-4">
+              <fieldset>
+                <legend className="text-body font-semibold text-ink mb-2">Prioritas finansial utama</legend>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  {priorityOptions.map((opt) => (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      aria-pressed={formData.financialPriority === opt.id}
+                      onClick={() => setFormData({ ...formData, financialPriority: opt.id })}
+                      className={optionClass(formData.financialPriority === opt.id)}
+                    >
+                      <span className="block text-body font-semibold">{opt.label}</span>
+                      <span className="block text-meta opacity-80">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
+              </fieldset>
+              </div>
+
+              <div className="pt-5">
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="inline-flex items-center gap-2 min-h-11 px-6 rounded-full bg-ink hover:bg-ink/90 text-paper-sheet dark:text-paper text-body font-semibold transition-colors disabled:opacity-50"
+                >
+                  {isSaving && <Loader2 className="w-4 h-4 motion-safe:animate-spin" aria-hidden="true" />}
+                  Simpan perubahan
+                </button>
+              </div>
+            </form>
+          )}
+        </section>
       </main>
     </>
+  );
+}
+
+/** One amount on the settings list: label, optional hint, a Rp-prefixed number field. */
+function MoneyField({ label, hint, value, onChange }: { label: string; hint?: string; value: number; onChange: (v: number) => void }) {
+  return (
+    <label className="block py-4 space-y-1.5">
+      <span className="block text-body font-semibold text-ink">{label}</span>
+      {hint && <span className="block text-meta text-ink-soft">{hint}</span>}
+      <span className="relative block max-w-xs">
+        <span className="absolute inset-y-0 left-3 flex items-center text-body font-semibold text-ink-soft">Rp</span>
+        {/* Grouped like every other amount (1.500.000), edited as digits. */}
+        <input
+          type="text"
+          inputMode="numeric"
+          autoComplete="off"
+          value={value ? value.toLocaleString("id-ID") : ""}
+          onChange={(e) => onChange(Number(e.target.value.replace(/\D/g, "")) || 0)}
+          className="money w-full min-h-11 pl-10 pr-3 bg-paper-sheet border border-ink/30 text-base font-semibold text-ink focus-visible:outline-offset-0"
+          required
+        />
+      </span>
+    </label>
   );
 }

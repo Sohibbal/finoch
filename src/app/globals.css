@@ -2,122 +2,110 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Lembar Rupiah: navy intaglio ink on cream note paper. Channels are "R G B" for Tailwind alpha. */
 :root {
-  --background: #FAF8F5;
+  --paper: 245 239 224;       /* #F5EFE0 note paper */
+  --paper-sheet: 251 248 241; /* #FBF8F1 the printed sheet */
+  --paper-deep: 236 228 208;  /* #ECE4D0 pressed areas */
+  --ink: 11 25 44;            /* #0B192C intaglio navy */
+  --ink-soft: 70 96 127;      /* #46607F secondary text, 5.6:1 on paper */
+  --ink-rule: 11 25 44;       /* hairlines use this at low alpha */
+  --aman: 62 155 107;         /* #3E9B6B thread fill */
+  --aman-ink: 43 117 80;      /* #2B7550 text */
+  --mepet: 176 122 42;        /* #B07A2A */
+  --mepet-ink: 138 94 28;     /* #8A5E1C */
+  --habis: 210 70 60;         /* #D2463C */
+  --habis-ink: 180 53 44;     /* #B4352C */
+  --denom-blue: 47 111 181;   /* #2F6FB5 */
+  --denom-violet: 123 79 160; /* #7B4FA0 */
+
+  --background: #F5EFE0;
   --foreground: #0B192C;
   --navy-primary: #0B192C;
-  --navy-surface: #F4EFE6;
-  --navy-border: #E8E1D5;
+  --navy-surface: #ECE4D0;
+  --navy-border: #DDD2B8;
 }
 
 .dark {
-  /* Soft dark navy, minimal badges, calm contrast */
-  --background: #060B14;
-  --foreground: #F6F4ED;
-  --navy-primary: #FAF8F5;
+  /* The same note printed in reverse: cream ink on navy stock, still matte. */
+  --paper: 8 18 31;           /* #08121F */
+  --paper-sheet: 11 25 44;    /* #0B192C */
+  --paper-deep: 16 34 56;     /* #102238 */
+  --ink: 245 239 224;
+  --ink-soft: 169 184 204;    /* #A9B8CC */
+  --ink-rule: 245 239 224;
+  --aman: 91 180 135;         /* #5BB487 */
+  --aman-ink: 91 180 135;
+  --mepet: 209 154 70;        /* #D19A46 */
+  --mepet-ink: 209 154 70;
+  --habis: 227 106 96;        /* #E36A60 */
+  --habis-ink: 227 106 96;
+  --denom-blue: 111 160 218;
+  --denom-violet: 169 136 200;
+
+  --background: #08121F;
+  --foreground: #F5EFE0;
+  --navy-primary: #F5EFE0;
   --navy-surface: #0E172A;
   --navy-border: #1E2D4A;
 }
 
 html {
   scroll-behavior: smooth;
+  accent-color: rgb(var(--ink));
+  caret-color: rgb(var(--ink));
 }
 
 body {
   color: var(--foreground);
   background-color: var(--background);
-  font-family: var(--font-plus-jakarta-sans), "Plus Jakarta Sans", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-ui), system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   min-height: 100dvh;
   overflow-x: hidden;
+  scrollbar-color: rgb(var(--ink) / 0.35) transparent;
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* Double-Bezel Hardware Architecture (Doppelrand) */
-.double-bezel-outer {
-  border-radius: 1.75rem;
-  padding: 0.375rem;
-  background: rgba(11, 25, 44, 0.04);
-  border: 1px solid rgba(11, 25, 44, 0.08);
-  box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
+::selection {
+  background: rgb(var(--ink));
+  color: rgb(var(--paper));
 }
 
-.dark .double-bezel-outer {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+:focus-visible {
+  outline: 2px solid rgb(var(--ink));
+  outline-offset: 2px;
 }
 
-.double-bezel-inner {
-  border-radius: calc(1.75rem - 0.375rem);
-  background: #ffffff;
-  border: 1px solid rgba(11, 25, 44, 0.06);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.8);
+@layer utilities {
+  /* Money always lines up in columns. */
+  .money {
+    font-variant-numeric: tabular-nums lining-nums;
+    font-feature-settings: "tnum" 1, "lnum" 1;
+  }
+
+  /* A fine wavy line that stands in for banknote microtext (drawn, never tiny text). */
+  .microtext-rule {
+    height: 6px;
+    background-color: rgb(var(--ink) / 0.55);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 3 Q3 0 6 3 T12 3' fill='none' stroke='black' stroke-width='0.75'/%3E%3C/svg%3E") repeat-x left center / 12px 6px;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 3 Q3 0 6 3 T12 3' fill='none' stroke='black' stroke-width='0.75'/%3E%3C/svg%3E") repeat-x left center / 12px 6px;
+  }
 }
 
-.dark .double-bezel-inner {
-  background: #0A1224;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.08);
+/* Logging re-prints the note: a stub slides into the stack. */
+@keyframes stubIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* Premium Glass & Reflection */
-.glass-pill {
-  background: rgba(250, 248, 245, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(11, 25, 44, 0.08);
+.animate-stub-in {
+  animation: stubIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-.dark .glass-pill {
-  background: rgba(10, 17, 32, 0.75);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+@media (prefers-reduced-motion: reduce) {
+  .animate-stub-in { animation: none; }
 }
-
-/* Dicoding-style Animated Wave Background */
-@keyframes waveFlow1 {
-  0% { transform: translate3d(0, 0, 0) scaleY(1); }
-  50% { transform: translate3d(-3%, 8px, 0) scaleY(1.08); }
-  100% { transform: translate3d(0, 0, 0) scaleY(1); }
-}
-
-@keyframes waveFlow2 {
-  0% { transform: translate3d(0, 0, 0) scaleY(1.05); }
-  50% { transform: translate3d(3%, -10px, 0) scaleY(0.95); }
-  100% { transform: translate3d(0, 0, 0) scaleY(1.05); }
-}
-
-@keyframes pulseGlow {
-  0%, 100% { opacity: 0.4; transform: scale(1); }
-  50% { opacity: 0.7; transform: scale(1.05); }
-}
-
-@keyframes soundwave {
-  0%, 100% { height: 6px; }
-  50% { height: 24px; }
-}
-
-.animate-wave-1 {
-  animation: waveFlow1 14s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-wave-2 {
-  animation: waveFlow2 18s ease-in-out infinite;
-  will-change: transform;
-}
-
-.animate-pulse-glow {
-  animation: pulseGlow 6s ease-in-out infinite;
-}
-
-.animate-soundwave-1 { animation: soundwave 0.8s ease-in-out infinite 0.1s; }
-.animate-soundwave-2 { animation: soundwave 0.9s ease-in-out infinite 0.2s; }
-.animate-soundwave-3 { animation: soundwave 0.7s ease-in-out infinite 0.3s; }
-.animate-soundwave-4 { animation: soundwave 1.0s ease-in-out infinite 0.15s; }
-.animate-soundwave-5 { animation: soundwave 0.85s ease-in-out infinite 0.25s; }
 
 /* Smooth Fade In */
 @keyframes fadeIn {
@@ -136,11 +124,3 @@ body {
 }
 
 /* Custom scrollbar for interactive preview */
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-}
-

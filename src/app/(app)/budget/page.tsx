@@ -1,16 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  Wallet,
-  Plus,
-  ArrowRightLeft,
-  RotateCcw,
-  Sparkles,
-  ShieldCheck,
-  TrendingDown,
-  Info,
-} from "lucide-react";
+import { ArrowRightLeft, Plus, RotateCcw, Wallet } from "lucide-react";
 import { BudgetEnvelope, EnvelopeTransferRecord, ReallocationSuggestion } from "@/types/budget-types";
 import {
   getEnvelopes,
@@ -22,16 +13,18 @@ import {
   resetEnvelopesToDefault,
 } from "@/lib/storage/budget-storage";
 import {
-  calculateEnvelopeProgress,
   getOverallBudgetSummary,
   syncExpensesToEnvelopes,
   findReallocationSuggestions,
 } from "@/lib/financial/budget-engine";
+import { monthLedger } from "@/lib/financial/month-ledger";
 import { expenseStorage } from "@/lib/storage/expense-storage";
-import { formatRupiah } from "@/lib/financial/split-bill-engine";
+import { getBills } from "@/lib/storage/bill-storage";
+import { mergeExpenses, toTransaction } from "@/components/dashboard/dashboard-data";
+import { rupiah } from "@/lib/format";
+import type { RecurringBill } from "@/types/bill-types";
 
-import { BudgetEnvelopeMobile } from "@/components/budget/budget-envelope-mobile";
-import { BudgetEnvelopeDesktop } from "@/components/budget/budget-envelope-desktop";
+import { BudgetAmplop } from "@/components/budget/budget-amplop";
 import { BudgetOverviewCard } from "@/components/budget/budget-overview-card";
 import { BudgetTransferModal } from "@/components/budget/budget-transfer-modal";
 import { BudgetFormModal } from "@/components/budget/budget-form-modal";
@@ -39,16 +32,24 @@ import { BudgetTransferHistory } from "@/components/budget/budget-transfer-histo
 import { EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { isDemoMode } from "@/lib/storage/local-storage";
-import { ACTION_BAR_BOTTOM } from "@/components/layout/insets";
+
+const PRIMARY_ACTION =
+  "inline-flex items-center gap-2 min-h-11 px-4 rounded-full bg-ink hover:bg-ink/90 text-paper-sheet text-body font-semibold transition-colors";
+const SECONDARY_ACTION =
+  "inline-flex items-center gap-2 min-h-11 px-4 rounded-full border border-ink/30 text-ink text-body font-semibold hover:bg-ink/5 transition-colors";
+
+type ExpenseRow = { id: string; itemName: string; category: string; amount: number; createdAt?: string; updatedAt?: string };
 
 export default function BudgetPage() {
   const profile = useFinancialProfile();
   const allowance = profile.monthlyIncome;
+  const profileFixed = profile.fixedExpenses ?? 0;
 
   const [rawEnvelopes, setRawEnvelopes] = useState<BudgetEnvelope[]>([]);
   const [loaded, setLoaded] = useState(false);
   const hasEnvelopes = rawEnvelopes.length > 0;
-  const [expenses, setExpenses] = useState<Array<{ category?: string; amount: number; createdAt?: string }>>([]);
+  const [expenses, setExpenses] = useState<ExpenseRow[]>([]);
+  const [bills, setBills] = useState<RecurringBill[]>([]);
   const [transfers, setTransfers] = useState<EnvelopeTransferRecord[]>([]);
 
   // Modals state
@@ -57,47 +58,28 @@ export default function BudgetPage() {
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
   const [editingEnvelope, setEditingEnvelope] = useState<BudgetEnvelope | null>(null);
 
-  // Load expenses and envelopes
-  // Envelopes are sized from (and rescaled to) the real allowance, so wait for the profile.
+  // Envelopes split what the month can spend after fixed costs (the ledger's spendable), so wait for the profile.
   const loadData = useCallback(async () => {
     if (!allowance) return;
-    const envs = getEnvelopes(allowance);
-    setRawEnvelopes(envs);
+    const currentBills = getBills();
+    setBills(currentBills);
+    const { spendable } = monthLedger({ monthlyIncome: allowance, profileFixedCosts: profileFixed, bills: currentBills, transactions: [] });
+    setRawEnvelopes(getEnvelopes(Math.max(0, spendable)));
     setLoaded(true);
     setTransfers(getTransferHistory());
 
-    // Load expenses from API or IndexedDB
-    try {
+    // Server rows plus local ones not synced yet: the same rows the dashboard reads.
+    const [server, local] = await Promise.all([
       // Demo mode shows only local demo rows; the server holds the real expenses.
-      const res = isDemoMode() ? null : await fetch("/api/expenses");
-      if (res?.ok) {
-        const data = await res.json();
-        if (Array.isArray(data.expenses) && data.expenses.length > 0) {
-          setExpenses(
-            data.expenses.map((e: { category?: string; amount: number; createdAt?: string }) => ({
-              category: e.category,
-              amount: e.amount,
-              createdAt: e.createdAt,
-            }))
-          );
-          return;
-        }
-      }
-
-      const local = await expenseStorage.getExpenses();
-      if (local && local.length > 0) {
-        setExpenses(
-          local.map((e) => ({
-            category: e.category,
-            amount: e.amount,
-            createdAt: e.createdAt,
-          }))
-        );
-      }
-    } catch {
-      // ignore
-    }
-  }, [allowance]);
+      isDemoMode()
+        ? []
+        : fetch("/api/expenses")
+            .then(async (res) => (res.ok ? (await res.json()).expenses : []))
+            .catch(() => []),
+      expenseStorage.getExpenses().catch(() => []),
+    ]);
+    setExpenses(mergeExpenses(Array.isArray(server) ? server : [], local));
+  }, [allowance, profileFixed]);
 
   useEffect(() => {
     loadData();
@@ -107,6 +89,19 @@ export default function BudgetPage() {
   const envelopes = useMemo(() => {
     return syncExpensesToEnvelopes(rawEnvelopes, expenses);
   }, [rawEnvelopes, expenses]);
+
+  // The month ledger every page prints "sisa bulan ini" from.
+  const month = useMemo(
+    () =>
+      monthLedger({
+        monthlyIncome: allowance ?? 0,
+        profileFixedCosts: profileFixed,
+        bills,
+        transactions: expenses.map((e) => toTransaction(e, "manual")),
+      }),
+    [allowance, profileFixed, bills, expenses]
+  );
+  const spendable = Math.max(0, month.spendable);
 
   // Overall summary
   const summary = useMemo(() => {
@@ -144,7 +139,7 @@ export default function BudgetPage() {
       sug.fromEnvelope.id,
       sug.toEnvelope.id,
       sug.recommendedAmount,
-      `AI Nudge: Rebalancing ${sug.fromEnvelope.name} -> ${sug.toEnvelope.name}`
+      `Saran Finoch: ${sug.fromEnvelope.name} ke ${sug.toEnvelope.name}`
     );
   };
 
@@ -182,7 +177,7 @@ export default function BudgetPage() {
 
   const handleResetDefaults = () => {
     if (confirm("Reset seluruh pos amplop ke preset standar mahasiswa?")) {
-      const reset = resetEnvelopesToDefault(allowance ?? undefined);
+      const reset = resetEnvelopesToDefault(spendable);
       setRawEnvelopes(reset);
       setTransfers(getTransferHistory());
     }
@@ -191,215 +186,104 @@ export default function BudgetPage() {
   return (
     <>
       <PageHeader
-        title="Amplop Anggaran Mahasiswa"
-        subtitle="Metode Amplop Digital: Pisahkan uang saku agar tidak ludes di awal bulan"
+        title="Amplop Anggaran"
+        subtitle="Uang saku setelah tagihan dibagi ke amplop biar nggak ludes di awal bulan"
         actions={
-          <>
-            {/* Desktop-only action buttons */}
-            <button
-              onClick={handleResetDefaults}
-              className="hidden lg:flex px-3 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 text-navy-600 dark:text-cream-300 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-navy-900 items-center gap-1.5 transition-all"
-              title="Reset ke Preset Standar Mahasiswa"
-            >
-              <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset Preset</span>
+          hasEnvelopes ? (
+            // Icon-only on phones so the title keeps one line; the label returns from sm up.
+            <button type="button" onClick={() => handleOpenTransfer()} aria-label="Pindah isi amplop" className={PRIMARY_ACTION}>
+              <ArrowRightLeft className="w-4 h-4" aria-hidden="true" />
+              <span className="hidden sm:inline">Pindah isi</span>
             </button>
-
-            <button
-              onClick={() => handleOpenTransfer()}
-              className="hidden sm:flex px-3.5 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 text-xs font-bold hover:bg-cream-100 dark:hover:bg-navy-900 items-center gap-1.5 transition-all"
-            >
-              <ArrowRightLeft className="w-3.5 h-3.5 text-navy-500 dark:text-cream-400" />
-              <span>Transfer Dana</span>
-            </button>
-
-            <button
-              onClick={handleOpenCreate}
-              className="px-4 py-1.5 rounded-full bg-navy-950 hover:bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 dark:hover:bg-white font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition-all"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Tambah Amplop</span>
-              <span className="sm:hidden">Pos Baru</span>
-            </button>
-          </>
+          ) : null
         }
       />
 
-      {/* Page Body */}
       <ProfileGate profile={profile}>
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
-        {!hasEnvelopes ? (
-          loaded && (
-          <EmptyState
-            icon={Wallet}
-            title="Belum ada pos amplop"
-            action={
-              <>
-                <button
-                  onClick={() => setRawEnvelopes(resetEnvelopesToDefault(allowance ?? undefined))}
-                  className={EMPTY_ACTION_CLASS}
-                >
-                  Pakai Preset Mahasiswa
-                </button>
-                <button
-                  onClick={handleOpenCreate}
-                  className="px-5 py-2.5 rounded-full border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 font-bold text-xs"
-                >
-                  Buat Pos Sendiri
-                </button>
-              </>
-            }
-          >
-            Bagi uang saku {allowance ? formatRupiah(allowance) : ""} ke pos makan, kos, transport, nongkrong, dan dana darurat, atau buat pos sendiri.
-          </EmptyState>
-          )
-        ) : (
-        <>
-        {/* Overview Section */}
-        <BudgetOverviewCard
-          summary={summary}
-          suggestions={suggestions}
-          onApplySuggestion={handleApplySuggestion}
-        />
-
-        {/* MOBILE PWA VIEW (md:hidden) */}
-        <div className="md:hidden space-y-4">
-          <div className="flex items-center justify-between px-1">
-            <span className="text-xs font-bold uppercase tracking-wider text-navy-500 dark:text-cream-400">
-              Daftar Pos Amplop ({envelopes.length})
-            </span>
-            <button
-              onClick={() => handleOpenTransfer()}
-              className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1"
-            >
-              <ArrowRightLeft className="w-3 h-3" />
-              <span>Transfer Dana</span>
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {envelopes.map((env) => (
-              <BudgetEnvelopeMobile
-                key={env.id}
-                envelope={env}
-                onTransfer={handleOpenTransfer}
-                onEdit={handleOpenEdit}
-                onDelete={handleDeleteEnvelope}
-              />
-            ))}
-          </div>
-
-          {/* Mobile Transfer History */}
-          <div className="pt-2">
-            <BudgetTransferHistory transfers={transfers} />
-          </div>
-        </div>
-
-        {/* DESKTOP BENTO GRID VIEW (hidden md:block) */}
-        <div className="hidden md:block space-y-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-black text-navy-950 dark:text-cream-50 tracking-tight">
-                Pos Anggaran Aktif Mahasiswa
-              </h3>
-              <p className="text-xs text-navy-500 dark:text-cream-400">
-                Pantau batas limit setiap kebutuhan anak kost secara visual & presisi
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-navy-600 dark:text-cream-400 bg-cream-200/50 dark:bg-navy-900 px-3 py-1 rounded-full border border-cream-300 dark:border-navy-800">
-                Total {envelopes.length} Amplop Terpasang
-              </span>
-            </div>
-          </div>
-
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {envelopes.map((env) => (
-              <BudgetEnvelopeDesktop
-                key={env.id}
-                envelope={env}
-                onTransfer={handleOpenTransfer}
-                onEdit={handleOpenEdit}
-                onDelete={handleDeleteEnvelope}
-              />
-            ))}
-          </div>
-
-          {/* Bottom Row: Transfer History & Philosophy Card */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 pt-4">
-            <div className="lg:col-span-2">
-              <BudgetTransferHistory transfers={transfers} />
-            </div>
-
-            {/* Envelope Philosophy / Educational Guide */}
-            <div className="rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-5 shadow-sm space-y-3 flex flex-col justify-between">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Info className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                  <h4 className="font-bold text-xs uppercase tracking-wider text-navy-950 dark:text-cream-50">
-                    Cara Kerja Metode Amplop
-                  </h4>
-                </div>
-                <p className="text-xs text-navy-600 dark:text-cream-300 leading-relaxed">
-                  Di awal bulan, uang saku kamu dimasukkan ke amplop-amplop terpisah. Saat belanja, catat pengeluaran di Finoch (suara atau foto struk) dan jatah amplop terkait akan berkurang otomatis.
-                </p>
-                <div className="p-3 rounded-xl bg-cream-100 dark:bg-navy-900/60 border border-cream-200 dark:border-navy-800 text-xs text-navy-700 dark:text-cream-300">
-                  <strong className="block mb-1 text-navy-950 dark:text-cream-50">
-                    Aturan Emas Anak Kost:
-                  </strong>
-                  Jika amplop nongkrong habis, kamu dilarang nongkrong kecuali kamu rela memindahkan jatah dari amplop lain.
-                </div>
-              </div>
-
-              <button
-                onClick={handleResetDefaults}
-                className="w-full py-2.5 px-3 rounded-xl border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-300 text-xs font-bold hover:bg-cream-100 dark:hover:bg-navy-800 flex items-center justify-center gap-2 transition-all mt-4"
+        <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-5 space-y-8">
+          {!hasEnvelopes ? (
+            loaded && (
+              <EmptyState
+                icon={Wallet}
+                title="Belum ada amplop"
+                action={
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => setRawEnvelopes(resetEnvelopesToDefault(spendable))}
+                      className={EMPTY_ACTION_CLASS}
+                    >
+                      Pakai Preset Mahasiswa
+                    </button>
+                    <button type="button" onClick={handleOpenCreate} className={SECONDARY_ACTION}>
+                      Buat Amplop Sendiri
+                    </button>
+                  </>
+                }
               >
-                <RotateCcw className="w-3.5 h-3.5" />
-                <span>Pulihkan Preset Mahasiswa</span>
-              </button>
-            </div>
-          </div>
-        </div>
-        </>
-        )}
-      </main>
+                Bagi {rupiah(spendable)} yang bisa dibelanjakan bulan ini (uang saku dikurangi pengeluaran tetap) ke amplop
+                makan, kebutuhan kos, transport, nongkrong, dan dana darurat, atau buat amplop sendiri.
+              </EmptyState>
+            )
+          ) : (
+            <>
+              <BudgetOverviewCard summary={summary} month={month} suggestions={suggestions} onApplySuggestion={handleApplySuggestion} />
+
+              <section aria-labelledby="amplop-list-title" className="space-y-3">
+                <h2 id="amplop-list-title" className="font-display text-head font-bold text-ink border-b border-ink/20 pb-2">
+                  {envelopes.length} amplop bulan ini
+                </h2>
+                <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+                  {envelopes.map((env) => (
+                    <BudgetAmplop
+                      key={env.id}
+                      envelope={env}
+                      onTransfer={handleOpenTransfer}
+                      onEdit={handleOpenEdit}
+                      onDelete={handleDeleteEnvelope}
+                    />
+                  ))}
+                  <li className="list-none">
+                    <button
+                      type="button"
+                      onClick={handleOpenCreate}
+                      className="w-full h-full min-h-40 flex flex-col items-center justify-center gap-2 border border-ink/30 bg-paper-sheet text-ink hover:bg-paper-deep transition-colors p-5"
+                    >
+                      <Plus className="w-6 h-6" aria-hidden="true" />
+                      <span className="text-body font-semibold">Tambah amplop</span>
+                      <span className="text-meta text-ink-soft">Misalnya buku, hobi, atau tabungan mudik.</span>
+                    </button>
+                  </li>
+                </ul>
+              </section>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-x-10 gap-y-8 items-start">
+                <div className="lg:col-span-2">
+                  <BudgetTransferHistory transfers={transfers} />
+                </div>
+
+                <section aria-labelledby="cara-kerja-title" className="space-y-3">
+                  <h2 id="cara-kerja-title" className="font-display text-head font-bold text-ink border-b border-ink/20 pb-2">
+                    Cara kerja amplop
+                  </h2>
+                  <p className="text-body text-ink">
+                    Di awal bulan, sewa dan tagihan rutin disisihkan dulu. Sisanya dibagi ke amplop-amplop terpisah. Tiap kali kamu catat pengeluaran (suara,
+                    foto struk, atau ketik), isi amplop yang cocok berkurang sendiri.
+                  </p>
+                  <p className="text-body text-ink">
+                    <span className="font-semibold">Aturan emas anak kost:</span> amplop nongkrong habis berarti libur
+                    nongkrong, kecuali kamu rela memindahkan isi dari amplop lain.
+                  </p>
+                  <button type="button" onClick={handleResetDefaults} className={SECONDARY_ACTION}>
+                    <RotateCcw className="w-4 h-4" aria-hidden="true" />
+                    Pulihkan preset mahasiswa
+                  </button>
+                </section>
+              </div>
+            </>
+          )}
+        </main>
       </ProfileGate>
-
-      {/* MOBILE STICKY FLOATING DOCK (md:hidden) */}
-      {hasEnvelopes && (
-      <div className={`md:hidden fixed ${ACTION_BAR_BOTTOM} left-0 right-0 z-30 px-4 pointer-events-none flex justify-center`}>
-        <div className="pointer-events-auto w-full max-w-md bg-white/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 rounded-2xl shadow-xl p-2.5 flex items-center justify-between backdrop-blur-xl">
-          <div className="pl-2">
-            <span className="text-[10px] text-navy-500 dark:text-cream-400 block leading-tight">
-              Sisa Dana Aman
-            </span>
-            <span className="text-sm font-black text-navy-950 dark:text-cream-50">
-              {formatRupiah(summary.totalRemaining)}
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <button
-              onClick={() => handleOpenTransfer()}
-              className="min-h-[44px] px-3 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-100 dark:bg-navy-900 text-navy-800 dark:text-cream-200 font-bold text-xs flex items-center gap-1.5"
-            >
-              <ArrowRightLeft className="w-3.5 h-3.5" />
-              <span>Pindah</span>
-            </button>
-            <button
-              onClick={handleOpenCreate}
-              className="min-h-[44px] px-4 rounded-xl bg-navy-950 dark:bg-cream-100 text-white dark:text-navy-950 font-bold text-xs flex items-center gap-1.5 shadow-md"
-            >
-              <Plus className="w-4 h-4" />
-              <span>Pos Baru</span>
-            </button>
-          </div>
-        </div>
-      </div>
-      )}
 
       {/* Modals */}
       <BudgetTransferModal

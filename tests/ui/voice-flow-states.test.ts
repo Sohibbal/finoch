@@ -32,8 +32,8 @@ describe("Voice Flow Component Definitions", () => {
     expect(manual.ManualExpenseInput).toBeDefined();
   });
 
-  it("exports OfflineModelCard component", async () => {
+  it("exports OfflineVoiceLine component", async () => {
     const card = await import("@/components/expense/offline-model-card");
-    expect(card.OfflineModelCard).toBeDefined();
+    expect(card.OfflineVoiceLine).toBeDefined();
   });
 });

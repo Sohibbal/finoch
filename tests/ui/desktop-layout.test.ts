@@ -17,16 +17,6 @@ describe("Desktop Layout & Navigation", () => {
     currentPathname = "/dashboard";
   });
 
-  it("exports TopNav component for desktop navigation", async () => {
-    const module = await import("@/components/layout/top-nav");
-    expect(module.TopNav).toBeDefined();
-  });
-
-  it("exports DesktopFloatingActions component for desktop floating actions", async () => {
-    const module = await import("@/components/layout/desktop-floating-actions");
-    expect(module.DesktopFloatingActions).toBeDefined();
-  });
-
   it("exports PwaInstallButton component for floating PWA installation", async () => {
     const module = await import("@/components/layout/pwa-install-button");
     expect(module.PwaInstallButton).toBeDefined();
@@ -37,7 +27,7 @@ describe("Desktop Layout & Navigation", () => {
     expect(module.BottomNav).toBeDefined();
   });
 
-  it("renders 5 accessible touch tabs in BottomNav for authenticated student", async () => {
+  it("renders the 5-slot bottom bar for an authenticated student", async () => {
     const { BottomNav } = await import("@/components/layout/bottom-nav");
     currentPathname = "/dashboard";
 
@@ -48,25 +38,14 @@ describe("Desktop Layout & Navigation", () => {
       })
     );
 
-    // 1. Home / Beranda link
     expect(html).toContain('href="/dashboard"');
     expect(html).toMatch(/beranda/i);
-
-    // 2. Simulator & Jatah link
-    expect(html).toContain('href="/simulator"');
-    expect(html).toMatch(/simulasi/i);
-
-    // 3. Center Voice Trigger button
-    expect(html).toContain("<button");
-    expect(html).toMatch(/bicara|suara|catat/i);
-
-    // 4. AI Copilot link
-    expect(html).toContain('href="/copilot"');
-    expect(html).toMatch(/copilot/i);
-
-    // 5. Profile & Goals link
-    expect(html).toContain('href="/profile"');
-    expect(html).toMatch(/profil/i);
+    expect(html).toContain('href="/wallets"');
+    expect(html).toContain('href="/reports"');
+    // Center Catat seal opens the voice sheet; Menu opens every other feature.
+    expect(html).toContain('aria-label="Catat pengeluaran dengan suara"');
+    expect(html).toContain("Menu");
+    expect(html).not.toContain("Menu Fitur");
   });
 
   it("renders guest navigation fallback when unauthenticated", async () => {
@@ -81,32 +60,18 @@ describe("Desktop Layout & Navigation", () => {
     );
 
     expect(html).toContain('href="/"');
-    expect(html).toContain('href="/simulator"');
-    expect(html).toContain('href="/copilot"');
-    expect(html).toContain('href="/login"');
+    expect(html).not.toContain('href="/dashboard"');
   });
 
-  it("reflects active route states properly", async () => {
+  it("marks the active tab for assistive tech", async () => {
     const { BottomNav } = await import("@/components/layout/bottom-nav");
-    
-    currentPathname = "/simulator";
-    const simHtml = renderToString(
+    currentPathname = "/wallets";
+    const html = renderToString(
       React.createElement(BottomNav, {
         onOpenVoice: () => {},
         userEmail: "student@campus.ac.id",
       })
     );
-    // Simulator tab should have active styling indicator
-    expect(simHtml).toContain('href="/simulator"');
-
-    currentPathname = "/copilot";
-    const copilotHtml = renderToString(
-      React.createElement(BottomNav, {
-        onOpenVoice: () => {},
-        userEmail: "student@campus.ac.id",
-      })
-    );
-    expect(copilotHtml).toContain('href="/copilot"');
+    expect(html).toMatch(/aria-current="page"[^>]*href="\/wallets"|href="\/wallets"[^>]*aria-current="page"/);
   });
 });
-

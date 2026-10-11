@@ -1,6 +1,9 @@
 import { MonthlyReportSummary, WhatsAppReportOptions, CategoryBreakdown } from "@/types/report-types";
 import { formatRupiah } from "@/lib/financial/split-bill-engine";
 import { localDateKey, parseDate } from "@/lib/date";
+import { BILL_PAYMENT_PREFIX } from "./month-ledger";
+
+const isBillPaymentName = (name?: string) => Boolean(name?.startsWith(BILL_PAYMENT_PREFIX));
 
 export const MONTH_NAMES_ID = [
   "Januari",
@@ -59,17 +62,19 @@ export function generateMonthlyReport(
   expenses: ExpenseRecord[],
   monthlyAllowance: number,
   month: number, // 1 - 12
-  year: number
+  year: number,
+  /** From the month ledger: with fixed costs counted, bill payments are skipped like the ledger does. */
+  fixedCosts = 0
 ): MonthlyReportSummary {
   // Filter expenses matching selected month and year; undated/invalid dates belong to no month
   const targetExpenses = expenses.filter((e) => {
     const d = parseDate(e.createdAt);
-    return !!d && d.getMonth() + 1 === month && d.getFullYear() === year;
+    return !!d && d.getMonth() + 1 === month && d.getFullYear() === year && !(fixedCosts > 0 && isBillPaymentName(e.itemName));
   });
 
   const totalExpenses = targetExpenses.reduce((sum, e) => sum + (e.amount || 0), 0);
   const totalIncome = Math.max(0, monthlyAllowance);
-  const netSavings = totalIncome - totalExpenses;
+  const netSavings = totalIncome - Math.max(0, fixedCosts) - totalExpenses;
   const savingsRate = totalIncome > 0 ? Math.round((netSavings / totalIncome) * 100) : 0;
 
   // 50-30-20 Breakdown
@@ -131,6 +136,7 @@ export function generateMonthlyReport(
     totalIncome,
     totalExpenses,
     netSavings,
+    fixedCosts: Math.max(0, fixedCosts),
     savingsRate,
     needsAmount,
     wantsAmount,

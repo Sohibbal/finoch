@@ -118,3 +118,25 @@ describe("Parser regressions", () => {
     expect(result[1].category).toBe("Transportation");
   });
 });
+
+describe("splits items spoken without a comma or conjunction", () => {
+  it.each([
+    ["nasi padang 18rb es teh 5rb", [["Nasi Padang", 18000], ["Es Teh", 5000]]],
+    ["makan warteg delapan belas ribu es teh lima ribu", [["Makan Warteg", 18000], ["Es Teh", 5000]]],
+    ["nasi goreng 15 ribu teh manis 4 ribu kerupuk 2 ribu", [["Nasi Goreng", 15000], ["Teh Manis", 4000], ["Kerupuk", 2000]]],
+    ["bensin 20rb parkir 2rb", [["Bensin", 20000], ["Parkir", 2000]]],
+  ])("%s", (input, expected) => {
+    expect(parseIndonesianExpense(input as string).map((i) => [i.itemName, i.amount])).toEqual(expected);
+  });
+
+  it.each([
+    ["dua ribu lima ratus", 2500],
+    ["parkir 2 ribu 500", 2500],
+    ["seratus lima puluh ribu", 150000],
+    ["fotokopi 100 lembar 15000", 15000],
+  ])("keeps %s as one amount", (input, amount) => {
+    const items = parseIndonesianExpense(input as string);
+    expect(items).toHaveLength(1);
+    expect(items[0].amount).toBe(amount);
+  });
+});

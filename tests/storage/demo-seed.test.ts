@@ -3,7 +3,8 @@ import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { getStorage, setDemoMode, setStorageScope } from "@/lib/storage/local-storage";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { syncQueue } from "@/lib/storage/sync-queue";
-import { getWallets, saveWallets } from "@/lib/storage/wallet-storage";
+import { getWallets, saveWallets, getWalletTransferHistory } from "@/lib/storage/wallet-storage";
+import { computeWalletBalances } from "@/lib/financial/wallet-engine";
 import { auditMicroExpenses } from "@/lib/financial/audit-engine";
 import { generateDemoExpenses, resetDemoData, seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { localDateKey } from "@/lib/date";
@@ -25,6 +26,20 @@ describe("demo expense seeding", () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
+  it("spreads demo spending over the demo wallets and keeps each at its designed balance", async () => {
+    setDemoMode(true);
+    const designed = new Map(getWallets().map((w) => [w.id, w.openingBalance]));
+    await seedDemoExpenses(NOW);
+    const expenses = await expenseStorage.getExpenses();
+    const used = new Set(expenses.map((e) => e.walletId));
+    expect(used.size).toBeGreaterThan(1);
+    const balances = computeWalletBalances(getWallets(), getWalletTransferHistory(), expenses);
+    for (const w of balances) {
+      expect(w.balance).toBe(designed.get(w.id));
+      expect(w.balance).toBeGreaterThanOrEqual(0);
+    }
+  });
+
   it("does nothing outside demo mode", async () => {
     expect(await seedDemoExpenses(NOW)).toBe(0);
     expect(await expenseStorage.getExpenses()).toEqual([]);
@@ -34,7 +49,7 @@ describe("demo expense seeding", () => {
     setDemoMode(true);
     const count = await seedDemoExpenses(NOW);
     expect(count).toBeGreaterThanOrEqual(45);
-    expect(count).toBeLessThanOrEqual(70);
+    expect(count).toBeLessThanOrEqual(100);
 
     const expenses = await expenseStorage.getExpenses();
     expect(expenses).toHaveLength(count);
@@ -45,7 +60,7 @@ describe("demo expense seeding", () => {
       expect(at).toBeLessThanOrEqual(NOW.getTime());
       expect(CATEGORIES).toContain(e.category);
       expect(e.userId).toBe("user-1::demo");
-      expect(e.walletId).toBe("wallet-cash-1");
+      expect(["wallet-cash-1", "wallet-bank-1", "wallet-ewallet-1"]).toContain(e.walletId);
     }
     const months = new Set(expenses.map((e) => new Date(e.createdAt).getMonth()));
     expect(months).toEqual(new Set([8, 9]));
@@ -99,5 +114,14 @@ describe("demo expense seeding", () => {
 
     setDemoMode(false);
     expect((await expenseStorage.getExpenses()).map((e) => e.id)).toEqual([real.id]);
+  });
+});
+
+describe("demo data tells a month-over-month story", () => {
+  it("gives Insight real equal-range changes to report", async () => {
+    const { detectSpendingPatterns, getMonthlyCategoryTotals } = await import("@/lib/insights/pattern-detector");
+    const expenses = generateDemoExpenses(NOW).map((e, i) => ({ ...e, id: `d${i}`, userId: "u", isDeleted: false, syncStatus: "synced", updatedAt: e.createdAt }));
+    const cards = detectSpendingPatterns({ ...getMonthlyCategoryTotals(expenses as never, NOW), recurringExpenses: [] });
+    expect(cards.length).toBeGreaterThanOrEqual(2);
   });
 });

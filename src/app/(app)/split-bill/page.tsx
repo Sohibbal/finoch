@@ -1,73 +1,36 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
-import {
-  Receipt,
-  HandCoins,
-  Sparkles,
-} from "lucide-react";
 import { Participant, SplitItem, SplitBillConfig } from "@/types/split-bill-types";
 import { calculateSplitBill } from "@/lib/financial/split-bill-engine";
 import { addDebt, getDebtSummary } from "@/lib/storage/debt-storage";
 import { expenseStorage } from "@/lib/storage/expense-storage";
+import { printDate } from "@/components/press/print-date";
 
 import { ParticipantManager } from "@/components/split-bill/participant-manager";
 import { BillItemEditor } from "@/components/split-bill/bill-item-editor";
 import { TaxDiscountConfig } from "@/components/split-bill/tax-discount-config";
 import { SplitSummaryCard } from "@/components/split-bill/split-summary-card";
 import { ReceiptOcrButton } from "@/components/split-bill/receipt-ocr-button";
+import { initialSplitBill } from "@/components/split-bill/initial-bill";
 import { PageHeader } from "@/components/layout/page-header";
+import { Note } from "@/components/press/note";
+import { Serial } from "@/components/press/serial";
+import { isDemoMode } from "@/lib/storage/local-storage";
 
 export default function SplitBillPage() {
-  // 1. Initial State
-  const [participants, setParticipants] = useState<Participant[]>([
-    { id: "p_user", name: "Saya", isUser: true },
-    { id: "p_budi", name: "Budi", isUser: false },
-    { id: "p_siti", name: "Siti", isUser: false },
-  ]);
+  // 1. Initial State: an empty nota; Mode Demo swaps in the sample bill after mount (storage is client-only).
+  const [participants, setParticipants] = useState<Participant[]>(() => initialSplitBill(false).participants);
+  const [items, setItems] = useState<SplitItem[]>([]);
+  const [config, setConfig] = useState<SplitBillConfig>(() => initialSplitBill(false).config);
 
-  const [items, setItems] = useState<SplitItem[]>([
-    {
-      id: "item_1",
-      name: "Ayam Geprek Sambal Bawang",
-      price: 18000,
-      quantity: 1,
-      assignedParticipantIds: ["p_user"],
-    },
-    {
-      id: "item_2",
-      name: "Nasi Goreng Spesial",
-      price: 22000,
-      quantity: 1,
-      assignedParticipantIds: ["p_budi"],
-    },
-    {
-      id: "item_3",
-      name: "Mie Ayam Bakso",
-      price: 19000,
-      quantity: 1,
-      assignedParticipantIds: ["p_siti"],
-    },
-    {
-      id: "item_4",
-      name: "Es Teh Manis Jumbo",
-      price: 12000,
-      quantity: 1,
-      assignedParticipantIds: ["p_user", "p_budi", "p_siti"], // Shared
-    },
-  ]);
-
-  const [config, setConfig] = useState<SplitBillConfig>({
-    restaurantName: "Warteg & Kopi Kampus",
-    date: new Date().toISOString().split("T")[0],
-    mode: "itemized",
-    taxPercentage: 10,
-    servicePercentage: 0,
-    discountAmount: 0,
-    rounding: 100,
-    paymentNote: "BCA / GoPay / DANA",
-  });
+  useEffect(() => {
+    if (!isDemoMode()) return;
+    const demo = initialSplitBill(true);
+    setParticipants(demo.participants);
+    setItems(demo.items);
+    setConfig(demo.config);
+  }, []);
 
   const [isSaved, setIsSaved] = useState(false);
   // Friends' shares are receivables in Buku Kasbon; read after mount (localStorage).
@@ -171,7 +134,6 @@ export default function SplitBillPage() {
 
       refreshKasbon();
       setIsSaved(true);
-      alert("Berhasil menyimpan! Porsi Anda dicatat ke Pengeluaran dan porsi teman dicatat ke Buku Kasbon.");
     } catch (err) {
       console.error("Gagal menyimpan ke Finoch:", err);
       alert("Terjadi kesalahan saat menyimpan transaksi.");
@@ -180,58 +142,32 @@ export default function SplitBillPage() {
 
   return (
     <>
-      <PageHeader
-        title="Kalkulator Split Bill & Talangan Resto"
-        subtitle="Hitung patungan makan, pajak PB1, service charge, dan salin ke WhatsApp"
-        actions={
-          <>
-            <ReceiptOcrButton onItemsExtracted={handleOcrExtracted} />
+      <PageHeader title="Split Bill" subtitle="Bagi tagihan makan bareng, lengkap PB1 & service, lalu kirim ke WhatsApp" />
 
-            <Link
-              href="/debts"
-              className="relative flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/20 text-xs font-bold transition-all active:scale-95"
-            >
-              <HandCoins className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Buku Kasbon</span>
-              {unpaidReceivables > 0 && (
-                <span className="w-4 h-4 rounded-full bg-amber-500 text-white text-[10px] font-black flex items-center justify-center">
-                  {unpaidReceivables}
-                </span>
-              )}
-            </Link>
-          </>
-        }
-      />
-
-      {/* Main Body */}
-      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 pt-5 space-y-5">
-        {/* Hero Banner Alert */}
-        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 shrink-0">
-              <Sparkles className="w-4 h-4" />
+      <main className="max-w-6xl w-full mx-auto px-4 sm:px-6 py-5 sm:py-10 grid grid-cols-1 lg:grid-cols-12 gap-x-10 gap-y-8 items-start">
+        <Note
+          as="section"
+          aria-label="Nota patungan"
+          microtext
+          serial={<Serial id={`split-${config.date}`} date={config.date} />}
+          className="lg:col-span-7"
+        >
+          <div className="px-5 sm:px-8 pt-6 pb-5 space-y-6">
+            <div className="text-center space-y-1 border-b-[3px] border-double border-ink/40 pb-4">
+              <label htmlFor="split-restaurant" className="sr-only">
+                Nama tempat makan
+              </label>
+              <input
+                id="split-restaurant"
+                type="text"
+                value={config.restaurantName}
+                onChange={(e) => handleConfigChange({ restaurantName: e.target.value })}
+                placeholder="Nama tempat makan"
+                className="w-full bg-transparent text-center font-display text-head font-bold text-ink placeholder:text-ink-soft border-b border-dashed border-ink/30 focus:outline-none focus-visible:border-ink py-1"
+              />
+              <p className="text-meta text-ink-soft">Nota patungan · {printDate(config.date)}</p>
             </div>
-            <div>
-              <h3 className="text-xs sm:text-sm font-bold text-navy-950 dark:text-cream-50">
-                Bagi Rata atau Bagi per Menu + Pajak Resto (PB1) Adil
-              </h3>
-              <p className="text-[11px] text-navy-600 dark:text-cream-300/70">
-                Pajak & service charge dialokasikan secara proporsional. Selesai hitung, langsung kirim rincian ke WhatsApp grup!
-              </p>
-            </div>
-          </div>
-        </div>
 
-        {/* Grid Layout: Config/Items on Left, Result Summary on Right */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
-          {/* Left Column: Form & Inputs (7 cols) */}
-          <div className="lg:col-span-7 space-y-4">
-            <TaxDiscountConfig config={config} onChange={handleConfigChange} />
-            <ParticipantManager
-              participants={participants}
-              onAddParticipant={handleAddParticipant}
-              onRemoveParticipant={handleRemoveParticipant}
-            />
             <BillItemEditor
               items={items}
               participants={participants}
@@ -239,23 +175,40 @@ export default function SplitBillPage() {
               onAddItem={handleAddItem}
               onUpdateItem={handleUpdateItem}
               onDeleteItem={handleDeleteItem}
+              extraAction={<ReceiptOcrButton onItemsExtracted={handleOcrExtracted} />}
             />
-          </div>
 
-          {/* Right Column: Split Bill Result & Share (5 cols) */}
-          <div className="lg:col-span-5 space-y-4">
-            <div className="sticky top-20">
-              <SplitSummaryCard
-                result={result}
-                config={config}
-                onSaveToTransactionsAndTalangan={handleSaveToFinoch}
-                isSaved={isSaved}
+            <div className="border-t border-ink/15 pt-5">
+              <ParticipantManager
+                participants={participants}
+                onAddParticipant={handleAddParticipant}
+                onRemoveParticipant={handleRemoveParticipant}
+                mode={config.mode}
+                onModeChange={(mode) => handleConfigChange({ mode })}
               />
             </div>
+
+            {items.length > 0 && (
+              <div className="border-t border-ink/15 pt-5">
+                <TaxDiscountConfig config={config} onChange={handleConfigChange} result={result} />
+              </div>
+            )}
           </div>
+        </Note>
+
+        <div className="lg:col-span-5 lg:sticky lg:top-24">
+          <SplitSummaryCard
+            result={result}
+            config={config}
+            onSaveToTransactionsAndTalangan={handleSaveToFinoch}
+            isSaved={isSaved}
+            unpaidReceivables={unpaidReceivables}
+          />
+          <p role="status" className="sr-only">
+            {isSaved ? "Porsi kamu tercatat di Pengeluaran, porsi teman tercatat di Buku Kasbon." : ""}
+          </p>
         </div>
       </main>
-
     </>
   );
 }

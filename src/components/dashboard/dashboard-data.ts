@@ -1,6 +1,7 @@
 import type { TransactionCandidate, TransactionSource } from "@/types/financial-types";
-import type { MonthlyCategorySpendingData } from "./spending-trend-chart";
+import type { RecurringBill } from "@/types/bill-types";
 import { localDateKey, parseDate } from "@/lib/date";
+import { monthLedger, type MonthFigures } from "@/lib/financial/month-ledger";
 
 interface ExpenseRow {
   id: string;
@@ -10,9 +11,19 @@ interface ExpenseRow {
   walletId?: string | null;
   createdAt?: string;
   updatedAt?: string;
+  isDeleted?: boolean;
 }
 
-type Bucket = Exclude<keyof MonthlyCategorySpendingData, "month">;
+export type Bucket = "food" | "transport" | "bills" | "shopping" | "other";
+
+/** Stored category each bucket is labelled by (see categoryLabel in lib/format). */
+export const BUCKET_CATEGORY: Record<Bucket, string> = {
+  food: "Food & Drinks",
+  transport: "Transportation",
+  bills: "Bills & Utilities",
+  shopping: "Shopping & Lifestyle",
+  other: "Other",
+};
 
 const NEEDS_CATEGORIES = ["Food & Drinks", "Food", "Bills & Utilities", "Housing & Bills", "Bills", "Transportation"];
 
@@ -28,19 +39,17 @@ const BUCKETS: Record<string, Bucket> = {
   "Entertainment & Leisure": "shopping",
 };
 
-const MONTH_LABELS = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
-
 const time = (iso?: string) => parseDate(iso)?.getTime() ?? 0;
 const monthPrefix = (d: Date) => `${localDateKey(d).slice(0, 7)}-`;
 
-/** Server rows plus local rows the server hasn't seen yet; for the same id the newer updatedAt wins. */
+/** Server rows plus local rows the server hasn't seen yet; for the same id the newer updatedAt wins, and a winning delete hides the row. */
 export function mergeExpenses<T extends ExpenseRow>(server: T[], local: T[]): T[] {
   const byId = new Map<string, T>();
   for (const e of [...server, ...local]) {
     const prev = byId.get(e.id);
     if (!prev || time(e.updatedAt) > time(prev.updatedAt)) byId.set(e.id, e);
   }
-  return [...byId.values()].sort((a, b) => time(b.createdAt) - time(a.createdAt));
+  return [...byId.values()].filter((e) => !e.isDeleted).sort((a, b) => time(b.createdAt) - time(a.createdAt));
 }
 
 export function toTransaction(e: ExpenseRow, source: TransactionSource): TransactionCandidate {
@@ -83,18 +92,44 @@ export function sumByBucket(txs: TransactionCandidate[]): Record<Bucket, number>
   return sums;
 }
 
-/** Category totals for the last `months` local months (oldest first); empty when they hold nothing. */
-export function buildMonthlyTrend(
-  txs: TransactionCandidate[],
-  now: Date = new Date(),
-  months = 4
-): MonthlyCategorySpendingData[] {
-  const rows: MonthlyCategorySpendingData[] = [];
-  for (let i = months - 1; i >= 0; i--) {
-    const month = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const label = MONTH_LABELS[month.getMonth()] + (i === 0 ? " (Ini)" : "");
-    rows.push({ month: label, ...sumByBucket(currentMonthTransactions(txs, month)) });
-  }
-  const hasData = rows.some((r) => r.food + r.transport + r.bills + r.shopping + r.other > 0);
-  return hasData ? rows : [];
+export interface DailyJatah {
+  /** Today's allowance: fixed for the whole day, so logging never moves it. */
+  jatah: number;
+  spentToday: number;
+  /** jatah − spentToday; negative once today went past the jatah. */
+  sisaHariIni: number;
+  /** month.remaining: income − fixed costs − everything spent this month, today included. */
+  sisaBulanIni: number;
+  /** Days left in the month, today included. */
+  daysLeft: number;
+  status: "aman" | "mepet" | "habis";
+  /** The month ledger the jatah is cut from, so its figures print with their scope. */
+  month: MonthFigures;
+}
+
+/**
+ * The one "jatah hari ini" number the app shows, cut from the month ledger:
+ * (spendable this month − spent before today) / days left including today.
+ * Status comes from the same number: Habis once today's jatah is used up, Mepet from 80%.
+ */
+export function dailyJatah(params: {
+  monthlyIncome: number;
+  /** The profile's fixed costs; the Tagihan total replaces it when `bills` is non-empty. */
+  monthlyFixedExpenses: number;
+  bills?: RecurringBill[];
+  transactions: TransactionCandidate[];
+  now?: Date;
+}): DailyJatah {
+  const month = monthLedger({
+    monthlyIncome: params.monthlyIncome,
+    profileFixedCosts: params.monthlyFixedExpenses,
+    bills: params.bills,
+    transactions: params.transactions,
+    now: params.now,
+  });
+  const { spentToday, daysLeft } = month;
+  const jatah = Math.max(0, Math.round((month.spendable - month.spentBefore) / daysLeft));
+  const sisaHariIni = jatah - spentToday;
+  const status = sisaHariIni <= 0 ? "habis" : spentToday >= jatah * 0.8 ? "mepet" : "aman";
+  return { jatah, spentToday, sisaHariIni, sisaBulanIni: month.remaining, daysLeft, status, month };
 }

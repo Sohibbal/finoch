@@ -1,45 +1,52 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, CheckCircle, Plus, AlertCircle, RefreshCw } from "lucide-react";
 import { useHybridSpeech } from "@/hooks/use-hybrid-speech";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
-import type { ParsedVoiceItem, ExpenseCategory } from "@/lib/types/expense";
+import { localDateKey } from "@/lib/date";
+import { rupiah } from "@/lib/format";
+import type { Expense, ParsedVoiceItem } from "@/lib/types/expense";
+import { PaperDialog, PRIMARY_CLASS } from "@/components/press/kampus-press";
+import { SaveReceipt } from "@/components/press/receipt-stub";
+import { WalletPicker } from "@/components/wallets/wallet-picker";
 import { VoiceRecorder, type VoiceState } from "./voice-recorder";
 import { TranscriptPreview } from "./transcript-preview";
 import { ParsedExpenseList } from "./parsed-expense-list";
-import { ExpenseEditor } from "./expense-editor";
+import { CATEGORIES, ExpenseEditor } from "./expense-editor";
 import { ManualExpenseInput } from "./manual-expense-input";
-import { OfflineModelCard } from "./offline-model-card";
-import { WalletPicker } from "@/components/wallets/wallet-picker";
+import { OfflineVoiceLine } from "./offline-model-card";
 
 interface VoiceExpenseSheetProps {
   isOpen: boolean;
+  /** Keep it stable (useCallback): the dialog re-focuses itself when it changes. */
   onClose: () => void;
   userId?: string;
-  onExpenseSaved?: () => void;
+  /** Saved or undone: reload so the jatah re-prints before the receipt shows. */
+  onExpenseSaved?: () => void | Promise<void>;
+  /** Today's jatah left, printed on the save receipt. */
+  sisaHariIni?: number;
 }
 
-export function VoiceExpenseSheet({
-  isOpen,
-  onClose,
-  userId,
-  onExpenseSaved,
-}: VoiceExpenseSheetProps) {
+const settle = async (fn?: () => void | Promise<void>) => {
+  try {
+    await fn?.();
+  } catch {
+    // A failed reload never undoes a save; the next sync refreshes the page.
+  }
+};
+
+/** Catat: speak or type, check the printed stubs, save, and get a receipt with Batalkan. */
+export function VoiceExpenseSheet({ isOpen, onClose, userId, onExpenseSaved, sisaHariIni }: VoiceExpenseSheetProps) {
   const {
     isListening,
     transcript,
     interimTranscript,
     error: speechError,
-    engineMode,
     isOnline,
     isTranscribing,
     isModelDownloaded,
-    activeModelTier,
-    selectedModelTier,
-    setSelectedModelTier,
     isDownloadingModel,
     modelDownloadProgress,
     isSupported,
@@ -52,15 +59,14 @@ export function VoiceExpenseSheet({
 
   const [voiceState, setVoiceState] = useState<VoiceState>("idle");
   const [parsedItems, setParsedItems] = useState<ParsedVoiceItem[]>([]);
-  const [editingItem, setEditingItem] = useState<ParsedVoiceItem | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [walletId, setWalletId] = useState<string | undefined>(undefined);
-  const closeTimerGenerationRef = useRef(0);
-  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(() => () => {
-    closeTimerGenerationRef.current += 1;
-    if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-  }, [isOpen]);
+  const [saved, setSaved] = useState<Expense[] | null>(null);
+  const [undoing, setUndoing] = useState(false);
+  const [undoError, setUndoError] = useState<string | null>(null);
+  // Bumped on close: a save that finishes after it must not print a receipt into the next opening.
+  const openingRef = useRef(0);
   const wasOpenRef = useRef(isOpen);
 
   // 1. Sync state saat merekam
@@ -71,7 +77,7 @@ export function VoiceExpenseSheet({
     }
   }, [isOpen, isListening]);
 
-  // 2. Sync state saat AI lokal Whisper mentranskripsi
+  // 2. Sync state saat Whisper lokal mentranskripsi
   useEffect(() => {
     if (isOpen && isTranscribing) {
       setVoiceState("processing");
@@ -79,7 +85,7 @@ export function VoiceExpenseSheet({
     }
   }, [isOpen, isTranscribing]);
 
-  // 3. Tangani hasil transkripsi setelah selesai merekam dan mentranskripsi
+  // 3. Hasil transkripsi ditambahkan ke daftar, lalu transkripnya dikosongkan
   useEffect(() => {
     if (!isOpen || isListening || isTranscribing) return;
 
@@ -88,6 +94,13 @@ export function VoiceExpenseSheet({
 
     let isMounted = true;
     setVoiceState("processing");
+
+    const found = (items: ParsedVoiceItem[]) => {
+      setParsedItems((prev) => [...prev, ...items]);
+      setVoiceState("review");
+      setStatusMessage(null);
+      resetTranscript();
+    };
 
     async function parseVoice() {
       try {
@@ -100,9 +113,7 @@ export function VoiceExpenseSheet({
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data.items) && data.items.length > 0 && isMounted) {
-            setParsedItems(data.items);
-            setVoiceState("review");
-            setStatusMessage(null);
+            found(data.items);
             return;
           }
         }
@@ -114,14 +125,10 @@ export function VoiceExpenseSheet({
       if (isMounted) {
         const items = parseIndonesianExpense(fullText);
         if (items.length > 0) {
-          setParsedItems(items);
-          setVoiceState("review");
-          setStatusMessage(null);
+          found(items);
         } else {
           setVoiceState("error");
-          setStatusMessage(
-            "Pengeluaran belum dapat dikenali. Silakan coba bicara lebih jelas atau gunakan Catat Manual."
-          );
+          setStatusMessage(`Belum kebaca nominalnya dari “${fullText}”. Coba bilang lagi pelan-pelan, atau ketik saja.`);
         }
       }
     }
@@ -131,7 +138,7 @@ export function VoiceExpenseSheet({
     return () => {
       isMounted = false;
     };
-  }, [isOpen, transcript, isListening, isTranscribing]);
+  }, [isOpen, transcript, isListening, isTranscribing, resetTranscript]);
 
   // 4. Tangani error pengenalan suara
   useEffect(() => {
@@ -141,84 +148,56 @@ export function VoiceExpenseSheet({
     }
   }, [isOpen, speechError]);
 
-  // Reset when modal opens/closes
+  // Reset when the sheet closes
   useEffect(() => {
     if (wasOpenRef.current && !isOpen) {
+      openingRef.current += 1;
       stopListening();
       resetTranscript();
       setParsedItems([]);
+      setEditingId(null);
       setVoiceState("idle");
       setStatusMessage(null);
       setWalletId(undefined);
+      setSaved(null);
+      setUndoError(null);
     }
     wasOpenRef.current = isOpen;
   }, [isOpen, stopListening, resetTranscript]);
 
-  if (!isOpen) return null;
-
   const handleStart = async () => {
     resetTranscript();
-    setParsedItems([]);
     setStatusMessage(null);
     await startListening();
   };
 
-  const handleStop = () => {
-    stopListening();
-  };
-
   const handleManualParsed = (items: ParsedVoiceItem[]) => {
-    setParsedItems(items);
+    setParsedItems((prev) => [...prev, ...items]);
     setVoiceState("review");
     setStatusMessage(null);
   };
 
   const handleToggleCategory = (id: string) => {
-    const CATEGORIES: ExpenseCategory[] = [
-      "Food & Drinks",
-      "Transportation",
-      "Bills & Utilities",
-      "Shopping & Lifestyle",
-      "Other",
-    ];
     setParsedItems((prev) =>
-      prev.map((item) => {
-        if (item.id === id) {
-          const currentIdx = CATEGORIES.indexOf(item.category as ExpenseCategory);
-          const nextCategory = CATEGORIES[(currentIdx + 1) % CATEGORIES.length];
-          return {
-            ...item,
-            category: nextCategory,
-          };
-        }
-        return item;
-      })
+      prev.map((item) =>
+        item.id === id ? { ...item, category: CATEGORIES[(CATEGORIES.indexOf(item.category) + 1) % CATEGORIES.length] } : item
+      )
     );
   };
 
   const handleDeleteItem = (id: string) => {
-    const updated = parsedItems.filter((item) => item.id !== id);
-    setParsedItems(updated);
-    if (updated.length === 0) {
-      setVoiceState("idle");
-    }
-  };
-
-  const handleSaveEditedItem = (updatedItem: ParsedVoiceItem) => {
-    setParsedItems((prev) =>
-      prev.map((item) => (item.id === updatedItem.id ? updatedItem : item))
-    );
-    setEditingItem(null);
+    setParsedItems((prev) => prev.filter((item) => item.id !== id));
   };
 
   const handleConfirmAndSave = async () => {
     if (parsedItems.length === 0) return;
-    const closeTimerGeneration = closeTimerGenerationRef.current;
-
+    const opening = openingRef.current;
     setVoiceState("processing");
+    setStatusMessage(null);
 
+    let result: Expense[];
     try {
-      await expenseStorage.saveExpenses(
+      result = await expenseStorage.saveExpenses(
         parsedItems.map((item) => ({
           itemName: item.itemName,
           amount: item.amount,
@@ -227,163 +206,142 @@ export function VoiceExpenseSheet({
           walletId,
         }))
       );
-
-      // Trigger background sync
-      syncManager.triggerSync();
-
-      setVoiceState("saved");
-
-      if (closeTimerGeneration !== closeTimerGenerationRef.current) return;
-      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
-      closeTimerRef.current = setTimeout(() => {
-        if (onExpenseSaved) onExpenseSaved();
-        onClose();
-      }, 1200);
-    } catch (err) {
+    } catch {
       setVoiceState("error");
-      setStatusMessage("Gagal menyimpan pengeluaran ke memori perangkat.");
+      setStatusMessage("Belum tersimpan: penyimpanan HP-mu menolak. Coba Simpan lagi; kalau tetap gagal, kosongkan sedikit ruang di HP.");
+      return;
     }
+
+    syncManager.triggerSync();
+    // The page re-prints the jatah first, so the receipt reads the new number.
+    await settle(onExpenseSaved);
+    if (opening !== openingRef.current) return;
+    setSaved(result);
+    setVoiceState("saved");
   };
 
+  const handleUndo = async () => {
+    if (!saved) return;
+    setUndoing(true);
+    setUndoError(null);
+    try {
+      await expenseStorage.deleteExpenses(saved.map((e) => e.id));
+    } catch {
+      setUndoError("Gagal membatalkan. Coba ketuk Batalkan lagi.");
+      setUndoing(false);
+      return;
+    }
+    syncManager.triggerSync();
+    await settle(onExpenseSaved);
+    setUndoing(false);
+    setSaved(null);
+    // The items come back unsaved, so a wrong amount can be fixed and saved again.
+    setVoiceState("review");
+    setStatusMessage("Dibatalkan, belum ada yang tercatat. Ubah dulu lalu Simpan, atau tutup.");
+  };
+
+  const total = parsedItems.reduce((sum, item) => sum + item.amount, 0);
+  const editing = parsedItems.find((item) => item.id === editingId);
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-navy-950/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-lg rounded-t-[32px] sm:rounded-[32px] bg-cream-50 dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 p-5 sm:p-6 shadow-2xl backdrop-blur-2xl max-h-[92vh] flex flex-col overflow-hidden text-navy-950 dark:text-cream-50 transition-colors">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-bold text-navy-950 dark:text-cream-50">
-                Pencatatan Suara
-              </h2>
-              {engineMode === "online" && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cream-200/80 dark:bg-navy-800 text-navy-900 dark:text-cream-200 border border-cream-300 dark:border-navy-700">
-                  Online: Web Speech
-                </span>
-              )}
-              {engineMode === "offline-whisper" && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cream-200/80 dark:bg-navy-800 text-navy-900 dark:text-cream-200 border border-cream-300 dark:border-navy-700">
-                  Offline: Whisper AI
-                </span>
-              )}
-              {engineMode === "offline-unready" && (
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30">
-                  Offline: Perlu Model
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-navy-600 dark:text-cream-300/80">
-              Bicara santai, AI otomatis mendeteksi transaksi dan nominal rupiah.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Tutup"
-            className="p-1.5 rounded-full text-navy-500 hover:text-navy-950 dark:text-cream-400 dark:hover:text-cream-50 hover:bg-cream-200 dark:hover:bg-navy-800 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
-
-        {/* Content body */}
-        <div className="flex-1 overflow-y-auto py-2 space-y-2">
-          {/* Voice Mic Section */}
-          <VoiceRecorder
-            state={voiceState}
-            onStart={handleStart}
-            onStop={handleStop}
-            isSupported={isSupported}
-            isTranscribing={isTranscribing}
-          />
-
-          {/* Real-time speech preview */}
-          <TranscriptPreview
-            transcript={transcript}
-            interimTranscript={interimTranscript}
-            isListening={isListening}
-          />
-
-          {/* Status / Error alert */}
-          {statusMessage && (
-            <div className="flex items-center gap-2 p-3 my-2 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs">
-              <AlertCircle className="w-4 h-4 shrink-0" />
-              <span>{statusMessage}</span>
-            </div>
-          )}
-
-          {/* Review stage: detected transactions */}
-          {voiceState === "review" && (
-            <>
-              <ParsedExpenseList
-                items={parsedItems}
-                onToggleCategory={handleToggleCategory}
-                onEdit={(item) => setEditingItem(item)}
-                onDelete={handleDeleteItem}
-              />
-              <WalletPicker value={walletId} onChange={setWalletId} />
-            </>
-          )}
-
-          {/* Offline Model Manager Card */}
-          {(voiceState === "idle" || voiceState === "error" || !isOnline) && (
-            <div className="pt-1">
-              <OfflineModelCard
+    <PaperDialog isOpen={isOpen} onClose={onClose} title="Catat pengeluaran">
+      {saved ? (
+        <SaveReceipt
+          items={saved.map((e) => ({ name: e.itemName, amount: e.amount }))}
+          serialId={saved[0]?.id ?? "catat"}
+          date={saved[0] ? localDateKey(new Date(saved[0].createdAt)) : localDateKey(new Date())}
+          sisaHariIni={sisaHariIni}
+          onUndo={handleUndo}
+          onDone={onClose}
+          undoing={undoing}
+          error={undoError}
+        />
+      ) : (
+        <div className="space-y-5">
+          <div className="space-y-4">
+            <VoiceRecorder
+              state={voiceState}
+              onStart={handleStart}
+              onStop={stopListening}
+              isSupported={isSupported}
+              isTranscribing={isTranscribing}
+            />
+            <TranscriptPreview transcript={transcript} interimTranscript={interimTranscript} isListening={isListening} />
+            <ManualExpenseInput onParsed={handleManualParsed} />
+            {statusMessage && (
+              <p role="status" className="text-body text-ink">
+                {statusMessage}
+              </p>
+            )}
+            {parsedItems.length === 0 && (
+              <OfflineVoiceLine
                 isModelDownloaded={isModelDownloaded}
-                activeModelTier={activeModelTier}
-                selectedModelTier={selectedModelTier}
-                onSelectTier={setSelectedModelTier}
                 isDownloading={isDownloadingModel}
                 downloadProgress={modelDownloadProgress}
                 onDownload={downloadOfflineModel}
                 onDelete={deleteOfflineModel}
                 isOnline={isOnline}
               />
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Fallback manual input when idle or error */}
-          {(voiceState === "idle" || voiceState === "error") && (
-            <div className="mt-3 pt-3 border-t border-cream-200 dark:border-navy-800">
-              <span className="block text-center text-[11px] text-navy-500 dark:text-cream-400/80 mb-1 font-medium">
-                Atau ketik manual tanpa bicara
-              </span>
-              <ManualExpenseInput onParsed={handleManualParsed} />
-            </div>
+          {parsedItems.length > 0 && (
+            <section aria-labelledby="catat-review" className="space-y-3">
+              <div className="flex items-baseline justify-between gap-3 border-b border-ink/20">
+                <h3 id="catat-review" className="text-body font-semibold text-ink">
+                  Cek dulu, lalu simpan
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setParsedItems([]);
+                    setEditingId(null);
+                    setStatusMessage(null);
+                    setVoiceState("idle");
+                  }}
+                  className="min-h-11 text-meta font-semibold text-ink-soft underline underline-offset-4 decoration-ink/40 hover:text-ink"
+                >
+                  Kosongkan
+                </button>
+              </div>
+
+              {editing ? (
+                <ExpenseEditor
+                  key={editing.id}
+                  item={editing}
+                  submitLabel="Pakai"
+                  onCancel={() => setEditingId(null)}
+                  onSave={(updated) => {
+                    setParsedItems((prev) => prev.map((item) => (item.id === editing.id ? { ...item, ...updated } : item)));
+                    setEditingId(null);
+                  }}
+                />
+              ) : (
+                <ParsedExpenseList
+                  items={parsedItems}
+                  onToggleCategory={handleToggleCategory}
+                  onEdit={(item) => setEditingId(item.id)}
+                  onDelete={handleDeleteItem}
+                />
+              )}
+
+              <WalletPicker value={walletId} onChange={setWalletId} />
+
+              {/* Pinned to the sheet's bottom edge so the one action is always in thumb reach. */}
+              <div className="sticky bottom-0 -mx-5 px-5 py-3 bg-paper-sheet border-t border-ink/15">
+                <button
+                  type="button"
+                  onClick={handleConfirmAndSave}
+                  disabled={voiceState === "processing" || Boolean(editing)}
+                  className={`${PRIMARY_CLASS} w-full`}
+                >
+                  {voiceState === "processing" ? "Menyimpan..." : `Simpan ${parsedItems.length} item · ${rupiah(total)}`}
+                </button>
+              </div>
+            </section>
           )}
         </div>
-
-        {/* Action Footer */}
-        {voiceState === "review" && (
-          <div className="pt-3 border-t border-cream-200 dark:border-navy-800 flex gap-2">
-            <button
-              type="button"
-              onClick={handleStart}
-              className="py-2.5 px-4 rounded-xl border border-cream-300 dark:border-navy-800 text-xs font-semibold text-navy-800 dark:text-cream-200 hover:bg-cream-200/60 dark:hover:bg-navy-900 flex items-center gap-1.5 transition active:scale-95"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              Ulangi
-            </button>
-            <button
-              type="button"
-              onClick={handleConfirmAndSave}
-              className="flex-1 py-2.5 px-4 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-95"
-            >
-              <CheckCircle className="w-4 h-4 stroke-[2.2]" />
-              Konfirmasi &amp; Simpan ({parsedItems.length})
-            </button>
-          </div>
-        )}
-
-        {/* Inline item editor modal */}
-        {editingItem && (
-          <ExpenseEditor
-            item={editingItem}
-            isOpen={true}
-            onSave={handleSaveEditedItem}
-            onClose={() => setEditingItem(null)}
-          />
-        )}
-      </div>
-    </div>
+      )}
+    </PaperDialog>
   );
 }

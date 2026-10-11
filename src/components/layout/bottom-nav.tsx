@@ -1,30 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Mic,
-  User,
-  Home,
-  LayoutGrid,
-  Bot,
-  X,
-  CreditCard,
-  Zap,
-  Wallet,
-  Flame,
-  Handshake,
-  CalendarClock,
-  Receipt,
-  Hourglass,
-  Utensils,
-  GraduationCap,
-  FileSpreadsheet,
-  Compass,
-} from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CreditCard, FileSpreadsheet, Home, Menu, X, type LucideIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BrandLogo } from "@/components/brand/brand-logo";
-import { FLOATING_PILL_BOTTOM } from "./insets";
+import { Seal } from "@/components/press/seal";
+import { NAV_GROUPS } from "./nav-items";
+import { ThemeToggle } from "./theme-toggle";
 
 interface BottomNavProps {
   onOpenVoice: () => void;
@@ -32,188 +14,117 @@ interface BottomNavProps {
   userEmail?: string | null;
 }
 
-const ALL_STUDENT_MODULES = [
-  { href: "/wallets", label: "Dompet Akun", desc: "Tunai, Bank, E-Wallet", icon: CreditCard, color: "text-emerald-500 bg-emerald-500/10" },
-  { href: "/streak", label: "Streak Hemat", desc: "No-spend day & kalender", icon: Zap, color: "text-amber-500 bg-amber-500/10" },
-  { href: "/budget", label: "Amplop Pos", desc: "Alokasi pos makan & kos", icon: Wallet, color: "text-teal-500 bg-teal-500/10" },
-  { href: "/audit", label: "Bocor Halus", desc: "Detektor jajan siluman", icon: Flame, color: "text-rose-500 bg-rose-500/10" },
-  { href: "/debts", label: "Buku Kasbon", desc: "Hutang & piutang teman", icon: Handshake, color: "text-blue-500 bg-blue-500/10" },
-  { href: "/bills", label: "Tagihan Kost", desc: "Sewa kamar, WiFi, listrik", icon: CalendarClock, color: "text-indigo-500 bg-indigo-500/10" },
-  { href: "/split-bill", label: "Split Bill", desc: "Bagi bill resto & teks WA", icon: Receipt, color: "text-emerald-600 bg-emerald-600/10" },
-  { href: "/wishlist", label: "Wishlist Tunda", desc: "Aturan tunda 7 hari", icon: Hourglass, color: "text-purple-500 bg-purple-500/10" },
-  { href: "/meal-calc", label: "Masak vs Warteg", desc: "Kalkulator hemat & hybrid", icon: Utensils, color: "text-orange-500 bg-orange-500/10" },
-  { href: "/ukt-savings", label: "Tabungan UKT", desc: "Sinking fund semesteran", icon: GraduationCap, color: "text-cyan-500 bg-cyan-500/10" },
-  { href: "/reports", label: "Laporan & LPJ", desc: "Rekap bulanan & Excel", icon: FileSpreadsheet, color: "text-blue-600 bg-blue-600/10" },
-  { href: "/simulator", label: "Simulator Kas", desc: "Skenario jatah harian", icon: Compass, color: "text-amber-600 bg-amber-600/10" },
-];
+function Tab({ href, label, icon: Icon, active, ariaLabel }: { href: string; label: string; icon: LucideIcon; active: boolean; ariaLabel?: string }) {
+  return (
+    <Link
+      href={href}
+      aria-label={ariaLabel}
+      aria-current={active ? "page" : undefined}
+      className={`flex flex-col items-center justify-center gap-0.5 min-h-12 text-meta ${active ? "text-ink font-bold" : "text-ink-soft font-medium"}`}
+    >
+      <Icon className="w-5 h-5" strokeWidth={active ? 2.4 : 2} aria-hidden="true" />
+      <span className={active ? "underline decoration-2 underline-offset-4" : ""}>{label}</span>
+    </Link>
+  );
+}
 
+/** Mobile: one printed bar along the bottom edge with the Catat seal in the middle. */
 export function BottomNav({ onOpenVoice, userEmail }: BottomNavProps) {
   const pathname = usePathname();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const isGuest = userEmail === null || (userEmail === undefined && pathname === "/");
   const homeHref = isGuest ? "/" : "/dashboard";
-  const profileHref = isGuest ? "/login" : "/profile";
+  const isHome = isGuest ? pathname === "/" : pathname === "/" || pathname === "/dashboard";
 
-  const isHome = isGuest ? pathname === "/" : (pathname === "/" || pathname === "/dashboard");
-  const isCopilot = pathname === "/copilot";
-  const isProfile = isGuest
-    ? pathname === "/login" || pathname === "/register"
-    : pathname === "/profile" || pathname === "/goals";
-
-  const isSubFeatureActive = ALL_STUDENT_MODULES.some((m) => m.href === pathname);
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setIsMenuOpen(false);
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [isMenuOpen]);
 
   return (
     <>
-      {/* Mobile Features Drawer Sheet */}
       {isMenuOpen && (
-        <div className="md:hidden fixed inset-0 z-50 bg-navy-950/60 backdrop-blur-sm animate-in fade-in duration-200 flex flex-col justify-end">
-          <div className="w-full bg-white dark:bg-[#070E1A] rounded-t-3xl border-t border-cream-200 dark:border-navy-800 p-5 space-y-4 max-h-[82vh] overflow-y-auto custom-scrollbar">
-            {/* Drawer Header */}
-            <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
-              <div className="flex items-center gap-2.5">
-                <BrandLogo variant="symbol" className="w-6 h-6 shrink-0" />
-                <div>
-                  <h3 className="font-extrabold text-sm text-navy-950 dark:text-cream-50">
-                    Semua Fitur Mahasiswa &amp; Anak Kost
-                  </h3>
-                  <p className="text-[11px] text-navy-500 dark:text-cream-400">
-                    Pilih modul finansial yang ingin Anda buka
-                  </p>
-                </div>
-              </div>
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-label="Semua fitur"
+          className="md:hidden fixed inset-0 z-50 bg-paper flex flex-col"
+        >
+          <div className="flex items-center justify-between gap-3 px-4 pt-[calc(0.75rem+env(safe-area-inset-top))] pb-3 border-b border-ink/15">
+            <h2 className="font-display text-head font-bold text-ink">Semua fitur</h2>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
               <button
                 type="button"
                 onClick={() => setIsMenuOpen(false)}
-                className="w-8 h-8 rounded-full bg-cream-100 dark:bg-navy-800 text-navy-700 dark:text-cream-200 flex items-center justify-center shrink-0"
+                className="w-11 h-11 rounded-full border border-ink/20 text-ink flex items-center justify-center"
+                aria-label="Tutup menu"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
-
-            {/* 12-Module Grid */}
-            <div className="grid grid-cols-2 gap-2.5">
-              {ALL_STUDENT_MODULES.map((item) => {
-                const Icon = item.icon;
-                const isActive = pathname === item.href;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={`p-3 rounded-2xl border text-left flex items-start gap-2.5 transition-all active:scale-[0.98] ${
-                      isActive
-                        ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30"
-                        : "border-cream-200 dark:border-navy-800 bg-cream-50/40 dark:bg-navy-900/50 hover:bg-cream-100"
-                    }`}
-                  >
-                    <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${item.color}`}>
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <span className="font-bold text-xs text-navy-950 dark:text-cream-50 block truncate">
-                        {item.label}
-                      </span>
-                      <span className="text-[10px] text-navy-500 dark:text-cream-400 block truncate">
-                        {item.desc}
-                      </span>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
           </div>
+
+          <nav aria-label="Semua fitur" className="flex-1 overflow-y-auto px-4 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
+            {NAV_GROUPS.map((group) => (
+              <section key={group.id} className="pt-4">
+                <h3 className="text-meta font-semibold uppercase tracking-[0.1em] text-ink-soft pb-1">{group.label}</h3>
+                <ul className="divide-y divide-ink/10 border-y border-ink/10">
+                  {group.items.map((item) => {
+                    // Guests only get the sign-in page instead of a profile.
+                    const href = isGuest && item.href === "/profile" ? "/login" : isGuest && item.href === "/dashboard" ? "/" : item.href;
+                    const Icon = item.icon;
+                    return (
+                      <li key={item.href}>
+                        <Link
+                          href={href}
+                          onClick={() => setIsMenuOpen(false)}
+                          aria-current={pathname === item.href ? "page" : undefined}
+                          className="flex items-center gap-3 min-h-12 py-2 text-ink"
+                        >
+                          <Icon className="w-5 h-5 shrink-0" aria-hidden="true" />
+                          <span className="min-w-0">
+                            <span className={`block text-body ${pathname === item.href ? "font-bold underline underline-offset-4" : "font-semibold"}`}>
+                              {isGuest && item.href === "/profile" ? "Masuk" : item.label}
+                            </span>
+                            <span className="block text-meta text-ink-soft">{item.desc}</span>
+                          </span>
+                        </Link>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </section>
+            ))}
+          </nav>
         </div>
       )}
 
-      {/* Floating Quick Feature Drawer Pill on Mobile */}
-      <div className={`md:hidden fixed ${FLOATING_PILL_BOTTOM} right-4 z-40 pointer-events-auto`}>
-        <button
-          type="button"
-          onClick={() => setIsMenuOpen(true)}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-navy-900 dark:bg-cream-100 text-white dark:text-navy-950 text-xs font-bold shadow-lg border border-white/20 active:scale-95 transition-all"
-        >
-          <LayoutGrid className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-600" />
-          <span>Menu Fitur</span>
-        </button>
-      </div>
-
-      {/* Main Bottom Bar */}
-      <div className="md:hidden fixed bottom-3 sm:bottom-5 left-0 right-0 z-40 px-3 sm:px-4 pointer-events-none flex justify-center pb-[env(safe-area-inset-bottom)]">
-        <nav
-          aria-label="Navigasi Bawah Mobile"
-          className="pointer-events-auto w-full max-w-md h-16 bg-white/95 dark:bg-[#070E1A]/95 border border-cream-300 dark:border-navy-800 rounded-2xl shadow-xl px-2 sm:px-3 py-1.5 flex items-center justify-between backdrop-blur-xl transition-all"
-        >
-          {/* 1. Beranda / Dashboard */}
-          <Link
-            href={homeHref}
-            className={`flex flex-col items-center justify-center min-w-[48px] min-h-[44px] px-2 py-1 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
-              isHome
-                ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 shadow-sm"
-                : "text-navy-600 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50"
-            }`}
-            aria-label={isGuest ? "Halaman Beranda" : "Halaman Dashboard"}
-          >
-            <Home className="w-4 h-4 stroke-[2]" />
-            <span className="mt-0.5 leading-tight">Beranda</span>
-          </Link>
-
-          {/* 2. Simulasi & Jatah Harian */}
-          <Link
-            href="/simulator"
-            className={`flex flex-col items-center justify-center min-w-[48px] min-h-[44px] px-2 py-1 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
-              pathname === "/simulator"
-                ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 shadow-sm"
-                : "text-navy-600 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50"
-            }`}
-            aria-label="Simulasi dan Jatah Harian"
-          >
-            <Compass className="w-4 h-4 stroke-[2]" />
-            <span className="mt-0.5 leading-tight">Simulasi</span>
-          </Link>
-
-          {/* 3. Center Floating Voice Trigger */}
-          <div className="relative -mt-6 flex items-center justify-center">
-            <span className="absolute -inset-1 rounded-full bg-navy-900/20 dark:bg-cream-100/20 animate-pulse pointer-events-none" />
-            <button
-              type="button"
-              onClick={onOpenVoice}
-              aria-label="Bicara untuk catat pengeluaran"
-              className="relative w-12 h-12 min-w-[48px] min-h-[48px] rounded-full bg-navy-900 dark:bg-cream-100 text-cream-50 dark:text-navy-950 flex items-center justify-center shadow-xl border-2 border-white dark:border-[#070E1A] hover:scale-105 active:scale-95 transition-transform"
-            >
-              <Mic className="w-5 h-5 stroke-[2.2]" />
-            </button>
+      <nav
+        aria-label="Navigasi Bawah Mobile"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-paper border-t border-ink/20 pb-[env(safe-area-inset-bottom)]"
+      >
+        <div className="grid grid-cols-5 items-end h-16 max-w-md mx-auto px-1">
+          <Tab href={homeHref} label="Beranda" icon={Home} active={isHome} ariaLabel={isGuest ? "Halaman Beranda" : "Halaman Dashboard"} />
+          <Tab href="/wallets" label="Dompet" icon={CreditCard} active={pathname === "/wallets"} />
+          <div className="flex justify-center -mt-7 self-start">
+            <Seal onClick={onOpenVoice} size={72} label="Catat pengeluaran dengan suara" />
           </div>
-
-          {/* 4. AI Copilot */}
-          <Link
-            href="/copilot"
-            className={`flex flex-col items-center justify-center min-w-[48px] min-h-[44px] px-2 py-1 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
-              isCopilot
-                ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 shadow-sm"
-                : "text-navy-600 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50"
-            }`}
-            aria-label="AI Copilot Keuangan"
+          <Tab href="/reports" label="Laporan" icon={FileSpreadsheet} active={pathname === "/reports"} />
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(true)}
+            aria-haspopup="dialog"
+            className="flex flex-col items-center justify-center gap-0.5 min-h-12 text-meta font-medium text-ink-soft"
           >
-            <Bot className="w-4 h-4 stroke-[2]" />
-            <span className="mt-0.5 leading-tight">Copilot</span>
-          </Link>
-
-          {/* 5. Profil & Target Keuangan */}
-          <Link
-            href={profileHref}
-            className={`flex flex-col items-center justify-center min-w-[48px] min-h-[44px] px-2 py-1 rounded-xl text-[10px] font-bold transition-all active:scale-95 ${
-              isProfile
-                ? "bg-navy-900 text-cream-50 dark:bg-cream-100 dark:text-navy-950 shadow-sm"
-                : "text-navy-600 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50"
-            }`}
-            aria-label={isGuest ? "Masuk Akun" : "Profil dan Target Keuangan"}
-          >
-            <User className="w-4 h-4 stroke-[2]" />
-            <span className="mt-0.5 leading-tight">{isGuest ? "Masuk" : "Profil"}</span>
-          </Link>
-        </nav>
-      </div>
+            <Menu className="w-5 h-5" aria-hidden="true" />
+            <span>Menu</span>
+          </button>
+        </div>
+      </nav>
     </>
   );
 }

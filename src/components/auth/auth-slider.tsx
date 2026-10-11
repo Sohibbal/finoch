@@ -3,14 +3,31 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ArrowLeft, Lock, Mail, User, Loader2, LogOut, Sun, Moon } from "lucide-react";
+import { ArrowLeft, Loader2, LogOut } from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
-import { useTheme } from "@/hooks/use-theme";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { Note } from "@/components/press/note";
 import { useAuth } from "@/hooks/use-auth";
 import { safeNextPath } from "@/lib/auth/safe-next";
 
 interface AuthSliderProps {
   initialMode?: "login" | "register";
+}
+
+const FIELD =
+  "w-full min-h-12 bg-paper border border-ink/30 px-3 text-body text-ink placeholder:text-ink-soft focus:outline-none focus-visible:border-ink";
+const LABEL = "block text-body font-semibold text-ink mb-1.5";
+const SUBMIT =
+  "w-full min-h-12 rounded-full bg-ink text-paper-sheet dark:text-paper text-body font-bold hover:bg-ink/90 disabled:opacity-50 flex items-center justify-center gap-2";
+const SWITCH_LINK = "min-h-11 font-semibold text-ink underline underline-offset-4 decoration-ink/40 hover:decoration-ink";
+
+/** An error printed on the sheet: outlined in red, announced right away. */
+function FormError({ children }: { children: React.ReactNode }) {
+  return (
+    <p role="alert" className="border border-habis px-3 py-2.5 text-body font-semibold text-habis-ink">
+      {children}
+    </p>
+  );
 }
 
 export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
@@ -36,8 +53,6 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
   const [regPassword, setRegPassword] = useState("");
   const [regError, setRegError] = useState<string | null>(null);
   const [isRegSubmitting, setIsRegSubmitting] = useState(false);
-
-  const { isDark, toggleTheme } = useTheme();
 
   const handleSwitchMode = (newMode: "login" | "register") => {
     setMode(newMode);
@@ -107,294 +122,203 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
   // If user is already logged in
   if (user) {
     return (
-      <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col justify-center px-4 sm:px-6 py-12 transition-colors">
-        <div className="max-w-md w-full mx-auto p-6 sm:p-8 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-sm space-y-5 text-center">
-          <div className="w-12 h-12 rounded-full bg-cream-200 dark:bg-navy-900 text-navy-950 dark:text-cream-100 flex items-center justify-center mx-auto font-black text-lg">
-            {user.name.charAt(0).toUpperCase()}
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-navy-950 dark:text-cream-50">
+      <div className="min-h-screen bg-paper text-ink flex flex-col justify-center px-4 sm:px-6 py-12">
+        <Note as="section" aria-labelledby="akun-title" className="max-w-md w-full mx-auto px-6 sm:px-8 py-8 space-y-5">
+          <div className="space-y-1">
+            <p className="text-body text-ink-soft">Kamu sudah masuk sebagai</p>
+            <h1 id="akun-title" className="font-display text-head font-bold text-ink break-words">
               {user.name}
-            </h2>
-            <p className="text-xs text-navy-600 dark:text-cream-300/70">{user.email}</p>
+            </h1>
+            <p className="text-body text-ink-soft break-words">{user.email}</p>
           </div>
-
-          <div className="p-3.5 rounded-xl bg-cream-100 dark:bg-navy-900/60 border border-cream-200 dark:border-navy-800 text-xs text-navy-700 dark:text-cream-200">
-            Akun Anda aktif dan siap digunakan untuk pencatatan transaksi harian.
-          </div>
-
-          <div className="pt-2 flex flex-col gap-2.5">
-            <Link
-              href="/dashboard"
-              className="w-full py-2.5 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 text-cream-50 dark:text-navy-950 text-xs font-bold transition-all shadow-sm"
-            >
-              Buka Dashboard
+          <div className="flex flex-col gap-2.5">
+            <Link href="/dashboard" className={SUBMIT}>
+              Buka Beranda
             </Link>
             <button
               type="button"
               onClick={async () => {
                 await logout();
               }}
-              className="w-full py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-300 hover:bg-cream-100 dark:hover:bg-navy-900 text-xs font-semibold flex items-center justify-center gap-1.5 transition"
+              className="w-full min-h-12 rounded-full border border-ink/30 text-ink text-body font-semibold hover:bg-ink/5 flex items-center justify-center gap-2"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              <span>Keluar Akun</span>
+              <LogOut className="w-4 h-4" aria-hidden="true" />
+              Keluar akun
             </button>
           </div>
-        </div>
+        </Note>
       </div>
     );
   }
 
+  const tab = (value: "login" | "register", label: string) => (
+    <button
+      type="button"
+      aria-pressed={mode === value}
+      onClick={() => handleSwitchMode(value)}
+      className={`relative z-10 flex-1 min-h-11 text-body font-bold motion-safe:transition-colors motion-safe:duration-200 ${
+        mode === value ? "text-paper-sheet dark:text-paper" : "text-ink hover:bg-ink/5"
+      }`}
+    >
+      {label}
+    </button>
+  );
+
   return (
-    <div className="min-h-screen bg-cream-50 dark:bg-navy-950 text-navy-900 dark:text-cream-100 flex flex-col justify-center px-4 sm:px-6 py-10 transition-colors selection:bg-navy-900 selection:text-cream-100 dark:selection:bg-cream-100 dark:selection:text-navy-950">
-      <div className="max-w-md w-full mx-auto space-y-5">
-        {/* Top Bar with Back and Theme Toggle */}
-        <div className="flex items-center justify-between px-1">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-navy-700 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50 transition"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Kembali ke Beranda</span>
+    <div className="min-h-screen bg-paper text-ink px-4 sm:px-6 py-6 sm:py-12">
+      <div className="max-w-md w-full mx-auto space-y-6">
+        <div className="flex items-center justify-between gap-3">
+          <Link href="/" className="inline-flex items-center gap-1.5 min-h-11 text-body font-semibold text-ink-soft hover:text-ink">
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+            Beranda
           </Link>
-          <button
-            type="button"
-            onClick={toggleTheme}
-            aria-label={isDark ? "Beralih ke Mode Terang" : "Beralih ke Mode Gelap"}
-            className="p-1.5 rounded-lg text-navy-700 hover:text-navy-950 dark:text-cream-300 dark:hover:text-cream-50 hover:bg-cream-200/60 dark:hover:bg-navy-800/80 transition-colors"
-          >
-            {isDark ? (
-              <Sun className="w-4 h-4 text-cream-200" />
-            ) : (
-              <Moon className="w-4 h-4 text-navy-900" />
-            )}
-          </button>
+          <ThemeToggle />
         </div>
 
-        {/* Main Sliding Card */}
-        <div className="rounded-3xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 shadow-xl overflow-hidden transition-colors">
-          {/* Brand & Sliding Segmented Tab */}
-          <div className="p-6 sm:p-7 pb-4 border-b border-cream-200 dark:border-navy-800/80 space-y-4">
-            <div className="flex items-center justify-between">
-              <Link href="/" className="hover:opacity-90 transition-opacity" aria-label="Finoch.id Beranda">
-                <BrandLogo variant="full" className="h-5 w-auto" />
-              </Link>
-              <span className="text-[11px] font-medium text-navy-500 dark:text-cream-400">
-                {mode === "login" ? "Akses Akun" : "Registrasi Akun"}
-              </span>
-            </div>
+        <Note as="section" aria-label={mode === "login" ? "Masuk" : "Daftar"} className="overflow-hidden">
+          <div className="px-6 sm:px-8 pt-7 pb-4 space-y-5">
+            <Link href="/" className="inline-block" aria-label="Finoch.id Beranda">
+              <BrandLogo variant="full" className="h-6 w-auto" />
+            </Link>
 
-            {/* Smooth Segmented Slider Controller */}
-            <div className="relative p-1 rounded-full bg-cream-100 dark:bg-navy-900 border border-cream-200 dark:border-navy-800 flex items-center">
-              {/* Sliding Pill Indicator */}
-              <div
-                className={`absolute top-1 bottom-1 w-[calc(50%-4px)] rounded-full bg-navy-900 dark:bg-cream-100 shadow-sm transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${
-                  mode === "login" ? "left-1" : "left-[calc(50%+2px)]"
+            {/* Two halves of one ticket; the ink block slides to the chosen half. */}
+            <div className="relative flex border border-ink">
+              <span
+                aria-hidden="true"
+                className={`absolute inset-y-0 left-0 w-1/2 bg-ink motion-safe:transition-transform motion-safe:duration-300 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ${
+                  mode === "login" ? "translate-x-0" : "translate-x-full"
                 }`}
               />
-
-              <button
-                type="button"
-                onClick={() => handleSwitchMode("login")}
-                className={`relative z-10 w-1/2 py-2 text-xs font-bold text-center transition-colors duration-200 ${
-                  mode === "login"
-                    ? "text-cream-50 dark:text-navy-950"
-                    : "text-navy-700 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50"
-                }`}
-              >
-                Masuk
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleSwitchMode("register")}
-                className={`relative z-10 w-1/2 py-2 text-xs font-bold text-center transition-colors duration-200 ${
-                  mode === "register"
-                    ? "text-cream-50 dark:text-navy-950"
-                    : "text-navy-700 dark:text-cream-300 hover:text-navy-950 dark:hover:text-cream-50"
-                }`}
-              >
-                Daftar
-              </button>
+              {tab("login", "Masuk")}
+              {tab("register", "Daftar")}
             </div>
           </div>
 
-          {/* Sliding Content Track */}
+          {/* Sliding track; the hidden panel is inert so focus never lands off-screen. */}
           <div className="relative overflow-hidden w-full">
             <div
-              className={`flex w-[200%] transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] ${
+              className={`flex items-start w-[200%] motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.16,1,0.3,1)] ${
                 mode === "login" ? "translate-x-0" : "-translate-x-1/2"
               }`}
             >
-              {/* PANEL 1: LOGIN (w-1/2) */}
-              <div className="w-1/2 p-6 sm:p-7 pt-5 space-y-5 shrink-0">
+              <div inert={mode !== "login"} className={`w-1/2 shrink-0 ${mode !== "login" ? "h-0 overflow-hidden" : ""} px-6 sm:px-8 pt-2 pb-8 space-y-5`}>
                 <div className="space-y-1">
-                  <h1 className="text-xl sm:text-2xl font-black tracking-tight text-navy-950 dark:text-cream-50">
-                    Masuk ke akun
-                  </h1>
-                  <p className="text-xs text-navy-600 dark:text-cream-300/70">
-                    Lanjutkan pencatatan pengeluaran harian Anda
-                  </p>
+                  <h1 className="font-display text-head font-bold text-ink">Masuk ke akunmu</h1>
+                  <p className="text-body text-ink-soft">Lanjut nyatat dari terakhir kali.</p>
                 </div>
 
-                {(loginError || (mode === "login" && authError)) && (
-                  <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300 text-xs font-medium animate-fade-in">
-                    {loginError || authError}
-                  </div>
-                )}
+                {(loginError || (mode === "login" && authError)) && <FormError>{loginError || authError}</FormError>}
 
-                <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <form onSubmit={handleLoginSubmit} className="space-y-4" noValidate>
                   <div>
-                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                      Alamat Email
+                    <label htmlFor="login-email" className={LABEL}>
+                      Email
                     </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={loginEmail}
-                        onChange={(e) => setLoginEmail(e.target.value)}
-                        placeholder="nama@email.com"
-                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      />
-                      <Mail className="w-4 h-4 text-navy-400 dark:text-cream-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
+                    <input
+                      id="login-email"
+                      type="email"
+                      autoComplete="email"
+                      value={loginEmail}
+                      onChange={(e) => setLoginEmail(e.target.value)}
+                      placeholder="nama@email.com"
+                      className={FIELD}
+                    />
                   </div>
-
                   <div>
-                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
+                    <label htmlFor="login-password" className={LABEL}>
                       Password
                     </label>
-                    <div className="relative">
-                      <input
-                        type="password"
-                        value={loginPassword}
-                        onChange={(e) => setLoginPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      />
-                      <Lock className="w-4 h-4 text-navy-400 dark:text-cream-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
+                    <input
+                      id="login-password"
+                      type="password"
+                      autoComplete="current-password"
+                      value={loginPassword}
+                      onChange={(e) => setLoginPassword(e.target.value)}
+                      className={FIELD}
+                    />
                   </div>
-
-                  <button
-                    type="submit"
-                    disabled={isLoginSubmitting || isLoading}
-                    className="w-full py-3 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 disabled:opacity-50 text-cream-50 dark:text-navy-950 text-xs font-bold shadow-sm flex items-center justify-center gap-2 transition active:scale-[0.98]"
-                  >
-                    {isLoginSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      "Masuk Sekarang"
-                    )}
+                  <button type="submit" disabled={isLoginSubmitting || isLoading} className={SUBMIT}>
+                    {isLoginSubmitting ? <Loader2 className="w-4 h-4 animate-spin" aria-label="Memproses" /> : "Masuk"}
                   </button>
                 </form>
 
-                <div className="pt-2 text-center text-xs text-navy-600 dark:text-cream-300/70 border-t border-cream-200 dark:border-navy-800">
+                <p className="pt-4 border-t border-ink/20 text-body text-ink-soft">
                   Belum punya akun?{" "}
-                  <button
-                    type="button"
-                    onClick={() => handleSwitchMode("register")}
-                    className="text-navy-950 dark:text-cream-100 font-bold hover:underline"
-                  >
-                    Daftar di sini &rarr;
+                  <button type="button" onClick={() => handleSwitchMode("register")} className={SWITCH_LINK}>
+                    Daftar gratis
                   </button>
-                </div>
+                </p>
               </div>
 
-              {/* PANEL 2: REGISTER (w-1/2) */}
-              <div className="w-1/2 p-6 sm:p-7 pt-5 space-y-5 shrink-0">
+              <div inert={mode !== "register"} className={`w-1/2 shrink-0 ${mode !== "register" ? "h-0 overflow-hidden" : ""} px-6 sm:px-8 pt-2 pb-8 space-y-5`}>
                 <div className="space-y-1">
-                  <h1 className="text-xl sm:text-2xl font-black tracking-tight text-navy-950 dark:text-cream-50">
-                    Buat akun baru
-                  </h1>
-                  <p className="text-xs text-navy-600 dark:text-cream-300/70">
-                    Daftar gratis dalam 30 detik untuk mulai mencatat
-                  </p>
+                  <h1 className="font-display text-head font-bold text-ink">Bikin akun baru</h1>
+                  <p className="text-body text-ink-soft">Gratis. Habis ini tinggal isi uang bulananmu.</p>
                 </div>
 
-                {(regError || (mode === "register" && authError)) && (
-                  <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/30 border border-rose-200 dark:border-rose-900 text-rose-800 dark:text-rose-300 text-xs font-medium animate-fade-in">
-                    {regError || authError}
-                  </div>
-                )}
+                {(regError || (mode === "register" && authError)) && <FormError>{regError || authError}</FormError>}
 
-                <form onSubmit={handleRegisterSubmit} className="space-y-4">
+                <form onSubmit={handleRegisterSubmit} className="space-y-4" noValidate>
                   <div>
-                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                      Nama Lengkap
+                    <label htmlFor="reg-name" className={LABEL}>
+                      Nama
                     </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        value={regName}
-                        onChange={(e) => setRegName(e.target.value)}
-                        placeholder="Budi Santoso"
-                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      />
-                      <User className="w-4 h-4 text-navy-400 dark:text-cream-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
+                    <input
+                      id="reg-name"
+                      type="text"
+                      autoComplete="name"
+                      value={regName}
+                      onChange={(e) => setRegName(e.target.value)}
+                      placeholder="Budi Santoso"
+                      className={FIELD}
+                    />
                   </div>
-
                   <div>
-                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                      Alamat Email
+                    <label htmlFor="reg-email" className={LABEL}>
+                      Email
                     </label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={regEmail}
-                        onChange={(e) => setRegEmail(e.target.value)}
-                        placeholder="nama@email.com"
-                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      />
-                      <Mail className="w-4 h-4 text-navy-400 dark:text-cream-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
+                    <input
+                      id="reg-email"
+                      type="email"
+                      autoComplete="email"
+                      value={regEmail}
+                      onChange={(e) => setRegEmail(e.target.value)}
+                      placeholder="nama@email.com"
+                      className={FIELD}
+                    />
                   </div>
-
                   <div>
-                    <label className="block text-xs font-semibold text-navy-800 dark:text-cream-200 mb-1.5">
-                      Password (minimal 8 karakter)
+                    <label htmlFor="reg-password" className={LABEL}>
+                      Password
                     </label>
-                    <div className="relative">
-                      <input
-                        type="password"
-                        value={regPassword}
-                        onChange={(e) => setRegPassword(e.target.value)}
-                        placeholder="••••••••"
-                        className="w-full pl-9 pr-3 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50/50 dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 placeholder-navy-400 dark:placeholder-cream-400/40 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-navy-800 dark:focus:ring-cream-200"
-                      />
-                      <Lock className="w-4 h-4 text-navy-400 dark:text-cream-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                    </div>
+                    <input
+                      id="reg-password"
+                      type="password"
+                      autoComplete="new-password"
+                      aria-describedby="reg-password-hint"
+                      value={regPassword}
+                      onChange={(e) => setRegPassword(e.target.value)}
+                      className={FIELD}
+                    />
+                    <p id="reg-password-hint" className="mt-1.5 text-meta text-ink-soft">
+                      Minimal 8 karakter.
+                    </p>
                   </div>
-
-                  <button
-                    type="submit"
-                    disabled={isRegSubmitting || isLoading}
-                    className="w-full py-3 rounded-xl bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 disabled:opacity-50 text-cream-50 dark:text-navy-950 text-xs font-bold shadow-sm flex items-center justify-center gap-2 transition active:scale-[0.98]"
-                  >
-                    {isRegSubmitting ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      "Daftar Akun Sekarang"
-                    )}
+                  <button type="submit" disabled={isRegSubmitting || isLoading} className={SUBMIT}>
+                    {isRegSubmitting ? <Loader2 className="w-4 h-4 animate-spin" aria-label="Memproses" /> : "Daftar"}
                   </button>
                 </form>
 
-                <div className="pt-2 text-center text-xs text-navy-600 dark:text-cream-300/70 border-t border-cream-200 dark:border-navy-800">
+                <p className="pt-4 border-t border-ink/20 text-body text-ink-soft">
                   Sudah punya akun?{" "}
-                  <button
-                    type="button"
-                    onClick={() => handleSwitchMode("login")}
-                    className="text-navy-950 dark:text-cream-100 font-bold hover:underline"
-                  >
-                    &larr; Masuk di sini
+                  <button type="button" onClick={() => handleSwitchMode("login")} className={SWITCH_LINK}>
+                    Masuk
                   </button>
-                </div>
+                </p>
               </div>
             </div>
           </div>
-        </div>
+        </Note>
       </div>
     </div>
   );

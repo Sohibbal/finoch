@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { Camera, Loader2, Sparkles } from "lucide-react";
+import { Camera, Loader2 } from "lucide-react";
 import { SplitItem } from "@/types/split-bill-types";
 import { TransactionCandidate } from "@/types/financial-types";
+import { SECONDARY_CLASS } from "@/components/press/kampus-press";
 
 /**
  * Maps an OCR transaction candidate to split-bill items: one per receipt line item,
@@ -87,25 +88,21 @@ export function ReceiptOcrButton({ onItemsExtracted }: ReceiptOcrButtonProps) {
         capture="environment"
         onChange={handleFileChange}
         className="hidden"
+        aria-hidden="true"
+        tabIndex={-1}
       />
       <button
         type="button"
         disabled={isScanning}
         onClick={() => fileInputRef.current?.click()}
-        className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs font-bold transition-all active:scale-95 disabled:opacity-50"
+        className={SECONDARY_CLASS}
       >
         {isScanning ? (
-          <>
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            <span>Memindai Struk...</span>
-          </>
+          <Loader2 className="w-4 h-4 motion-safe:animate-spin" aria-hidden="true" />
         ) : (
-          <>
-            <Camera className="w-3.5 h-3.5" />
-            <span>Scan Struk Kasir</span>
-            <Sparkles className="w-3 h-3 text-amber-500" />
-          </>
+          <Camera className="w-4 h-4" aria-hidden="true" />
         )}
+        {isScanning ? "Membaca struk…" : "Scan struk kasir"}
       </button>
     </div>
   );

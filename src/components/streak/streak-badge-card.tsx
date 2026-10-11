@@ -1,57 +1,45 @@
 "use client";
 
 import React from "react";
-import { Trophy, Flame, Zap, Shield, Sparkles } from "lucide-react";
 import { StreakSummary } from "@/types/streak-types";
+import { Guilloche } from "@/components/press/guilloche";
+import { Note } from "@/components/press/note";
+import { useRolledNumber } from "@/components/press/rolling-numeral";
+import { Award } from "lucide-react";
+import { StateLabel } from "@/components/press/kampus-press";
 
 interface StreakBadgeCardProps {
   summary: StreakSummary;
 }
 
+/** The running streak printed as the page's one big number, with the earned title stamped on. */
 export function StreakBadgeCard({ summary }: StreakBadgeCardProps) {
+  const streak = useRolledNumber(summary.currentStreak);
   return (
-    <div className="rounded-3xl bg-gradient-to-r from-amber-500/20 via-emerald-500/15 to-blue-500/15 border border-amber-500/30 p-5 sm:p-6 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-      <div className="flex items-center gap-4">
-        <div className="w-14 h-14 rounded-2xl bg-white dark:bg-navy-900 border border-amber-500/30 text-3xl flex items-center justify-center shrink-0 shadow-md">
-          {summary.badge.emoji}
-        </div>
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] uppercase font-bold tracking-widest bg-amber-500/20 text-amber-800 dark:text-amber-300 px-2 py-0.5 rounded-full">
-              Pencapaian Mahasiswa
-            </span>
-            <span className="text-xs font-bold text-navy-500 dark:text-cream-400">
-              Level: {summary.badge.level.toUpperCase()}
-            </span>
+    <Note as="section" aria-labelledby="streak-title" microtext className="overflow-hidden">
+      <div className="relative flex items-center gap-8 px-5 sm:px-8 pt-6 pb-4">
+        <Guilloche seed={0x57ea} turn={summary.currentStreak * 12} size={160} className="hidden sm:block shrink-0" />
+        <div className="min-w-0 space-y-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+            <h2 id="streak-title" className="text-body font-semibold text-ink-soft">
+              Streak hemat
+            </h2>
+            <StateLabel icon={Award} className="text-ink">{summary.badge.title}</StateLabel>
           </div>
-          <h3 className="text-base sm:text-lg font-black text-navy-950 dark:text-cream-50 mt-0.5">
-            {summary.badge.title}
-          </h3>
-          <p className="text-xs text-navy-600 dark:text-cream-300 mt-0.5">
-            {summary.badge.description}
+          <p className="font-display font-bold text-ink money flex items-baseline gap-2">
+            <span className="text-numeral" aria-hidden="true">
+              {streak}
+            </span>
+            <span className="text-head">hari</span>
+            <span className="sr-only">{summary.currentStreak} hari berturut-turut</span>
+          </p>
+          <p className="text-body text-ink max-w-prose">{summary.badge.description}</p>
+          <p className="text-body text-ink-soft">
+            Rekor <span className="money font-semibold text-ink">{summary.longestStreak} hari</span> · puasa jajan bulan ini{" "}
+            <span className="money font-semibold text-ink">{summary.greenDaysCount} hari</span>
           </p>
         </div>
       </div>
-
-      <div className="flex items-center gap-3 pt-3 sm:pt-0 border-t sm:border-t-0 border-black/5 dark:border-white/10 shrink-0">
-        <div className="text-center px-3 py-1.5 rounded-xl bg-white/70 dark:bg-navy-900/70 border border-black/5">
-          <span className="text-[10px] text-navy-500 dark:text-cream-400 block font-semibold">
-            Streak Aktif
-          </span>
-          <span className="text-sm font-black text-amber-600 dark:text-amber-400">
-            🔥 {summary.currentStreak} Hari
-          </span>
-        </div>
-
-        <div className="text-center px-3 py-1.5 rounded-xl bg-white/70 dark:bg-navy-900/70 border border-black/5">
-          <span className="text-[10px] text-navy-500 dark:text-cream-400 block font-semibold">
-            Puasa Jajan
-          </span>
-          <span className="text-sm font-black text-emerald-600 dark:text-emerald-400">
-            🟢 {summary.greenDaysCount} Hari
-          </span>
-        </div>
-      </div>
-    </div>
+    </Note>
   );
 }

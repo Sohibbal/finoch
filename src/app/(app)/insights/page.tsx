@@ -2,152 +2,143 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import {
-  Sparkles,
-  Lightbulb,
-  ShieldAlert,
-  CheckCircle,
-} from "lucide-react";
-import { detectSpendingPatterns, getMonthlyCategoryTotals } from "@/lib/insights/pattern-detector";
+import { Lightbulb } from "lucide-react";
+import { comparisonLabels, detectSpendingPatterns, getMonthlyCategoryTotals } from "@/lib/insights/pattern-detector";
 import { AiInsightCard } from "@/types/financial-types";
 import { EMPTY_ACTION_CLASS, EmptyState, PageHeader } from "@/components/layout/page-header";
 import { expenseStorage } from "@/lib/storage/expense-storage";
-import { getBills } from "@/lib/storage/bill-storage";
+import { getBills, getMonthlyBillAmount } from "@/lib/storage/bill-storage";
+import { isDemoMode } from "@/lib/storage/local-storage";
+import { mergeExpenses } from "@/components/dashboard/dashboard-data";
+import { categoryLabel, rupiah } from "@/lib/format";
+import { localDateKey } from "@/lib/date";
+
+const num = (v: unknown) => (typeof v === "number" && Number.isFinite(v) ? v : 0);
+
+/** What each slip prints: a headline in Indonesian labels, a plain kind label, and the figures behind it. */
+function slip(
+  card: AiInsightCard,
+  ranges: { current: string; previous: string }
+): { title: string; kind: string; kindClass: string; figures: Array<[string, string]> } {
+  const e = card.evidence;
+  if (card.type === "spending_increase" || card.type === "spending_decrease") {
+    const up = card.type === "spending_increase";
+    const label = categoryLabel(String(e.category ?? ""));
+    return {
+      title: `${label} ${up ? "naik" : "turun"} ${Math.abs(Math.round(num(e.changePercent)))}% dari tanggal yang sama bulan lalu`,
+      kind: up ? "Naik" : "Turun",
+      kindClass: "text-ink",
+      figures: [
+        [ranges.previous, rupiah(num(e.previous))],
+        [ranges.current, rupiah(num(e.current))],
+        ["Selisih", rupiah(num(e.diffAmount))],
+      ],
+    };
+  }
+  if (card.type === "recurring") {
+    const items = Array.isArray(e.items) ? e.items.map(String) : [];
+    return {
+      title: `${num(e.count)} tagihan rutin tiap bulan`,
+      kind: "Tagihan rutin",
+      kindClass: "text-ink-soft",
+      figures: [
+        ["Total per bulan (dari tagihan)", rupiah(num(e.total))],
+        ["Isinya", items.join(", ")],
+      ],
+    };
+  }
+  return { title: card.title, kind: "Catatan", kindClass: "text-ink-soft", figures: [] };
+}
 
 export default function InsightsPage() {
-  // null while loading: the user's own expenses (this vs last month) and recurring bills.
+  // null while loading: the user's own expenses (equal day ranges of this and last month) and recurring bills.
   const [insights, setInsights] = useState<AiInsightCard[] | null>(null);
 
   useEffect(() => {
     let active = true;
-    expenseStorage
-      .getExpenses()
-      .catch((err) => {
+    // Server rows plus local ones not synced yet: the same rows the dashboard reads.
+    Promise.all([
+      // Demo mode shows only sample data: the server holds the user's real expenses.
+      isDemoMode()
+        ? []
+        : fetch("/api/expenses")
+            .then(async (res) => (res.ok ? (await res.json()).expenses : []))
+            .catch(() => []),
+      expenseStorage.getExpenses().catch((err) => {
         console.warn("Gagal memuat pengeluaran lokal:", err);
         return [];
-      })
-      .then((expenses) => {
-        if (!active) return;
-        setInsights(
-          detectSpendingPatterns({
-            ...getMonthlyCategoryTotals(expenses),
-            recurringExpenses: getBills().map((b) => ({ name: b.name, amount: b.amount, frequency: b.frequency })),
-          })
-        );
-      });
+      }),
+    ]).then(([server, local]) => {
+      if (!active) return;
+      setInsights(
+        detectSpendingPatterns({
+          ...getMonthlyCategoryTotals(mergeExpenses(Array.isArray(server) ? server : [], local)),
+          recurringExpenses: getBills().map((b) => ({ name: b.name, amount: getMonthlyBillAmount(b), frequency: b.frequency })),
+        })
+      );
+    });
     return () => {
       active = false;
     };
   }, []);
 
+  const now = new Date();
+  const today = localDateKey(now);
+  const ranges = comparisonLabels(now);
+
   return (
     <>
-      <PageHeader
-        title="Wawasan Finansial (AI Insights)"
-        subtitle="Setiap wawasan didukung bukti angka konkret dan rencana aksi nyata"
-      />
+      <PageHeader title="Insight" subtitle={`Pola belanjamu ${ranges.current} dibanding ${ranges.previous}`} />
 
-      {/* Main Content */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-6 space-y-6 w-full">
-        <div>
-          <h2 className="text-xl font-black text-navy-950 dark:text-cream-50">
-            Deteksi Pola & Rekomendasi Finansial
-          </h2>
-          <p className="text-xs text-navy-600 dark:text-cream-300/70 mt-1">
-            Evaluasi kebiasaan belanja untuk mencegah kebocoran kas bulanan secara cerdas.
-          </p>
-        </div>
-
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-5 sm:py-10 w-full">
         {insights === null && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6" aria-busy="true">
-            <div className="h-56 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
-            <div className="h-56 rounded-2xl bg-cream-200/70 dark:bg-navy-900/70 animate-pulse" />
+            <div className="h-56 bg-paper-deep motion-safe:animate-pulse" />
+            <div className="h-56 bg-paper-deep motion-safe:animate-pulse" />
           </div>
         )}
 
         {insights?.length === 0 && (
           <EmptyState
-            icon={Sparkles}
-            title="Belum cukup data untuk wawasan"
+            icon={Lightbulb}
+            title="Belum cukup data untuk insight"
             action={
               <Link href="/dashboard" className={EMPTY_ACTION_CLASS}>
                 Catat Pengeluaran
               </Link>
             }
           >
-            Wawasan muncul setelah ada pengeluaran bulan lalu dan bulan ini untuk dibandingkan, atau tagihan rutin yang tercatat.
+            Insight muncul setelah ada pengeluaran bulan lalu dan bulan ini untuk dibandingkan, atau tagihan rutin yang tercatat.
           </EmptyState>
         )}
 
-        {/* Insights Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {insights?.map((card, idx) => (
-            <div
-              key={idx}
-              className="bg-white dark:bg-[#070E1A] rounded-2xl p-6 shadow-sm border border-cream-300 dark:border-navy-800 space-y-4 flex flex-col justify-between transition-colors"
-            >
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <span
-                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      card.type === "spending_increase"
-                        ? "bg-rose-50 text-rose-800 dark:bg-rose-950/40 dark:text-rose-300"
-                        : card.type === "spending_decrease"
-                        ? "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
-                        : "bg-cream-100 text-navy-800 dark:bg-navy-900 dark:text-cream-200"
-                    }`}
-                  >
-                    {card.type === "spending_increase" ? (
-                      <ShieldAlert className="w-3.5 h-3.5" />
-                    ) : card.type === "spending_decrease" ? (
-                      <CheckCircle className="w-3.5 h-3.5" />
-                    ) : (
-                      <Sparkles className="w-3.5 h-3.5" />
-                    )}
-                    {card.type.replace("_", " ")}
-                  </span>
-                  <span className="text-xs text-navy-400 dark:text-cream-400/60">
-                    Akurasi: {Math.round((card.confidence || 0.95) * 100)}%
-                  </span>
-                </div>
-
-                <h3 className="text-base font-bold text-navy-950 dark:text-cream-50">
-                  {card.title}
-                </h3>
-                <p className="text-xs text-navy-600 dark:text-cream-300/80 leading-relaxed">
-                  {card.description}
-                </p>
-
-                {/* Evidence Box */}
-                <div className="p-3 rounded-xl bg-cream-50/70 dark:bg-navy-900/50 border border-cream-200 dark:border-navy-800/60 text-xs text-navy-700 dark:text-cream-300">
-                  <div className="font-semibold text-navy-950 dark:text-cream-50 mb-1">
-                    Bukti Angka:
+        {insights && insights.length > 0 && (
+          <ol className="grid grid-cols-1 md:grid-cols-2 gap-x-10 border-t border-ink/20">
+            {insights.map((card, idx) => {
+              const s = slip(card, ranges);
+              return (
+                <li key={idx} className="py-6 border-b border-ink/20 space-y-3">
+                  <div className="flex items-start justify-between gap-4">
+                    <h2 className="font-display text-head font-bold text-ink">{s.title}</h2>
+                    <span className={`shrink-0 mt-1.5 text-meta font-semibold ${s.kindClass}`}>{s.kind}</span>
                   </div>
-                  <pre className="text-[11px] font-mono text-navy-500 dark:text-cream-400/70 overflow-x-auto">
-                    {JSON.stringify(card.evidence, null, 2)}
-                  </pre>
-                </div>
-
-                {/* Impact Statement */}
-                <div className="text-xs font-medium text-navy-700 dark:text-cream-300">
-                  <span className="font-bold text-navy-950 dark:text-cream-50">Dampak: </span>
-                  {card.impact}
-                </div>
-              </div>
-
-              {/* Recommendation Action */}
-              <div className="pt-3 border-t border-cream-200 dark:border-navy-800/80">
-                <div className="p-3 rounded-xl bg-cream-100 dark:bg-navy-900 border border-cream-200 dark:border-navy-800 text-xs text-navy-900 dark:text-cream-100 flex items-start gap-2">
-                  <Lightbulb className="w-4 h-4 shrink-0 mt-0.5 text-navy-800 dark:text-cream-200" />
-                  <div>
-                    <span className="font-bold">Rekomendasi Aksi: </span>
-                    {card.recommendation}
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
+                  {s.figures.length > 0 && (
+                    <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1">
+                      {s.figures.map(([k, v]) => (
+                        <React.Fragment key={k}>
+                          <dt className="text-body text-ink-soft">{k}</dt>
+                          <dd className="money text-body font-semibold text-ink text-right break-words">{v}</dd>
+                        </React.Fragment>
+                      ))}
+                    </dl>
+                  )}
+                  <p className="text-body text-ink">{card.impact}</p>
+                  <p className="text-body text-ink">{card.recommendation}</p>
+                </li>
+              );
+            })}
+          </ol>
+        )}
       </main>
     </>
   );

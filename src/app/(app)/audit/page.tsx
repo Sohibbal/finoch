@@ -1,19 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  Flame,
-  ShieldCheck,
-  RefreshCw,
-  Lightbulb,
-} from "lucide-react";
+import { Flame, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import { LeakAuditSummary } from "@/types/audit-types";
 import { auditMicroExpenses, ExpenseAuditCandidate } from "@/lib/financial/audit-engine";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 
-import { AuditCardMobile } from "@/components/audit/audit-card-mobile";
-import { AuditBentoDesktop } from "@/components/audit/audit-bento-desktop";
+import { AuditReceipt } from "@/components/audit/audit-receipt";
+import { MONTH_NAMES_ID } from "@/lib/financial/report-engine";
 import { ContentSkeleton, EMPTY_ACTION_CLASS, EmptyState, PageHeader, ProfileGate } from "@/components/layout/page-header";
 import { useFinancialProfile } from "@/hooks/use-financial-profile";
 import { isDemoMode } from "@/lib/storage/local-storage";
@@ -66,25 +61,22 @@ export default function AuditPage() {
   return (
     <>
       <PageHeader
-        title="Detektor Bocor Halus"
-        subtitle="Audit pengeluaran receh & jajan siluman anak kost"
+        title="Bocor Halus"
+        subtitle="Jajan kecil yang numpuk bulan ini"
         actions={
-          <>
-            <button
-              onClick={loadData}
-              className="px-3.5 py-1.5 rounded-full border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-200 text-xs font-semibold hover:bg-cream-100 dark:hover:bg-navy-900 flex items-center gap-1.5 transition-all"
-              title="Refresh Data Audit"
-            >
-              <RefreshCw className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Refresh</span>
-            </button>
-          </>
+          <button
+            type="button"
+            onClick={loadData}
+            aria-label="Muat ulang audit"
+            className="w-11 h-11 rounded-full border border-ink/30 text-ink hover:bg-ink/5 flex items-center justify-center transition-colors"
+          >
+            <RefreshCw className="w-4 h-4" aria-hidden="true" />
+          </button>
         }
       />
 
-      {/* Page Body */}
       <ProfileGate profile={profile}>
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 pt-3 space-y-6">
+      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-5 sm:py-10">
         {!loaded ? (
           <ContentSkeleton />
         ) : expenses.length === 0 ? (
@@ -100,17 +92,7 @@ export default function AuditPage() {
             Catat pengeluaran harianmu lewat suara atau foto struk. Finoch akan menandai jajan receh yang diam-diam menggerus uang saku.
           </EmptyState>
         ) : (
-        <>
-        {/* MOBILE PWA VIEW (md:hidden) */}
-        <div className="md:hidden space-y-4">
-          <AuditCardMobile summary={auditSummary} />
-        </div>
-
-        {/* DESKTOP BENTO GRID VIEW (hidden md:block) */}
-        <div className="hidden md:block">
-          <AuditBentoDesktop summary={auditSummary} />
-        </div>
-        </>
+          <AuditReceipt summary={auditSummary} monthLabel={`${MONTH_NAMES_ID[new Date().getMonth()]} ${new Date().getFullYear()}`} />
         )}
       </main>
       </ProfileGate>

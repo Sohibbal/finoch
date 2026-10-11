@@ -10,6 +10,8 @@ export interface MonthlyReportSummary {
   year: number;
   monthName: string;
   totalIncome: number;
+  /** Fixed costs taken from the month ledger (bills or profile); 0 when unknown. */
+  fixedCosts: number;
   totalExpenses: number;
   netSavings: number;
   savingsRate: number;

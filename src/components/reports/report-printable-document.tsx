@@ -1,212 +1,210 @@
-"use client";
-
 import React from "react";
-import { Printer, Download, CheckCircle2, ShieldCheck } from "lucide-react";
 import { MonthlyReportSummary } from "@/types/report-types";
 import { ExpenseRecord } from "@/lib/financial/report-engine";
-import { formatRupiah } from "@/lib/financial/split-bill-engine";
 import { BrandLogo } from "@/components/brand/brand-logo";
+import { Note } from "@/components/press/note";
+import { Serial, formatSerial } from "@/components/press/serial";
+import { categoryLabel, rupiah } from "@/lib/format";
+import { localDateKey, parseDate } from "@/lib/date";
+import { BILL_PAYMENT_PREFIX } from "@/lib/financial/month-ledger";
 
 interface ReportPrintableDocumentProps {
   summary: MonthlyReportSummary;
   expenses: ExpenseRecord[];
   studentName?: string;
   campusName?: string;
-  onPrint?: () => void;
-  onExportCsv?: () => void;
+  /** Where the fixed costs come from ("dari tagihan" / "dari profil"). */
+  fixedCostLabel?: string;
 }
 
+const TH = "py-2 pr-3 text-meta font-semibold text-ink-soft text-left";
+const TD = "py-2 pr-3 text-body text-ink align-baseline";
+
+// Printing in dark mode would put cream ink on white paper: the printed sheet always uses the light inks.
+const PRINT_INKS =
+  "print:[--ink:11_25_44] print:[--ink-soft:70_96_127] print:[--paper-sheet:255_255_255] print:[--aman-ink:43_117_80] print:[--habis-ink:180_53_44]";
+
+/** The month's expenses oldest first, each with the balance left after it, like a bank statement. */
+export function statementRows(expenses: ExpenseRecord[], summary: MonthlyReportSummary) {
+  // Opens at what is spendable after fixed costs; bill payments are already inside those costs.
+  let saldo = summary.totalIncome - (summary.fixedCosts ?? 0);
+  return expenses
+    .map((e) => ({ e, d: parseDate(e.createdAt) }))
+    .filter(({ e, d }) => d && d.getMonth() + 1 === summary.month && d.getFullYear() === summary.year && !(summary.fixedCosts > 0 && e.itemName?.startsWith(BILL_PAYMENT_PREFIX)))
+    .sort((a, b) => a.d!.getTime() - b.d!.getTime())
+    .map(({ e, d }, i) => {
+      saldo -= e.amount || 0;
+      const day = localDateKey(d!);
+      return { id: e.id ?? `row-${i}`, day, item: e.itemName || "Pengeluaran", category: e.category, amount: e.amount || 0, saldo };
+    });
+}
+
+/** Monthly statement printed as a rekening koran: summary, mutasi with running balance, categories, signatures. */
 export function ReportPrintableDocument({
   summary,
   expenses,
   studentName = "Mahasiswa Finoch",
   campusName = "Perguruan Tinggi",
-  onPrint,
-  onExportCsv,
+  fixedCostLabel,
 }: ReportPrintableDocumentProps) {
   const isSurplus = summary.netSavings >= 0;
+  const rows = statementRows(expenses, summary);
+  const period = `${summary.monthName} ${summary.year}`;
 
   return (
-    <div className="space-y-4">
-      {/* Top Document Controls (Hidden when printed) */}
-      <div className="print:hidden flex items-center justify-between p-3 rounded-2xl bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800">
-        <div className="flex items-center gap-2 pl-1">
-          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-          <span className="text-xs font-bold text-navy-950 dark:text-cream-50">
-            Format Resmi Pertanggungjawaban (A4 Print-Ready)
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          {onExportCsv && (
-            <button
-              onClick={onExportCsv}
-              className="px-3.5 py-1.5 rounded-xl border border-cream-300 dark:border-navy-800 hover:bg-cream-100 dark:hover:bg-navy-900 text-navy-700 dark:text-cream-300 text-xs font-semibold flex items-center gap-1.5 transition-all"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Ekspor CSV</span>
-            </button>
-          )}
-
-          {onPrint && (
-            <button
-              onClick={onPrint}
-              className="px-4 py-1.5 rounded-xl bg-navy-950 hover:bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 dark:hover:bg-white text-xs font-bold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
-            >
-              <Printer className="w-3.5 h-3.5" />
-              <span>Cetak / PDF (A4)</span>
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Printable Sheet (Standard A4 Proportions on Screen, Clean Pure Print on Paper) */}
-      <div
-        id="printable-report"
-        className="rounded-3xl bg-white text-navy-950 border border-cream-300 dark:border-navy-800 p-8 sm:p-12 shadow-md print:shadow-none print:border-none print:p-0 print:m-0 space-y-6 max-w-4xl mx-auto"
-      >
-        {/* Document Header */}
-        <div className="border-b-2 border-navy-900 pb-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2.5">
-              <BrandLogo variant="full" className="h-6 w-auto" theme="light" />
-              <span className="text-[10px] uppercase font-bold tracking-widest bg-navy-100 text-navy-800 px-2 py-0.5 rounded">
-                Official Statement
-              </span>
-            </div>
-            <h2 className="text-lg font-bold text-navy-900 mt-1 uppercase tracking-wide">
-              Laporan Keuangan & Akuntabilitas Mahasiswa
+    <Note
+      as="article"
+      aria-labelledby="statement-title"
+      microtext
+      serial={<Serial id={`laporan-${summary.year}-${summary.month}`} date={new Date(summary.year, summary.month - 1, 1)} />}
+      className={`max-w-4xl mx-auto print:border-none ${PRINT_INKS}`}
+    >
+      <div id="printable-report" className="px-5 sm:px-10 pt-7 pb-6 space-y-8">
+        <header className="flex flex-wrap items-start justify-between gap-x-6 gap-y-4 border-b-2 border-ink pb-5">
+          <div className="space-y-2">
+            <BrandLogo variant="full" className="h-6 w-auto" />
+            <h2 id="statement-title" className="font-display text-head font-bold text-ink">
+              Rekening Koran Uang Saku
             </h2>
-            <p className="text-xs text-navy-600">
-              Periode Pelaporan: <strong>{summary.monthName} {summary.year}</strong>
-            </p>
+            <p className="text-body text-ink">Periode {period}</p>
           </div>
+          <dl className="text-body text-ink grid grid-cols-[auto_1fr] gap-x-3 gap-y-0.5">
+            <dt className="text-ink-soft">Nama</dt>
+            <dd className="font-semibold break-words">{studentName}</dd>
+            <dt className="text-ink-soft">Institusi</dt>
+            <dd className="break-words">{campusName}</dd>
+            <dt className="text-ink-soft">Dicetak</dt>
+            <dd>{new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}</dd>
+          </dl>
+        </header>
 
-          <div className="text-left sm:text-right text-xs text-navy-600 space-y-0.5">
-            <p><strong>Nama:</strong> {studentName}</p>
-            <p><strong>Institusi:</strong> {campusName}</p>
-            <p className="text-[10px] text-navy-500">
-              Digenerate: {new Date().toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" })}
-            </p>
-          </div>
-        </div>
+        <section aria-label="Ringkasan bulan ini" className="space-y-3">
+          <dl className="divide-y divide-ink/15 border-y border-ink/15">
+            <div className="flex items-baseline justify-between gap-4 py-2.5">
+              <dt className="text-body text-ink">Uang saku masuk</dt>
+              <dd className="money text-body font-semibold text-ink">{rupiah(summary.totalIncome)}</dd>
+            </div>
+            {summary.fixedCosts > 0 && (
+              <div className="flex items-baseline justify-between gap-4 py-2.5">
+                <dt className="text-body text-ink">
+                  Pengeluaran tetap {fixedCostLabel && <span className="text-meta text-ink-soft">· {fixedCostLabel}</span>}
+                </dt>
+                <dd className="money text-body font-semibold text-ink">{rupiah(-summary.fixedCosts)}</dd>
+              </div>
+            )}
+            <div className="flex items-baseline justify-between gap-4 py-2.5">
+              <dt className="text-body text-ink">
+                Total keluar <span className="text-meta text-ink-soft">· {summary.totalTransactions} transaksi</span>
+              </dt>
+              <dd className="money text-body font-semibold text-ink">{rupiah(-summary.totalExpenses)}</dd>
+            </div>
+            <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 py-3">
+              <dt className="text-body font-bold text-ink flex items-center gap-3">
+                Saldo akhir bulan ini
+                <span className="text-meta font-semibold text-ink-soft">{isSurplus ? "Masih sisa" : "Tekor"}</span>
+              </dt>
+              <dd className="money font-display text-head font-bold text-ink">{rupiah(summary.netSavings)}</dd>
+            </div>
+          </dl>
+          <p className="text-meta text-ink-soft max-w-prose">
+            Rasio tabungan {summary.savingsRate}% · dengan laju belanja sekarang, sisa saldo cukup sekitar {summary.runwayDays} hari
+          </p>
+        </section>
 
-        {/* Financial Executive Summary Cards */}
-        <div className="grid grid-cols-3 gap-4 border border-navy-200 rounded-2xl p-4 bg-navy-50/40">
-          <div>
-            <span className="text-[10px] uppercase font-bold text-navy-500 block">
-              1. Total Pemasukan / Uang Saku
-            </span>
-            <span className="text-base font-black text-navy-950">
-              {formatRupiah(summary.totalIncome)}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[10px] uppercase font-bold text-navy-500 block">
-              2. Total Realisasi Pengeluaran
-            </span>
-            <span className="text-base font-black text-rose-600">
-              {formatRupiah(summary.totalExpenses)}
-            </span>
-          </div>
-
-          <div>
-            <span className="text-[10px] uppercase font-bold text-navy-500 block">
-              3. Saldo Kas Bersih (Surplus)
-            </span>
-            <span className={`text-base font-black ${isSurplus ? "text-emerald-700" : "text-rose-700"}`}>
-              {formatRupiah(summary.netSavings)}
-            </span>
-          </div>
-        </div>
-
-        {/* 50/30/20 Rule Breakdown */}
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-navy-900 mb-2">
-            I. Klasifikasi Anggaran (Metode 50/30/20)
+        <section aria-labelledby="mutasi-title" className="space-y-2">
+          <h3 id="mutasi-title" className="font-display text-head font-bold text-ink">
+            Mutasi
           </h3>
-          <table className="w-full text-xs text-left border border-navy-200 rounded-xl overflow-hidden">
-            <thead className="bg-navy-100 text-navy-900 font-bold border-b border-navy-200">
-              <tr>
-                <th className="py-2.5 px-3">Kategori</th>
-                <th className="py-2.5 px-3">Deskripsi</th>
-                <th className="py-2.5 px-3 text-right">Realisasi (IDR)</th>
-                <th className="py-2.5 px-3 text-right">Porsi (%)</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy-100">
-              <tr>
-                <td className="py-2 px-3 font-semibold text-emerald-800">Kebutuhan Pokok (Needs)</td>
-                <td className="py-2 px-3 text-navy-600">Makan, kost, utilitas, buku kuliah & bensin</td>
-                <td className="py-2 px-3 text-right font-bold">{formatRupiah(summary.needsAmount)}</td>
-                <td className="py-2 px-3 text-right">{summary.needsPercentage}%</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 font-semibold text-amber-800">Keinginan & Gaya Hidup (Wants)</td>
-                <td className="py-2 px-3 text-navy-600">Nongkrong, hiburan & jajan tambahan</td>
-                <td className="py-2 px-3 text-right font-bold">{formatRupiah(summary.wantsAmount)}</td>
-                <td className="py-2 px-3 text-right">{summary.wantsPercentage}%</td>
-              </tr>
-              <tr>
-                <td className="py-2 px-3 font-semibold text-blue-800">Tabungan / Investasi (Savings)</td>
-                <td className="py-2 px-3 text-navy-600">Dana darurat & saldo akhir</td>
-                <td className="py-2 px-3 text-right font-bold">{formatRupiah(summary.savingsAmount)}</td>
-                <td className="py-2 px-3 text-right">{summary.savingsPercentage}%</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        {/* Breakdown by Category */}
-        <div>
-          <h3 className="text-xs font-bold uppercase tracking-wider text-navy-900 mb-2">
-            II. Rincian Pengeluaran per Kategori
-          </h3>
-          <table className="w-full text-xs text-left border border-navy-200 rounded-xl overflow-hidden">
-            <thead className="bg-navy-100 text-navy-900 font-bold border-b border-navy-200">
-              <tr>
-                <th className="py-2.5 px-3">No</th>
-                <th className="py-2.5 px-3">Pos Kategori</th>
-                <th className="py-2.5 px-3 text-center">Jumlah Transaksi</th>
-                <th className="py-2.5 px-3 text-right">Total Nominal</th>
-                <th className="py-2.5 px-3 text-right">Persentase</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-navy-100">
-              {summary.topCategories.map((cat, idx) => (
-                <tr key={cat.category}>
-                  <td className="py-2 px-3 font-medium text-navy-500">{idx + 1}</td>
-                  <td className="py-2 px-3 font-bold text-navy-900">{cat.category}</td>
-                  <td className="py-2 px-3 text-center text-navy-600">{cat.transactionCount}x</td>
-                  <td className="py-2 px-3 text-right font-bold">{formatRupiah(cat.amount)}</td>
-                  <td className="py-2 px-3 text-right text-navy-600">{cat.percentage}%</td>
+          {rows.length === 0 ? (
+            <p className="text-body text-ink-soft">Belum ada pengeluaran tercatat di {period}.</p>
+          ) : (
+            <table className="w-full border-collapse">
+              <thead className="border-b border-ink/40">
+                <tr>
+                  <th scope="col" className={TH}>Tgl</th>
+                  <th scope="col" className={TH}>Keterangan</th>
+                  <th scope="col" className={`${TH} text-right`}>Keluar</th>
+                  <th scope="col" className={`${TH} text-right pr-0 hidden sm:table-cell print:table-cell`}>Saldo</th>
                 </tr>
+              </thead>
+              <tbody className="divide-y divide-dotted divide-ink/25">
+                {rows.map((r) => (
+                  <tr key={r.id}>
+                    <td className={`${TD} money whitespace-nowrap`}>{r.day.slice(8, 10)}/{r.day.slice(5, 7)}</td>
+                    <td className={`${TD} break-words`}>
+                      {r.item}
+                      <span className="block text-meta text-ink-soft">
+                        {categoryLabel(r.category)} · <span className="money">{formatSerial(r.id, r.day)}</span>
+                      </span>
+                    </td>
+                    <td className={`${TD} money text-right whitespace-nowrap`}>{rupiah(r.amount)}</td>
+                    <td className={`${TD} money text-right whitespace-nowrap pr-0 text-ink-soft hidden sm:table-cell print:table-cell`}>
+                      {rupiah(r.saldo)}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8 print:grid-cols-2">
+          <section aria-labelledby="kategori-title" className="space-y-2">
+            <h3 id="kategori-title" className="font-display text-head font-bold text-ink">
+              Per kategori
+            </h3>
+            <ul className="divide-y divide-ink/15 border-y border-ink/15">
+              {summary.topCategories.map((cat) => (
+                <li key={cat.category} className="py-2 grid grid-cols-[1fr_auto] gap-x-4 items-baseline">
+                  <span className="text-body text-ink">
+                    {categoryLabel(cat.category)}{" "}
+                    <span className="text-meta text-ink-soft">
+                      · {cat.transactionCount}x · {cat.percentage}%
+                    </span>
+                  </span>
+                  <span className="money text-body font-semibold text-ink">{rupiah(cat.amount)}</span>
+                </li>
               ))}
-            </tbody>
-          </table>
+            </ul>
+          </section>
+
+          <section aria-labelledby="pos-title" className="space-y-2">
+            <h3 id="pos-title" className="font-display text-head font-bold text-ink">
+              Pos 50/30/20
+            </h3>
+            <ul className="divide-y divide-ink/15 border-y border-ink/15">
+              {[
+                { label: "Kebutuhan pokok", note: "makan, kos, tagihan, transport", amount: summary.needsAmount, pct: summary.needsPercentage },
+                { label: "Keinginan", note: "nongkrong, hiburan, jajan tambahan", amount: summary.wantsAmount, pct: summary.wantsPercentage },
+                { label: "Tabungan", note: "dana darurat & setoran tabungan", amount: summary.savingsAmount, pct: summary.savingsPercentage },
+              ].map((p) => (
+                <li key={p.label} className="py-2 grid grid-cols-[1fr_auto] gap-x-4 items-baseline">
+                  <span className="text-body text-ink">
+                    {p.label} <span className="text-meta text-ink-soft">· {p.pct}%</span>
+                    <span className="block text-meta text-ink-soft">{p.note}</span>
+                  </span>
+                  <span className="money text-body font-semibold text-ink">{rupiah(p.amount)}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
         </div>
 
-        {/* Formal Signature Block */}
-        <div className="pt-8 border-t border-navy-200 grid grid-cols-2 text-center text-xs">
+        <div className="pt-6 grid grid-cols-2 gap-6 text-center">
           <div>
-            <p className="text-navy-600 mb-16">Disiapkan secara jujur & transparan oleh:</p>
-            <p className="font-bold underline text-navy-950">{studentName}</p>
-            <p className="text-[10px] text-navy-500">Mahasiswa / Penerima Dana</p>
+            <p className="text-meta text-ink-soft mb-14">Disiapkan dengan jujur oleh</p>
+            <p className="text-body font-bold text-ink underline underline-offset-4 break-words">{studentName}</p>
+            <p className="text-meta text-ink-soft">Mahasiswa / penerima dana</p>
           </div>
-
           <div>
-            <p className="text-navy-600 mb-16">Mengetahui / Menerima:</p>
-            <p className="font-bold underline text-navy-950">_________________________</p>
-            <p className="text-[10px] text-navy-500">Orang Tua / Pengelola Beasiswa</p>
+            <p className="text-meta text-ink-soft mb-14">Mengetahui</p>
+            <p aria-hidden="true" className="border-b border-ink mx-4 h-6" />
+            <p className="text-meta text-ink-soft">Orang tua / pengelola beasiswa</p>
           </div>
         </div>
 
-        {/* Footer Note */}
-        <div className="pt-4 text-center text-[10px] text-navy-500">
-          Dokumen ini digenerate secara otomatis melalui platform <strong>finoch.id</strong> untuk transparansi keuangan mahasiswa.
-        </div>
+        <p className="text-meta text-ink-soft text-center">Disusun otomatis dari catatan pengeluaran di finoch.id.</p>
       </div>
-    </div>
+    </Note>
   );
 }

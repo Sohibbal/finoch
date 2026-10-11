@@ -25,7 +25,7 @@ describe("Breadcrumbs Navigation Component", () => {
 
     const html = renderToString(React.createElement(Breadcrumbs));
     expect(html).toContain('aria-label="Breadcrumb"');
-    expect(html).toContain("Dashboard");
+    expect(html).toContain("Beranda");
     expect(html).toContain('aria-current="page"');
   });
 
@@ -36,7 +36,7 @@ describe("Breadcrumbs Navigation Component", () => {
     const html = renderToString(React.createElement(Breadcrumbs));
     expect(html).toContain('href="/dashboard"');
     expect(html).toMatch(/mahasiswa &amp; kost|mahasiswa & kost/i);
-    expect(html).toContain("Sinking Fund UKT &amp; Kampus");
+    expect(html).toContain("Tabungan UKT");
     expect(html).toContain('aria-current="page"');
   });
 

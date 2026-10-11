@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { Edit3, Trash2, Tag } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import type { ParsedVoiceItem } from "@/lib/types/expense";
+import { categoryLabel, rupiah } from "@/lib/format";
 
 interface ParsedExpenseListProps {
   items: ParsedVoiceItem[];
@@ -12,80 +13,43 @@ interface ParsedExpenseListProps {
 }
 
 export function formatRupiah(amount: number): string {
-  return new Intl.NumberFormat("id-ID", {
-    style: "currency",
-    currency: "IDR",
-    maximumFractionDigits: 0,
-  }).format(amount);
+  return rupiah(amount);
 }
 
-export function ParsedExpenseList({
-  items,
-  onToggleCategory,
-  onEdit,
-  onDelete,
-}: ParsedExpenseListProps) {
-  if (items.length === 0) {
-    return (
-      <div className="text-center py-6 text-slate-400 text-sm">
-        Belum ada transaksi terdeteksi. Silakan coba bicara atau ketik pengeluaran.
-      </div>
-    );
-  }
+const ICON_BUTTON = "w-11 h-11 shrink-0 flex items-center justify-center text-ink hover:bg-ink/5 transition-colors";
+
+/** What was heard or typed, printed as stubs to check before saving. */
+export function ParsedExpenseList({ items, onToggleCategory, onEdit, onDelete }: ParsedExpenseListProps) {
+  if (items.length === 0) return null;
 
   return (
-    <div className="space-y-3 my-4">
-      <div className="flex items-center justify-between text-xs font-medium text-navy-600 dark:text-cream-300/80 px-1">
-        <span>{items.length} transaksi ditemukan</span>
-        <span>Tap kategori untuk ubah</span>
-      </div>
-
-      {items.map((item) => {
-        return (
-          <div
-            key={item.id}
-            className="flex items-center justify-between p-3.5 rounded-2xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 shadow-sm"
-          >
-            <div className="flex-1 min-w-0 pr-3">
-              <h4 className="text-sm font-bold text-navy-950 dark:text-cream-50 truncate">
-                {item.itemName}
-              </h4>
-              <p className="text-base font-black text-navy-900 dark:text-cream-100 mt-0.5">
-                {formatRupiah(item.amount)}
-              </p>
-
-              {/* Category chip */}
-              <button
-                type="button"
-                onClick={() => onToggleCategory(item.id)}
-                className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-cream-200/80 text-navy-900 dark:bg-navy-800 dark:text-cream-200 border border-cream-300 dark:border-navy-700 hover:opacity-80 transition"
-              >
-                <Tag className="w-3 h-3" />
-                {item.category || "Other"}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => onEdit(item)}
-                aria-label="Edit transaksi"
-                className="p-2 text-navy-500 hover:text-navy-950 dark:text-cream-400 dark:hover:text-cream-50 rounded-xl hover:bg-cream-200/60 dark:hover:bg-navy-800 transition"
-              >
-                <Edit3 className="w-4 h-4" />
-              </button>
-              <button
-                type="button"
-                onClick={() => onDelete(item.id)}
-                aria-label="Hapus transaksi"
-                className="p-2 text-navy-400 hover:text-rose-600 dark:hover:text-rose-400 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 transition"
-              >
-                <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+    <ol aria-label="Cek dulu sebelum disimpan" className="space-y-2">
+      {items.map((item) => (
+        <li key={item.id} className="relative flex items-center gap-1 pl-4 bg-paper-sheet border border-ink/30 animate-stub-in">
+          <span aria-hidden="true" className="absolute left-1.5 top-2 bottom-2 border-l border-dotted border-ink/40" />
+          <div className="min-w-0 flex-1 py-2">
+            <p className="flex items-baseline justify-between gap-3">
+              <span className="text-body font-semibold text-ink break-words min-w-0">{item.itemName}</span>
+              <span className="money text-body font-bold text-ink whitespace-nowrap">{rupiah(item.amount)}</span>
+            </p>
+            {/* Tapping cycles the five categories; the full list is in Ubah. */}
+            <button
+              type="button"
+              onClick={() => onToggleCategory(item.id)}
+              aria-label={`Kategori ${categoryLabel(item.category)}, ketuk untuk ganti`}
+              className="-ml-1 px-1 min-h-11 text-meta font-semibold text-ink-soft underline underline-offset-4 decoration-dotted decoration-ink/40 hover:text-ink"
+            >
+              {categoryLabel(item.category)}
+            </button>
           </div>
-        );
-      })}
-    </div>
+          <button type="button" onClick={() => onEdit(item)} aria-label={`Ubah ${item.itemName}`} className={ICON_BUTTON}>
+            <Pencil className="w-4 h-4" aria-hidden="true" />
+          </button>
+          <button type="button" onClick={() => onDelete(item.id)} aria-label={`Buang ${item.itemName}`} className={ICON_BUTTON}>
+            <Trash2 className="w-4 h-4" aria-hidden="true" />
+          </button>
+        </li>
+      ))}
+    </ol>
   );
 }

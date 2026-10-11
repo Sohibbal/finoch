@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Send, CornerDownLeft } from "lucide-react";
+import { CornerDownLeft } from "lucide-react";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
 import type { ParsedVoiceItem } from "@/lib/types/expense";
+import { INPUT_CLASS } from "./expense-editor";
+import { LABEL_CLASS } from "@/components/press/kampus-press";
 
 interface ManualExpenseInputProps {
   onParsed: (items: ParsedVoiceItem[]) => void;
   disabled?: boolean;
 }
 
+/** The typed way to catat: same parser as voice, one line at a time. */
 export function ManualExpenseInput({ onParsed, disabled }: ManualExpenseInputProps) {
   const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +24,7 @@ export function ManualExpenseInput({ onParsed, disabled }: ManualExpenseInputPro
 
     const parsed = parseIndonesianExpense(clean);
     if (parsed.length === 0) {
-      setError("Tidak dapat mendeteksi pengeluaran. Contoh: 'ayam geprek 15rb'");
+      setError("Belum kebaca nominalnya. Tulis seperti: ayam geprek 15rb");
       return;
     }
 
@@ -31,9 +34,13 @@ export function ManualExpenseInput({ onParsed, disabled }: ManualExpenseInputPro
   };
 
   return (
-    <div className="w-full max-w-md mx-auto my-3">
-      <form onSubmit={handleSubmit} className="relative">
+    <form onSubmit={handleSubmit} className="w-full">
+      <label htmlFor="catat-ketik" className={LABEL_CLASS}>
+        Atau ketik
+      </label>
+      <div className="flex gap-2">
         <input
+          id="catat-ketik"
           type="text"
           value={text}
           onChange={(e) => {
@@ -41,24 +48,26 @@ export function ManualExpenseInput({ onParsed, disabled }: ManualExpenseInputPro
             setError(null);
           }}
           disabled={disabled}
-          placeholder="Atau ketik di sini: beli bensin 20rb..."
-          className="w-full pl-3.5 pr-11 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 bg-white dark:bg-navy-900/60 text-navy-950 dark:text-cream-50 text-xs sm:text-sm placeholder:text-navy-400 dark:placeholder:text-cream-400/50 focus:outline-none focus:ring-2 focus:ring-navy-900 dark:focus:ring-cream-200 shadow-sm transition-colors"
+          enterKeyHint="done"
+          autoComplete="off"
+          placeholder="es teh 5rb, bensin 20rb"
+          aria-describedby={error ? "catat-ketik-error" : undefined}
+          className={INPUT_CLASS}
         />
         <button
           type="submit"
           disabled={!text.trim() || disabled}
-          aria-label="Kirim teks pengeluaran"
-          className="absolute right-1.5 top-1/2 -translate-y-1/2 p-2 rounded-lg bg-navy-900 hover:bg-navy-800 dark:bg-cream-100 dark:hover:bg-cream-200 disabled:opacity-40 text-cream-50 dark:text-navy-950 transition-colors"
+          aria-label="Tambah ke catatan"
+          className="w-11 h-11 shrink-0 flex items-center justify-center bg-ink text-paper-sheet hover:bg-ink/90 disabled:opacity-40 transition-colors"
         >
-          <Send className="w-3.5 h-3.5" />
+          <CornerDownLeft className="w-4 h-4" aria-hidden="true" />
         </button>
-      </form>
-
+      </div>
       {error && (
-        <p className="mt-1.5 text-xs text-rose-600 dark:text-rose-400 px-1">
+        <p id="catat-ketik-error" role="alert" className="mt-1.5 text-body text-habis-ink">
           {error}
         </p>
       )}
-    </div>
+    </form>
   );
 }

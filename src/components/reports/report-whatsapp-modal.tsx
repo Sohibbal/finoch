@@ -1,15 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import {
-  X,
-  Share2,
-  Copy,
-  Check,
-  Send,
-  MessageSquare,
-  Sparkles,
-} from "lucide-react";
+import { Check, Copy, Send, X } from "lucide-react";
 import { MonthlyReportSummary, ReportRecipientType } from "@/types/report-types";
 import { formatWhatsAppReport } from "@/lib/financial/report-engine";
 
@@ -19,6 +11,9 @@ interface ReportWhatsAppModalProps {
   summary: MonthlyReportSummary;
   defaultStudentName?: string;
 }
+
+const FIELD =
+  "w-full min-h-11 px-3 bg-paper border border-ink/30 text-body text-ink placeholder:text-ink-soft focus-visible:outline-offset-0";
 
 export function ReportWhatsAppModal({
   isOpen,
@@ -68,152 +63,89 @@ export function ReportWhatsAppModal({
     }
   };
 
+  const RECIPIENTS: Array<{ id: ReportRecipientType; label: string }> = [
+    { id: "parents", label: "Orang tua" },
+    { id: "scholarship", label: "Beasiswa" },
+    { id: "personal", label: "Pribadi" },
+  ];
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
-      <div className="w-full max-w-lg bg-white dark:bg-[#070E1A] border border-cream-300 dark:border-navy-800 rounded-3xl p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto custom-scrollbar">
-        {/* Header */}
-        <div className="flex items-center justify-between pb-3 border-b border-cream-200 dark:border-navy-800">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
-              <MessageSquare className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-base text-navy-950 dark:text-cream-50">
-                Kirim Rekap ke WhatsApp
-              </h3>
-              <p className="text-xs text-navy-500 dark:text-cream-400">
-                Format pesan sopan & rapi untuk orang tua atau beasiswa
-              </p>
-            </div>
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 bg-ink/50" role="dialog" aria-modal="true" aria-labelledby="wa-title">
+      <div className="w-full max-w-lg bg-paper-sheet border border-ink/20 px-5 pt-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))] space-y-5 max-h-[90dvh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-3 border-b border-ink/20 pb-3">
+          <div>
+            <h2 id="wa-title" className="font-display text-head font-bold text-ink">
+              Kirim rekap ke WhatsApp
+            </h2>
+            <p className="text-meta text-ink-soft">Pesan sopan dan rapi, tinggal kirim</p>
           </div>
           <button
+            type="button"
             onClick={onClose}
-            className="w-8 h-8 rounded-full flex items-center justify-center text-navy-500 hover:bg-cream-100 dark:hover:bg-navy-800"
+            aria-label="Tutup"
+            className="-mr-2 w-11 h-11 rounded-full flex items-center justify-center text-ink hover:bg-ink/5 shrink-0"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Recipient Mode Tabs */}
-        <div>
-          <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1.5">
-            Penerima Laporan:
+        <fieldset>
+          <legend className="text-meta text-ink-soft mb-1.5">Penerima</legend>
+          <div className="grid grid-cols-3 border border-ink/30">
+            {RECIPIENTS.map((r) => (
+              <button
+                key={r.id}
+                type="button"
+                aria-pressed={recipientType === r.id}
+                onClick={() => setRecipientType(r.id)}
+                className={`min-h-11 px-2 text-body font-semibold border-l first:border-l-0 border-ink/30 transition-colors ${
+                  recipientType === r.id ? "bg-ink text-paper-sheet dark:text-paper" : "text-ink hover:bg-ink/5"
+                }`}
+              >
+                {r.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <label className="block space-y-1">
+            <span className="block text-meta text-ink-soft">Nama mahasiswa</span>
+            <input type="text" value={studentName} onChange={(e) => setStudentName(e.target.value)} placeholder="Contoh: Budi Santoso" className={FIELD} />
           </label>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => setRecipientType("parents")}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
-                recipientType === "parents"
-                  ? "bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm"
-                  : "bg-cream-50 dark:bg-navy-900 border-cream-300 dark:border-navy-800 text-navy-600 dark:text-cream-300 hover:bg-cream-100"
-              }`}
-            >
-              Orang Tua ❤️
-            </button>
-            <button
-              type="button"
-              onClick={() => setRecipientType("scholarship")}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
-                recipientType === "scholarship"
-                  ? "bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm"
-                  : "bg-cream-50 dark:bg-navy-900 border-cream-300 dark:border-navy-800 text-navy-600 dark:text-cream-300 hover:bg-cream-100"
-              }`}
-            >
-              Beasiswa 🎓
-            </button>
-            <button
-              type="button"
-              onClick={() => setRecipientType("personal")}
-              className={`py-2 px-3 rounded-xl text-xs font-bold transition-all border ${
-                recipientType === "personal"
-                  ? "bg-navy-900 text-white dark:bg-cream-100 dark:text-navy-950 border-transparent shadow-sm"
-                  : "bg-cream-50 dark:bg-navy-900 border-cream-300 dark:border-navy-800 text-navy-600 dark:text-cream-300 hover:bg-cream-100"
-              }`}
-            >
-              Pribadi 📊
-            </button>
-          </div>
-        </div>
-
-        {/* Inputs */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1">
-              Nama Mahasiswa:
-            </label>
-            <input
-              type="text"
-              value={studentName}
-              onChange={(e) => setStudentName(e.target.value)}
-              placeholder="Contoh: Budi Santoso"
-              className="w-full px-3 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900 text-navy-950 dark:text-cream-50 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1">
-              Kampus / Jurusan:
-            </label>
-            <input
-              type="text"
-              value={campusName}
-              onChange={(e) => setCampusName(e.target.value)}
-              placeholder="Contoh: Teknik Informatika ITB"
-              className="w-full px-3 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900 text-navy-950 dark:text-cream-50 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="text-xs font-semibold text-navy-700 dark:text-cream-300 block mb-1">
-            Pesan / Catatan Khusus:
+          <label className="block space-y-1">
+            <span className="block text-meta text-ink-soft">Kampus / jurusan</span>
+            <input type="text" value={campusName} onChange={(e) => setCampusName(e.target.value)} placeholder="Contoh: Teknik Informatika ITB" className={FIELD} />
           </label>
-          <input
-            type="text"
-            value={customNote}
-            onChange={(e) => setCustomNote(e.target.value)}
-            placeholder="Contoh: Bulan ini hemat karena banyak masak di kost"
-            className="w-full px-3 py-2 rounded-xl border border-cream-300 dark:border-navy-800 bg-cream-50 dark:bg-navy-900 text-navy-950 dark:text-cream-50 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          />
         </div>
 
-        {/* Live Preview Box */}
-        <div>
-          <div className="flex items-center justify-between mb-1">
-            <span className="text-[11px] font-bold text-navy-500 dark:text-cream-400 uppercase tracking-wider">
-              Pratinjau Pesan WhatsApp:
-            </span>
-            <button
-              onClick={handleCopy}
-              className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1 hover:underline"
-            >
-              {copied ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? "Tersalin!" : "Salin Teks"}</span>
-            </button>
-          </div>
-          <div className="p-3.5 rounded-2xl bg-cream-100 dark:bg-navy-900/80 border border-cream-200 dark:border-navy-800 max-h-48 overflow-y-auto custom-scrollbar font-mono text-[11px] whitespace-pre-wrap text-navy-800 dark:text-cream-200 leading-relaxed select-all">
+        <label className="block space-y-1">
+          <span className="block text-meta text-ink-soft">Catatan tambahan</span>
+          <input type="text" value={customNote} onChange={(e) => setCustomNote(e.target.value)} placeholder="Contoh: Bulan ini hemat karena banyak masak di kost" className={FIELD} />
+        </label>
+
+        <div className="space-y-1">
+          <p className="text-meta text-ink-soft">Pratinjau pesan</p>
+          <div className="p-3.5 bg-paper-deep border-l border-dotted border-ink/40 max-h-48 overflow-y-auto text-meta whitespace-pre-wrap text-ink select-all">
             {generatedText}
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2 pt-2">
+        <div className="flex gap-2">
           <button
             type="button"
             onClick={handleCopy}
-            className="w-1/2 py-2.5 rounded-xl border border-cream-300 dark:border-navy-800 text-navy-700 dark:text-cream-300 font-bold text-xs hover:bg-cream-100 dark:hover:bg-navy-800 flex items-center justify-center gap-2"
+            className="flex-1 min-h-11 rounded-full border border-ink/30 text-ink text-body font-semibold hover:bg-ink/5 flex items-center justify-center gap-2"
           >
-            {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4" />}
-            <span>{copied ? "Tersalin!" : "Salin Teks"}</span>
+            {copied ? <Check className="w-4 h-4" aria-hidden="true" /> : <Copy className="w-4 h-4" aria-hidden="true" />}
+            <span>{copied ? "Tersalin" : "Salin teks"}</span>
           </button>
-
           <button
             type="button"
             onClick={handleShareOrSend}
-            className="w-1/2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md active:scale-95 transition-all flex items-center justify-center gap-2"
+            className="flex-1 min-h-11 rounded-full bg-ink hover:bg-ink/90 text-paper-sheet dark:text-paper text-body font-semibold flex items-center justify-center gap-2"
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4" aria-hidden="true" />
             <span>Kirim WhatsApp</span>
           </button>
         </div>

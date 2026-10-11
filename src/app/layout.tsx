@@ -1,19 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Archivo, Bricolage_Grotesque } from "next/font/google";
 import "./globals.css";
 import { PwaInstallButton } from "@/components/layout/pwa-install-button";
 import { OfflineBanner } from "@/components/layout/offline-banner";
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+// Workhorse UI face: a grotesque with tabular figures and a width axis for printed labels.
+const uiFont = Archivo({
   subsets: ["latin"],
-  variable: "--font-plus-jakarta-sans",
+  variable: "--font-ui",
   display: "swap",
-  weight: ["400", "500", "600", "700", "800"],
+  axes: ["wdth"],
+});
+
+// Display face for the giant numeral and headings: heavy, low-contrast figures so 1, 4 and 7 stay
+// unmistakable at every size (the earlier hairline didone made a small 4 read as 1).
+const displayFont = Bricolage_Grotesque({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+  axes: ["opsz"],
 });
 
 export const metadata: Metadata = {
   title: "Finoch - Finansial Anak Kost Rapi Sekali Bicara",
-  description: "Asisten finansial cerdas anak kost berbasis AI & suara (PWA, Local-first, Offline-ready, 100% Gratis untuk Seluruh Mahasiswa Indonesia).",
+  description: "Catat pengeluaran anak kost cukup dengan bicara. Jatah aman hari ini, dompet, amplop, tagihan, dan kasbon dalam satu aplikasi yang tetap jalan tanpa sinyal.",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [
@@ -34,7 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#2563eb",
+  themeColor: "#0B192C",
   width: "device-width",
   initialScale: 1,
 };
@@ -45,7 +55,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={plusJakartaSans.variable} suppressHydrationWarning>
+    <html lang="id" className={`${uiFont.variable} ${displayFont.variable}`} suppressHydrationWarning>
       <head>
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -69,7 +79,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className="antialiased bg-[#FAF8F5] dark:bg-[#0A1120] text-[#0B192C] dark:text-[#F6F4ED] min-h-screen font-sans transition-colors duration-300">
+      <body className="antialiased bg-paper text-ink min-h-screen font-sans transition-colors duration-300">
         {/* Real-time Offline & Online Sync Banner */}
         <OfflineBanner />
 

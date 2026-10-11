@@ -23,11 +23,8 @@ describe("Meal Calc Components (Cooking vs Warteg)", () => {
     expect(typeof MealCalcModule.default).toBe("function");
   });
 
-  it("exports MealCalcCardMobile and MealCalcBentoDesktop", async () => {
-    const MobileMod = await import("@/components/meal-calc/meal-calc-card-mobile");
-    const DesktopMod = await import("@/components/meal-calc/meal-calc-bento-desktop");
-
-    expect(MobileMod.MealCalcCardMobile).toBeDefined();
-    expect(DesktopMod.MealCalcBentoDesktop).toBeDefined();
+  it("exports MealCompare", async () => {
+    const Mod = await import("@/components/meal-calc/meal-compare");
+    expect(Mod.MealCompare).toBeDefined();
   });
 });

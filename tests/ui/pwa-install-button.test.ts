@@ -12,8 +12,13 @@ async function render(pathname: string) {
 }
 
 describe("PwaInstallButton placement", () => {
-  it("shows the full install banner on the landing page", async () => {
-    expect(await render("/")).toContain("Tutup rekomendasi pasang");
+  it("keeps the landing hero clear: the banner waits until the visitor scrolls past it", async () => {
+    expect(await render("/")).toBe("");
+    const { readFileSync } = await import("node:fs");
+    const source = readFileSync("src/components/layout/pwa-install-button.tsx", "utf8");
+    expect(source).toMatch(/scrollY > window\.innerHeight/);
+    expect(source).toContain("Tutup rekomendasi pasang");
+    expect(source).not.toMatch(/backdrop-blur|shadow-2xl|text-\[9px\]/);
   });
 
   it.each(["/dashboard", "/wallets", "/login"])("never overlays headers or modals on %s", async (path) => {
@@ -25,6 +30,6 @@ describe("PwaInstallButton placement", () => {
     const { readFileSync } = await import("node:fs");
     const source = readFileSync("src/components/layout/pwa-install-button.tsx", "utf8");
     expect(source).not.toMatch(/top-\[calc/);
-    expect(source).toMatch(/left-4 md:bottom-6 md:left-6 z-30/);
+    expect(source).toMatch(/hidden md:block fixed md:bottom-6 md:left-6 z-30/);
   });
 });
