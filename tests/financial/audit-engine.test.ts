@@ -33,4 +33,25 @@ describe("Micro-Expense Leak Audit Engine", () => {
     expect(emptySummary.leakCount).toBe(0);
     expect(emptySummary.wartegEquivalence).toBe(0);
   });
+
+  it("never flags essential kost bills like galon as bocor halus", () => {
+    const summary = auditMicroExpenses(
+      [
+        { itemName: "Isi ulang galon", amount: 6000, category: "Bills & Utilities" },
+        { itemName: "Air galon", amount: 7000, category: "Food & Drinks" },
+        { itemName: "Cilok", amount: 5000, category: "Food & Drinks" },
+      ],
+      2000000
+    );
+    expect(summary.items.map((i) => i.name)).toEqual(["Cilok"]);
+  });
+
+  it("only gives the Family Plan tip when a subscription was detected", () => {
+    const noSub = auditMicroExpenses([{ itemName: "Parkir Indomaret", amount: 2000, category: "Transportation" }], 2000000);
+    expect(noSub.actionChecklist.join(" ")).not.toContain("Family Plan");
+    expect(noSub.actionChecklist.length).toBe(1);
+
+    const withSub = auditMicroExpenses(mockExpenses, 2000000);
+    expect(withSub.actionChecklist.join(" ")).toContain("Family Plan");
+  });
 });
