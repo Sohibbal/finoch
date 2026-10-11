@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft, UserRoundCog, WifiOff, type LucideIcon } from "lucide-react";
+import { ArrowLeft, FlaskConical, UserRoundCog, WifiOff, type LucideIcon } from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { BrandLogo } from "@/components/brand/brand-logo";
@@ -62,15 +62,6 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
             {!isDashboard && <Breadcrumbs className="hidden md:flex mb-0.5" />}
             <h1 className="font-display text-head font-bold text-ink break-words">{title}</h1>
             {subtitle && <p className="text-meta text-ink-soft hidden sm:block">{subtitle}</p>}
-            {demo && (
-              <Link
-                href="/profile"
-                title="Data contoh aktif. Matikan di halaman Profil."
-                className="inline-block mt-0.5 px-1.5 border border-dashed border-mepet-ink text-mepet-ink text-meta font-semibold"
-              >
-                Mode Demo
-              </Link>
-            )}
           </div>
         </div>
 
@@ -78,6 +69,17 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
           <ThemeToggle className="hidden md:inline-flex" />
           {actions}
         </div>
+
+        {/* Its own line under the title row, so a wrapped title never collides with it. Ink, not a status hue. */}
+        {demo && (
+          <p className="basis-full text-meta text-ink-soft">
+            <Link href="/profile" className="inline-flex items-center gap-1 min-h-6 font-semibold text-ink underline underline-offset-2 decoration-ink/40 hover:decoration-ink">
+              <FlaskConical className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+              Mode Demo
+            </Link>{" "}
+            · data contoh, matikan di Profil
+          </p>
+        )}
       </div>
     </header>
   );
