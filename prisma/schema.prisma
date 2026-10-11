@@ -31,6 +31,7 @@ model Expense {
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   itemName        String
   amount          Int
+  walletId        String?  // Client-side wallet the money came out of; null when the user has no wallets
   category        String   // "Food & Drinks", "Transportation", "Housing & Bills", "Shopping & Clothing", "Entertainment & Leisure", "Education & Career", "Health & Personal Care", "Social & Family", "Other"
   isDeleted       Boolean  @default(false)
   createdAt       DateTime @default(now())
