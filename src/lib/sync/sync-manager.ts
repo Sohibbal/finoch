@@ -1,8 +1,17 @@
 import { syncQueue } from "../storage/sync-queue";
 import { getDatabase } from "../storage/indexed-db";
-import { getStorageScope } from "../storage/local-storage";
+import {
+  GUEST_SCOPE,
+  docCursorKey,
+  getRawStorage,
+  getStorageScope,
+  readDocumentMeta,
+  scopedKey,
+  writeDocumentMeta,
+} from "../storage/local-storage";
+import { DATA_PULLED_EVENT, SYNCED_DOCUMENT_KEYS, isSyncedDocumentKey } from "./document-keys";
 import type { Expense } from "../types/expense";
-import type { BatchSyncRequest, BatchSyncResponse } from "../types/sync";
+import type { BatchSyncRequest, BatchSyncResponse, DocumentSyncRequest, DocumentSyncResponse, SyncDocument } from "../types/sync";
 
 /**
  * Reconciles conflicts between local and server records using Last-Write-Wins based on updatedAt.
@@ -20,6 +29,109 @@ export function reconcileChanges(local: Expense, server: Expense): Expense {
 // Per user: another account on the same device must start from its own cursor.
 function lastSyncKey(userId: string): string {
   return `last_sync_timestamp::${userId}`;
+}
+
+function parseStored(value: string): unknown {
+  try {
+    return JSON.parse(value);
+  } catch {
+    return value;
+  }
+}
+
+async function postDocuments(body: DocumentSyncRequest): Promise<DocumentSyncResponse> {
+  const response = await fetch("/api/sync/documents", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  if (!response.ok) throw new Error(`Document sync failed with status ${response.status}`);
+  return response.json();
+}
+
+/**
+ * Writes pulled documents into the user's real (non-demo) scope. A local edit not yet pushed wins
+ * until it is; writes stamped 0 (made before this device's first pull) always lose. Writes go to raw
+ * storage so applying server data never marks a key dirty again. Returns whether anything changed.
+ */
+function applyDocuments(userId: string, documents: SyncDocument[]): boolean {
+  const raw = getRawStorage();
+  if (!raw) return false;
+  const meta = readDocumentMeta(userId);
+  let changed = false;
+  for (const doc of documents) {
+    if (!isSyncedDocumentKey(doc.key)) continue;
+    const docTime = new Date(doc.updatedAt).getTime();
+    const local = meta[doc.key];
+    if (local && ((local.dirty && local.updatedAt > 0) || docTime <= local.updatedAt)) continue;
+    const target = scopedKey(doc.key, userId);
+    if (doc.isDeleted) raw.removeItem(target);
+    else raw.setItem(target, JSON.stringify(doc.data));
+    meta[doc.key] = { updatedAt: docTime, dirty: false };
+    changed = true;
+  }
+  writeDocumentMeta(userId, meta);
+  return changed;
+}
+
+/**
+ * Syncs the localStorage feature stores (wallets, debts, bills, ...) as one document per key.
+ * A device's first sync pulls before it pushes, so its seeded templates never overwrite server data.
+ */
+export async function syncDocuments(userId: string): Promise<void> {
+  const raw = getRawStorage();
+  if (!raw || userId === GUEST_SCOPE) return;
+
+  // Data written outside getStorage (pre-sync installs, legacy key migration) uploads once, but loses to a server copy.
+  const meta = readDocumentMeta(userId);
+  for (const key of SYNCED_DOCUMENT_KEYS) {
+    if (!meta[key] && raw.getItem(scopedKey(key, userId)) !== null) meta[key] = { updatedAt: 0, dirty: true };
+  }
+  writeDocumentMeta(userId, meta);
+
+  let pulled = false;
+  try {
+    let since = raw.getItem(docCursorKey(userId)) ?? undefined;
+    if (!since) {
+      const first = await postDocuments({ changes: [] });
+      pulled = applyDocuments(userId, first.documents);
+      since = first.serverTime;
+      raw.setItem(docCursorKey(userId), since);
+    }
+
+    // Still-unstamped writes are pushed as of now; the first pull already let the server copy win over them.
+    const dirtyMeta = readDocumentMeta(userId);
+    const pushed = new Map<string, string | null>();
+    const changes: SyncDocument[] = [];
+    for (const [key, entry] of Object.entries(dirtyMeta)) {
+      if (!entry.dirty || !isSyncedDocumentKey(key)) continue;
+      if (!entry.updatedAt) entry.updatedAt = Date.now();
+      const value = raw.getItem(scopedKey(key, userId));
+      pushed.set(key, value);
+      changes.push({
+        key,
+        data: value === null ? null : parseStored(value),
+        isDeleted: value === null,
+        updatedAt: new Date(entry.updatedAt).toISOString(),
+      });
+    }
+    writeDocumentMeta(userId, dirtyMeta);
+
+    const result = await postDocuments({ changes, since });
+
+    // Settled keys are clean unless they were edited again while the request was in flight.
+    const settledMeta = readDocumentMeta(userId);
+    for (const key of [...result.appliedKeys, ...result.rejected.map((r) => r.key)]) {
+      const entry = settledMeta[key];
+      if (entry && pushed.has(key) && raw.getItem(scopedKey(key, userId)) === pushed.get(key)) entry.dirty = false;
+    }
+    writeDocumentMeta(userId, settledMeta);
+
+    pulled = applyDocuments(userId, result.documents) || pulled;
+    raw.setItem(docCursorKey(userId), result.serverTime);
+  } finally {
+    if (pulled && typeof window !== "undefined") window.dispatchEvent(new Event(DATA_PULLED_EVENT));
+  }
 }
 
 export class SyncManager {
@@ -160,6 +272,8 @@ export class SyncManager {
         val: result.serverTimestamp || new Date().toISOString(),
       });
 
+      await syncDocuments(userId);
+
       this.notify("synced");
       return true;
     } catch (error) {
@@ -181,8 +295,12 @@ export class SyncManager {
     await tx.done;
   }
 
-  /** Forgets a user's unsynced queue items and pull cursor (used on logout). Their local expenses stay, scoped by userId. */
+  /**
+   * Forgets a user's unsynced queue items and pull cursors (used on logout). Their local expenses and
+   * feature data stay, scoped by userId; unpushed document edits stay dirty for their next login.
+   */
   async clearUserSyncState(userId: string) {
+    getRawStorage()?.removeItem(docCursorKey(userId));
     await syncQueue.removeUserItems(userId);
     const db = await getDatabase();
     await db.delete("metadata", lastSyncKey(userId));
