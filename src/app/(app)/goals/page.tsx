@@ -12,7 +12,8 @@ import { Note } from "@/components/press/note";
 import { Serial } from "@/components/press/serial";
 import { DENOMS, type Denom } from "@/components/press/denom";
 import { StateLabel } from "@/components/press/kampus-press";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 
 const DAY_MS = 86400000;
 
@@ -184,7 +185,7 @@ export default function GoalsPage() {
                         <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
                           <p className="text-body text-ink">
                             Kurang <span className="money font-semibold">{rupiah(remaining)}</span>
-                            {due && <> · tenggat {shortDate(due)}</>}
+                            {due && <> · tenggat {printDate(due)}</>}
                           </p>
                           <StateLabel icon={status.icon} className="text-ink">
                             {status.label}

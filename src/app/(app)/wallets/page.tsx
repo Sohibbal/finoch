@@ -14,7 +14,8 @@ import {
 } from "@/lib/storage/wallet-storage";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { computeWalletBalances, detectCriticalBalances } from "@/lib/financial/wallet-engine";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 
 import { WalletNote, WALLET_TYPE_LABEL, walletTotals } from "@/components/wallets/wallet-note";
 import { WalletFormModal } from "@/components/wallets/wallet-form-modal";
@@ -221,7 +222,7 @@ export default function WalletsPage() {
                     <p className="money text-body font-bold text-ink whitespace-nowrap">{rupiah(t.amount)}</p>
                   </div>
                   <p className="text-meta text-ink-soft break-words">
-                    {[t.reason, t.adminFee > 0 && `admin ${rupiah(t.adminFee)}`, shortDate(new Date(t.createdAt))]
+                    {[t.reason, t.adminFee > 0 && `admin ${rupiah(t.adminFee)}`, printDate(new Date(t.createdAt))]
                       .filter(Boolean)
                       .join(" · ")}
                   </p>

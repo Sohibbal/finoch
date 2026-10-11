@@ -10,7 +10,8 @@ import {
   deleteUktPlan,
 } from "@/lib/storage/ukt-storage";
 import { calculateUktMetrics } from "@/lib/financial/ukt-engine";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { localDateKey } from "@/lib/date";
 
 import { UktPlanNote } from "@/components/ukt/ukt-plan-note";
@@ -162,7 +163,7 @@ export default function UktSavingsPage() {
                           <div className="min-w-0 flex-1">
                             <p className="text-body font-semibold text-ink break-words">{dep.note}</p>
                             <p className="text-meta text-ink-soft break-words">
-                              {planName.get(dep.planId)} · {shortDate(new Date(dep.createdAt))}
+                              {planName.get(dep.planId)} · {printDate(new Date(dep.createdAt))}
                             </p>
                             <p className="money text-meta tracking-[0.08em] text-ink-soft">
                               {formatSerial(dep.id, new Date(dep.createdAt))}

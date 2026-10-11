@@ -2,7 +2,8 @@ import React from "react";
 import { Check, Droplet } from "lucide-react";
 import { StateLabel } from "@/components/press/kampus-press";
 import { Serial, formatSerial } from "@/components/press/serial";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { localDateKey, parseDate } from "@/lib/date";
 import type { LeakAuditSummary } from "@/types/audit-types";
 
@@ -54,7 +55,7 @@ export function AuditReceipt({ summary, monthLabel }: { summary: LeakAuditSummar
                       {item.name}
                     </p>
                     <p className="text-meta text-ink-soft">
-                      {[shortDate(dayKey(item.date)), item.categoryLabel].filter(Boolean).join(" · ")}
+                      {[printDate(dayKey(item.date)), item.categoryLabel].filter(Boolean).join(" · ")}
                       <span className="sr-only"> · {formatSerial(item.id, dayKey(item.date))}</span>
                     </p>
                   </div>

@@ -5,7 +5,8 @@ import { CalendarX, Check, MessageCircle, RotateCcw, Trash2 } from "lucide-react
 import { DebtItem } from "@/types/debt-types";
 import { generateWhatsAppDebtReminder } from "@/lib/financial/debt-engine";
 import { localDateKey } from "@/lib/date";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { Cap, DenomSheet, seedOf } from "@/components/press/denom";
 import { formatSerial } from "@/components/press/serial";
 import { StateLabel } from "@/components/press/kampus-press";
@@ -89,8 +90,8 @@ export function DebtSlip({ debt, justPaid, onTogglePaid, onDelete }: DebtSlipPro
       <p className="text-body break-words">{debt.description || "Tanpa keterangan"}</p>
       <p className="text-meta break-words">
         {[
-          debt.dueDate && `Janji bayar ${shortDate(debt.dueDate.slice(0, 10))}`,
-          paid && debt.settledAt && `lunas ${shortDate(new Date(debt.settledAt))}`,
+          debt.dueDate && `Janji bayar ${printDate(debt.dueDate.slice(0, 10))}`,
+          paid && debt.settledAt && `lunas ${printDate(new Date(debt.settledAt))}`,
           debt.phone,
         ]
           .filter(Boolean)

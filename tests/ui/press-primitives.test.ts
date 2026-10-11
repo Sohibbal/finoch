@@ -6,6 +6,7 @@ import { formatSerial } from "@/components/press/serial";
 import { rosetteFamilies } from "@/components/press/guilloche";
 import { Stub, stubStateLabel } from "@/components/press/stub";
 import { StatusStamp } from "@/components/press/status-stamp";
+import { printDate } from "@/components/press/print-date";
 import { DENOM, DENOMS, DENOM_FIELD, DENOM_CHOICES, denomOf, type Denom } from "@/components/press/denom";
 
 describe("format helpers", () => {
@@ -79,5 +80,16 @@ describe("denominations", () => {
     expect(denomOf(undefined)).toBe("slate");
     expect(denomOf("green")).toBe("slate");
     for (const c of DENOM_CHOICES) expect(denomOf(c.id)).toBe(c.denom);
+  });
+});
+
+describe("dates in print", () => {
+  it("never breaks inside a date", () => {
+    expect(printDate("2026-10-08")).toBe("Kam, 8 Okt");
+    const html = renderToString(
+      React.createElement(Stub, { data: { id: "a", item: "Es teh", amount: 5000, date: "2026-10-08", wallet: "Dompet Tunai", time: "Kam, 8 Okt" } })
+    );
+    expect(html).toContain("Kam, 8 Okt");
+    expect(html).toContain("Dompet Tunai");
   });
 });

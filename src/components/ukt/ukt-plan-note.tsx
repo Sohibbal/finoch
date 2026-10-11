@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { Check, Trash2, TriangleAlert } from "lucide-react";
 import { UktCategory, UktMetrics, UktPlan } from "@/types/ukt-types";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { Guilloche } from "@/components/press/guilloche";
 import { formatSerial } from "@/components/press/serial";
 import { StatusStamp } from "@/components/press/status-stamp";
@@ -45,7 +46,7 @@ const seedOf = (id: string) => [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0
 function deadlineLabel(deadline: string): string {
   const d = new Date(`${deadline}T00:00:00`);
   if (isNaN(d.getTime())) return deadline;
-  return d.getFullYear() === new Date().getFullYear() ? shortDate(d) : `${shortDate(d)} ${d.getFullYear()}`;
+  return d.getFullYear() === new Date().getFullYear() ? printDate(d) : `${printDate(d)} ${d.getFullYear()}`;
 }
 
 /** A sinking-fund plan as a note whose denomination color fills up toward the target. */

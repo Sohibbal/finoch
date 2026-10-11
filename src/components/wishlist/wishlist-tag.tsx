@@ -3,7 +3,8 @@
 import React from "react";
 import { Check, ExternalLink, Hourglass, PiggyBank, ShoppingBag, Trash2 } from "lucide-react";
 import { WishlistItem } from "@/types/wishlist-types";
-import { rupiah, shortDate } from "@/lib/format";
+import { rupiah } from "@/lib/format";
+import { printDate } from "@/components/press/print-date";
 import { formatSerial } from "@/components/press/serial";
 import { StateLabel } from "@/components/press/kampus-press";
 
@@ -102,7 +103,7 @@ export function WishlistTag({ item, onCancelAndSave, onPurchase, onDelete, now =
 
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-dashed border-ink/25 pt-2">
           <p className="text-meta text-ink-soft">
-            <span className="money tracking-[0.12em]">{formatSerial(item.id, item.createdAt)}</span> · dicatat {shortDate(new Date(item.createdAt))}
+            <span className="money tracking-[0.12em]">{formatSerial(item.id, item.createdAt)}</span> · dicatat {printDate(new Date(item.createdAt))}
           </p>
           {item.linkUrl && (
             <a
