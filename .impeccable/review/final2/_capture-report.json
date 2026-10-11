@@ -5,7 +5,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1158
+    "textLen": 1260
   },
   {
     "file": "wallets-mobile.png",
@@ -21,7 +21,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1793
+    "textLen": 1982
   },
   {
     "file": "bills-mobile.png",
@@ -29,7 +29,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1044
+    "textLen": 1323
   },
   {
     "file": "debts-mobile.png",
@@ -37,7 +37,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 575
+    "textLen": 573
   },
   {
     "file": "ukt-savings-mobile.png",
@@ -45,7 +45,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1425
+    "textLen": 1434
   },
   {
     "file": "wishlist-mobile.png",
@@ -53,7 +53,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 863
+    "textLen": 862
   },
   {
     "file": "split-bill-mobile.png",
@@ -101,7 +101,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1762
+    "textLen": 342
   },
   {
     "file": "simulator-mobile.png",
@@ -109,7 +109,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1100
+    "textLen": 1115
   },
   {
     "file": "goals-mobile.png",
@@ -125,7 +125,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 587
+    "textLen": 524
   },
   {
     "file": "profile-mobile.png",
@@ -133,7 +133,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 953
+    "textLen": 1021
   },
   {
     "file": "landing-mobile.png",
@@ -149,7 +149,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1164
+    "textLen": 1266
   },
   {
     "file": "wallets-desktop.png",
@@ -165,7 +165,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1793
+    "textLen": 1982
   },
   {
     "file": "bills-desktop.png",
@@ -173,7 +173,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1044
+    "textLen": 1323
   },
   {
     "file": "debts-desktop.png",
@@ -181,7 +181,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 575
+    "textLen": 573
   },
   {
     "file": "ukt-savings-desktop.png",
@@ -189,7 +189,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1425
+    "textLen": 1434
   },
   {
     "file": "wishlist-desktop.png",
@@ -197,7 +197,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 863
+    "textLen": 862
   },
   {
     "file": "split-bill-desktop.png",
@@ -245,7 +245,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1762
+    "textLen": 342
   },
   {
     "file": "simulator-desktop.png",
@@ -253,7 +253,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1100
+    "textLen": 1115
   },
   {
     "file": "goals-desktop.png",
@@ -269,7 +269,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 587
+    "textLen": 524
   },
   {
     "file": "profile-desktop.png",
@@ -277,7 +277,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 953
+    "textLen": 1021
   },
   {
     "file": "landing-desktop.png",
@@ -285,7 +285,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 2810
+    "textLen": 3063
   },
   {
     "file": "onboarding-mobile.png",
@@ -313,7 +313,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 368
+    "textLen": 463
   },
   {
     "file": "wallets-empty-mobile.png",
@@ -329,7 +329,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1758
+    "textLen": 1936
   },
   {
     "file": "bills-empty-mobile.png",
@@ -337,7 +337,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 483
+    "textLen": 508
   },
   {
     "file": "debts-empty-mobile.png",
@@ -377,7 +377,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 374
+    "textLen": 469
   },
   {
     "file": "wallets-empty-desktop.png",
@@ -393,7 +393,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 1758
+    "textLen": 1936
   },
   {
     "file": "bills-empty-desktop.png",
@@ -401,7 +401,7 @@
     "busy": false,
     "loggedOut": false,
     "overflow": false,
-    "textLen": 483
+    "textLen": 508
   },
   {
     "file": "debts-empty-desktop.png",
