@@ -140,21 +140,25 @@ interface DenomSheetProps {
   as?: "article" | "div" | "li";
   className?: string;
   "aria-labelledby"?: string;
+  /** Slips whose heading spans the full width print without the rosette, so it never sits in text. */
+  rosette?: boolean;
 }
 
 /**
  * A note printed in its denomination color: a flat color field, a paper-toned rosette
  * and corner registration marks. No gradients, no shadows.
  */
-export function DenomSheet({ denom, seed, children, as: Tag = "article", className = "", ...aria }: DenomSheetProps) {
+export function DenomSheet({ denom, seed, children, as: Tag = "article", className = "", rosette = true, ...aria }: DenomSheetProps) {
   return (
     <Tag className={`relative overflow-hidden ${DENOM_FIELD[denom]} ${className}`} {...aria}>
-      <Guilloche
-        seed={seed}
-        size={200}
-        families={3}
-        className="absolute -right-14 -top-12 !text-paper-sheet opacity-35 pointer-events-none"
-      />
+      {rosette && (
+        <Guilloche
+          seed={seed}
+          size={200}
+          families={3}
+          className="absolute -right-14 -top-12 !text-paper-sheet opacity-35 pointer-events-none"
+        />
+      )}
       <span aria-hidden="true" className="absolute top-1.5 left-1.5 w-3 h-3 border-t border-l border-current opacity-70" />
       <span aria-hidden="true" className="absolute top-1.5 right-1.5 w-3 h-3 border-t border-r border-current opacity-70" />
       <span aria-hidden="true" className="absolute bottom-1.5 left-1.5 w-3 h-3 border-b border-l border-current opacity-70" />

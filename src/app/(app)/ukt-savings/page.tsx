@@ -102,9 +102,9 @@ export default function UktSavingsPage() {
                       <h2 id="ukt-total-title" className="text-body font-semibold text-ink-soft">
                         Total tabungan kampus
                       </h2>
-                      <p className="font-display font-bold text-ink money flex flex-wrap items-baseline gap-x-2">
+                      <p className="font-display font-bold text-ink money flex items-baseline gap-x-2 whitespace-nowrap">
                         <span className="text-head">Rp</span>
-                        <span className="text-numeral" aria-hidden="true">
+                        <span className={totalSaved >= 1_000_000 ? "text-numeral-long" : "text-numeral"} aria-hidden="true">
                           {rolledTotal.toLocaleString("id-ID")}
                         </span>
                         <span className="sr-only">{totalSaved.toLocaleString("id-ID")}</span>
@@ -164,7 +164,7 @@ export default function UktSavingsPage() {
                               {planName.get(dep.planId)} · {printDate(new Date(dep.createdAt))}
                             </p>
                           </div>
-                          <p className="money text-body font-bold text-aman-ink whitespace-nowrap">+{rupiah(dep.amount)}</p>
+                          <p className="money text-body font-bold text-ink whitespace-nowrap">+{rupiah(dep.amount)}</p>
                         </li>
                       ))}
                     </ol>

@@ -174,7 +174,7 @@ export default function ProfilePage() {
               </div>
               <div className="px-5 pb-4 flex flex-wrap items-center gap-3">
                 <span className="text-meta font-semibold text-aman-ink">Akun aktif</span>
-                {demoMode && <span className="text-meta font-semibold text-mepet-ink">Mode Demo</span>}
+                {demoMode && <span className="text-meta font-semibold text-ink">Mode Demo</span>}
               </div>
             </Note>
           )}
@@ -197,13 +197,13 @@ export default function ProfilePage() {
                 onClick={handleToggleDemo}
                 disabled={demoBusy}
                 className={`relative w-14 h-11 shrink-0 disabled:opacity-50 before:absolute before:inset-x-0 before:top-2.5 before:h-6 before:rounded-full before:border-2 before:transition-colors ${
-                  demoMode ? "before:border-mepet-ink before:bg-mepet/30" : "before:border-ink/50 before:bg-transparent"
+                  demoMode ? "before:border-ink before:bg-ink/15" : "before:border-ink/50 before:bg-transparent"
                 }`}
               >
                 <span
                   aria-hidden="true"
                   className={`absolute top-3.5 left-1 w-4 h-4 rounded-full motion-safe:transition-transform ${
-                    demoMode ? "translate-x-7 bg-mepet-ink" : "bg-ink/60"
+                    demoMode ? "translate-x-7 bg-ink" : "bg-ink/60"
                   }`}
                 />
               </button>
@@ -213,7 +213,7 @@ export default function ProfilePage() {
                 type="button"
                 onClick={handleResetDemo}
                 disabled={demoBusy}
-                className="min-h-11 px-4 rounded-full border border-mepet-ink text-mepet-ink text-body font-semibold hover:bg-mepet/10 transition-colors disabled:opacity-50"
+                className="min-h-11 px-4 rounded-full border border-ink text-ink text-body font-semibold hover:bg-ink/5 transition-colors disabled:opacity-50"
               >
                 Reset data demo
               </button>
@@ -338,12 +338,14 @@ function MoneyField({ label, hint, value, onChange }: { label: string; hint?: st
       {hint && <span className="block text-meta text-ink-soft">{hint}</span>}
       <span className="relative block max-w-xs">
         <span className="absolute inset-y-0 left-3 flex items-center text-body font-semibold text-ink-soft">Rp</span>
+        {/* Grouped like every other amount (1.500.000), edited as digits. */}
         <input
-          type="number"
+          type="text"
           inputMode="numeric"
-          value={value || ""}
-          onChange={(e) => onChange(Number(e.target.value))}
-          className="money w-full min-h-11 pl-10 pr-3 bg-paper-sheet border border-ink/30 text-body font-semibold text-ink focus-visible:outline-offset-0"
+          autoComplete="off"
+          value={value ? value.toLocaleString("id-ID") : ""}
+          onChange={(e) => onChange(Number(e.target.value.replace(/\D/g, "")) || 0)}
+          className="money w-full min-h-11 pl-10 pr-3 bg-paper-sheet border border-ink/30 text-base font-semibold text-ink focus-visible:outline-offset-0"
           required
         />
       </span>

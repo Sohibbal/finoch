@@ -44,6 +44,8 @@ export default function CopilotPage() {
   };
 
   useEffect(() => {
+    // Only the greeting so far: leave it read from its first line instead of scrolled mid-sentence.
+    if (messages.length <= 1) return;
     scrollToBottom();
   }, [messages]);
 

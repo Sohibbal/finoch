@@ -98,7 +98,7 @@ export function SimulationResultCard({ result, before, after, baselineNetSavings
           seed={0x51a7}
           stamp={
             delta !== 0 && (
-              <span className={`money text-meta font-semibold ${delta > 0 ? "text-aman-ink" : "text-habis-ink"}`}>
+              <span className={`money text-meta font-semibold text-ink`}>
                 {delta > 0 ? "+" : "−"}
                 {rupiah(Math.abs(delta))}/hari
               </span>

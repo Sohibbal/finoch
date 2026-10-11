@@ -5,6 +5,14 @@ import type { Expense } from "../types/expense";
 /** After this many failed attempts an item is dropped so one poisoned change can't wedge the queue. */
 export const MAX_SYNC_RETRIES = 5;
 
+// The queue is read in timestamp order; two changes in the same millisecond must still keep
+// the order they were made in (create before its edit), so timestamps only ever increase.
+let lastTimestamp = 0;
+function nextTimestamp(): number {
+  lastTimestamp = Math.max(Date.now(), lastTimestamp + 1);
+  return lastTimestamp;
+}
+
 export class SyncQueueManager {
   async enqueue(action: SyncAction, expense: Expense): Promise<SyncQueueItem> {
     const db = await getDatabase();
@@ -13,7 +21,7 @@ export class SyncQueueManager {
       expenseId: expense.id,
       action,
       payload: expense,
-      timestamp: Date.now(),
+      timestamp: nextTimestamp(),
       retryCount: 0,
     };
 

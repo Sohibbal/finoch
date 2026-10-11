@@ -184,7 +184,7 @@ export default function OnboardingPage() {
             Isi uang bulananmu dulu
           </h1>
           <p className="text-body text-ink-soft">
-            Tiga lembar, kurang dari semenit. Dari sini Finoch menghitung jatah aman jajanmu tiap hari.
+            Tiga lembar singkat. Dari sini Finoch menghitung jatah aman jajanmu tiap hari.
           </p>
         </div>
 

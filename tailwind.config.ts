@@ -23,6 +23,8 @@ const config: Config = {
         body: ["0.9375rem", { lineHeight: "1.4rem" }],
         head: ["1.375rem", { lineHeight: "1.75rem", letterSpacing: "-0.01em" }],
         numeral: ["clamp(3.5rem, 17vw, 5rem)", { lineHeight: "1", letterSpacing: "-0.03em" }],
+        // The same numeral for 7+ digit amounts, so "Rp 1.850.000" stays on one line at 342px.
+        "numeral-long": ["clamp(2.5rem, 12vw, 5rem)", { lineHeight: "1", letterSpacing: "-0.03em" }],
       },
       colors: {
         background: "var(--background)",

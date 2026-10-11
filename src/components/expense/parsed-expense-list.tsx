@@ -25,7 +25,7 @@ export function ParsedExpenseList({ items, onToggleCategory, onEdit, onDelete }:
   return (
     <ol aria-label="Cek dulu sebelum disimpan" className="space-y-2">
       {items.map((item) => (
-        <li key={item.id} className="relative flex items-center gap-1 pl-4 bg-paper-sheet border border-dashed border-ink/50 animate-stub-in">
+        <li key={item.id} className="relative flex items-center gap-1 pl-4 bg-paper-sheet border border-ink/30 animate-stub-in">
           <span aria-hidden="true" className="absolute left-1.5 top-2 bottom-2 border-l border-dotted border-ink/40" />
           <div className="min-w-0 flex-1 py-2">
             <p className="flex items-baseline justify-between gap-3">

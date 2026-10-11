@@ -27,7 +27,7 @@ function slip(
     return {
       title: `${label} ${up ? "naik" : "turun"} ${Math.abs(Math.round(num(e.changePercent)))}% dari tanggal yang sama bulan lalu`,
       kind: up ? "Naik" : "Turun",
-      kindClass: up ? "text-habis-ink" : "text-aman-ink",
+      kindClass: "text-ink",
       figures: [
         [ranges.previous, rupiah(num(e.previous))],
         [ranges.current, rupiah(num(e.current))],
