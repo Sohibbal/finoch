@@ -40,7 +40,7 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
 
   return (
     <header
-      className={`sticky top-0 z-40 bg-white/90 dark:bg-[#0E1422]/90 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-800/80 px-4 sm:px-6 py-2.5 print:static ${className}`}
+      className={`sticky top-0 z-30 bg-white/90 dark:bg-[#0E1422]/90 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-800/80 px-4 sm:px-6 py-2.5 print:static ${className}`}
     >
       <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-3">
         {/* Left: Brand / Mobile Back / Title */}

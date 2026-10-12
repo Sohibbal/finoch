@@ -60,7 +60,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
 
   return (
     <aside
-      className={`sticky top-3 self-start my-3 ml-3 rounded-[2rem] bg-white/95 dark:bg-[#070A11] border border-slate-200/80 dark:border-slate-800/80 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/50 backdrop-blur-xl flex flex-col py-5 justify-between shrink-0 z-30 transition-all duration-300 h-[calc(100vh-1.5rem)] max-h-screen relative ${
+      className={`sticky top-3 self-start my-3 ml-3 rounded-[2rem] bg-white/95 dark:bg-[#070A11] border border-slate-200/80 dark:border-slate-800/80 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/50 backdrop-blur-xl flex flex-col py-5 justify-between shrink-0 z-40 transition-all duration-300 h-[calc(100vh-1.5rem)] max-h-screen relative ${
         isExpanded ? "w-56 md:w-60 px-3" : "w-16 md:w-20 px-2 items-center"
       } ${className}`}
     >
@@ -73,7 +73,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
         title={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
         aria-label={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
         className={`absolute top-6.5 w-7 h-7 rounded-full bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-700/80 shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all z-50 cursor-pointer ${
-          isExpanded ? "right-3 left-auto" : "left-[calc(100%+0.5rem)] right-auto"
+          isExpanded ? "right-3" : "-right-9"
         }`}
       >
         {isExpanded ? (
