@@ -123,4 +123,38 @@ body {
   animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* Professional card content entrance animation */
+@keyframes contentPopIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-content-in {
+  animation: contentPopIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-content-delay-1 {
+  animation-delay: 80ms;
+}
+
+.animate-content-delay-2 {
+  animation-delay: 160ms;
+}
+
+.animate-content-delay-3 {
+  animation-delay: 240ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-content-in {
+    animation: none !important;
+  }
+}
+
 /* Custom scrollbar for interactive preview */

@@ -84,9 +84,9 @@ export default function PengeluaranPage() {
   const handleScanConfirmed = async (candidate: TransactionCandidate) => {
     const saved = await saveTransaction({
       type: "expense",
-      itemName: candidate.merchant || candidate.description || candidate.items?.[0]?.name || "Belanja Struk",
+      itemName: candidate.merchant || candidate.description || candidate.items?.[0]?.name || "Pengeluaran",
       amount: candidate.amount,
-      category: candidate.category || "Makanan & Minuman",
+      category: candidate.category || "Makanan",
       source: "ocr",
       transactionDate: candidate.date,
     });
@@ -115,86 +115,117 @@ export default function PengeluaranPage() {
         subtitle="Pantau dan kontrol seluruh uang keluar via suara, scan struk, atau manual"
       />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5">
-        {/* Metric Card & Action Bar */}
-        <div className="p-5 sm:p-6 rounded-3xl backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-rose-500/80 after:shadow-sm space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Total Pengeluaran</p>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money mt-1">
-                -{rupiah(totalThisMonth)}
-              </h2>
+      <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
+        <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
+          
+          {/* Main 2-Column Split: Kiri 3 Button Persegi & Kanan Riwayat */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            {/* SISI KIRI: Summary Metric Card + 3 Button Persegi Berjejer ke Bawah (4 cols) */}
+            <div className="lg:col-span-4 space-y-4">
+              {/* Summary Card */}
+              <div className="p-5 rounded-3xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Total Pengeluaran
+                </p>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
+                  -{rupiah(totalThisMonth)}
+                </h2>
+                <p className="text-[11px] text-slate-400">
+                  {transactions.length} transaksi pengeluaran tercatat
+                </p>
+              </div>
+
+              {/* 3 Button Persegi Berjejer ke Bawah */}
+              <div className="flex flex-col gap-3">
+                {/* 1. Button Persegi: Bicara */}
+                <button
+                  type="button"
+                  onClick={() => setIsVoiceOpen(true)}
+                  className="w-full p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 hover:bg-blue-100 hover:border-blue-400 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Mic className="w-5 h-5" strokeWidth={2} />
+                  </div>
+                  <div className="text-left sm:text-center">
+                    <p className="text-sm font-bold">Bicara</p>
+                    <p className="text-[11px] opacity-75 font-normal">Input cepat via suara</p>
+                  </div>
+                </button>
+
+                {/* 2. Button Persegi: Scan */}
+                <button
+                  type="button"
+                  onClick={() => setIsScanOpen(true)}
+                  className="w-full p-4 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200/80 dark:border-rose-900/60 hover:bg-rose-100 hover:border-rose-400 dark:hover:bg-rose-900/50 text-rose-600 dark:text-rose-400 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-rose-600/10 dark:bg-rose-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <ScanLine className="w-5 h-5" strokeWidth={2} />
+                  </div>
+                  <div className="text-left sm:text-center">
+                    <p className="text-sm font-bold">Scan</p>
+                    <p className="text-[11px] opacity-75 font-normal">Scan struk belanja fisik</p>
+                  </div>
+                </button>
+
+                {/* 3. Button Persegi: Catat */}
+                <button
+                  type="button"
+                  onClick={() => setIsManualOpen(true)}
+                  className="w-full p-4 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 border border-slate-800 dark:border-slate-200 hover:opacity-90 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/10 dark:bg-slate-900/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Plus className="w-5 h-5" strokeWidth={2} />
+                  </div>
+                  <div className="text-left sm:text-center">
+                    <p className="text-sm font-bold">Catat</p>
+                    <p className="text-[11px] opacity-75 font-normal">Input manual pengeluaran</p>
+                  </div>
+                </button>
+              </div>
             </div>
 
-            {/* 3 Input Method Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => setIsVoiceOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold text-xs transition-colors"
-              >
-                <Mic className="w-4 h-4" strokeWidth={2} />
-                <span>Bicara</span>
-              </button>
+            {/* SISI KANAN: Riwayat Pengeluaran (8 cols) */}
+            <div className="lg:col-span-8 rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <ArrowUpRight className="w-5 h-5 text-rose-500" />
+                  <span>Riwayat Pengeluaran</span>
+                </h3>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                  {transactions.length} data
+                </span>
+              </div>
 
-              <button
-                type="button"
-                onClick={() => setIsScanOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 hover:bg-amber-100 dark:hover:bg-amber-900/50 text-amber-600 dark:text-amber-400 font-semibold text-xs transition-colors"
-              >
-                <ScanLine className="w-4 h-4" strokeWidth={2} />
-                <span>Scan Struk</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setIsManualOpen(true)}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-xs hover:opacity-90 transition-opacity"
-              >
-                <Plus className="w-4 h-4" strokeWidth={2} />
-                <span>Catat Manual</span>
-              </button>
+              <TransactionHistoryTable
+                type="expense"
+                transactions={transactions}
+                onDelete={handleDelete}
+                isLoading={isLoading}
+              />
             </div>
           </div>
         </div>
-
-        {/* Transaction History Section */}
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-head font-bold text-ink dark:text-white flex items-center gap-2">
-              <ArrowUpRight className="w-5 h-5 text-rose-500" />
-              <span>Riwayat Pengeluaran</span>
-            </h3>
-          </div>
-
-          <TransactionHistoryTable
-            type="expense"
-            transactions={transactions}
-            onDelete={handleDelete}
-            isLoading={isLoading}
-          />
-        </section>
       </div>
 
       {/* Modals */}
       <ManualTransactionModal
         isOpen={isManualOpen}
-        type="expense"
         onClose={() => setIsManualOpen(false)}
+        type="expense"
         onSave={handleManualSave}
       />
 
       <ReceiptScannerModal
         isOpen={isScanOpen}
-        type="expense"
         onClose={() => setIsScanOpen(false)}
         onConfirm={handleScanConfirmed}
       />
 
       <VoiceTransactionModal
         isOpen={isVoiceOpen}
-        type="expense"
         onClose={() => setIsVoiceOpen(false)}
+        type="expense"
         onSave={handleVoiceSave}
       />
     </>

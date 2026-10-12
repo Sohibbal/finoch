@@ -49,14 +49,6 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
     }
   }, []);
 
-  const navPills = [
-    { label: "Overview", href: "/dashboard" },
-    { label: "Pemasukan", href: "/pemasukan" },
-    { label: "Pengeluaran", href: "/pengeluaran" },
-    { label: "Wishlist", href: "/wishlist" },
-    { label: "Copilot", href: "/copilot" },
-  ];
-
   return (
     <header
       className={`sticky top-0 z-40 bg-white/90 dark:bg-[#0E1422]/90 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-800/80 px-4 sm:px-6 py-2.5 print:static ${className}`}
@@ -82,38 +74,15 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
             </span>
           </Link>
 
-          <div className="hidden lg:block h-5 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
+          <div className="hidden sm:block h-5 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
 
-          <div className="min-w-0 hidden sm:block">
+          <div className="min-w-0">
             {!isDashboard && <Breadcrumbs className="hidden md:flex mb-0.5" />}
-            <h1 className="text-xs font-bold text-slate-700 dark:text-slate-300 truncate">
+            <h1 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
               {title}
             </h1>
           </div>
         </div>
-
-        {/* Center: Subly-style Pill Navigation Bar (Desktop) */}
-        <nav
-          aria-label="Navigasi Atas"
-          className="hidden md:flex items-center gap-1 p-1 rounded-full bg-slate-100/90 dark:bg-slate-800/90 border border-slate-200/50 dark:border-slate-700/50 shadow-inner"
-        >
-          {navPills.map((pill) => {
-            const active = pathname === pill.href;
-            return (
-              <Link
-                key={pill.href}
-                href={pill.href}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                  active
-                    ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
-                    : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
-                }`}
-              >
-                {pill.label}
-              </Link>
-            );
-          })}
-        </nav>
 
         {/* Right: Actions, Search, Notifications, Theme, User Pill */}
         <div className="flex items-center gap-2.5 shrink-0 ml-auto">

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Plus, Mic, Gift, Sparkles, Filter } from "lucide-react";
+import { Plus, Mic, Sparkles, Gift } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah } from "@/lib/format";
 import {
@@ -11,32 +11,39 @@ import {
   deleteWishlist,
   type LocalWishlist,
 } from "@/lib/storage/wishlist-storage";
-import { getTransactions, type LocalTransaction } from "@/lib/storage/transaction-storage";
+import { getTransactions } from "@/lib/storage/transaction-storage";
 import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
 import { WishlistItemCard } from "@/components/wishlist/wishlist-item-card";
 import { ManualWishlistModal } from "@/components/wishlist/manual-wishlist-modal";
 import { VoiceWishlistModal } from "@/components/wishlist/voice-wishlist-modal";
 
-type FilterStatus = "all" | "active" | "achieved";
-
 export default function WishlistPage() {
   const [items, setItems] = useState<LocalWishlist[]>([]);
-  const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
+  const [currentSavings, setCurrentSavings] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
-  const [filter, setFilter] = useState<FilterStatus>("active");
+  const [filter, setFilter] = useState<"active" | "achieved" | "all">("active");
 
+  // Modals
   const [isManualOpen, setIsManualOpen] = useState(false);
   const [isVoiceOpen, setIsVoiceOpen] = useState(false);
 
   const loadData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const [wList, txList] = await Promise.all([
+      const [wishlistData, txData] = await Promise.all([
         getWishlistItems(),
         getTransactions(),
       ]);
-      setItems(wList);
-      setTransactions(txList);
+      setItems(wishlistData);
+
+      // Calculate current net savings (Income - Expenses)
+      let income = 0;
+      let expenses = 0;
+      for (const tx of txData) {
+        if (tx.type === "income") income += tx.amount;
+        else if (tx.type === "expense") expenses += tx.amount;
+      }
+      setCurrentSavings(Math.max(0, income - expenses));
     } finally {
       setIsLoading(false);
     }
@@ -46,52 +53,44 @@ export default function WishlistPage() {
     loadData();
   }, [loadData]);
 
-  // Compute financial health for dynamic projections
-  const { currentSavings, dailySavingsRate } = useMemo(() => {
-    let income = 0;
-    let expense = 0;
-    for (const t of transactions) {
-      if (t.type === "income") income += t.amount;
-      if (t.type === "expense") expense += t.amount;
-    }
-    const net = Math.max(0, income - expense);
-    // Surplus per day over 30 days
-    const dailyRate = Math.max(0, Math.round(net / 30));
-    return {
-      currentSavings: net,
-      dailySavingsRate: dailyRate > 0 ? dailyRate : 25000,
-    };
-  }, [transactions]);
-
   const handleManualSave = async (data: { name: string; targetPrice: number; priority: number }) => {
-    await saveWishlistItem({
+    const saved = await saveWishlistItem({
       name: data.name,
       targetPrice: data.targetPrice,
-      savedAmount: 0,
       priority: data.priority,
+      savedAmount: 0,
       isAchieved: false,
     });
+    setItems((prev) => [saved, ...prev]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:wishlist-changed"));
+    }
     await loadData();
   };
 
   const handleToggleAchieved = async (id: string) => {
-    await toggleWishlistAchieved(id);
-    await loadData();
-  };
-
-  const handleDelete = async (id: string) => {
-    if (confirm("Hapus barang ini dari wishlist?")) {
-      await deleteWishlist(id);
-      await loadData();
+    const updated = await toggleWishlistAchieved(id);
+    if (updated) {
+      setItems((prev) => prev.map((item) => (item.id === id ? updated : item)));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new Event("finoch:wishlist-changed"));
+      }
     }
   };
 
+  const handleDelete = async (id: string) => {
+    setItems((prev) => prev.filter((i) => i.id !== id));
+    await deleteWishlist(id);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:wishlist-changed"));
+    }
+    await loadData();
+  };
+
   const filteredItems = useMemo(() => {
-    return items.filter((item) => {
-      if (filter === "active") return !item.isAchieved;
-      if (filter === "achieved") return item.isAchieved;
-      return true;
-    });
+    if (filter === "active") return items.filter((i) => !i.isAchieved);
+    if (filter === "achieved") return items.filter((i) => i.isAchieved);
+    return items;
   }, [items, filter]);
 
   const totalValue = items.reduce((sum, item) => sum + item.targetPrice, 0);
@@ -105,116 +104,149 @@ export default function WishlistPage() {
         subtitle="Kawal barang impian dan pantau estimasi jadwal ketercapaiannya"
       />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-5 sm:py-6 space-y-5">
-        {/* Metric Summary Card */}
-        <div className="p-5 sm:p-6 rounded-3xl backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-blue-500/80 after:shadow-sm space-y-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <p className="text-meta font-medium text-ink-soft dark:text-navy-400">Total Nilai Wishlist</p>
-              <h2 className="text-display font-bold text-ink dark:text-white money">
-                {rupiah(totalValue)}
-              </h2>
-              <p className="text-meta text-ink-soft dark:text-navy-400 mt-1 flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-primary-500" />
-                <span>Tabungan bersih saat ini: <strong className="text-ink dark:text-white">{rupiah(currentSavings)}</strong></span>
-              </p>
+      <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
+        <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
+          
+          {/* Main 2-Column Split: Kiri Button Persegi & Kanan Grid Wishlist */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            
+            {/* SISI KIRI: Summary Metric Card + Button Persegi Berjejer ke Bawah (4 cols) */}
+            <div className="lg:col-span-4 space-y-4">
+              {/* Summary Metric Card */}
+              <div className="p-5 rounded-3xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  Total Nilai Wishlist
+                </p>
+                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
+                  {rupiah(totalValue)}
+                </h2>
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs space-y-1">
+                  <p className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                    <span>Tabungan aktif: <strong className="text-slate-900 dark:text-white">{rupiah(currentSavings)}</strong></span>
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    {activeCount} impian aktif · {achievedCount} tercapai
+                  </p>
+                </div>
+              </div>
+
+              {/* 2 Button Persegi Berjejer ke Bawah */}
+              <div className="flex flex-col gap-3">
+                {/* 1. Button Persegi: Bicara */}
+                <button
+                  type="button"
+                  onClick={() => setIsVoiceOpen(true)}
+                  className="w-full p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 hover:bg-blue-100 hover:border-blue-400 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Mic className="w-5 h-5" strokeWidth={2} />
+                  </div>
+                  <div className="text-left sm:text-center">
+                    <p className="text-sm font-bold">Bicara</p>
+                    <p className="text-[11px] opacity-75 font-normal">Catat target impian via suara</p>
+                  </div>
+                </button>
+
+                {/* 2. Button Persegi: Catat Manual */}
+                <button
+                  type="button"
+                  onClick={() => setIsManualOpen(true)}
+                  className="w-full p-4 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 border border-slate-800 dark:border-slate-200 hover:opacity-90 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
+                >
+                  <div className="w-10 h-10 rounded-xl bg-white/10 dark:bg-slate-900/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                    <Plus className="w-5 h-5" strokeWidth={2} />
+                  </div>
+                  <div className="text-left sm:text-center">
+                    <p className="text-sm font-bold">Catat Manual</p>
+                    <p className="text-[11px] opacity-75 font-normal">Tambah target barang impian</p>
+                  </div>
+                </button>
+              </div>
             </div>
 
-            {/* Input Options (Voice & Manual) */}
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setIsVoiceOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 font-semibold text-meta transition-colors"
-              >
-                <Mic className="w-4 h-4" strokeWidth={2} />
-                <span>Bicara</span>
-              </button>
+            {/* SISI KANAN: Filter Tabs & Grid Wishlist (8 cols) */}
+            <div className="lg:col-span-8 space-y-4">
+              {/* Filter Tabs Header */}
+              <div className="flex items-center justify-between gap-3 flex-wrap">
+                <div className="flex items-center gap-1.5 p-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setFilter("active")}
+                    className={`px-3 py-1.5 rounded-full transition-colors ${
+                      filter === "active"
+                        ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    Aktif ({activeCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("achieved")}
+                    className={`px-3 py-1.5 rounded-full transition-colors ${
+                      filter === "achieved"
+                        ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    Tercapai ({achievedCount})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFilter("all")}
+                    className={`px-3 py-1.5 rounded-full transition-colors ${
+                      filter === "all"
+                        ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    Semua ({items.length})
+                  </button>
+                </div>
 
-              <button
-                type="button"
-                onClick={() => setIsManualOpen(true)}
-                className="flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-ink text-paper-sheet dark:bg-white dark:text-navy-950 font-semibold text-meta hover:opacity-90 transition-opacity"
-              >
-                <Plus className="w-4 h-4" strokeWidth={2} />
-                <span>Catat Manual</span>
-              </button>
+                <span className="text-xs text-slate-400 font-medium">
+                  {filteredItems.length} item ditampilkan
+                </span>
+              </div>
+
+              {/* Wishlist Items Grid */}
+              {filteredItems.length === 0 ? (
+                <div className="p-12 text-center rounded-[2rem] border border-dashed border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-[#111726]/60 space-y-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 mx-auto flex items-center justify-center">
+                    <Gift className="w-6 h-6" />
+                  </div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Belum ada barang di daftar ini
+                  </h3>
+                  <p className="text-xs text-slate-400 max-w-sm mx-auto">
+                    Punya barang yang pengen dibeli? Catat sekarang lewat tombol Bicara atau Catat Manual di sisi kiri.
+                  </p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {filteredItems.map((item) => {
+                    const projection = calculateWishlistProjection(
+                      item.targetPrice,
+                      currentSavings,
+                      25000
+                    );
+                    return (
+                      <WishlistItemCard
+                        key={item.id}
+                        item={item}
+                        estimatedDays={projection.estimatedDays}
+                        projectionStatus={projection.status}
+                        onToggleAchieved={handleToggleAchieved}
+                        onDelete={handleDelete}
+                      />
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
-
-        {/* Filter Navigation */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 bg-paper-sheet dark:bg-navy-900 p-1 rounded-xl border border-ink/10 dark:border-navy-800">
-            <button
-              type="button"
-              onClick={() => setFilter("active")}
-              className={`px-3 py-1.5 rounded-lg text-meta font-semibold transition-colors ${
-                filter === "active"
-                  ? "bg-ink text-white dark:bg-white dark:text-navy-950 shadow-sm"
-                  : "text-ink-soft dark:text-navy-400 hover:text-ink dark:hover:text-white"
-              }`}
-            >
-              Aktif ({activeCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter("achieved")}
-              className={`px-3 py-1.5 rounded-lg text-meta font-semibold transition-colors ${
-                filter === "achieved"
-                  ? "bg-ink text-white dark:bg-white dark:text-navy-950 shadow-sm"
-                  : "text-ink-soft dark:text-navy-400 hover:text-ink dark:hover:text-white"
-              }`}
-            >
-              Tercapai ({achievedCount})
-            </button>
-            <button
-              type="button"
-              onClick={() => setFilter("all")}
-              className={`px-3 py-1.5 rounded-lg text-meta font-semibold transition-colors ${
-                filter === "all"
-                  ? "bg-ink text-white dark:bg-white dark:text-navy-950 shadow-sm"
-                  : "text-ink-soft dark:text-navy-400 hover:text-ink dark:hover:text-white"
-              }`}
-            >
-              Semua ({items.length})
-            </button>
-          </div>
-        </div>
-
-        {/* Wishlist Items Grid */}
-        {filteredItems.length === 0 ? (
-          <div className="p-12 text-center rounded-2xl border border-dashed border-ink/20 dark:border-navy-800 bg-paper-sheet/50 dark:bg-navy-900/30 space-y-3">
-            <div className="w-12 h-12 rounded-2xl bg-ink/5 dark:bg-navy-800 mx-auto flex items-center justify-center text-ink-soft">
-              <Gift className="w-6 h-6" />
-            </div>
-            <h3 className="text-body font-bold text-ink dark:text-white">Belum ada barang di daftar ini</h3>
-            <p className="text-meta text-ink-soft dark:text-navy-400 max-w-sm mx-auto">
-              Punya barang yang pengen dibeli? Catat sekarang lewat tombol Bicara atau Catat Manual di atas.
-            </p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredItems.map((item) => {
-              const projection = calculateWishlistProjection(
-                item.targetPrice,
-                currentSavings,
-                dailySavingsRate
-              );
-
-              return (
-                <WishlistItemCard
-                  key={item.id}
-                  item={item}
-                  estimatedDays={projection.estimatedDays}
-                  projectionStatus={projection.status}
-                  onToggleAchieved={handleToggleAchieved}
-                  onDelete={handleDelete}
-                />
-              );
-            })}
-          </div>
-        )}
       </div>
 
       {/* Modals */}
@@ -227,7 +259,7 @@ export default function WishlistPage() {
       <VoiceWishlistModal
         isOpen={isVoiceOpen}
         onClose={() => setIsVoiceOpen(false)}
-        onSave={handleManualSave}
+        onSave={(data) => handleManualSave({ name: data.name, targetPrice: data.targetPrice, priority: 1 })}
       />
     </>
   );
