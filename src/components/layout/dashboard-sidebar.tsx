@@ -64,13 +64,17 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
         isExpanded ? "w-56 md:w-60 px-3" : "w-16 md:w-20 px-2 items-center"
       } ${className}`}
     >
-      {/* Floating Toggle Expand / Collapse Button placed on outer edge */}
+      {/* Toggle Expand / Collapse Button:
+          - When collapsed (!isExpanded): placed outside the card on the right edge so logo remains centered
+          - When expanded (isExpanded): placed in top-right corner inside the card */}
       <button
         type="button"
         onClick={toggleExpand}
         title={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
         aria-label={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
-        className="absolute left-[calc(100%+0.5rem)] top-6.5 w-7 h-7 rounded-full bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-700/80 shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all z-50 cursor-pointer"
+        className={`absolute top-6.5 w-7 h-7 rounded-full bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-700/80 shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all z-50 cursor-pointer ${
+          isExpanded ? "right-3 left-auto" : "left-[calc(100%+0.5rem)] right-auto"
+        }`}
       >
         {isExpanded ? (
           <ChevronLeft className="w-3.5 h-3.5" />
