@@ -60,7 +60,7 @@ export function GlobalSearchBar({ className = "" }: GlobalSearchBarProps) {
               setIsOpen(false);
             }
           }}
-          className="h-8 w-36 sm:w-52 pl-8 pr-7 text-xs rounded-xl bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/80 placeholder:text-slate-400 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:w-48 sm:focus:w-64 transition-all"
+          className="h-8 w-36 sm:w-52 pl-8 pr-7 text-xs rounded-xl bg-white/80 dark:bg-slate-800/80 border border-blue-200/70 dark:border-slate-700/80 placeholder:text-slate-400 text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 focus:w-48 sm:focus:w-64 transition-all shadow-xs"
         />
         {query && (
           <button
