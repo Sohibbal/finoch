@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Loader2, Sparkles, Wallet, TrendingUp, TrendingDown } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
+import { TypewriterText } from "@/components/ui/typewriter-text";
 import { getTransactions } from "@/lib/storage/transaction-storage";
 import { getWishlistItems } from "@/lib/storage/wishlist-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
@@ -19,7 +20,7 @@ interface ChatMessage {
 /** Original FinBot vector mark - geometric wallet & pulse emblem */
 function FinBotAvatar() {
   return (
-    <div className="w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-xs">
+    <div className="w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-xs finbot-fade-loop">
       <svg
         viewBox="0 0 24 24"
         fill="none"
@@ -51,7 +52,9 @@ export default function CopilotPage() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
+  const [completedMsgIds, setCompletedMsgIds] = useState<Set<string>>(() => new Set());
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const scrollFrameRef = useRef<number | null>(null);
 
   const quickPrompts = [
     "Bulan ini gue paling boros apa?",
@@ -75,13 +78,26 @@ export default function CopilotPage() {
     loadStats();
   }, []);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBottom = (smooth = false) => {
+    if (scrollFrameRef.current) {
+      cancelAnimationFrame(scrollFrameRef.current);
+    }
+    scrollFrameRef.current = requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+    });
   };
 
   useEffect(() => {
+    return () => {
+      if (scrollFrameRef.current) {
+        cancelAnimationFrame(scrollFrameRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (messages.length > 1) {
-      scrollToBottom();
+      scrollToBottom(true);
     }
   }, [messages]);
 
@@ -256,7 +272,25 @@ export default function CopilotPage() {
                           : "bg-slate-50 dark:bg-slate-800/90 border border-slate-200/70 dark:border-slate-700/70 text-slate-800 dark:text-white rounded-tl-xs"
                       }`}
                     >
-                      <p className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                      <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
+                        {isUser || completedMsgIds.has(msg.id) ? (
+                          msg.text
+                        ) : (
+                          <TypewriterText
+                            text={msg.text}
+                            speed={12}
+                            onTick={() => scrollToBottom(false)}
+                            onComplete={() => {
+                              setCompletedMsgIds((prev) => {
+                                const next = new Set(prev);
+                                next.add(msg.id);
+                                return next;
+                              });
+                              scrollToBottom(true);
+                            }}
+                          />
+                        )}
+                      </div>
                       <div
                         className={`text-[10px] opacity-60 flex items-center gap-2 ${
                           isUser ? "justify-end" : "justify-start"

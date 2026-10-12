@@ -209,3 +209,26 @@ body {
     display: none !important;
   }
 }
+
+/* Smooth looping fade & breathing effect for FinBot Icon */
+@keyframes finbotFadeLoop {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+.finbot-fade-loop {
+  animation: finbotFadeLoop 2.8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .finbot-fade-loop {
+    animation: none !important;
+  }
+}
+
