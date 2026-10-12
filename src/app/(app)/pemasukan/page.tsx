@@ -119,7 +119,7 @@ export default function PemasukanPage() {
         <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
           
           {/* Main 2-Column Split: Kiri 3 Button Persegi & Kanan Riwayat */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
             
             {/* SISI KIRI: Summary Metric Card + 3 Button Persegi Berjejer ke Bawah (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
@@ -192,9 +192,9 @@ export default function PemasukanPage() {
               </div>
             </div>
 
-            {/* SISI KANAN: Riwayat Pemasukan (8 cols) with Glass Sheen */}
-            <div className="lg:col-span-8 rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
-              <div className="flex items-center justify-between relative z-10">
+            {/* SISI KANAN: Riwayat Pemasukan (8 cols) with 100% Height & Glass Sheen */}
+            <div className="lg:col-span-8 rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between glass-sheen relative overflow-hidden group h-full min-h-[460px]">
+              <div className="flex items-center justify-between relative z-10 shrink-0 mb-3">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <ArrowDownLeft className="w-5 h-5 text-emerald-500" />
                   <span>Riwayat Pemasukan</span>
@@ -204,7 +204,7 @@ export default function PemasukanPage() {
                 </span>
               </div>
 
-              <div className="relative z-10">
+              <div className="relative z-10 flex-1 flex flex-col justify-between">
                 <TransactionHistoryTable
                   type="income"
                   transactions={transactions}

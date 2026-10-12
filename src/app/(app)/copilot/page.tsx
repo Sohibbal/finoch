@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Sparkles, Wallet, TrendingUp, TrendingDown, Bot } from "lucide-react";
+import { Send, Loader2, Speech, Wallet, TrendingUp, TrendingDown, Bot } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { TypewriterText } from "@/components/ui/typewriter-text";
 import { FormattedBotMessage } from "@/components/copilot/formatted-message";
@@ -225,7 +225,7 @@ export default function CopilotPage() {
               <div className="flex flex-col justify-between h-full space-y-3">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <Speech className="w-3.5 h-3.5 text-blue-500 dark:text-blue-400" />
                     <span>Pusat Tanya Cepat</span>
                   </p>
                   <div className="mt-3 space-y-2">

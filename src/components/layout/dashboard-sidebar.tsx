@@ -70,7 +70,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
         onClick={toggleExpand}
         title={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
         aria-label={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
-        className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-white dark:bg-[#151D2E] border border-slate-200 dark:border-slate-700 shadow-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all z-40 cursor-pointer"
+        className="absolute left-[calc(100%+0.5rem)] top-6.5 w-7 h-7 rounded-full bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-700/80 shadow-md hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all z-50 cursor-pointer"
       >
         {isExpanded ? (
           <ChevronLeft className="w-3.5 h-3.5" />
