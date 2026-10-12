@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { Plus, Mic, Sparkles, Gift, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, Mic, Sparkles, Gift, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah } from "@/lib/format";
 import {
@@ -220,35 +220,63 @@ export default function WishlistPage() {
                 </div>
               </div>
 
-              {/* 2 Button Persegi Berjejer ke Bawah */}
+              {/* 2 Action Cards Berjejer ke Bawah */}
               <div className="flex flex-col gap-3">
-                {/* 1. Button Persegi: Bicara */}
+                {/* 1. Card: Bicara */}
                 <button
                   type="button"
                   onClick={() => setIsVoiceOpen(true)}
-                  className="w-full p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 hover:bg-blue-100 hover:border-blue-400 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
+                  className="w-full text-left rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-blue-400 dark:hover:border-blue-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <Mic className="w-5 h-5" strokeWidth={2} />
+                  <Mic
+                    className="absolute -right-3 -bottom-3 w-24 h-24 text-blue-500/10 dark:text-blue-400/10 pointer-events-none select-none transition-transform group-hover:scale-110 group-hover:rotate-6"
+                    strokeWidth={1.5}
+                  />
+                  <div className="relative z-10 space-y-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-blue-500/10 dark:bg-blue-400/20 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Mic className="w-5 h-5" strokeWidth={2.2} />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        Bicara
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                        Catat target impian via suara
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-left sm:text-center">
-                    <p className="text-sm font-bold">Bicara</p>
-                    <p className="text-[11px] opacity-75 font-normal">Catat target impian via suara</p>
+                  <div className="relative z-10 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-semibold text-blue-600 dark:text-blue-400">
+                    <span>Mulai Bicara</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </div>
                 </button>
 
-                {/* 2. Button Persegi: Catat Manual */}
+                {/* 2. Card: Catat Manual */}
                 <button
                   type="button"
                   onClick={() => setIsManualOpen(true)}
-                  className="w-full p-4 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 border border-slate-800 dark:border-slate-200 hover:opacity-90 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
+                  className="w-full text-left rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-indigo-400 dark:hover:border-indigo-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/10 dark:bg-slate-900/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <Plus className="w-5 h-5" strokeWidth={2} />
+                  <Plus
+                    className="absolute -right-3 -bottom-3 w-24 h-24 text-indigo-500/10 dark:text-indigo-400/10 pointer-events-none select-none transition-transform group-hover:scale-110 group-hover:rotate-6"
+                    strokeWidth={1.5}
+                  />
+                  <div className="relative z-10 space-y-2.5">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-400/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
+                      <Plus className="w-5 h-5" strokeWidth={2.2} />
+                    </div>
+                    <div>
+                      <h4 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        Catat Manual
+                      </h4>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 leading-relaxed">
+                        Tambah target barang impian
+                      </p>
+                    </div>
                   </div>
-                  <div className="text-left sm:text-center">
-                    <p className="text-sm font-bold">Catat Manual</p>
-                    <p className="text-[11px] opacity-75 font-normal">Tambah target barang impian</p>
+                  <div className="relative z-10 pt-2.5 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">
+                    <span>Input Manual</span>
+                    <ArrowUpRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
                   </div>
                 </button>
               </div>

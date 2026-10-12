@@ -14,6 +14,7 @@ import { TransactionHistoryTable } from "@/components/transaction/transaction-hi
 import { ManualTransactionModal } from "@/components/transaction/manual-transaction-modal";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
 import { VoiceTransactionModal } from "@/components/transaction/voice-transaction-modal";
+import { TransactionActionCards } from "@/components/transaction/transaction-action-cards";
 import type { TransactionCandidate } from "@/types/financial-types";
 
 export default function PemasukanPage() {
@@ -143,53 +144,14 @@ export default function PemasukanPage() {
                 </div>
               </div>
 
-              {/* 3 Button Persegi Berjejer ke Bawah */}
-              <div className="flex flex-col gap-3">
-                {/* 1. Button Persegi: Bicara */}
-                <button
-                  type="button"
-                  onClick={() => setIsVoiceOpen(true)}
-                  className="w-full p-4 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 hover:bg-blue-100 hover:border-blue-400 dark:hover:bg-blue-900/50 text-blue-600 dark:text-blue-400 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-blue-600/10 dark:bg-blue-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <Mic className="w-5 h-5" strokeWidth={2} />
-                  </div>
-                  <div className="text-left sm:text-center">
-                    <p className="text-sm font-bold">Bicara</p>
-                    <p className="text-[11px] opacity-75 font-normal">Input cepat via suara</p>
-                  </div>
-                </button>
-
-                {/* 2. Button Persegi: Scan */}
-                <button
-                  type="button"
-                  onClick={() => setIsScanOpen(true)}
-                  className="w-full p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60 hover:bg-emerald-100 hover:border-emerald-400 dark:hover:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-emerald-600/10 dark:bg-emerald-500/20 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <ScanLine className="w-5 h-5" strokeWidth={2} />
-                  </div>
-                  <div className="text-left sm:text-center">
-                    <p className="text-sm font-bold">Scan</p>
-                    <p className="text-[11px] opacity-75 font-normal">Scan struk / bukti transfer</p>
-                  </div>
-                </button>
-
-                {/* 3. Button Persegi: Catat */}
-                <button
-                  type="button"
-                  onClick={() => setIsManualOpen(true)}
-                  className="w-full p-4 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 border border-slate-800 dark:border-slate-200 hover:opacity-90 font-semibold transition-all flex items-center sm:flex-col justify-center gap-2 group shadow-xs"
-                >
-                  <div className="w-10 h-10 rounded-xl bg-white/10 dark:bg-slate-900/10 flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform">
-                    <Plus className="w-5 h-5" strokeWidth={2} />
-                  </div>
-                  <div className="text-left sm:text-center">
-                    <p className="text-sm font-bold">Catat</p>
-                    <p className="text-[11px] opacity-75 font-normal">Input manual nominal</p>
-                  </div>
-                </button>
-              </div>
+              {/* 3 Action Cards (Bicara, Scan, Catat) styled like Dashboard Cards */}
+              <TransactionActionCards
+                layout="vertical"
+                type="income"
+                onOpenVoice={() => setIsVoiceOpen(true)}
+                onOpenScan={() => setIsScanOpen(true)}
+                onOpenManual={() => setIsManualOpen(true)}
+              />
             </div>
 
             {/* SISI KANAN: Riwayat Pemasukan (8 cols) with 100% Height & Glass Sheen */}

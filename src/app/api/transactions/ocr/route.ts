@@ -62,21 +62,26 @@ async function parseWithLlm(rawText: string): Promise<TransactionCandidate | nul
   if (!llmConfig) return null;
 
   try {
-    const prompt = `Anda adalah asisten ekstraksi data struk belanja finansial untuk aplikasi FINRA.
+    const prompt = `Anda adalah asisten AI ekstraksi struk belanja untuk aplikasi Finoch.
 Ekstrak data dari teks OCR struk berikut ke dalam format JSON valid tanpa format markdown (hanya raw JSON):
 {
   "merchant": "Nama Toko / Resto",
   "amount": 25000,
   "category": "Food & Drinks",
-  "date": "2026-10-02",
-  "items": [{"name": "Nama Item", "amount": 10000}]
+  "date": "2026-10-12",
+  "items": [{"name": "Ayam Bg Kumis", "amount": 25000}]
 }
-Pilih category PERSIS dari salah satu 5 kategori berikut:
-- Food & Drinks (makan resto/warteg, jajan kopi, sembako harian)
-- Transportation (bensin, ojek online, tiket/parkir, tol)
-- Bills & Utilities (sewa kos, listrik, air, pulsa/internet)
-- Shopping & Lifestyle (baju, sepatu, skincare, belanja online, bioskop, game, hiburan)
-- Other (pendidikan/buku/print, obat/kesehatan, kirim uang keluarga, kado, sedekah, lainnya)
+Aturan Ekstraksi:
+1. "merchant": Nama toko atau restoran yang bersih (contoh: "Mie Gacoan", "Indomaret", "Kopi Kenangan"). Jangan sertakan alamat panjang, no telp, atau no struk.
+2. "amount": Total nominal yang dibayarkan pelanggan (angka bulat positif).
+3. "category": Pilih PERSIS dari salah satu 5 kategori berikut:
+- Food & Drinks (makanan, minuman, resto, warteg, kafe, jajan, sembako harian)
+- Transportation (bensin, tiket kereta/bus, parkir, tol)
+- Bills & Utilities (sewa kos, listrik, air, pulsa, kuota, internet)
+- Shopping & Lifestyle (baju, celana, sepatu, skincare, belanja olshop, bioskop, hiburan)
+- Other (kuliah/buku/print, obat/kesehatan, kirim uang keluarga, kado, sedekah, lainnya)
+4. "date": Format YYYY-MM-DD (jika tidak terbaca, gunakan hari ini: ${jakartaDate()}).
+5. "items": Daftar barang yang dibeli dengan nama barang yang bersih dan mudah dibaca (buang kode barcode atau singkatan kasir acak).
 
 Teks OCR Struk:
 ${rawText}`;

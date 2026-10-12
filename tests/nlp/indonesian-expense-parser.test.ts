@@ -24,6 +24,7 @@ describe("Item Extractor", () => {
     expect(extractItemName("tadi beli nasi goreng lima belas ribu", "lima belas ribu")).toBe("Nasi Goreng");
     expect(extractItemName("bayar parkir motor dua ribu", "dua ribu")).toBe("Parkir Motor");
     expect(extractItemName("keluar uang buat pulsa 25rb", "25rb")).toBe("Pulsa");
+    expect(extractItemName("hari ini saya makan ayam bg kumis 25 ribu", "25 ribu")).toBe("Ayam Bg Kumis");
   });
 });
 

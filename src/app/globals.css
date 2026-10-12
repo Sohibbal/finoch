@@ -232,3 +232,29 @@ body {
   }
 }
 
+/* Receipt Scanning Laser Beam Animation */
+@keyframes scannerLaser {
+  0% {
+    top: 2%;
+    opacity: 0.85;
+  }
+  50% {
+    top: 96%;
+    opacity: 1;
+  }
+  100% {
+    top: 2%;
+    opacity: 0.85;
+  }
+}
+
+.animate-scanner-laser {
+  animation: scannerLaser 2.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-scanner-laser {
+    animation: none !important;
+  }
+}
+

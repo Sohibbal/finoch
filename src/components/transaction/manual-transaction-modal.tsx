@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Check } from "lucide-react";
+import { X, Check, Plus, PenLine } from "lucide-react";
 import { localDateKey } from "@/lib/date";
+import { rupiah } from "@/lib/format";
 
 interface ManualTransactionModalProps {
   isOpen: boolean;
@@ -37,7 +38,8 @@ export function ManualTransactionModal({
   onClose,
   onSave,
 }: ManualTransactionModalProps) {
-  const categories = type === "income" ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
+  const isIncome = type === "income";
+  const categories = isIncome ? INCOME_CATEGORIES : EXPENSE_CATEGORIES;
 
   const [itemName, setItemName] = useState("");
   const [amountStr, setAmountStr] = useState("");
@@ -48,13 +50,15 @@ export function ManualTransactionModal({
 
   if (!isOpen) return null;
 
+  const rawAmount = Number(amountStr.replace(/\D/g, "")) || 0;
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanAmount = Number(amountStr.replace(/\D/g, ""));
     const cleanItem = itemName.trim();
 
     if (!cleanItem) {
-      setError("Deskripsi / nama item tidak boleh kosong");
+      setError("Nama item tidak boleh kosong");
       return;
     }
     if (!cleanAmount || cleanAmount <= 0) {
@@ -82,63 +86,85 @@ export function ManualTransactionModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-ink/40 dark:bg-black/60 backdrop-blur-sm animate-in fade-in">
-      <div className="w-full max-w-md bg-paper-sheet dark:bg-navy-900 border border-ink/20 dark:border-navy-700 rounded-2xl shadow-2xl overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 dark:bg-black/70 backdrop-blur-md animate-fade-in">
+      <div className="w-full max-w-lg rounded-[2.25rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 shadow-2xl glass-sheen relative overflow-hidden group space-y-5">
+        {/* Background Watermark Icon */}
+        <Plus
+          className="absolute -right-3 -bottom-3 w-32 h-32 text-indigo-500/10 dark:text-indigo-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+          strokeWidth={1.5}
+        />
+
         {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-ink/10 dark:border-navy-800">
-          <h2 className="text-head font-bold text-ink dark:text-white">
-            Catat {type === "income" ? "Pemasukan" : "Pengeluaran"}
-          </h2>
+        <div className="flex items-center justify-between pb-3.5 border-b border-slate-100 dark:border-slate-800/80 relative z-10">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-500/10 dark:bg-indigo-400/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+              <PenLine className="w-5 h-5" strokeWidth={2.2} />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-bold text-slate-900 dark:text-white">
+                Catat Manual {isIncome ? "Pemasukan" : "Pengeluaran"}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                Ketik nama item, nominal & tentukan kategori
+              </p>
+            </div>
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1 rounded-lg text-ink-soft hover:text-ink hover:bg-ink/5 dark:hover:bg-navy-800 transition-colors"
+            className="p-2 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            aria-label="Tutup modal"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {error && <p className="text-meta font-medium text-rose-500">{error}</p>}
+        <form onSubmit={handleSubmit} className="relative z-10 space-y-4">
+          {error && (
+            <div className="p-3 rounded-2xl bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-900/60 text-xs text-rose-700 dark:text-rose-300 font-medium">
+              {error}
+            </div>
+          )}
 
           <div>
-            <label className="block text-meta font-semibold text-ink-soft dark:text-navy-300 mb-1">
-              Nominal (Rp)
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+              Nama {isIncome ? "Pemasukan / Sumber" : "Pengeluaran / Keperluan"}
             </label>
             <input
               type="text"
-              inputMode="numeric"
-              value={amountStr ? Number(amountStr.replace(/\D/g, "")).toLocaleString("id-ID") : ""}
-              onChange={(e) => setAmountStr(e.target.value.replace(/\D/g, ""))}
-              placeholder="0"
-              className="w-full px-4 py-2.5 rounded-xl border border-ink/20 dark:border-navy-700 bg-paper-sheet dark:bg-navy-800 text-ink dark:text-white text-head font-bold money focus:outline-none focus:ring-2 focus:ring-ink/20"
-              autoFocus
-            />
-          </div>
-
-          <div>
-            <label className="block text-meta font-semibold text-ink-soft dark:text-navy-300 mb-1">
-              {type === "income" ? "Sumber / Keterangan" : "Untuk Apa / Di Mana"}
-            </label>
-            <input
-              type="text"
+              required
               value={itemName}
               onChange={(e) => setItemName(e.target.value)}
-              placeholder={type === "income" ? "Transfer Ortu, Gaji Freelance..." : "Makan Siang, Bensin..."}
-              className="w-full px-4 py-2.5 rounded-xl border border-ink/20 dark:border-navy-700 bg-paper-sheet dark:bg-navy-800 text-ink dark:text-white text-body focus:outline-none focus:ring-2 focus:ring-ink/20"
+              placeholder={isIncome ? "Contoh: Uang Saku Ortu, Gaji Part Time" : "Contoh: Makan Siang, Bensin Pertalite"}
+              className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-[#0B101D] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
             <div>
-              <label className="block text-meta font-semibold text-ink-soft dark:text-navy-300 mb-1">
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+                Nominal (Rp)
+              </label>
+              <input
+                type="text"
+                inputMode="numeric"
+                required
+                value={amountStr ? Number(amountStr.replace(/\D/g, "")).toLocaleString("id-ID") : ""}
+                onChange={(e) => setAmountStr(e.target.value.replace(/\D/g, ""))}
+                placeholder="25.000"
+                className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-[#0B101D] text-slate-900 dark:text-white text-sm font-extrabold money focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
                 Kategori
               </label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-ink/20 dark:border-navy-700 bg-paper-sheet dark:bg-navy-800 text-ink dark:text-white text-body focus:outline-none focus:ring-2 focus:ring-ink/20"
+                className="w-full px-4 py-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-[#0B101D] text-slate-900 dark:text-white text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
               >
                 {categories.map((cat) => (
                   <option key={cat} value={cat}>
@@ -147,25 +173,41 @@ export function ManualTransactionModal({
                 ))}
               </select>
             </div>
-
-            <div>
-              <label className="block text-meta font-semibold text-ink-soft dark:text-navy-300 mb-1">
-                Tanggal
-              </label>
-              <input
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                className="w-full px-3 py-2.5 rounded-xl border border-ink/20 dark:border-navy-700 bg-paper-sheet dark:bg-navy-800 text-ink dark:text-white text-body focus:outline-none focus:ring-2 focus:ring-ink/20"
-              />
-            </div>
           </div>
 
-          <div className="pt-2">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5">
+              Tanggal Transaksi
+            </label>
+            <input
+              type="date"
+              required
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/70 dark:bg-[#0B101D] text-slate-900 dark:text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all"
+            />
+          </div>
+
+          {rawAmount > 0 && (
+            <p className="text-xs text-indigo-600 dark:text-indigo-400 font-bold text-right pt-0.5">
+              Nominal: {rupiah(rawAmount)}
+            </p>
+          )}
+
+          <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-slate-100 dark:border-slate-800">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="px-4 py-2.5 rounded-2xl text-xs font-semibold text-slate-500 hover:text-slate-800 dark:hover:text-white transition-colors"
+            >
+              Batal
+            </button>
+
             <button
               type="submit"
-              disabled={isSubmitting}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-ink dark:bg-white text-paper-sheet dark:text-navy-950 font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
+              disabled={isSubmitting || !itemName.trim() || rawAmount <= 0}
+              className="inline-flex items-center gap-2 px-6 py-2.5 rounded-2xl font-bold text-xs text-white bg-indigo-600 hover:bg-indigo-700 shadow-md shadow-indigo-500/20 transition-all disabled:opacity-50"
             >
               <Check className="w-4 h-4" />
               <span>{isSubmitting ? "Menyimpan..." : "Simpan Transaksi"}</span>

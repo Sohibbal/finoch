@@ -1,17 +1,34 @@
 const FILLER_PATTERNS = [
+  // Compound conversational and time phrases with subject/verb
+  /\bhari\s+ini\s+(?:saya|aku|gua|gue|gw|ane|kami|kita)?\s*(?:makan|minum|sarapan|maksi|jajan|beli|pesan|order|bayar)?\b/gi,
+  /\bkemarin\s+(?:pagi|siang|sore|malam)?\s*(?:saya|aku|gua|gue|gw|ane|kami|kita)?\s*(?:makan|minum|sarapan|maksi|jajan|beli|pesan|order|bayar)?\b/gi,
+  /\btadi\s+(?:pagi|siang|sore|malam|subuh)?\s*(?:saya|aku|gua|gue|gw|ane|kami|kita)?\s*(?:makan|minum|sarapan|maksi|jajan|beli|pesan|order|bayar)?\b/gi,
+  /\bbarusan\s+(?:saya|aku|gua|gue|gw|ane|kami|kita)?\s*(?:makan|minum|sarapan|maksi|jajan|beli|pesan|order|bayar)?\b/gi,
+  /\bbaru\s+saja\b/gi,
+  /\bsemalam\b/gi,
+
+  // Pronoun + action compounds (e.g. "saya makan", "aku beli")
+  /\b(?:saya|aku|gua|gue|gw|ane)\s+(?:makan|minum|beli|bayar|jajan|pesan|order)\b/gi,
+  /\b(?:saya|aku|gua|gue|gw|ane)\b/gi,
+
+  // Standalone conversational preambles
   /\btadi\s+beli\b/gi,
   /\bbeli\s+tadi\b/gi,
   /\bbeli\b/gi,
+  /\bbelikan\b/gi,
   /\bbayarin\b/gi,
   /\bbayar\b/gi,
   /\bkeluar\s+uang\b/gi,
   /\bpengeluaran\b/gi,
   /\bseharga\b/gi,
   /\bsebesar\b/gi,
+  /\bsenilai\b/gi,
   /\bhabis\b/gi,
   /\bbuat\b/gi,
   /\buntuk\b/gi,
   /\btadi\b/gi,
+  /\bdapat\s+kiriman\b/gi,
+  /\bterima\s+transfer\b/gi,
 ];
 
 /**

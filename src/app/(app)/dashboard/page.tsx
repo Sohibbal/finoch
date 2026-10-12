@@ -20,7 +20,7 @@ import { PageHeader } from "@/components/layout/page-header";
 import { rupiah, shortDate } from "@/lib/format";
 import { localDateKey } from "@/lib/date";
 import { useAuthContext } from "@/components/layout/auth-provider";
-import { getTransactions, type LocalTransaction } from "@/lib/storage/transaction-storage";
+import { getTransactions, saveTransaction, type LocalTransaction } from "@/lib/storage/transaction-storage";
 import { getWishlistItems, type LocalWishlist } from "@/lib/storage/wishlist-storage";
 import {
   getWishlistSavingsPercentage,
@@ -33,6 +33,12 @@ import { GenZInsightCard } from "@/components/dashboard/genz-insight-card";
 import { DailyAllowanceRing } from "@/components/dashboard/daily-allowance-ring";
 import { CategoryPieChart } from "@/components/dashboard/category-pie-chart";
 import { TransactionBarChart } from "@/components/dashboard/transaction-bar-chart";
+import { TransactionActionCards } from "@/components/transaction/transaction-action-cards";
+import { ManualTransactionModal } from "@/components/transaction/manual-transaction-modal";
+import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
+import { VoiceTransactionModal } from "@/components/transaction/voice-transaction-modal";
+import { OPEN_VOICE_EVENT } from "@/components/layout/app-shell";
+import type { TransactionCandidate } from "@/types/financial-types";
 
 const MAX_DASHBOARD_TX = 14;
 
@@ -42,6 +48,17 @@ export default function DashboardPage() {
   const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
   const [wishlists, setWishlists] = useState<LocalWishlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Modal controls
+  const [isManualOpen, setIsManualOpen] = useState(false);
+  const [isScanOpen, setIsScanOpen] = useState(false);
+  const [isVoiceOpen, setIsVoiceOpen] = useState(false);
+
+  useEffect(() => {
+    const handleOpenVoice = () => setIsVoiceOpen(true);
+    window.addEventListener(OPEN_VOICE_EVENT, handleOpenVoice);
+    return () => window.removeEventListener(OPEN_VOICE_EVENT, handleOpenVoice);
+  }, []);
 
   // Card filter states
   const [saldoFilter, setSaldoFilter] = useState<"all" | "month" | "today">("all");
@@ -88,6 +105,64 @@ export default function DashboardPage() {
       setIsLoading(false);
     }
   }, []);
+
+  const handleVoiceSave = async (data: {
+    itemName: string;
+    amount: number;
+    category: string;
+    transactionDate: string;
+  }) => {
+    const saved = await saveTransaction({
+      itemName: data.itemName,
+      amount: data.amount,
+      type: "expense",
+      category: data.category,
+      source: "voice",
+      transactionDate: data.transactionDate,
+    });
+    setTransactions((prev) => [saved, ...prev.filter((t) => t.id !== saved.id)]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:transaction-changed"));
+    }
+    await loadData();
+  };
+
+  const handleScanConfirmed = async (candidate: TransactionCandidate) => {
+    const saved = await saveTransaction({
+      itemName: candidate.merchant || "Struk Belanja",
+      amount: candidate.amount,
+      type: "expense",
+      category: candidate.category || "Makanan & Minuman",
+      source: "ocr",
+      transactionDate: candidate.date,
+    });
+    setTransactions((prev) => [saved, ...prev.filter((t) => t.id !== saved.id)]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:transaction-changed"));
+    }
+    await loadData();
+  };
+
+  const handleManualSave = async (data: {
+    itemName: string;
+    amount: number;
+    category: string;
+    transactionDate: string;
+  }) => {
+    const saved = await saveTransaction({
+      itemName: data.itemName,
+      amount: data.amount,
+      type: "expense",
+      category: data.category,
+      source: "manual",
+      transactionDate: data.transactionDate,
+    });
+    setTransactions((prev) => [saved, ...prev.filter((t) => t.id !== saved.id)]);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("finoch:transaction-changed"));
+    }
+    await loadData();
+  };
 
   useEffect(() => {
     loadData();
@@ -267,6 +342,17 @@ export default function DashboardPage() {
           {/* ROW 1: FinBot Daily Insight (Paling Atas, tinggi sama dengan card Saldo Bersih) */}
           <div className="w-full animate-content-in">
             <GenZInsightCard nickname={nickname} insight={financialData.insight} />
+          </div>
+
+          {/* ROW 2: 3 Action Cards (Bicara, Scan Struk, Catat Manual) */}
+          <div className="w-full animate-content-in">
+            <TransactionActionCards
+              layout="grid"
+              type="general"
+              onOpenVoice={() => setIsVoiceOpen(true)}
+              onOpenScan={() => setIsScanOpen(true)}
+              onOpenManual={() => setIsManualOpen(true)}
+            />
           </div>
 
           {/* Main 2-Column Split: Sisi Kiri Konten Utama & Sisi Kanan Widget Vertikal */}
@@ -723,6 +809,27 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <ManualTransactionModal
+        isOpen={isManualOpen}
+        onClose={() => setIsManualOpen(false)}
+        type="expense"
+        onSave={handleManualSave}
+      />
+
+      <ReceiptScannerModal
+        isOpen={isScanOpen}
+        onClose={() => setIsScanOpen(false)}
+        onConfirm={handleScanConfirmed}
+      />
+
+      <VoiceTransactionModal
+        isOpen={isVoiceOpen}
+        onClose={() => setIsVoiceOpen(false)}
+        type="expense"
+        onSave={handleVoiceSave}
+      />
     </>
   );
 }
