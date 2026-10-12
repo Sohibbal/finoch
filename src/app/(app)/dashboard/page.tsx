@@ -12,6 +12,7 @@ import {
   BarChart3,
   Gift,
   Receipt,
+  Plus,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah, shortDate } from "@/lib/format";
@@ -19,6 +20,10 @@ import { localDateKey } from "@/lib/date";
 import { useAuthContext } from "@/components/layout/auth-provider";
 import { getTransactions, type LocalTransaction } from "@/lib/storage/transaction-storage";
 import { getWishlistItems, type LocalWishlist } from "@/lib/storage/wishlist-storage";
+import {
+  getWishlistSavingsPercentage,
+  WISHLIST_SETTINGS_CHANGED_EVENT,
+} from "@/lib/storage/wishlist-settings";
 import { calculateStreakMetrics } from "@/lib/financial/streak-engine";
 import { generateDailyGenZInsight } from "@/lib/financial/genz-insight-engine";
 import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
@@ -36,6 +41,23 @@ export default function DashboardPage() {
   // Card filter states
   const [saldoFilter, setSaldoFilter] = useState<"all" | "month" | "today">("all");
   const [chartYear, setChartYear] = useState<"2025" | "2026">("2025");
+  const [savingsPercentage, setSavingsPercentage] = useState<number>(() => getWishlistSavingsPercentage());
+
+  useEffect(() => {
+    const handleSettingsChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ percentage: number }>;
+      if (customEvent.detail?.percentage) {
+        setSavingsPercentage(customEvent.detail.percentage);
+      } else {
+        setSavingsPercentage(getWishlistSavingsPercentage());
+      }
+    };
+
+    window.addEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+    return () => {
+      window.removeEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+    };
+  }, []);
 
   // Load nickname from local storage or profile
   useEffect(() => {
@@ -129,11 +151,22 @@ export default function DashboardPage() {
     }
     const displayBalance = displayIncome - displayExpense;
 
-    const dailyAllowance = 50000;
+    // Calculate dynamic daily allowance from actual cashflow
+    const now = new Date();
+    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+    const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
+    const spendableMonth = monthIncome - (monthExpense - todayExpense);
+    const dailyAllowance = monthIncome > 0
+      ? Math.max(10000, Math.round(spendableMonth / daysLeft))
+      : allIncome > 0
+      ? Math.max(10000, Math.round(allIncome / 30))
+      : 50000;
+
     const streakSummary = calculateStreakMetrics(streakCandidates, dailyAllowance);
 
     const activeWishlists = wishlists.filter((w) => !w.isAchieved);
     const topWishlist = activeWishlists[0] || null;
+    const topWishlists = activeWishlists.slice(0, 3);
 
     const insight = generateDailyGenZInsight({
       nickname,
@@ -155,10 +188,15 @@ export default function DashboardPage() {
       dailyAllowance,
       streakDays: streakSummary.currentStreak,
       topWishlist,
+      topWishlists,
       insight,
       recentTx,
     };
   }, [transactions, wishlists, nickname, saldoFilter]);
+
+  const dailySavingsRate = useMemo(() => {
+    return Math.max(1000, Math.round(financialData.dailyAllowance * (savingsPercentage / 100)));
+  }, [financialData.dailyAllowance, savingsPercentage]);
 
   // Income categories distribution for Pie Chart
   const incomeCategoryData = useMemo(() => {
@@ -671,45 +709,108 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* CARD: Wishlist Prioritas (Tepat di bawah card Total Pengeluaran) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3 glass-sheen relative overflow-hidden group">
+              {/* CARD: Top 3 Wishlist Impian (Tepat di bawah card Total Pengeluaran) */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group">
                 {/* Transparent Gift Watermark */}
                 <Gift
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-amber-500/5 dark:text-amber-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
                   strokeWidth={1.5}
                 />
 
+                {/* Header */}
                 <div className="flex items-center justify-between relative z-10">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Wishlist Prioritas
-                  </h3>
-                  <Link href="/wishlist" title="Buka Wishlist" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-amber-500" />
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                      Top 3 Wishlist Impian
+                    </h3>
+                  </div>
+                  <Link
+                    href="/wishlist"
+                    title="Buka Wishlist Lengkap"
+                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
+                  >
+                    <span>Kelola</span>
                     <MoreHorizontal className="w-4 h-4" />
                   </Link>
                 </div>
 
-                <div className="animate-content-in animate-content-delay-1">
-                  <h4 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money flex items-center gap-2">
-                    <span>{rupiah(financialData.topWishlist?.targetPrice || 15140000)}</span>
-                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full">
-                      ↑ 3.5%
-                    </span>
-                  </h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                    {financialData.topWishlist
-                      ? `Target tabungan untuk ${financialData.topWishlist.name}`
-                      : "Estimasi ketercapaian target tabungan impian kamu."}
-                  </p>
+                {/* Subtitle Alokasi Tabungan */}
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 relative z-10">
+                  <span>
+                    Alokasi: <strong className="text-slate-700 dark:text-slate-300">{savingsPercentage}% Jatah</strong>
+                  </span>
+                  <span className="font-bold text-blue-600 dark:text-blue-400">
+                    +{rupiah(dailySavingsRate)}/hari
+                  </span>
                 </div>
 
-                {topProjection && (
-                  <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 text-xs flex items-center justify-between animate-content-in animate-content-delay-2">
-                    <span className="text-slate-500">Estimasi jadwal:</span>
-                    <span className="font-bold text-blue-600 dark:text-blue-400">
-                      {topProjection.status === "achievable_now"
-                        ? "Sudah Cukup! 🎉"
-                        : `~${topProjection.estimatedDays} hari lagi`}
-                    </span>
+                {/* Wishlist Items List (Top 3) */}
+                {financialData.topWishlists && financialData.topWishlists.length > 0 ? (
+                  <div className="space-y-2.5 relative z-10 animate-content-in">
+                    {financialData.topWishlists.map((w, idx) => {
+                      const remaining = Math.max(0, w.targetPrice - (w.savedAmount || 0));
+                      const days = Math.ceil(remaining / dailySavingsRate);
+                      const isReady = remaining <= 0;
+                      const progress = Math.min(
+                        100,
+                        Math.round(((w.savedAmount || 0) / w.targetPrice) * 100)
+                      );
+
+                      return (
+                        <div
+                          key={w.id}
+                          className="p-3 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 space-y-1.5 hover:border-slate-300 dark:hover:border-slate-600 transition-colors"
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="w-5 h-5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                                #{idx + 1}
+                              </span>
+                              <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                                {w.name}
+                              </p>
+                            </div>
+                            <span
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                                isReady
+                                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
+                                  : "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
+                              }`}
+                            >
+                              {isReady ? "Siap Dibeli! 🎉" : `~${days} hari lagi`}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                            <span className="money font-semibold text-slate-700 dark:text-slate-300">
+                              {rupiah(w.targetPrice)}
+                            </span>
+                            <span className="text-[10px]">
+                              {w.savedAmount ? `${rupiah(w.savedAmount)} (${progress}%)` : "Mulai menabung"}
+                            </span>
+                          </div>
+
+                          <div className="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-slate-700/80 overflow-hidden">
+                            <div
+                              className="h-full rounded-full bg-gradient-to-r from-amber-500 to-blue-500 transition-all duration-500"
+                              style={{ width: `${Math.max(progress > 0 ? 5 : 0, progress)}%` }}
+                            />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-5 text-center space-y-2 relative z-10 animate-content-in">
+                    <p className="text-xs text-slate-400">Belum ada barang impian aktif.</p>
+                    <Link
+                      href="/wishlist"
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white dark:bg-white dark:text-slate-900 hover:opacity-90 transition-all shadow-xs"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Tambah Wishlist</span>
+                    </Link>
                   </div>
                 )}
               </div>

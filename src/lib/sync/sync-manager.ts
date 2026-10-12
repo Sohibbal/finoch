@@ -281,6 +281,26 @@ export class SyncManager {
           }
           await tx.done;
         }
+
+        if (result.serverWishlists && result.serverWishlists.length > 0 && db.objectStoreNames.contains("wishlists")) {
+          const wtx = db.transaction("wishlists", "readwrite");
+          for (const remote of result.serverWishlists) {
+            const existing = await wtx.store.get(remote.id);
+            if (existing) {
+              const localTime = new Date(existing.updatedAt).getTime();
+              const serverTime = new Date(remote.updatedAt).getTime();
+              const winner = localTime >= serverTime ? existing : remote;
+              winner.syncStatus = "synced";
+              await wtx.store.put(winner);
+            } else {
+              await wtx.store.put({ ...remote, syncStatus: "synced" });
+            }
+          }
+          await wtx.done;
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new Event("finoch:wishlist-changed"));
+          }
+        }
       }
 
       // Update last sync timestamp

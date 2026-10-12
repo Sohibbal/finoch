@@ -36,6 +36,18 @@ function validateChange(change: any): string | null {
   return null;
 }
 
+function validateWishlistChange(change: any): string | null {
+  if (!change || typeof change.id !== "string") return "invalid_queue_id";
+  if (!ACTIONS.includes(change.action)) return "invalid_action";
+  const p = change.payload;
+  if (!p || typeof p.id !== "string" || !p.id || p.id.length > 100) return "invalid_id";
+  if (change.action === "delete") return null;
+  if (typeof p.name !== "string" || !p.name.trim() || p.name.length > 200) return "invalid_item_name";
+  if (!Number.isSafeInteger(p.targetPrice) || p.targetPrice < 1 || p.targetPrice > MAX_AMOUNT) return "invalid_amount";
+  if (!isValidDate(p.createdAt) || !isValidDate(p.updatedAt)) return "invalid_date";
+  return null;
+}
+
 function clampClientTime(value: string, now: Date): Date {
   const time = new Date(value).getTime();
   return new Date(Math.min(time, now.getTime() + MAX_CLOCK_SKEW_MS));
@@ -61,6 +73,72 @@ export async function POST(req: Request) {
     // Each change stands alone: one bad item must not roll back the rest of the batch.
     // Items that throw unexpectedly are neither applied nor rejected, so the client retries them.
     for (const change of clientChanges) {
+      const isWishlist = Boolean(
+        change?.payload &&
+        (change.payload.targetPrice !== undefined ||
+          (change.payload.name !== undefined && change.payload.itemName === undefined))
+      );
+
+      if (isWishlist) {
+        const reason = validateWishlistChange(change);
+        if (reason) {
+          if (typeof change?.id === "string") rejectedIds.push({ id: change.id, reason });
+          continue;
+        }
+
+        const { id: queueId, action, payload } = change;
+        const wishlistModel = (prisma as any).wishlist;
+        if (!wishlistModel) {
+          appliedIds.push(queueId);
+          continue;
+        }
+
+        try {
+          const existing = await wishlistModel.findUnique({ where: { id: payload.id } });
+          if (existing && existing.userId !== session.userId) {
+            rejectedIds.push({ id: queueId, reason: "forbidden" });
+            continue;
+          }
+
+          if (action === "delete") {
+            if (existing) {
+              await wishlistModel.update({
+                where: { id: payload.id },
+                data: { isDeleted: true, updatedAt: now },
+              });
+            }
+          } else {
+            const clientUpdatedAt = clampClientTime(payload.updatedAt, now);
+            const data = {
+              name: payload.name.trim(),
+              targetPrice: Math.round(payload.targetPrice),
+              savedAmount: Math.round(payload.savedAmount || 0),
+              priority: typeof payload.priority === "number" ? payload.priority : 1,
+              isAchieved: Boolean(payload.isAchieved),
+              isDeleted: Boolean(payload.isDeleted),
+              updatedAt: clientUpdatedAt,
+            };
+
+            if (!existing) {
+              await wishlistModel.create({
+                data: {
+                  ...data,
+                  id: payload.id,
+                  userId: session.userId,
+                  createdAt: clampClientTime(payload.createdAt, now),
+                },
+              });
+            } else if (clientUpdatedAt.getTime() >= existing.updatedAt.getTime()) {
+              await wishlistModel.update({ where: { id: payload.id }, data });
+            }
+          }
+          appliedIds.push(queueId);
+        } catch (err) {
+          console.error(`Sync wishlist item ${queueId} gagal:`, err);
+        }
+        continue;
+      }
+
       const reason = validateChange(change);
       if (reason) {
         if (typeof change?.id === "string") rejectedIds.push({ id: change.id, reason });
@@ -153,10 +231,37 @@ export async function POST(req: Request) {
       updatedAt: row.updatedAt.toISOString(),
     }));
 
+    let serverWishlists: any[] = [];
+    if ((prisma as any).wishlist) {
+      try {
+        const wishlistRows = await (prisma as any).wishlist.findMany({
+          where: {
+            userId: session.userId,
+            ...(cursor ? { serverUpdatedAt: { gt: cursor } } : {}),
+          },
+        });
+        serverWishlists = wishlistRows.map((row: any) => ({
+          id: row.id,
+          userId: row.userId,
+          name: row.name,
+          targetPrice: row.targetPrice,
+          savedAmount: row.savedAmount,
+          priority: row.priority,
+          isAchieved: row.isAchieved,
+          isDeleted: row.isDeleted,
+          createdAt: row.createdAt.toISOString(),
+          updatedAt: row.updatedAt.toISOString(),
+        }));
+      } catch (err) {
+        console.error("Gagal menarik serverWishlists:", err);
+      }
+    }
+
     const response: BatchSyncResponse = {
       appliedIds,
       rejectedIds,
       serverChanges,
+      serverWishlists,
       serverTimestamp: now.toISOString(),
     };
 

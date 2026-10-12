@@ -16,7 +16,7 @@ export interface BatchSyncRequest {
   clientChanges: {
     id: string;
     action: SyncAction;
-    payload: Expense;
+    payload: any;
   }[];
   lastSyncTimestamp?: string;
 }
@@ -31,6 +31,7 @@ export interface BatchSyncResponse {
   /** Changes the server will never accept (invalid, or the record belongs to someone else). */
   rejectedIds: SyncRejection[];
   serverChanges: Expense[];
+  serverWishlists?: any[];
   /** Server-clock cursor; send back as lastSyncTimestamp on the next sync. */
   serverTimestamp: string;
 }

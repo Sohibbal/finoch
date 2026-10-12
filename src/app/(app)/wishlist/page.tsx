@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Plus, Mic, Sparkles, Gift } from "lucide-react";
+import { Plus, Mic, Sparkles, Gift, Sliders } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah } from "@/lib/format";
 import {
@@ -13,6 +13,12 @@ import {
 } from "@/lib/storage/wishlist-storage";
 import { getTransactions } from "@/lib/storage/transaction-storage";
 import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
+import { syncManager } from "@/lib/sync/sync-manager";
+import {
+  getWishlistSavingsPercentage,
+  setWishlistSavingsPercentage,
+  WISHLIST_SETTINGS_CHANGED_EVENT,
+} from "@/lib/storage/wishlist-settings";
 import { WishlistItemCard } from "@/components/wishlist/wishlist-item-card";
 import { ManualWishlistModal } from "@/components/wishlist/manual-wishlist-modal";
 import { VoiceWishlistModal } from "@/components/wishlist/voice-wishlist-modal";
@@ -20,6 +26,8 @@ import { VoiceWishlistModal } from "@/components/wishlist/voice-wishlist-modal";
 export default function WishlistPage() {
   const [items, setItems] = useState<LocalWishlist[]>([]);
   const [currentSavings, setCurrentSavings] = useState(0);
+  const [dailyAllowance, setDailyAllowance] = useState(50000);
+  const [savingsPercentage, setSavingsPercentage] = useState<number>(() => getWishlistSavingsPercentage());
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<"active" | "achieved" | "all">("active");
 
@@ -36,14 +44,37 @@ export default function WishlistPage() {
       ]);
       setItems(wishlistData);
 
-      // Calculate current net savings (Income - Expenses)
+      // Calculate current net savings (Income - Expenses) and dynamic daily allowance
       let income = 0;
       let expenses = 0;
+      let monthIncome = 0;
+      let monthExpense = 0;
+      let todayExpense = 0;
+      const now = new Date();
+      const currentMonthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const todayStr = `${currentMonthStr}-${String(now.getDate()).padStart(2, "0")}`;
+
       for (const tx of txData) {
-        if (tx.type === "income") income += tx.amount;
-        else if (tx.type === "expense") expenses += tx.amount;
+        if (tx.type === "income") {
+          income += tx.amount;
+          if (tx.transactionDate?.startsWith(currentMonthStr)) monthIncome += tx.amount;
+        } else if (tx.type === "expense") {
+          expenses += tx.amount;
+          if (tx.transactionDate?.startsWith(currentMonthStr)) monthExpense += tx.amount;
+          if (tx.transactionDate?.startsWith(todayStr)) todayExpense += tx.amount;
+        }
       }
       setCurrentSavings(Math.max(0, income - expenses));
+
+      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+      const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
+      const spendable = monthIncome - (monthExpense - todayExpense);
+      const computedDaily = monthIncome > 0
+        ? Math.max(10000, Math.round(spendable / daysLeft))
+        : income > 0
+        ? Math.max(10000, Math.round(income / 30))
+        : 50000;
+      setDailyAllowance(computedDaily);
     } finally {
       setIsLoading(false);
     }
@@ -52,6 +83,31 @@ export default function WishlistPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    const handleSettingsChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ percentage: number }>;
+      if (customEvent.detail?.percentage) {
+        setSavingsPercentage(customEvent.detail.percentage);
+      } else {
+        setSavingsPercentage(getWishlistSavingsPercentage());
+      }
+    };
+
+    window.addEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+    return () => {
+      window.removeEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+    };
+  }, []);
+
+  const dailySavingsRate = useMemo(() => {
+    return Math.max(1000, Math.round(dailyAllowance * (savingsPercentage / 100)));
+  }, [dailyAllowance, savingsPercentage]);
+
+  const handleSavingsPercentageChange = (pct: number) => {
+    setSavingsPercentage(pct);
+    setWishlistSavingsPercentage(pct);
+  };
 
   const handleManualSave = async (data: { name: string; targetPrice: number; priority: number }) => {
     const saved = await saveWishlistItem({
@@ -65,6 +121,7 @@ export default function WishlistPage() {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("finoch:wishlist-changed"));
     }
+    syncManager.triggerSync().catch(() => {});
     await loadData();
   };
 
@@ -75,6 +132,7 @@ export default function WishlistPage() {
       if (typeof window !== "undefined") {
         window.dispatchEvent(new Event("finoch:wishlist-changed"));
       }
+      syncManager.triggerSync().catch(() => {});
     }
   };
 
@@ -84,6 +142,7 @@ export default function WishlistPage() {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new Event("finoch:wishlist-changed"));
     }
+    syncManager.triggerSync().catch(() => {});
     await loadData();
   };
 
@@ -128,6 +187,61 @@ export default function WishlistPage() {
                   <p className="text-[11px] text-slate-400">
                     {activeCount} impian aktif · {achievedCount} tercapai
                   </p>
+                </div>
+              </div>
+
+              {/* Setting Alokasi Tabungan Harian (Opsi B) */}
+              <div className="p-5 rounded-3xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                    <Sliders className="w-3.5 h-3.5 text-blue-500" />
+                    <span>Target Tabungan Harian</span>
+                  </p>
+                  <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-0.5 rounded-full">
+                    {savingsPercentage}% dari Jatah
+                  </span>
+                </div>
+
+                <div className="space-y-1">
+                  <p className="text-xl font-extrabold text-slate-900 dark:text-white money">
+                    {rupiah(dailySavingsRate)} <span className="text-xs font-normal text-slate-400">/ hari</span>
+                  </p>
+                  <p className="text-[11px] text-slate-400">
+                    Dihitung dari jatah harian lo: {rupiah(dailyAllowance)}/hari
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    <span>Pilih Persentase Komitmen:</span>
+                    <span className="text-blue-600 dark:text-blue-400 font-bold">{savingsPercentage}%</span>
+                  </div>
+                  <div className="grid grid-cols-4 gap-1.5">
+                    {[10, 20, 30, 50].map((pct) => (
+                      <button
+                        key={pct}
+                        type="button"
+                        onClick={() => handleSavingsPercentageChange(pct)}
+                        className={`py-1.5 text-xs font-bold rounded-xl transition-all ${
+                          savingsPercentage === pct
+                            ? "bg-blue-600 text-white shadow-xs"
+                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                        }`}
+                      >
+                        {pct}%
+                      </button>
+                    ))}
+                  </div>
+
+                  <input
+                    type="range"
+                    min={5}
+                    max={80}
+                    step={5}
+                    value={savingsPercentage}
+                    onChange={(e) => handleSavingsPercentageChange(Number(e.target.value))}
+                    className="w-full accent-blue-600 cursor-pointer mt-1"
+                  />
                 </div>
               </div>
 
@@ -229,7 +343,7 @@ export default function WishlistPage() {
                     const projection = calculateWishlistProjection(
                       item.targetPrice,
                       currentSavings,
-                      25000
+                      dailySavingsRate
                     );
                     return (
                       <WishlistItemCard
