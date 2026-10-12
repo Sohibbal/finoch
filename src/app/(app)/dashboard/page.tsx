@@ -6,9 +6,11 @@ import {
   MoreHorizontal,
   Clock,
   ChevronRight,
+  ChevronLeft,
   Wallet,
   ArrowUpRight,
   ArrowDownRight,
+  ArrowDownLeft,
   BarChart3,
   Gift,
   Receipt,
@@ -32,12 +34,15 @@ import { DailyAllowanceRing } from "@/components/dashboard/daily-allowance-ring"
 import { CategoryPieChart } from "@/components/dashboard/category-pie-chart";
 import { TransactionBarChart } from "@/components/dashboard/transaction-bar-chart";
 
+const TX_PAGE_SIZE = 14;
+
 export default function DashboardPage() {
   const { user } = useAuthContext();
   const [nickname, setNickname] = useState("Kawan");
   const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
   const [wishlists, setWishlists] = useState<LocalWishlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [txPage, setTxPage] = useState(1);
 
   // Card filter states
   const [saldoFilter, setSaldoFilter] = useState<"all" | "month" | "today">("all");
@@ -176,7 +181,7 @@ export default function DashboardPage() {
       streakDays: streakSummary.currentStreak,
     });
 
-    const recentTx = transactions.slice(0, 5);
+    const recentTx = transactions.slice(0, TX_PAGE_SIZE);
 
     return {
       allIncome,
@@ -193,6 +198,12 @@ export default function DashboardPage() {
       recentTx,
     };
   }, [transactions, wishlists, nickname, saldoFilter]);
+
+  const totalTxPages = Math.ceil(transactions.length / TX_PAGE_SIZE) || 1;
+  const paginatedTx = useMemo(() => {
+    const start = (txPage - 1) * TX_PAGE_SIZE;
+    return transactions.slice(start, start + TX_PAGE_SIZE);
+  }, [transactions, txPage]);
 
   const dailySavingsRate = useMemo(() => {
     return Math.max(1000, Math.round(financialData.dailyAllowance * (savingsPercentage / 100)));
@@ -421,7 +432,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Transactions List */}
-                {financialData.recentTx.length === 0 ? (
+                {paginatedTx.length === 0 ? (
                   <div className="py-8 text-center text-slate-400 dark:text-slate-500 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
                     <p className="text-xs font-semibold">Belum ada transaksi tercatat</p>
                     <p className="text-[11px] mt-0.5 text-slate-400">
@@ -430,7 +441,7 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-2.5 animate-content-in animate-content-delay-1 relative z-10">
-                    {financialData.recentTx.map((tx) => {
+                    {paginatedTx.map((tx) => {
                       const isInc = tx.type === "income";
                       return (
                         <div
@@ -439,13 +450,17 @@ export default function DashboardPage() {
                         >
                           <div className="flex items-center gap-3 min-w-0 flex-1 sm:max-w-[40%]">
                             <div
-                              className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
                                 isInc
                                   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                                  : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
+                                  : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
                               }`}
                             >
-                              {isInc ? "+" : "-"}
+                              {isInc ? (
+                                <ArrowDownLeft className="w-4 h-4" />
+                              ) : (
+                                <ArrowUpRight className="w-4 h-4" />
+                              )}
                             </div>
                             <div className="min-w-0">
                               <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
@@ -489,6 +504,38 @@ export default function DashboardPage() {
                         </div>
                       );
                     })}
+                  </div>
+                )}
+
+                {/* Pagination Controls */}
+                {transactions.length > TX_PAGE_SIZE && (
+                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 relative z-10">
+                    <span className="text-[11px] text-slate-400">
+                      Hal. {txPage} dari {totalTxPages} ({transactions.length} transaksi)
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        disabled={txPage === 1}
+                        onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+                        className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        title="Halaman sebelumnya"
+                      >
+                        <ChevronLeft className="w-4 h-4" />
+                      </button>
+                      <span className="font-bold text-xs px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                        {txPage}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={txPage >= totalTxPages}
+                        onClick={() => setTxPage((p) => Math.min(totalTxPages, p + 1))}
+                        className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+                        title="Halaman berikutnya"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 )}
               </div>
@@ -549,45 +596,47 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* CARD: Top 3 Wishlist Impian (Tepat di bawah card Total Pengeluaran) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group">
+              {/* CARD: Top 3 Wishlist Impian (Tepat di bawah card Total Pengeluaran, tinggi sejajar dengan Tren Bar Chart) */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group min-h-[420px] lg:h-[432px] flex flex-col justify-between">
                 {/* Transparent Gift Watermark */}
                 <Gift
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-amber-500/5 dark:text-amber-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
                   strokeWidth={1.5}
                 />
 
-                {/* Header */}
-                <div className="flex items-center justify-between relative z-10">
-                  <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-amber-500" />
-                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                      Top 3 Wishlist Impian
-                    </h3>
+                <div className="space-y-3.5 relative z-10">
+                  {/* Header */}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                        Top 3 Wishlist Impian
+                      </h3>
+                    </div>
+                    <Link
+                      href="/wishlist"
+                      title="Buka Wishlist Lengkap"
+                      className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
+                    >
+                      <span>Kelola</span>
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Link>
                   </div>
-                  <Link
-                    href="/wishlist"
-                    title="Buka Wishlist Lengkap"
-                    className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-0.5"
-                  >
-                    <span>Kelola</span>
-                    <MoreHorizontal className="w-4 h-4" />
-                  </Link>
-                </div>
 
-                {/* Subtitle Alokasi Tabungan */}
-                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 relative z-10">
-                  <span>
-                    Alokasi: <strong className="text-slate-700 dark:text-slate-300">{savingsPercentage}% Jatah</strong>
-                  </span>
-                  <span className="font-bold text-blue-600 dark:text-blue-400">
-                    +{rupiah(dailySavingsRate)}/hari
-                  </span>
+                  {/* Subtitle Alokasi Tabungan */}
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                    <span>
+                      Alokasi: <strong className="text-slate-700 dark:text-slate-300">{savingsPercentage}% Jatah</strong>
+                    </span>
+                    <span className="font-bold text-blue-600 dark:text-blue-400">
+                      +{rupiah(dailySavingsRate)}/hari
+                    </span>
+                  </div>
                 </div>
 
                 {/* Wishlist Items List (Top 3) */}
                 {financialData.topWishlists && financialData.topWishlists.length > 0 ? (
-                  <div className="space-y-2.5 relative z-10 animate-content-in">
+                  <div className="space-y-2.5 relative z-10 animate-content-in my-auto flex-1 flex flex-col justify-center">
                     {financialData.topWishlists.map((w, idx) => {
                       const remaining = Math.max(0, w.targetPrice - (w.savedAmount || 0));
                       const days = Math.ceil(remaining / dailySavingsRate);
@@ -642,7 +691,7 @@ export default function DashboardPage() {
                     })}
                   </div>
                 ) : (
-                  <div className="py-5 text-center space-y-2 relative z-10 animate-content-in">
+                  <div className="py-5 text-center space-y-2 relative z-10 animate-content-in my-auto flex-1 flex flex-col items-center justify-center">
                     <p className="text-xs text-slate-400">Belum ada barang impian aktif.</p>
                     <Link
                       href="/wishlist"
@@ -653,6 +702,14 @@ export default function DashboardPage() {
                     </Link>
                   </div>
                 )}
+
+                {/* Footer to perfectly anchor bottom */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+                  <span>Target Prioritas:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300 truncate max-w-[150px]">
+                    {financialData.topWishlists?.[0]?.name || "Belum ada wishlist"}
+                  </span>
+                </div>
               </div>
 
               {/* CARD: Status Jatah Harian (Dipindahkan ke bawah card wishlist) */}

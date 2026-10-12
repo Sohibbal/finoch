@@ -24,10 +24,10 @@ export function DailyAllowanceRing({
     ? Math.min(100, Math.round((todaySpent / dailyAllowance) * 100))
     : 100;
 
-  // SVG circular geometry with comfortable breathing room
-  const radius = 56;
-  const strokeWidth = 12;
-  const circumference = 2 * Math.PI * radius; // ~351.85
+  // SVG circular geometry with comfortable breathing room (enlarged hole)
+  const radius = 64;
+  const strokeWidth = 11;
+  const circumference = 2 * Math.PI * radius; // ~402.12
   const spentOffset = circumference - (circumference * Math.min(100, spentPercent)) / 100;
 
   return (
@@ -66,12 +66,12 @@ export function DailyAllowanceRing({
 
       {/* Ring / Donut Chart with ample space */}
       <div className="flex flex-col items-center justify-center relative py-1 z-10">
-        <div className="relative w-40 h-40 flex items-center justify-center">
-          <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 140 140">
+        <div className="relative w-48 h-48 sm:w-52 sm:h-52 flex items-center justify-center">
+          <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 160 160">
             {/* Background Track */}
             <circle
-              cx="70"
-              cy="70"
+              cx="80"
+              cy="80"
               r={radius}
               stroke="currentColor"
               strokeWidth={strokeWidth}
@@ -81,8 +81,8 @@ export function DailyAllowanceRing({
 
             {/* Spent Arc */}
             <circle
-              cx="70"
-              cy="70"
+              cx="80"
+              cy="80"
               r={radius}
               stroke={isOverspent ? "#EF4444" : "#14B8A6"}
               strokeWidth={strokeWidth}
@@ -94,10 +94,10 @@ export function DailyAllowanceRing({
             />
           </svg>
 
-          {/* Center Info */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-3">
+          {/* Center Info - Spacious non-overlapping layout */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
             <span
-              className={`text-lg sm:text-xl font-extrabold tracking-tight money ${
+              className={`text-xl sm:text-2xl font-extrabold tracking-tight money ${
                 isOverspent
                   ? "text-rose-600 dark:text-rose-400"
                   : "text-slate-900 dark:text-white"
@@ -105,7 +105,7 @@ export function DailyAllowanceRing({
             >
               {isOverspent ? `+${rupiah(overspentAmount)}` : rupiah(remaining)}
             </span>
-            <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 mt-0.5">
+            <span className="text-[11px] sm:text-xs font-semibold text-slate-500 dark:text-slate-400 mt-1">
               {isOverspent ? "Jatah Terlewati" : "Sisa Jatah Hari Ini"}
             </span>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef } from "react";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { rupiah } from "@/lib/format";
 
@@ -37,7 +37,9 @@ export function CategoryPieChart({
   type,
   className = "",
 }: CategoryPieChartProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
+  const [mousePos, setMousePos] = useState<{ x: number; y: number } | null>(null);
 
   // Filter out zero-amount items and sort descending
   const sortedData = useMemo(() => {
@@ -50,8 +52,9 @@ export function CategoryPieChart({
     return sortedData.reduce((sum, item) => sum + item.amount, 0);
   }, [sortedData]);
 
-  // Circumference for r=38 on viewBox 0 0 100 100 is 2 * Math.PI * 38 = 238.761
-  const circumference = 2 * Math.PI * 38;
+  // Circumference for r=46 on viewBox 0 0 120 120 is 2 * Math.PI * 46 = 289.026
+  const radius = 46;
+  const circumference = 2 * Math.PI * radius;
 
   const slices = useMemo(() => {
     if (totalAmount === 0) return [];
@@ -83,6 +86,7 @@ export function CategoryPieChart({
 
   return (
     <div
+      ref={containerRef}
       className={`rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 glass-sheen relative overflow-hidden group ${className}`}
     >
       {type === "income" ? (
@@ -95,6 +99,67 @@ export function CategoryPieChart({
           className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
           strokeWidth={1.5}
         />
+      )}
+
+      {/* Floating Interactive Card on Hover */}
+      {activeItem && (
+        <div
+          style={{
+            left: mousePos
+              ? Math.min(
+                  Math.max(12, mousePos.x - 110),
+                  (containerRef.current?.offsetWidth || 340) - 240
+                )
+              : "50%",
+            top: mousePos ? Math.max(12, mousePos.y - 120) : "18%",
+            transform: mousePos ? undefined : "translateX(-50%)",
+          }}
+          className="absolute z-50 pointer-events-none min-w-[210px] sm:min-w-[230px] max-w-[270px] p-3 rounded-2xl bg-slate-900/95 dark:bg-[#080E1A]/95 text-white shadow-2xl backdrop-blur-xl border border-slate-700/80 animate-in fade-in zoom-in-95 duration-150"
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between gap-2 border-b border-slate-700/70 pb-1.5">
+            <span className="font-bold text-xs text-teal-400 flex items-center gap-1.5 truncate">
+              <span
+                className="w-2.5 h-2.5 rounded-full shrink-0"
+                style={{ backgroundColor: activeItem.color }}
+              />
+              <span className="truncate">{activeItem.category}</span>
+            </span>
+            {activeItem.count !== undefined && activeItem.count > 0 && (
+              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-teal-950 text-teal-300 font-semibold border border-teal-500/30 shrink-0">
+                {activeItem.count}x
+              </span>
+            )}
+          </div>
+
+          {/* Body */}
+          <div className="pt-2 space-y-1.5 text-xs">
+            <div className="flex items-baseline justify-between">
+              <span className="text-slate-400 text-[11px]">Total:</span>
+              <span className="font-extrabold text-white money text-sm">
+                {rupiah(activeItem.amount)}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px]">
+              <span className="text-slate-400">
+                Porsi {type === "income" ? "pemasukan" : "pengeluaran"}:
+              </span>
+              <span className="font-bold text-teal-300">
+                {activeItem.percentage.toFixed(1)}%
+              </span>
+            </div>
+
+            {activeItem.count !== undefined && activeItem.count > 0 && (
+              <div className="flex items-center justify-between text-[11px]">
+                <span className="text-slate-400">Kuantitas:</span>
+                <span className="font-semibold text-slate-200">
+                  {activeItem.count} transaksi
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/* Card Header */}
@@ -123,18 +188,18 @@ export function CategoryPieChart({
         </span>
       </div>
 
-      {/* SVG Donut Graphic with Non-blocking Center Label */}
+      {/* SVG Donut Graphic with Enlarged Clean Hole */}
       <div className="flex items-center justify-center py-2 animate-content-in relative z-10">
-        <div className="relative w-36 h-36 flex items-center justify-center">
-          <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+        <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center">
+          <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90">
             {slices.length === 0 ? (
               <circle
-                cx="50"
-                cy="50"
-                r="38"
+                cx="60"
+                cy="60"
+                r={radius}
                 fill="transparent"
                 stroke="currentColor"
-                strokeWidth="11"
+                strokeWidth="10"
                 className="text-slate-100 dark:text-slate-800"
               />
             ) : (
@@ -145,16 +210,24 @@ export function CategoryPieChart({
                 return (
                   <circle
                     key={slice.category}
-                    cx="50"
-                    cy="50"
-                    r="38"
+                    cx="60"
+                    cy="60"
+                    r={radius}
                     fill="transparent"
                     stroke={slice.color}
-                    strokeWidth={isHovered ? 13 : 10.5}
+                    strokeWidth={isHovered ? 13 : 9.5}
                     strokeDasharray={slice.strokeDasharray}
                     strokeDashoffset={slice.strokeDashoffset}
-                    onMouseEnter={() => setHoveredCategory(slice.category)}
-                    onMouseLeave={() => setHoveredCategory(null)}
+                    onMouseMove={(e) => {
+                      if (!containerRef.current) return;
+                      const rect = containerRef.current.getBoundingClientRect();
+                      setMousePos({ x: e.clientX - rect.left, y: e.clientY - rect.top });
+                      setHoveredCategory(slice.category);
+                    }}
+                    onMouseLeave={() => {
+                      setHoveredCategory(null);
+                      setMousePos(null);
+                    }}
                     className={`transition-all duration-200 cursor-pointer ${
                       isDimmed ? "opacity-35" : "opacity-100"
                     }`}
@@ -169,39 +242,22 @@ export function CategoryPieChart({
             )}
           </svg>
 
-          {/* Inner Center Label - Safely positioned inside donut hole without covering chart ring */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-2 transition-all duration-200">
-            {activeItem ? (
-              <div className="flex flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-150">
-                <span className="text-[10px] font-bold text-teal-600 dark:text-teal-400 truncate max-w-[105px]">
-                  {activeItem.category}
-                </span>
-                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white money truncate max-w-[105px]">
-                  {rupiah(activeItem.amount)}
-                </span>
-                <span className="text-[10px] text-slate-400 font-semibold">
-                  {activeItem.percentage.toFixed(0)}%
-                  {activeItem.count ? ` (${activeItem.count}x)` : ""}
-                </span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center">
-                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">
-                  {type === "income" ? "Total Masuk:" : "Total Keluar:"}
-                </span>
-                <span className="text-xs sm:text-sm font-extrabold text-slate-900 dark:text-white money truncate max-w-[105px]">
-                  {totalAmount > 0 ? rupiah(totalAmount) : "Rp 0"}
-                </span>
-                <span className="text-[9px] text-slate-400 font-medium mt-0.5">
-                  {sortedData.length} Kategori
-                </span>
-              </div>
-            )}
+          {/* Inner Center Label - Clean Non-Overlapping Layout */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-3 select-none">
+            <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
+              {type === "income" ? "Total Masuk" : "Total Keluar"}
+            </span>
+            <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white money tracking-tight max-w-[130px] truncate">
+              {totalAmount > 0 ? rupiah(totalAmount) : "Rp 0"}
+            </span>
+            <span className="text-[10px] text-teal-600 dark:text-teal-400 font-semibold mt-0.5">
+              {sortedData.length} Kategori
+            </span>
           </div>
         </div>
       </div>
 
-      {/* Legend Pills with Hover Connection to Center Label */}
+      {/* Legend Pills with Hover Connection */}
       {slices.length === 0 ? (
         <p className="text-[11px] text-slate-400 text-center py-1">
           Belum ada transaksi {type === "income" ? "pemasukan" : "pengeluaran"} tercatat
@@ -215,8 +271,14 @@ export function CategoryPieChart({
               <button
                 key={slice.category}
                 type="button"
-                onMouseEnter={() => setHoveredCategory(slice.category)}
-                onMouseLeave={() => setHoveredCategory(null)}
+                onMouseEnter={() => {
+                  setHoveredCategory(slice.category);
+                  setMousePos(null);
+                }}
+                onMouseLeave={() => {
+                  setHoveredCategory(null);
+                  setMousePos(null);
+                }}
                 className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg transition-all cursor-pointer ${
                   isHovered
                     ? "bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white ring-1 ring-teal-500/50"
