@@ -177,7 +177,7 @@ export default function CopilotPage() {
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 flex flex-col lg:flex-row gap-5 h-[calc(100vh-12rem)] min-h-[580px]">
+        <div className="rounded-[2.25rem] bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 flex flex-col lg:flex-row gap-5 h-[calc(100vh-12rem)] min-h-[580px]">
           {/* Left Side: Financial Context & Quick Actions Panel (Desktop) */}
           <aside className="hidden lg:flex lg:w-72 shrink-0 flex-col gap-4 animate-content-in">
             <div className="rounded-[2rem] p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">

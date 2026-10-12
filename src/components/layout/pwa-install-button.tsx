@@ -101,7 +101,7 @@ export function PwaInstallButton() {
   if (!isLanding || isDismissed) {
     // In the app only a small desktop pill, and only when the browser says Finoch is installable.
     // Phones keep the bottom edge for the nav alone. z-30 keeps it under modals (z-50).
-    if (!deferredPrompt) return null;
+    if (!deferredPrompt || !isLanding) return null;
     return (
       <div className="hidden md:block fixed md:bottom-6 md:left-6 z-30">
         <button

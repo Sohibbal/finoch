@@ -142,7 +142,7 @@ export function TransactionBarChart({
 
   return (
     <div
-      className={`rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-5 flex flex-col justify-between glass-sheen relative overflow-hidden group ${className}`}
+      className={`rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-5 flex flex-col justify-between glass-sheen relative overflow-hidden group min-h-[460px] lg:h-[460px] ${className}`}
     >
       {/* Watermark */}
       <BarChart3

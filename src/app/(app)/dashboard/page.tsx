@@ -34,7 +34,7 @@ import { DailyAllowanceRing } from "@/components/dashboard/daily-allowance-ring"
 import { CategoryPieChart } from "@/components/dashboard/category-pie-chart";
 import { TransactionBarChart } from "@/components/dashboard/transaction-bar-chart";
 
-const TX_PAGE_SIZE = 14;
+const MAX_DASHBOARD_TX = 14;
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
@@ -42,7 +42,6 @@ export default function DashboardPage() {
   const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
   const [wishlists, setWishlists] = useState<LocalWishlist[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [txPage, setTxPage] = useState(1);
 
   // Card filter states
   const [saldoFilter, setSaldoFilter] = useState<"all" | "month" | "today">("all");
@@ -181,7 +180,7 @@ export default function DashboardPage() {
       streakDays: streakSummary.currentStreak,
     });
 
-    const recentTx = transactions.slice(0, TX_PAGE_SIZE);
+    const recentTx = transactions.slice(0, MAX_DASHBOARD_TX);
 
     return {
       allIncome,
@@ -199,11 +198,9 @@ export default function DashboardPage() {
     };
   }, [transactions, wishlists, nickname, saldoFilter]);
 
-  const totalTxPages = Math.ceil(transactions.length / TX_PAGE_SIZE) || 1;
-  const paginatedTx = useMemo(() => {
-    const start = (txPage - 1) * TX_PAGE_SIZE;
-    return transactions.slice(start, start + TX_PAGE_SIZE);
-  }, [transactions, txPage]);
+  const displayedTx = useMemo(() => {
+    return transactions.slice(0, MAX_DASHBOARD_TX);
+  }, [transactions]);
 
   const dailySavingsRate = useMemo(() => {
     return Math.max(1000, Math.round(financialData.dailyAllowance * (savingsPercentage / 100)));
@@ -265,7 +262,7 @@ export default function DashboardPage() {
 
       {/* Outer ambient container matching Subly floating canvas */}
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
+        <div className="rounded-[2.25rem] bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
           
           {/* ROW 1: FinBot Daily Insight (Paling Atas, tinggi sama dengan card Saldo Bersih) */}
           <div className="w-full animate-content-in">
@@ -432,7 +429,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Transactions List */}
-                {paginatedTx.length === 0 ? (
+                {displayedTx.length === 0 ? (
                   <div className="py-8 text-center text-slate-400 dark:text-slate-500 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
                     <p className="text-xs font-semibold">Belum ada transaksi tercatat</p>
                     <p className="text-[11px] mt-0.5 text-slate-400">
@@ -441,7 +438,7 @@ export default function DashboardPage() {
                   </div>
                 ) : (
                   <div className="space-y-2.5 animate-content-in animate-content-delay-1 relative z-10">
-                    {paginatedTx.map((tx) => {
+                    {displayedTx.map((tx) => {
                       const isInc = tx.type === "income";
                       return (
                         <div
@@ -507,37 +504,19 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* Pagination Controls */}
-                {transactions.length > TX_PAGE_SIZE && (
-                  <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 relative z-10">
-                    <span className="text-[11px] text-slate-400">
-                      Hal. {txPage} dari {totalTxPages} ({transactions.length} transaksi)
-                    </span>
-                    <div className="flex items-center gap-1.5">
-                      <button
-                        type="button"
-                        disabled={txPage === 1}
-                        onClick={() => setTxPage((p) => Math.max(1, p - 1))}
-                        className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                        title="Halaman sebelumnya"
-                      >
-                        <ChevronLeft className="w-4 h-4" />
-                      </button>
-                      <span className="font-bold text-xs px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                        {txPage}
-                      </span>
-                      <button
-                        type="button"
-                        disabled={txPage >= totalTxPages}
-                        onClick={() => setTxPage((p) => Math.min(totalTxPages, p + 1))}
-                        className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 disabled:opacity-30 disabled:cursor-not-allowed hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-                        title="Halaman berikutnya"
-                      >
-                        <ChevronRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
+                {/* Footer Riwayat Transaksi */}
+                <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs text-slate-500 relative z-10">
+                  <span className="text-[11px] text-slate-400">
+                    Menampilkan {Math.min(transactions.length, MAX_DASHBOARD_TX)} dari {transactions.length} transaksi
+                  </span>
+                  <Link
+                    href="/pengeluaran"
+                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>Lihat Seluruh Riwayat</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </Link>
+                </div>
               </div>
 
             </div>
@@ -597,7 +576,7 @@ export default function DashboardPage() {
               </div>
 
               {/* CARD: Top 3 Wishlist Impian (Tepat di bawah card Total Pengeluaran, tinggi sejajar dengan Tren Bar Chart) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group min-h-[420px] lg:h-[432px] flex flex-col justify-between">
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group min-h-[460px] lg:h-[460px] flex flex-col justify-between">
                 {/* Transparent Gift Watermark */}
                 <Gift
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-amber-500/5 dark:text-amber-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
