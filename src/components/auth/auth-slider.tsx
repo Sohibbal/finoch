@@ -240,6 +240,18 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
                   <button type="submit" disabled={isLoginSubmitting || isLoading} className={SUBMIT}>
                     {isLoginSubmitting ? <Loader2 className="w-4 h-4 animate-spin" aria-label="Memproses" /> : "Masuk"}
                   </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLoginEmail("demo@finoch.id");
+                      setLoginPassword("demo123456");
+                      setLoginError(null);
+                    }}
+                    className="w-full py-2.5 px-3 text-xs rounded-2xl border border-teal-500/40 text-teal-700 dark:text-teal-300 bg-teal-50/70 dark:bg-teal-950/30 hover:bg-teal-100/70 dark:hover:bg-teal-900/40 transition-colors flex items-center justify-center gap-1.5 font-semibold cursor-pointer shadow-xs"
+                  >
+                    <span>Gunakan Akun Demo (Jan - Sep 2026)</span>
+                  </button>
                 </form>
 
                 <p className="pt-4 border-t border-ink/20 text-body text-ink-soft">
