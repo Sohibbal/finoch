@@ -60,12 +60,12 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
 
   return (
     <aside
-      className={`my-3 ml-3 rounded-[2rem] bg-[#0E131F] dark:bg-[#070A11] border border-slate-800/80 shadow-2xl flex flex-col py-5 justify-between shrink-0 z-30 transition-all duration-300 ${
+      className={`sticky top-3 self-start my-3 ml-3 rounded-[2rem] bg-[#0E131F] dark:bg-[#070A11] border border-slate-800/80 shadow-2xl flex flex-col py-5 justify-between shrink-0 z-30 transition-all duration-300 h-[calc(100vh-1.5rem)] max-h-screen ${
         isExpanded ? "w-56 md:w-60 px-3" : "w-16 md:w-20 px-2 items-center"
       } ${className}`}
     >
       {/* Top: Logo & Brand + Expand/Collapse Button */}
-      <div className="flex flex-col gap-3 w-full">
+      <div className="flex flex-col gap-3 w-full shrink-0">
         <div
           className={`flex items-center ${
             isExpanded ? "justify-between px-2" : "justify-center"
@@ -103,8 +103,8 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
         </div>
       </div>
 
-      {/* Middle: Navigation Items */}
-      <nav aria-label="Navigasi fitur" className="flex flex-col gap-1.5 my-auto w-full">
+      {/* Top Navigation Items */}
+      <nav aria-label="Navigasi fitur" className="flex flex-col gap-1.5 mt-5 mb-auto w-full">
         {navItems.map((item) => {
           const Icon = item.icon;
           const active = pathname === item.href;
@@ -142,7 +142,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
       </nav>
 
       {/* Bottom: User Card, Settings & Logout */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/60 w-full">
+      <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/60 w-full shrink-0">
         {isExpanded ? (
           <div className="px-2 py-1.5 flex items-center justify-between text-xs text-slate-400">
             <div className="min-w-0 pr-2">
