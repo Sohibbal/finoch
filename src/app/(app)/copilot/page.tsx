@@ -233,8 +233,8 @@ export default function CopilotPage() {
               </div>
             </div>
 
-            <div className="flex-1 rounded-[2rem] p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-3 glass-sheen relative overflow-hidden group">
-              <div className="relative z-10 flex flex-col justify-between h-full space-y-3">
+            <div className="flex-1 rounded-[2rem] p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-3">
+              <div className="flex flex-col justify-between h-full space-y-3">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
                     <Sparkles className="w-3.5 h-3.5 text-amber-500" />
@@ -263,9 +263,9 @@ export default function CopilotPage() {
 
           {/* Right Side: Chat Container */}
           <section className="flex-1 flex flex-col min-w-0 h-full animate-content-in">
-            {/* Chat message history container with Glass Sheen */}
-            <div className="flex-1 rounded-[2rem] backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs relative overflow-hidden glass-sheen flex flex-col">
-              <div className="relative z-10 flex-1 overflow-y-auto space-y-3.5 p-4 sm:p-5">
+            {/* Chat message history container */}
+            <div className="flex-1 rounded-[2rem] backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col">
+              <div className="flex-1 overflow-y-auto space-y-3.5 p-4 sm:p-5">
                 {messages.map((msg) => {
                 const isUser = msg.sender === "user";
                 return (
