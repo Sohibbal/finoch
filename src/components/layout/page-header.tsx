@@ -10,7 +10,6 @@ import {
 } from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { seedDemoExpenses } from "@/lib/storage/demo-seed";
-import { BrandLogo } from "@/components/brand/brand-logo";
 import { ThemeToggle } from "./theme-toggle";
 import { GlobalSearchBar } from "./global-search-bar";
 
@@ -56,21 +55,12 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
             </button>
           )}
 
-          <Link href="/dashboard" className="flex items-center gap-2 shrink-0" aria-label="Finoch Beranda">
-            <BrandLogo variant="symbol" className="w-7 h-7 text-blue-600" />
-            <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white hidden sm:inline">
-              Finoch
-            </span>
-          </Link>
-
-          <div className="hidden sm:block h-5 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
-
           <div className="min-w-0">
-            <h1 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
+            <h1 className="text-sm sm:text-base font-extrabold text-slate-900 dark:text-white truncate tracking-tight">
               {title}
             </h1>
             {subtitle && (
-              <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate hidden md:block">
+              <p className="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 truncate">
                 {subtitle}
               </p>
             )}

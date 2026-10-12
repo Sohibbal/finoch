@@ -1,10 +1,32 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { BarChart3, TrendingDown, Layers, Calendar } from "lucide-react";
+import { BarChart3, Layers, Calendar } from "lucide-react";
 import { rupiah } from "@/lib/format";
 import type { LocalTransaction } from "@/lib/storage/transaction-storage";
 import { EXPENSE_CATEGORIES } from "@/components/transaction/manual-transaction-modal";
+
+interface CategoryBarItem {
+  kind: "category";
+  label: string;
+  amount: number;
+  count: number;
+}
+
+interface MonthlyBarItem {
+  kind: "monthly";
+  label: string;
+  monthFull: string;
+  amount: number;
+  count: number;
+  categoryBreakdown: {
+    category: string;
+    amount: number;
+    count: number;
+  }[];
+}
+
+type BarItem = CategoryBarItem | MonthlyBarItem;
 
 interface TransactionBarChartProps {
   transactions: LocalTransaction[];
@@ -14,6 +36,11 @@ interface TransactionBarChartProps {
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "Mei", "Jun",
   "Jul", "Agu", "Sep", "Okt", "Nov", "Des"
+];
+
+const MONTH_FULL_NAMES = [
+  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+  "Juli", "Agustus", "September", "Oktober", "November", "Desember"
 ];
 
 export function TransactionBarChart({
@@ -45,13 +72,13 @@ export function TransactionBarChart({
       map[cat].count += 1;
     }
 
-    const items = Object.entries(map).map(([category, val]) => ({
+    const items: CategoryBarItem[] = Object.entries(map).map(([category, val]) => ({
+      kind: "category",
       label: category,
       amount: val.amount,
       count: val.count,
     }));
 
-    // Find maximum amount for bar scaling
     const maxAmount = Math.max(...items.map((i) => i.amount), 1);
     const totalAmount = items.reduce((sum, i) => sum + i.amount, 0);
 
@@ -62,27 +89,42 @@ export function TransactionBarChart({
     };
   }, [expenseTransactions]);
 
-  // Aggregate Monthly Data for selectedYear (strictly from real transactions, NO dummy data!)
+  // Aggregate Monthly Data with category breakdown per month
   const monthlyData = useMemo(() => {
-    const monthlyItems = MONTH_NAMES.map((mName, idx) => {
+    const monthlyItems: MonthlyBarItem[] = MONTH_NAMES.map((mName, idx) => {
       const monthNumberStr = String(idx + 1).padStart(2, "0");
       const monthPrefix = `${selectedYear}-${monthNumberStr}`;
 
       let amount = 0;
       let count = 0;
+      const categoryMap: Record<string, { amount: number; count: number }> = {};
 
       for (const tx of expenseTransactions) {
         if (tx.transactionDate && tx.transactionDate.startsWith(monthPrefix)) {
           amount += tx.amount;
           count += 1;
+          const cat = tx.category || "Lainnya";
+          if (!categoryMap[cat]) categoryMap[cat] = { amount: 0, count: 0 };
+          categoryMap[cat].amount += tx.amount;
+          categoryMap[cat].count += 1;
         }
       }
 
+      const categoryBreakdown = Object.entries(categoryMap)
+        .map(([category, val]) => ({
+          category,
+          amount: val.amount,
+          count: val.count,
+        }))
+        .sort((a, b) => b.amount - a.amount);
+
       return {
+        kind: "monthly" as const,
         label: mName,
-        monthFull: `${mName} ${selectedYear}`,
+        monthFull: `${MONTH_FULL_NAMES[idx]} ${selectedYear}`,
         amount,
         count,
+        categoryBreakdown,
       };
     });
 
@@ -97,7 +139,6 @@ export function TransactionBarChart({
   }, [expenseTransactions, selectedYear]);
 
   const currentDataset = viewMode === "category" ? categoryData : monthlyData;
-  const activeItem = hoveredIndex !== null ? currentDataset.items[hoveredIndex] : null;
 
   return (
     <div
@@ -140,7 +181,7 @@ export function TransactionBarChart({
                 setViewMode("category");
                 setHoveredIndex(null);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
                 viewMode === "category"
                   ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                   : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -155,7 +196,7 @@ export function TransactionBarChart({
                 setViewMode("monthly");
                 setHoveredIndex(null);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
                 viewMode === "monthly"
                   ? "bg-white dark:bg-[#1E293B] text-teal-600 dark:text-teal-400 shadow-xs"
                   : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -166,13 +207,13 @@ export function TransactionBarChart({
             </button>
           </div>
 
-          {/* Year selector (only visible in monthly mode) */}
+          {/* Year selector (only in monthly mode) */}
           {viewMode === "monthly" && (
             <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setSelectedYear("2025")}
-                className={`px-2.5 py-1 rounded-full transition-colors ${
+                className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
                   selectedYear === "2025"
                     ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -183,7 +224,7 @@ export function TransactionBarChart({
               <button
                 type="button"
                 onClick={() => setSelectedYear("2026")}
-                className={`px-2.5 py-1 rounded-full transition-colors ${
+                className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
                   selectedYear === "2026"
                     ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -196,46 +237,10 @@ export function TransactionBarChart({
         </div>
       </div>
 
-      {/* Floating Info Banner (Non-blocking label showing exact amount & quantity) */}
-      <div className="min-h-[2.5rem] flex items-center justify-between px-3.5 py-1.5 rounded-xl bg-slate-50/80 dark:bg-slate-850/60 border border-slate-200/70 dark:border-slate-800/80 text-xs relative z-10 transition-all">
-        {activeItem ? (
-          <div className="flex flex-wrap items-center justify-between w-full gap-2 animate-in fade-in duration-150">
-            <span className="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-teal-500" />
-              <span>{activeItem.label}</span>
-            </span>
-            {activeItem.amount > 0 ? (
-              <div className="flex items-center gap-3">
-                <span className="text-slate-600 dark:text-slate-300">
-                  Jumlah:{" "}
-                  <strong className="text-slate-900 dark:text-white font-extrabold money">
-                    {rupiah(activeItem.amount)}
-                  </strong>
-                </span>
-                <span className="px-2 py-0.5 rounded-md bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300 font-bold text-[11px] border border-teal-500/20">
-                  {activeItem.count} transaksi
-                </span>
-              </div>
-            ) : (
-              <span className="text-slate-400 italic text-[11px]">
-                Tidak ada transaksi pada periode ini
-              </span>
-            )}
-          </div>
-        ) : (
-          <div className="flex items-center justify-between w-full text-slate-400 text-[11px]">
-            <span>Arahkan kursor ke grafik batang untuk melihat rincian & jumlah transaksi</span>
-            <span className="hidden sm:inline font-medium text-slate-500 dark:text-slate-400">
-              Palet: Biru • Putih • Hijau Tosca
-            </span>
-          </div>
-        )}
-      </div>
-
       {/* Bar Chart Area */}
-      <div className="relative pt-4 pb-2 animate-content-in">
+      <div className="relative pt-6 pb-2 animate-content-in">
         {/* Horizontal Guide Lines */}
-        <div className="absolute inset-x-0 inset-y-4 flex flex-col justify-between pointer-events-none opacity-20 dark:opacity-10">
+        <div className="absolute inset-x-0 inset-y-6 flex flex-col justify-between pointer-events-none opacity-20 dark:opacity-10">
           <div className="border-b border-slate-400 w-full" />
           <div className="border-b border-slate-400 w-full" />
           <div className="border-b border-slate-400 w-full" />
@@ -244,7 +249,7 @@ export function TransactionBarChart({
         </div>
 
         {/* Y-Axis & Bars */}
-        <div className="flex items-end gap-2 sm:gap-3 h-52 sm:h-60 w-full relative z-10">
+        <div className="flex items-end gap-2 sm:gap-3 h-60 sm:h-64 w-full relative z-10">
           {/* Y-Axis Scale Reference */}
           <div className="flex flex-col justify-between h-full text-[10px] font-semibold text-slate-400 pr-1 pb-6 shrink-0 select-none">
             <span>{rupiah(currentDataset.maxAmount)}</span>
@@ -259,25 +264,144 @@ export function TransactionBarChart({
             {currentDataset.items.map((item, idx) => {
               const hasData = item.amount > 0;
               const heightPercent = hasData
-                ? Math.max(10, Math.round((item.amount / currentDataset.maxAmount) * 100))
+                ? Math.max(12, Math.round((item.amount / currentDataset.maxAmount) * 100))
                 : 0;
               const isHovered = hoveredIndex === idx;
+
+              // Safe horizontal alignment for floating tooltip
+              const isFirst = idx <= 1;
+              const isLast = idx >= currentDataset.items.length - 2;
+              const tooltipAlignClass = isFirst
+                ? "left-0"
+                : isLast
+                ? "right-0"
+                : "left-1/2 -translate-x-1/2";
+
+              // Safe vertical alignment for floating tooltip
+              const tooltipVerticalClass =
+                heightPercent > 45
+                  ? "top-1"
+                  : `bottom-[calc(${heightPercent}%+14px)]`;
 
               return (
                 <div
                   key={item.label}
                   onMouseEnter={() => setHoveredIndex(idx)}
                   onMouseLeave={() => setHoveredIndex(null)}
-                  className="flex-1 flex flex-col items-center h-full justify-end cursor-pointer group"
+                  className="flex-1 flex flex-col items-center h-full justify-end cursor-pointer relative group"
                 >
+                  {/* Floating Tooltip Card (Professional interactive popover) */}
+                  {isHovered && (
+                    <div
+                      className={`absolute z-40 pointer-events-none ${tooltipAlignClass} ${tooltipVerticalClass} min-w-[190px] sm:min-w-[220px] max-w-[270px] p-3 rounded-2xl bg-slate-900/95 dark:bg-[#080E1A]/95 text-white shadow-2xl backdrop-blur-xl border border-slate-700/80 dark:border-slate-700/80 animate-in fade-in zoom-in-95 duration-150`}
+                    >
+                      {/* Tooltip Header */}
+                      <div className="flex items-center justify-between gap-2 border-b border-slate-700/70 pb-1.5">
+                        <span className="font-bold text-xs text-teal-400 flex items-center gap-1.5 truncate">
+                          <span className="w-2 h-2 rounded-full bg-teal-400 shrink-0" />
+                          <span className="truncate">
+                            {item.kind === "monthly" ? item.monthFull : item.label}
+                          </span>
+                        </span>
+                        {hasData && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-teal-950 text-teal-300 font-semibold border border-teal-500/30 shrink-0">
+                            {item.count}x
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Tooltip Body */}
+                      {hasData ? (
+                        <div className="pt-2 space-y-2">
+                          <div className="flex items-baseline justify-between text-xs">
+                            <span className="text-slate-400 text-[11px]">Total:</span>
+                            <span className="font-extrabold text-white money text-sm">
+                              {rupiah(item.amount)}
+                            </span>
+                          </div>
+
+                          {/* Breakdown per Category for 12-Month Mode */}
+                          {item.kind === "monthly" && item.categoryBreakdown.length > 0 && (
+                            <div className="pt-1.5 border-t border-slate-800 space-y-1">
+                              <div className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                                Rincian Kategori:
+                              </div>
+                              <div className="space-y-1 max-h-36 overflow-y-auto pr-0.5">
+                                {item.categoryBreakdown.map((c) => (
+                                  <div
+                                    key={c.category}
+                                    className="flex items-center justify-between text-[10px] gap-2"
+                                  >
+                                    <span className="text-slate-300 truncate max-w-[110px]">
+                                      • {c.category}
+                                    </span>
+                                    <div className="flex items-center gap-1 shrink-0 text-right">
+                                      <span className="font-semibold text-white money">
+                                        {rupiah(c.amount)}
+                                      </span>
+                                      <span className="text-[9px] text-teal-400 font-semibold">
+                                        ({c.count}x)
+                                      </span>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Share Percentage for Category Mode */}
+                          {item.kind === "category" && (
+                            <div className="text-[10px] text-slate-400 flex items-center justify-between">
+                              <span>Porsi pengeluaran:</span>
+                              <span className="font-bold text-teal-300">
+                                {Math.round(
+                                  (item.amount / currentDataset.totalAmount) * 100
+                                )}
+                                %
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="py-1 text-[11px] text-slate-400 italic">
+                          {item.kind === "monthly"
+                            ? "Tidak ada transaksi di bulan ini"
+                            : "Tidak ada transaksi di kategori ini"}
+                        </div>
+                      )}
+
+                      {/* Small Caret indicator pointing to bar when floating above */}
+                      {heightPercent <= 45 && (
+                        <div
+                          className={`absolute -bottom-1 w-2 h-2 rotate-45 bg-slate-900 dark:bg-[#080E1A] border-b border-r border-slate-700/80 ${
+                            isFirst
+                              ? "left-5"
+                              : isLast
+                              ? "right-5"
+                              : "left-1/2 -translate-x-1/2"
+                          }`}
+                        />
+                      )}
+                    </div>
+                  )}
+
+                  {/* Subtle Column Highlight on hover */}
+                  <div
+                    className={`absolute inset-x-0 inset-y-0 rounded-xl transition-colors pointer-events-none ${
+                      isHovered
+                        ? "bg-teal-500/10 dark:bg-teal-400/5"
+                        : "transparent"
+                    }`}
+                  />
+
                   {/* Bar Element */}
-                  <div className="w-full max-w-[42px] h-full flex items-end justify-center relative">
+                  <div className="w-full max-w-[42px] h-full flex items-end justify-center relative z-10">
                     {hasData ? (
                       <div
                         style={{ height: `${heightPercent}%` }}
                         className={`w-full rounded-t-xl transition-all duration-300 relative border-t-2 border-x border-teal-200/40 dark:border-teal-400/30 ${
                           isHovered
-                            ? "bg-gradient-to-t from-blue-600 via-teal-500 to-teal-300 shadow-lg shadow-teal-500/25 scale-105"
+                            ? "bg-gradient-to-t from-blue-600 via-teal-500 to-teal-300 shadow-lg shadow-teal-500/30 scale-105"
                             : "bg-gradient-to-t from-blue-600/90 via-teal-600/90 to-teal-400/80 hover:brightness-110"
                         }`}
                       >
@@ -299,7 +423,7 @@ export function TransactionBarChart({
 
                   {/* X-Axis Label */}
                   <span
-                    className={`text-[10px] sm:text-[11px] font-semibold mt-2 truncate max-w-[48px] text-center transition-colors ${
+                    className={`text-[10px] sm:text-[11px] font-semibold mt-2 truncate max-w-[48px] text-center transition-colors relative z-10 ${
                       isHovered
                         ? "text-teal-600 dark:text-teal-400 font-bold"
                         : hasData
