@@ -30,6 +30,7 @@ import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
 import { GenZInsightCard } from "@/components/dashboard/genz-insight-card";
 import { DailyAllowanceRing } from "@/components/dashboard/daily-allowance-ring";
 import { CategoryPieChart } from "@/components/dashboard/category-pie-chart";
+import { TransactionBarChart } from "@/components/dashboard/transaction-bar-chart";
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
@@ -40,7 +41,6 @@ export default function DashboardPage() {
 
   // Card filter states
   const [saldoFilter, setSaldoFilter] = useState<"all" | "month" | "today">("all");
-  const [chartYear, setChartYear] = useState<"2025" | "2026">("2025");
   const [savingsPercentage, setSavingsPercentage] = useState<number>(() => getWishlistSavingsPercentage());
 
   useEffect(() => {
@@ -200,26 +200,38 @@ export default function DashboardPage() {
 
   // Income categories distribution for Pie Chart
   const incomeCategoryData = useMemo(() => {
-    const map: Record<string, number> = {};
+    const map: Record<string, { amount: number; count: number }> = {};
     for (const tx of transactions) {
       if (tx.type === "income") {
         const cat = tx.category || "Lainnya";
-        map[cat] = (map[cat] || 0) + tx.amount;
+        if (!map[cat]) map[cat] = { amount: 0, count: 0 };
+        map[cat].amount += tx.amount;
+        map[cat].count += 1;
       }
     }
-    return Object.entries(map).map(([category, amount]) => ({ category, amount }));
+    return Object.entries(map).map(([category, val]) => ({
+      category,
+      amount: val.amount,
+      count: val.count,
+    }));
   }, [transactions]);
 
   // Expense categories distribution for Pie Chart
   const expenseCategoryData = useMemo(() => {
-    const map: Record<string, number> = {};
+    const map: Record<string, { amount: number; count: number }> = {};
     for (const tx of transactions) {
       if (tx.type === "expense") {
         const cat = tx.category || "Lainnya";
-        map[cat] = (map[cat] || 0) + tx.amount;
+        if (!map[cat]) map[cat] = { amount: 0, count: 0 };
+        map[cat].amount += tx.amount;
+        map[cat].count += 1;
       }
     }
-    return Object.entries(map).map(([category, amount]) => ({ category, amount }));
+    return Object.entries(map).map(([category, val]) => ({
+      category,
+      amount: val.amount,
+      count: val.count,
+    }));
   }, [transactions]);
 
   const topProjection = useMemo(() => {
@@ -378,180 +390,8 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              {/* CARD: 12-Month Bar Chart (MAU & Cohort Trends Style) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-5 flex flex-col justify-between glass-sheen relative overflow-hidden group">
-                {/* Transparent BarChart3 Watermark */}
-                <BarChart3
-                  className="absolute -right-3 -bottom-3 w-32 h-32 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
-                  strokeWidth={1.5}
-                />
-                {/* Header & Working Year Filter */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                      Tren Transaksi Bulanan (12 Bulan)
-                    </h3>
-                    <div className="flex items-baseline gap-2 mt-1">
-                      <span className="text-3xl font-extrabold text-slate-900 dark:text-white money">
-                        {chartYear === "2025" ? "15.140" : "18.320"}
-                      </span>
-                      <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                        +32% vs tahun lalu
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Working Year Toggle */}
-                  <div className="flex items-center gap-1.5 p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
-                    <button
-                      type="button"
-                      onClick={() => setChartYear("2025")}
-                      className={`px-3 py-1 rounded-full transition-colors ${
-                        chartYear === "2025"
-                          ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
-                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                      }`}
-                    >
-                      2025
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setChartYear("2026")}
-                      className={`px-3 py-1 rounded-full transition-colors ${
-                        chartYear === "2026"
-                          ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
-                          : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                      }`}
-                    >
-                      2026
-                    </button>
-                  </div>
-                </div>
-
-                {/* The Signature 12-Month Bar Chart */}
-                <div className="relative pt-6 pb-2 animate-content-in animate-content-delay-2">
-                  {/* Horizontal Guide Lines */}
-                  <div className="absolute inset-x-0 inset-y-6 flex flex-col justify-between pointer-events-none opacity-20 dark:opacity-10">
-                    <div className="border-b border-slate-400 w-full" />
-                    <div className="border-b border-slate-400 w-full" />
-                    <div className="border-b border-slate-400 w-full" />
-                    <div className="border-b border-slate-400 w-full" />
-                    <div className="border-b border-slate-400 w-full" />
-                    <div className="border-b border-slate-400 w-full" />
-                  </div>
-
-                  {/* Y-Axis Labels & Bars */}
-                  <div className="flex items-end gap-2 sm:gap-3 h-52 sm:h-60 w-full relative z-10">
-                    <div className="flex flex-col justify-between h-full text-[10px] font-semibold text-slate-400 pr-1 pb-6 shrink-0">
-                      <span>100%</span>
-                      <span>80%</span>
-                      <span>60%</span>
-                      <span>40%</span>
-                      <span>20%</span>
-                      <span>0%</span>
-                    </div>
-
-                    {/* 12 Bars Container */}
-                    <div className="flex-1 h-full flex items-end justify-between gap-1 sm:gap-2 pb-6">
-                      {/* Month 1: Jan */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[45%] rounded-t-lg bg-gradient-to-t from-[#F472B6] via-[#F472B6]/90 to-pink-100/40 relative shadow-xs">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Jan</span>
-                      </div>
-
-                      {/* Month 2: Feb */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[35%] rounded-t-lg bg-[repeating-linear-gradient(45deg,#38bdf8,#38bdf8_3px,transparent_3px,transparent_8px)] relative border-x border-t border-sky-300 dark:border-sky-600">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Feb</span>
-                      </div>
-
-                      {/* Month 3: Mar */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[25%] rounded-t-lg bg-[repeating-linear-gradient(45deg,#94a3b8,#94a3b8_3px,transparent_3px,transparent_8px)] relative border-x border-t border-slate-300 dark:border-slate-600">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Mar</span>
-                      </div>
-
-                      {/* Month 4: Apr */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[50%] rounded-t-lg bg-slate-200 dark:bg-slate-700 relative">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Apr</span>
-                      </div>
-
-                      {/* Month 5: Mei */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[52%] rounded-t-lg bg-[repeating-linear-gradient(45deg,#60a5fa,#60a5fa_3px,transparent_3px,transparent_8px)] relative border-x border-t border-blue-300 dark:border-blue-600">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Mei</span>
-                      </div>
-
-                      {/* Month 6: Jun */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[40%] rounded-t-lg bg-[repeating-linear-gradient(45deg,#38bdf8,#38bdf8_3px,transparent_3px,transparent_8px)] relative border-x border-t border-sky-300 dark:border-sky-600">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Jun</span>
-                      </div>
-
-                      {/* Month 7: Jul */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[65%] rounded-t-lg bg-gradient-to-t from-[#38BDF8] via-[#38BDF8]/90 to-cyan-100/40 relative shadow-xs">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Jul</span>
-                      </div>
-
-                      {/* Month 8: Agu */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[72%] rounded-t-lg bg-blue-100/80 dark:bg-blue-900/40 relative border-x border-t border-blue-200 dark:border-blue-700">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Agu</span>
-                      </div>
-
-                      {/* Month 9: Sep */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[36%] rounded-t-lg bg-[repeating-linear-gradient(45deg,#94a3b8,#94a3b8_3px,transparent_3px,transparent_8px)] relative border-x border-t border-slate-300 dark:border-slate-600">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Sep</span>
-                      </div>
-
-                      {/* Month 10: Okt */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[62%] rounded-t-lg bg-gradient-to-t from-[#F472B6] via-[#F472B6]/90 to-pink-100/40 relative shadow-xs">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Okt</span>
-                      </div>
-
-                      {/* Month 11: Nov */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[18%] rounded-t-lg bg-[repeating-linear-gradient(45deg,#38bdf8,#38bdf8_3px,transparent_3px,transparent_8px)] relative border-x border-t border-sky-300 dark:border-sky-600">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Nov</span>
-                      </div>
-
-                      {/* Month 12: Des */}
-                      <div className="flex-1 flex flex-col items-center h-full justify-end group">
-                        <div className="w-full max-w-[34px] h-[30%] rounded-t-lg bg-sky-100/90 dark:bg-sky-950/60 relative border-x border-t border-sky-300 dark:border-sky-700">
-                          <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        </div>
-                        <span className="text-[11px] font-semibold text-slate-400 mt-2">Des</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              {/* CARD: Transaction Bar Chart (Kategori Pengeluaran & Tren 12 Bulan) */}
+              <TransactionBarChart transactions={transactions} />
 
               {/* CARD: Riwayat Transaksi Terbaru (Tepat di bawah dan ukuran lebar yang sama dengan tren transaksi) */}
               <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
