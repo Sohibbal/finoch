@@ -135,7 +135,7 @@ export default function PengeluaranPage() {
                   <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                     Total Pengeluaran
                   </p>
-                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-rose-600 dark:text-rose-400 money">
                     -{rupiah(totalThisMonth)}
                   </h2>
                 </div>

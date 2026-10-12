@@ -33,7 +33,6 @@ import { GenZInsightCard } from "@/components/dashboard/genz-insight-card";
 import { DailyAllowanceRing } from "@/components/dashboard/daily-allowance-ring";
 import { CategoryPieChart } from "@/components/dashboard/category-pie-chart";
 import { TransactionBarChart } from "@/components/dashboard/transaction-bar-chart";
-import { TransactionActionCards } from "@/components/transaction/transaction-action-cards";
 import { ManualTransactionModal } from "@/components/transaction/manual-transaction-modal";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
 import { VoiceTransactionModal } from "@/components/transaction/voice-transaction-modal";
@@ -344,17 +343,6 @@ export default function DashboardPage() {
             <GenZInsightCard nickname={nickname} insight={financialData.insight} />
           </div>
 
-          {/* ROW 2: 3 Action Cards (Bicara, Scan Struk, Catat Manual) */}
-          <div className="w-full animate-content-in">
-            <TransactionActionCards
-              layout="grid"
-              type="general"
-              onOpenVoice={() => setIsVoiceOpen(true)}
-              onOpenScan={() => setIsScanOpen(true)}
-              onOpenManual={() => setIsManualOpen(true)}
-            />
-          </div>
-
           {/* Main 2-Column Split: Sisi Kiri Konten Utama & Sisi Kanan Widget Vertikal */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
@@ -637,7 +625,7 @@ export default function DashboardPage() {
 
                 {/* Metric Numeral */}
                 <div className="space-y-1 relative z-10 animate-content-in">
-                  <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-slate-900 dark:text-white">
+                  <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-rose-600 dark:text-rose-400">
                     -{rupiah(financialData.displayExpense)}
                   </h2>
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
