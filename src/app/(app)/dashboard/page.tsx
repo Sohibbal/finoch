@@ -206,201 +206,205 @@ export default function DashboardPage() {
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
         <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
           
-          {/* ROW 1: FinBot Daily Insight & Status Jatah Harian (Top Banner) */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-            {/* Gen-Z Daily Insight Card (8 cols) */}
-            <div className="lg:col-span-7 xl:col-span-8 animate-content-in">
-              <GenZInsightCard nickname={nickname} insight={financialData.insight} />
-            </div>
-
-            {/* Daily Allowance Ring (4 cols) */}
-            <div className="lg:col-span-5 xl:col-span-4 animate-content-in animate-content-delay-1">
-              <DailyAllowanceRing
-                dailyAllowance={financialData.dailyAllowance}
-                todaySpent={financialData.todaySpent}
-              />
-            </div>
+          {/* ROW 1: FinBot Daily Insight (Paling Atas, tinggi sama dengan card Saldo Bersih) */}
+          <div className="w-full animate-content-in">
+            <GenZInsightCard nickname={nickname} insight={financialData.insight} />
           </div>
 
-          {/* ROW 2: 3 Metric Cards (Saldo Bersih, Total Pemasukan, Total Pengeluaran) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {/* CARD 1: Saldo Bersih */}
-            <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
-              {/* Transparent Watermark Icon */}
-              <Wallet
-                className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
-                strokeWidth={1.5}
-              />
-
-              {/* Header with Saldo Filter Toggle */}
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Saldo Bersih
-                  </h3>
-                </div>
-
-                <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
-                  <button
-                    type="button"
-                    onClick={() => setSaldoFilter("all")}
-                    className={`px-2.5 py-0.5 rounded-full transition-colors ${
-                      saldoFilter === "all"
-                        ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    Semua
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSaldoFilter("month")}
-                    className={`px-2.5 py-0.5 rounded-full transition-colors ${
-                      saldoFilter === "month"
-                        ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
-                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                    }`}
-                  >
-                    Bulan Ini
-                  </button>
-                </div>
-              </div>
-
-              {/* Metric Numeral */}
-              <div className="space-y-1 relative z-10 animate-content-in">
-                <h2
-                  className={`text-2xl sm:text-3xl font-extrabold tracking-tight money ${
-                    financialData.displayBalance >= 0
-                      ? "text-slate-900 dark:text-white"
-                      : "text-rose-600 dark:text-rose-400"
-                  }`}
-                >
-                  {rupiah(financialData.displayBalance)}
-                </h2>
-                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span>+12%</span>
-                  <span className="text-slate-400 font-normal">
-                    {saldoFilter === "month" ? "vs bulan lalu" : "terakumulasi"}
-                  </span>
-                </div>
-              </div>
-
-              {/* Context Footer */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
-                <span>Periode:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  {saldoFilter === "month" ? "Bulan Berjalan" : "Semua Waktu"}
-                </span>
-              </div>
-            </div>
-
-            {/* CARD 2: Total Pemasukan */}
-            <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
-              {/* Transparent Panah Naik Watermark */}
-              <ArrowUpRight
-                className="absolute -right-3 -bottom-3 w-28 h-28 text-emerald-500/10 dark:text-emerald-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
-                strokeWidth={1.5}
-              />
-
-              {/* Header */}
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Total Pemasukan
-                  </h3>
-                </div>
-                <Link
-                  href="/pemasukan"
-                  title="Lihat Detail Pemasukan"
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {/* Metric Numeral */}
-              <div className="space-y-1 relative z-10 animate-content-in">
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-emerald-600 dark:text-emerald-400">
-                  +{rupiah(financialData.displayIncome)}
-                </h2>
-                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                  <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-[10px]">
-                    Aktif
-                  </span>
-                  <span className="text-slate-400 font-normal">
-                    {incomeCategoryData.length} pos pendapatan
-                  </span>
-                </div>
-              </div>
-
-              {/* Context Footer */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
-                <span>Status Arus Kas:</span>
-                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-                  Positif & Bertambah
-                </span>
-              </div>
-            </div>
-
-            {/* CARD 3: Total Pengeluaran */}
-            <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group sm:col-span-2 lg:col-span-1">
-              {/* Transparent Panah Turun Watermark */}
-              <ArrowDownRight
-                className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
-                strokeWidth={1.5}
-              />
-
-              {/* Header */}
-              <div className="flex items-center justify-between relative z-10">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Total Pengeluaran
-                  </h3>
-                </div>
-                <Link
-                  href="/pengeluaran"
-                  title="Lihat Detail Pengeluaran"
-                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
-                >
-                  <MoreHorizontal className="w-4 h-4" />
-                </Link>
-              </div>
-
-              {/* Metric Numeral */}
-              <div className="space-y-1 relative z-10 animate-content-in">
-                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-slate-900 dark:text-white">
-                  -{rupiah(financialData.displayExpense)}
-                </h2>
-                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                  <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px]">
-                    Hari Ini
-                  </span>
-                  <span className="text-slate-400 font-normal">
-                    {rupiah(financialData.todaySpent)} terpakai
-                  </span>
-                </div>
-              </div>
-
-              {/* Context Footer */}
-              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
-                <span>Efisiensi:</span>
-                <span className="font-semibold text-slate-700 dark:text-slate-300">
-                  {financialData.todaySpent > financialData.dailyAllowance
-                    ? "Melebihi Jatah"
-                    : "Terkendali"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* ROW 3: Main 2-Column Split: Sisi Kiri Bar Chart & Sisi Kanan Stacked Cards */}
+          {/* Main 2-Column Split: Sisi Kiri Konten Utama & Sisi Kanan Widget Vertikal */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             {/* SISI KIRI (lg:col-span-8 space-y-6) */}
             <div className="lg:col-span-8 space-y-6">
+
+              {/* BARIS METRIK: Saldo Bersih & Total Pemasukan di atas Total Pengeluaran */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                {/* CARD 1: Saldo Bersih */}
+                <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+                  {/* Transparent Watermark Icon */}
+                  <Wallet
+                    className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+                    strokeWidth={1.5}
+                  />
+
+                  {/* Header with Saldo Filter Toggle */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                        Saldo Bersih
+                      </h3>
+                    </div>
+
+                    <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
+                      <button
+                        type="button"
+                        onClick={() => setSaldoFilter("all")}
+                        className={`px-2.5 py-0.5 rounded-full transition-colors ${
+                          saldoFilter === "all"
+                            ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        }`}
+                      >
+                        Semua
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSaldoFilter("month")}
+                        className={`px-2.5 py-0.5 rounded-full transition-colors ${
+                          saldoFilter === "month"
+                            ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                        }`}
+                      >
+                        Bulan Ini
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Metric Numeral */}
+                  <div className="space-y-1 relative z-10 animate-content-in">
+                    <h2
+                      className={`text-2xl sm:text-3xl font-extrabold tracking-tight money ${
+                        financialData.displayBalance >= 0
+                          ? "text-slate-900 dark:text-white"
+                          : "text-rose-600 dark:text-rose-400"
+                      }`}
+                    >
+                      {rupiah(financialData.displayBalance)}
+                    </h2>
+                    <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <span>+12%</span>
+                      <span className="text-slate-400 font-normal">
+                        {saldoFilter === "month" ? "vs bulan lalu" : "terakumulasi"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Context Footer */}
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+                    <span>Periode:</span>
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
+                      {saldoFilter === "month" ? "Bulan Berjalan" : "Semua Waktu"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* CARD 2: Total Pemasukan */}
+                <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+                  {/* Transparent Panah Naik Watermark */}
+                  <ArrowUpRight
+                    className="absolute -right-3 -bottom-3 w-28 h-28 text-emerald-500/10 dark:text-emerald-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                    strokeWidth={1.5}
+                  />
+
+                  {/* Header */}
+                  <div className="flex items-center justify-between relative z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                        Total Pemasukan
+                      </h3>
+                    </div>
+                    <Link
+                      href="/pemasukan"
+                      title="Lihat Detail Pemasukan"
+                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                    >
+                      <MoreHorizontal className="w-4 h-4" />
+                    </Link>
+                  </div>
+
+                  {/* Metric Numeral */}
+                  <div className="space-y-1 relative z-10 animate-content-in">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-emerald-600 dark:text-emerald-400">
+                      +{rupiah(financialData.displayIncome)}
+                    </h2>
+                    <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-[10px]">
+                        Aktif
+                      </span>
+                      <span className="text-slate-400 font-normal">
+                        {incomeCategoryData.length} pos pendapatan
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Context Footer */}
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+                    <span>Status Arus Kas:</span>
+                    <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                      Positif & Bertambah
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* CARD 3: Total Pengeluaran (Tepat di Bawah Saldo Bersih & Total Pemasukan) */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group w-full">
+                {/* Transparent Panah Turun Watermark */}
+                <ArrowDownRight
+                  className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                  strokeWidth={1.5}
+                />
+
+                {/* Header */}
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-rose-500" />
+                    <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                      Total Pengeluaran
+                    </h3>
+                  </div>
+                  <Link
+                    href="/pengeluaran"
+                    title="Lihat Detail Pengeluaran"
+                    className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                  >
+                    <MoreHorizontal className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                {/* Metric Numeral & Status */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-center relative z-10 animate-content-in">
+                  <div className="space-y-1">
+                    <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-slate-900 dark:text-white">
+                      -{rupiah(financialData.displayExpense)}
+                    </h2>
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                      <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px]">
+                        Hari Ini
+                      </span>
+                      <span className="text-slate-400 font-normal">
+                        {rupiah(financialData.todaySpent)} terpakai
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="sm:text-right space-y-1">
+                    <p className="text-[11px] text-slate-400">Efisiensi Konsumsi:</p>
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold ${
+                        financialData.todaySpent > financialData.dailyAllowance
+                          ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400"
+                          : "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
+                      }`}
+                    >
+                      {financialData.todaySpent > financialData.dailyAllowance
+                        ? "Melebihi Jatah"
+                        : "Terkendali"}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Context Footer */}
+                <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+                  <span>Cakupan Periode:</span>
+                  <span className="font-semibold text-slate-700 dark:text-slate-300">
+                    {saldoFilter === "month" ? "Bulan Berjalan" : "Semua Waktu"}
+                  </span>
+                </div>
+              </div>
               
               {/* CARD: 12-Month Bar Chart (MAU & Cohort Trends Style) */}
               <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-5 flex flex-col justify-between glass-sheen relative overflow-hidden group">
@@ -577,9 +581,109 @@ export default function DashboardPage() {
                 </div>
               </div>
 
+              {/* CARD: Riwayat Transaksi Terbaru (Tepat di bawah dan ukuran lebar yang sama dengan tren transaksi) */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
+                {/* Transparent Receipt Watermark */}
+                <Receipt
+                  className="absolute -right-3 -bottom-3 w-32 h-32 text-slate-400/5 dark:text-slate-300/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+                  strokeWidth={1.5}
+                />
+
+                <div className="flex items-center justify-between relative z-10">
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-bold text-slate-900 dark:text-white">
+                      Riwayat Transaksi Terbaru
+                    </h3>
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                      {transactions.length} total
+                    </span>
+                  </div>
+
+                  <Link
+                    href="/pengeluaran"
+                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>Lihat Seluruh Riwayat</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+
+                {/* Transactions List */}
+                {financialData.recentTx.length === 0 ? (
+                  <div className="py-8 text-center text-slate-400 dark:text-slate-500 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+                    <p className="text-xs font-semibold">Belum ada transaksi tercatat</p>
+                    <p className="text-[11px] mt-0.5 text-slate-400">
+                      Catat transaksi lewat menu Pemasukan atau Pengeluaran!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5 animate-content-in animate-content-delay-1 relative z-10">
+                    {financialData.recentTx.map((tx) => {
+                      const isInc = tx.type === "income";
+                      return (
+                        <div
+                          key={tx.id}
+                          className="rounded-2xl border border-slate-100 dark:border-slate-800/80 p-3.5 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40"
+                        >
+                          <div className="flex items-center gap-3 min-w-0 flex-1 sm:max-w-[40%]">
+                            <div
+                              className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
+                                isInc
+                                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                  : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
+                              }`}
+                            >
+                              {isInc ? "+" : "-"}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+                                {tx.itemName}
+                              </p>
+                              <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
+                                {shortDate(tx.transactionDate)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="hidden sm:flex items-center justify-center flex-1">
+                            <span
+                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium inline-flex items-center gap-1.5 ${
+                                isInc
+                                  ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
+                              }`}
+                            >
+                              <span className="w-1.5 h-1.5 rounded-full bg-current" />
+                              <span>{isInc ? "Pemasukan" : "Pengeluaran"}</span>
+                            </span>
+                          </div>
+
+                          <div className="hidden sm:block text-xs text-slate-500 dark:text-slate-400 text-center flex-1 truncate">
+                            {tx.category}
+                          </div>
+
+                          <div className="text-right shrink-0">
+                            <span
+                              className={`text-xs sm:text-sm font-bold money ${
+                                isInc
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-slate-900 dark:text-white"
+                              }`}
+                            >
+                              {isInc ? "+" : "-"}
+                              {rupiah(tx.amount)}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
             </div>
 
-            {/* SISI KANAN: Wishlist Prioritas, Pemasukan per Kategori, Pengeluaran per Kategori (lg:col-span-4 space-y-6) */}
+            {/* SISI KANAN: Wishlist Prioritas, Jatah Harian, Pemasukan per Kategori, Pengeluaran per Kategori (lg:col-span-4 space-y-6) */}
             <div className="lg:col-span-4 space-y-6">
               
               {/* CARD: Wishlist Prioritas */}
@@ -625,8 +729,16 @@ export default function DashboardPage() {
                 )}
               </div>
 
-              {/* CARD: Pemasukan per Kategori (styled like Distribusi Kategori Utama) */}
+              {/* CARD: Status Jatah Harian (Dipindahkan ke bawah card wishlist) */}
               <div className="animate-content-in animate-content-delay-1">
+                <DailyAllowanceRing
+                  dailyAllowance={financialData.dailyAllowance}
+                  todaySpent={financialData.todaySpent}
+                />
+              </div>
+
+              {/* CARD: Pemasukan per Kategori (styled like Distribusi Kategori Utama) */}
+              <div className="animate-content-in animate-content-delay-2">
                 <CategoryPieChart
                   title="Pemasukan per Kategori"
                   subtitle="Distribusi sumber pendapatan kamu"
@@ -636,7 +748,7 @@ export default function DashboardPage() {
               </div>
 
               {/* CARD: Pengeluaran per Kategori (styled like Distribusi Kategori Utama) */}
-              <div className="animate-content-in animate-content-delay-2">
+              <div className="animate-content-in animate-content-delay-3">
                 <CategoryPieChart
                   title="Pengeluaran per Kategori"
                   subtitle="Distribusi pos belanja dan konsumsi kamu"
@@ -646,106 +758,6 @@ export default function DashboardPage() {
               </div>
 
             </div>
-          </div>
-
-          {/* FINAL BENTO ROW: Riwayat Transaksi Terbaru (Treehouse Style) */}
-          <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
-            {/* Transparent Receipt Watermark */}
-            <Receipt
-              className="absolute -right-3 -bottom-3 w-32 h-32 text-slate-400/5 dark:text-slate-300/5 pointer-events-none select-none transition-transform group-hover:scale-105"
-              strokeWidth={1.5}
-            />
-
-            <div className="flex items-center justify-between relative z-10">
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-slate-900 dark:text-white">
-                  Riwayat Transaksi Terbaru
-                </h3>
-                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
-                  {transactions.length} total
-                </span>
-              </div>
-
-              <Link
-                href="/pengeluaran"
-                className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-              >
-                <span>Lihat Seluruh Riwayat</span>
-                <ChevronRight className="w-4 h-4" />
-              </Link>
-            </div>
-
-            {/* Transactions List */}
-            {financialData.recentTx.length === 0 ? (
-              <div className="py-8 text-center text-slate-400 dark:text-slate-500 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
-                <p className="text-xs font-semibold">Belum ada transaksi tercatat</p>
-                <p className="text-[11px] mt-0.5 text-slate-400">
-                  Catat transaksi lewat menu Pemasukan atau Pengeluaran!
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-2.5 animate-content-in animate-content-delay-1 relative z-10">
-                {financialData.recentTx.map((tx) => {
-                  const isInc = tx.type === "income";
-                  return (
-                    <div
-                      key={tx.id}
-                      className="rounded-2xl border border-slate-100 dark:border-slate-800/80 p-3.5 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40"
-                    >
-                      <div className="flex items-center gap-3 min-w-0 flex-1 sm:max-w-[40%]">
-                        <div
-                          className={`w-9 h-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 ${
-                            isInc
-                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
-                              : "bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200"
-                          }`}
-                        >
-                          {isInc ? "+" : "-"}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
-                            {tx.itemName}
-                          </p>
-                          <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
-                            {shortDate(tx.transactionDate)}
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="hidden sm:flex items-center justify-center flex-1">
-                        <span
-                          className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium inline-flex items-center gap-1.5 ${
-                            isInc
-                              ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
-                          }`}
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-current" />
-                          <span>{isInc ? "Pemasukan" : "Pengeluaran"}</span>
-                        </span>
-                      </div>
-
-                      <div className="hidden sm:block text-xs text-slate-500 dark:text-slate-400 text-center flex-1 truncate">
-                        {tx.category}
-                      </div>
-
-                      <div className="text-right shrink-0">
-                        <span
-                          className={`text-xs sm:text-sm font-bold money ${
-                            isInc
-                              ? "text-emerald-600 dark:text-emerald-400"
-                              : "text-slate-900 dark:text-white"
-                          }`}
-                        >
-                          {isInc ? "+" : "-"}
-                          {rupiah(tx.amount)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </div>
       </div>
