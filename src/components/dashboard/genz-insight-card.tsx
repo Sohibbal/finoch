@@ -68,7 +68,7 @@ export function GenZInsightCard({ nickname, insight }: GenZInsightCardProps) {
 
   return (
     <div
-      className={`relative overflow-hidden p-6 rounded-3xl backdrop-blur-xl border shadow-sm transition-all before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-slate-300/80 dark:after:bg-slate-700/80 after:shadow-sm ${
+      className={`relative overflow-hidden p-6 rounded-3xl backdrop-blur-xl border shadow-sm transition-all glass-sheen before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-slate-300/80 dark:after:bg-slate-700/80 after:shadow-sm ${
         isWarning
           ? "bg-amber-500/[0.05] dark:bg-amber-950/25 border-amber-300/70 dark:border-amber-800/60"
           : isHype
@@ -76,7 +76,21 @@ export function GenZInsightCard({ nickname, insight }: GenZInsightCardProps) {
           : "bg-white/80 dark:bg-[#111C2E]/80 border-slate-200/80 dark:border-slate-800"
       }`}
     >
-      <div className="flex items-start gap-4">
+      {/* Background Transparent Watermark */}
+      <svg
+        viewBox="0 0 44 44"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        className="absolute -right-6 -bottom-6 w-36 h-36 opacity-[0.04] dark:opacity-[0.07] text-slate-900 dark:text-white pointer-events-none select-none"
+        aria-hidden="true"
+      >
+        <rect x="7" y="10" width="30" height="24" rx="5" stroke="currentColor" strokeWidth="2" />
+        <path d="M7 14L22 23L37 14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
+        <circle cx="22" cy="23" r="3" fill="currentColor" />
+        <path d="M12 30H32" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 3" strokeLinecap="round" />
+      </svg>
+
+      <div className="flex items-start gap-4 relative z-10">
         <FinBotVectorMark mood={insight.mood} />
 
         <div className="space-y-1.5 flex-1 min-w-0">

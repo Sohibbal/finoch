@@ -6,6 +6,12 @@ import {
   MoreHorizontal,
   Clock,
   ChevronRight,
+  Wallet,
+  ArrowUpRight,
+  ArrowDownRight,
+  BarChart3,
+  Gift,
+  Receipt,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah, shortDate } from "@/lib/format";
@@ -200,136 +206,209 @@ export default function DashboardPage() {
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
         <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
           
-          {/* Main 2-Column Split: Sisi Kiri Konten Utama & Sisi Kanan Pie Chart Kategori Stacked */}
+          {/* ROW 1: FinBot Daily Insight & Status Jatah Harian (Top Banner) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            {/* Gen-Z Daily Insight Card (8 cols) */}
+            <div className="lg:col-span-7 xl:col-span-8 animate-content-in">
+              <GenZInsightCard nickname={nickname} insight={financialData.insight} />
+            </div>
+
+            {/* Daily Allowance Ring (4 cols) */}
+            <div className="lg:col-span-5 xl:col-span-4 animate-content-in animate-content-delay-1">
+              <DailyAllowanceRing
+                dailyAllowance={financialData.dailyAllowance}
+                todaySpent={financialData.todaySpent}
+              />
+            </div>
+          </div>
+
+          {/* ROW 2: 3 Metric Cards (Saldo Bersih, Total Pemasukan, Total Pengeluaran) */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {/* CARD 1: Saldo Bersih */}
+            <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
+              {/* Transparent Watermark Icon */}
+              <Wallet
+                className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+                strokeWidth={1.5}
+              />
+
+              {/* Header with Saldo Filter Toggle */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Saldo Bersih
+                  </h3>
+                </div>
+
+                <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
+                  <button
+                    type="button"
+                    onClick={() => setSaldoFilter("all")}
+                    className={`px-2.5 py-0.5 rounded-full transition-colors ${
+                      saldoFilter === "all"
+                        ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    Semua
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSaldoFilter("month")}
+                    className={`px-2.5 py-0.5 rounded-full transition-colors ${
+                      saldoFilter === "month"
+                        ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
+                        : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+                    }`}
+                  >
+                    Bulan Ini
+                  </button>
+                </div>
+              </div>
+
+              {/* Metric Numeral */}
+              <div className="space-y-1 relative z-10 animate-content-in">
+                <h2
+                  className={`text-2xl sm:text-3xl font-extrabold tracking-tight money ${
+                    financialData.displayBalance >= 0
+                      ? "text-slate-900 dark:text-white"
+                      : "text-rose-600 dark:text-rose-400"
+                  }`}
+                >
+                  {rupiah(financialData.displayBalance)}
+                </h2>
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span>+12%</span>
+                  <span className="text-slate-400 font-normal">
+                    {saldoFilter === "month" ? "vs bulan lalu" : "terakumulasi"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Context Footer */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+                <span>Periode:</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                  {saldoFilter === "month" ? "Bulan Berjalan" : "Semua Waktu"}
+                </span>
+              </div>
+            </div>
+
+            {/* CARD 2: Total Pemasukan */}
+            <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
+              {/* Transparent Panah Naik Watermark */}
+              <ArrowUpRight
+                className="absolute -right-3 -bottom-3 w-28 h-28 text-emerald-500/10 dark:text-emerald-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                strokeWidth={1.5}
+              />
+
+              {/* Header */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Total Pemasukan
+                  </h3>
+                </div>
+                <Link
+                  href="/pemasukan"
+                  title="Lihat Detail Pemasukan"
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* Metric Numeral */}
+              <div className="space-y-1 relative z-10 animate-content-in">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-emerald-600 dark:text-emerald-400">
+                  +{rupiah(financialData.displayIncome)}
+                </h2>
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-[10px]">
+                    Aktif
+                  </span>
+                  <span className="text-slate-400 font-normal">
+                    {incomeCategoryData.length} pos pendapatan
+                  </span>
+                </div>
+              </div>
+
+              {/* Context Footer */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+                <span>Status Arus Kas:</span>
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">
+                  Positif & Bertambah
+                </span>
+              </div>
+            </div>
+
+            {/* CARD 3: Total Pengeluaran */}
+            <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group sm:col-span-2 lg:col-span-1">
+              {/* Transparent Panah Turun Watermark */}
+              <ArrowDownRight
+                className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                strokeWidth={1.5}
+              />
+
+              {/* Header */}
+              <div className="flex items-center justify-between relative z-10">
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    Total Pengeluaran
+                  </h3>
+                </div>
+                <Link
+                  href="/pengeluaran"
+                  title="Lihat Detail Pengeluaran"
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
+                >
+                  <MoreHorizontal className="w-4 h-4" />
+                </Link>
+              </div>
+
+              {/* Metric Numeral */}
+              <div className="space-y-1 relative z-10 animate-content-in">
+                <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight money text-slate-900 dark:text-white">
+                  -{rupiah(financialData.displayExpense)}
+                </h2>
+                <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
+                  <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px]">
+                    Hari Ini
+                  </span>
+                  <span className="text-slate-400 font-normal">
+                    {rupiah(financialData.todaySpent)} terpakai
+                  </span>
+                </div>
+              </div>
+
+              {/* Context Footer */}
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+                <span>Efisiensi:</span>
+                <span className="font-semibold text-slate-700 dark:text-slate-300">
+                  {financialData.todaySpent > financialData.dailyAllowance
+                    ? "Melebihi Jatah"
+                    : "Terkendali"}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* ROW 3: Main 2-Column Split: Sisi Kiri Bar Chart & Sisi Kanan Stacked Cards */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
             
             {/* SISI KIRI (lg:col-span-8 space-y-6) */}
             <div className="lg:col-span-8 space-y-6">
               
-              {/* CARD 1: Saldo Bersih & Target (MRR Growth Target Style) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-5">
-                {/* Card Header & Working Filter */}
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                    Saldo Bersih & Target
-                  </h3>
-                  <div className="flex items-center gap-1.5">
-                    {/* Working Filter Pills */}
-                    <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
-                      <button
-                        type="button"
-                        onClick={() => setSaldoFilter("all")}
-                        className={`px-2.5 py-0.5 rounded-full transition-colors ${
-                          saldoFilter === "all"
-                            ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                        }`}
-                      >
-                        Semua
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSaldoFilter("month")}
-                        className={`px-2.5 py-0.5 rounded-full transition-colors ${
-                          saldoFilter === "month"
-                            ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
-                            : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
-                        }`}
-                      >
-                        Bulan Ini
-                      </button>
-                    </div>
-
-                    <Link
-                      href="/pemasukan"
-                      title="Lihat Detail Transaksi"
-                      className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-                    >
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Link>
-                  </div>
-                </div>
-
-                {/* Animated Card Content */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-end animate-content-in">
-                  {/* Left: Main Numeral & Period Pill */}
-                  <div className="space-y-4">
-                    <div>
-                      <h2
-                        className={`text-3xl sm:text-4xl font-extrabold tracking-tight money ${
-                          financialData.displayBalance >= 0
-                            ? "text-slate-900 dark:text-white"
-                            : "text-rose-600 dark:text-rose-400"
-                        }`}
-                      >
-                        {rupiah(financialData.displayBalance)}
-                      </h2>
-                      <p className="text-xs font-bold text-emerald-600 dark:text-emerald-400 mt-1 flex items-center gap-1">
-                        <span>+12%</span>
-                        <span className="text-slate-400 font-normal">
-                          {saldoFilter === "month" ? "vs bulan lalu" : "terakumulasi"}
-                        </span>
-                      </p>
-                    </div>
-
-                    {/* Period Box */}
-                    <div className="flex items-center gap-2.5 p-2 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60">
-                      <div className="w-8 h-8 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 flex items-center justify-center shrink-0">
-                        <Clock className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <p className="text-[10px] uppercase font-bold text-slate-400">Periode</p>
-                        <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
-                          {saldoFilter === "month"
-                            ? "Bulan Berjalan"
-                            : "01 Jan - Sekarang"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Right: Subly Statistic Brand Mini Chart */}
-                  <div className="flex flex-col items-center justify-end h-36 p-3 rounded-2xl bg-slate-50/70 dark:bg-slate-800/40 border border-dashed border-slate-200 dark:border-slate-800 relative">
-                    <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2 self-start">
-                      Rasio Pos Dana
-                    </p>
-
-                    <div className="flex items-end justify-center gap-4 w-full h-24 pb-1 relative">
-                      {/* Pink Gradient Bar */}
-                      <div className="w-7 h-16 rounded-t-lg bg-gradient-to-t from-[#F472B6] via-[#F472B6]/80 to-pink-100/40 relative shadow-sm">
-                        <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                      </div>
-
-                      {/* Cyan Gradient Bar with Black Tooltip */}
-                      <div className="w-7 h-20 rounded-t-lg bg-gradient-to-t from-[#38BDF8] via-[#38BDF8]/80 to-cyan-100/40 relative shadow-sm">
-                        <div className="absolute top-0 inset-x-0 h-1 bg-[#2563EB] rounded-t-lg" />
-                        <div className="absolute -top-6 -left-3 px-2 py-0.5 rounded-md bg-slate-950 text-[9px] font-bold text-white shadow-md whitespace-nowrap">
-                          Masuk
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* CARD 2: FinBot Daily Insight & Daily Allowance Ring */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-5">
-                {/* Gen-Z Daily Insight Card (7 cols) */}
-                <div className="md:col-span-7 animate-content-in animate-content-delay-1">
-                  <GenZInsightCard nickname={nickname} insight={financialData.insight} />
-                </div>
-
-                {/* Daily Allowance Ring (5 cols) */}
-                <div className="md:col-span-5 animate-content-in animate-content-delay-2">
-                  <DailyAllowanceRing
-                    dailyAllowance={financialData.dailyAllowance}
-                    todaySpent={financialData.todaySpent}
-                  />
-                </div>
-              </div>
-
-              {/* CARD 3: 12-Month Bar Chart (MAU & Cohort Trends Style) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-5 flex flex-col justify-between">
+              {/* CARD: 12-Month Bar Chart (MAU & Cohort Trends Style) */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-5 flex flex-col justify-between glass-sheen relative overflow-hidden group">
+                {/* Transparent BarChart3 Watermark */}
+                <BarChart3
+                  className="absolute -right-3 -bottom-3 w-32 h-32 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+                  strokeWidth={1.5}
+                />
                 {/* Header & Working Year Filter */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div>
@@ -504,12 +583,18 @@ export default function DashboardPage() {
             <div className="lg:col-span-4 space-y-6">
               
               {/* CARD: Wishlist Prioritas */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3 glass-sheen relative overflow-hidden group">
+                {/* Transparent Gift Watermark */}
+                <Gift
+                  className="absolute -right-3 -bottom-3 w-28 h-28 text-amber-500/5 dark:text-amber-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+                  strokeWidth={1.5}
+                />
+
+                <div className="flex items-center justify-between relative z-10">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-white">
                     Wishlist Prioritas
                   </h3>
-                  <Link href="/wishlist" title="Buka Wishlist" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                  <Link href="/wishlist" title="Buka Wishlist" className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors">
                     <MoreHorizontal className="w-4 h-4" />
                   </Link>
                 </div>
@@ -564,8 +649,14 @@ export default function DashboardPage() {
           </div>
 
           {/* FINAL BENTO ROW: Riwayat Transaksi Terbaru (Treehouse Style) */}
-          <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4">
-            <div className="flex items-center justify-between">
+          <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
+            {/* Transparent Receipt Watermark */}
+            <Receipt
+              className="absolute -right-3 -bottom-3 w-32 h-32 text-slate-400/5 dark:text-slate-300/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+              strokeWidth={1.5}
+            />
+
+            <div className="flex items-center justify-between relative z-10">
               <div className="flex items-center gap-2">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white">
                   Riwayat Transaksi Terbaru
@@ -593,7 +684,7 @@ export default function DashboardPage() {
                 </p>
               </div>
             ) : (
-              <div className="space-y-2.5 animate-content-in animate-content-delay-1">
+              <div className="space-y-2.5 animate-content-in animate-content-delay-1 relative z-10">
                 {financialData.recentTx.map((tx) => {
                   const isInc = tx.type === "income";
                   return (

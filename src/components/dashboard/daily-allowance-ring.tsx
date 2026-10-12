@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Info, MoreHorizontal } from "lucide-react";
+import { Info, MoreHorizontal, Coins } from "lucide-react";
 import { rupiah } from "@/lib/format";
 
 interface DailyAllowanceRingProps {
@@ -33,8 +33,12 @@ export function DailyAllowanceRing({
 
   return (
     <div
-      className={`p-6 rounded-3xl bg-white dark:bg-[#111C2E] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6 ${className}`}
+      className={`p-6 rounded-3xl bg-white dark:bg-[#111C2E] border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-6 glass-sheen relative overflow-hidden ${className}`}
     >
+      <Coins
+        className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none"
+        strokeWidth={1.5}
+      />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">

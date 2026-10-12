@@ -7,16 +7,13 @@ import {
   ArrowLeft,
   FlaskConical,
   Bell,
-  Search,
-  User as UserIcon,
-  type LucideIcon,
 } from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { BrandLogo } from "@/components/brand/brand-logo";
-import { Breadcrumbs } from "./breadcrumbs";
 import { ThemeToggle } from "./theme-toggle";
 import { GlobalSearchBar } from "./global-search-bar";
+
 interface PageHeaderProps {
   title: React.ReactNode;
   subtitle?: React.ReactNode;
@@ -29,7 +26,6 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
   const pathname = usePathname();
   const isDashboard = pathname === "/dashboard";
   const [demo, setDemo] = useState(false);
-  const [nickname, setNickname] = useState("Kawan");
 
   useEffect(() => {
     const on = isDemoMode();
@@ -40,13 +36,6 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
         if (added > 0) window.dispatchEvent(new Event("finoch:data-pulled"));
       })
       .catch((err) => console.error("Gagal mengisi data demo:", err));
-  }, []);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const stored = localStorage.getItem("finoch_user_nickname");
-      if (stored && stored.trim()) setNickname(stored.trim());
-    }
   }, []);
 
   return (
@@ -77,14 +66,18 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
           <div className="hidden sm:block h-5 w-px bg-slate-200 dark:bg-slate-800 mx-1" />
 
           <div className="min-w-0">
-            {!isDashboard && <Breadcrumbs className="hidden md:flex mb-0.5" />}
             <h1 className="text-xs sm:text-sm font-bold text-slate-800 dark:text-slate-200 truncate">
               {title}
             </h1>
+            {subtitle && (
+              <p className="text-[11px] text-slate-400 dark:text-slate-500 truncate hidden md:block">
+                {subtitle}
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Right: Actions, Search, Notifications, Theme, User Pill */}
+        {/* Right: Actions, Search, Notifications, Theme */}
         <div className="flex items-center gap-2.5 shrink-0 ml-auto">
           <GlobalSearchBar className="hidden sm:block" />
 
@@ -99,24 +92,6 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
           </button>
 
           <ThemeToggle />
-
-          {/* User Profile Pill (Matching Subly "James Noah" User Box) */}
-          <Link
-            href="/profile"
-            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors group"
-          >
-            <div className="w-7 h-7 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-[11px] shadow-sm">
-              {nickname.charAt(0).toUpperCase()}
-            </div>
-            <div className="text-left hidden xl:block leading-tight">
-              <p className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                {nickname}
-              </p>
-              <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                Personal / Pro
-              </p>
-            </div>
-          </Link>
 
           {actions}
         </div>
