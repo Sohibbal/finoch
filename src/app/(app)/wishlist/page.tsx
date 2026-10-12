@@ -171,77 +171,85 @@ export default function WishlistPage() {
             
             {/* SISI KIRI: Summary Metric Card + Button Persegi Berjejer ke Bawah (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
-              {/* Summary Metric Card */}
-              <div className="p-5 rounded-3xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Total Nilai Wishlist
-                </p>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
-                  {rupiah(totalValue)}
-                </h2>
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs space-y-1">
-                  <p className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                    <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                    <span>Tabungan aktif: <strong className="text-slate-900 dark:text-white">{rupiah(currentSavings)}</strong></span>
+              {/* Summary Metric Card with Glass Sheen */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3 glass-sheen relative overflow-hidden group">
+                <Gift
+                  className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/10 dark:text-blue-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                  strokeWidth={1.5}
+                />
+                <div className="relative z-10 space-y-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Total Nilai Wishlist
                   </p>
-                  <p className="text-[11px] text-slate-400">
-                    {activeCount} impian aktif · {achievedCount} tercapai
-                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
+                    {rupiah(totalValue)}
+                  </h2>
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs space-y-1">
+                    <p className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                      <span>Tabungan aktif: <strong className="text-slate-900 dark:text-white">{rupiah(currentSavings)}</strong></span>
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      {activeCount} impian aktif · {achievedCount} tercapai
+                    </p>
+                  </div>
                 </div>
               </div>
 
-              {/* Setting Alokasi Tabungan Harian (Opsi B) */}
-              <div className="p-5 rounded-3xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                    <Sliders className="w-3.5 h-3.5 text-blue-500" />
-                    <span>Target Tabungan Harian</span>
-                  </p>
-                  <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-0.5 rounded-full">
-                    {savingsPercentage}% dari Jatah
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <p className="text-xl font-extrabold text-slate-900 dark:text-white money">
-                    {rupiah(dailySavingsRate)} <span className="text-xs font-normal text-slate-400">/ hari</span>
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    Dihitung dari jatah harian lo: {rupiah(dailyAllowance)}/hari
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                  <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                    <span>Pilih Persentase Komitmen:</span>
-                    <span className="text-blue-600 dark:text-blue-400 font-bold">{savingsPercentage}%</span>
-                  </div>
-                  <div className="grid grid-cols-4 gap-1.5">
-                    {[10, 20, 30, 50].map((pct) => (
-                      <button
-                        key={pct}
-                        type="button"
-                        onClick={() => handleSavingsPercentageChange(pct)}
-                        className={`py-1.5 text-xs font-bold rounded-xl transition-all ${
-                          savingsPercentage === pct
-                            ? "bg-blue-600 text-white shadow-xs"
-                            : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                        }`}
-                      >
-                        {pct}%
-                      </button>
-                    ))}
+              {/* Setting Alokasi Tabungan Harian with Glass Sheen */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3 glass-sheen relative overflow-hidden group">
+                <div className="relative z-10 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                      <Sliders className="w-3.5 h-3.5 text-blue-500" />
+                      <span>Target Tabungan Harian</span>
+                    </p>
+                    <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-0.5 rounded-full">
+                      {savingsPercentage}% dari Jatah
+                    </span>
                   </div>
 
-                  <input
-                    type="range"
-                    min={5}
-                    max={80}
-                    step={5}
-                    value={savingsPercentage}
-                    onChange={(e) => handleSavingsPercentageChange(Number(e.target.value))}
-                    className="w-full accent-blue-600 cursor-pointer mt-1"
-                  />
+                  <div className="space-y-1">
+                    <p className="text-xl font-extrabold text-slate-900 dark:text-white money">
+                      {rupiah(dailySavingsRate)} <span className="text-xs font-normal text-slate-400">/ hari</span>
+                    </p>
+                    <p className="text-[11px] text-slate-400">
+                      Dihitung dari jatah harian lo: {rupiah(dailyAllowance)}/hari
+                    </p>
+                  </div>
+
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
+                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                      <span>Pilih Persentase Komitmen:</span>
+                      <span className="text-blue-600 dark:text-blue-400 font-bold">{savingsPercentage}%</span>
+                    </div>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[10, 20, 30, 50].map((pct) => (
+                        <button
+                          key={pct}
+                          type="button"
+                          onClick={() => handleSavingsPercentageChange(pct)}
+                          className={`py-1.5 text-xs font-bold rounded-xl transition-all ${
+                            savingsPercentage === pct
+                              ? "bg-blue-600 text-white shadow-xs"
+                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                          }`}
+                        >
+                          {pct}%
+                        </button>
+                      ))}
+                    </div>
+
+                    <input
+                      type="range"
+                      min={5}
+                      max={80}
+                      step={5}
+                      value={savingsPercentage}
+                      onChange={(e) => handleSavingsPercentageChange(Number(e.target.value))}
+                      className="w-full accent-blue-600 cursor-pointer mt-1"
+                    />
+                  </div>
                 </div>
               </div>
 

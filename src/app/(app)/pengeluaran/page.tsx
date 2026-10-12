@@ -123,17 +123,24 @@ export default function PengeluaranPage() {
             
             {/* SISI KIRI: Summary Metric Card + 3 Button Persegi Berjejer ke Bawah (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
-              {/* Summary Card */}
-              <div className="p-5 rounded-3xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                  Total Pengeluaran
-                </p>
-                <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
-                  -{rupiah(totalThisMonth)}
-                </h2>
-                <p className="text-[11px] text-slate-400">
+              {/* Summary Card with Glass Sheen */}
+              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-2 glass-sheen relative overflow-hidden group min-h-[140px] flex flex-col justify-between">
+                {/* Transparent Watermark Icon */}
+                <ArrowUpRight
+                  className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                  strokeWidth={1.5}
+                />
+                <div className="relative z-10 space-y-1">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Total Pengeluaran
+                  </p>
+                  <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
+                    -{rupiah(totalThisMonth)}
+                  </h2>
+                </div>
+                <div className="relative z-10 pt-2 border-t border-slate-100 dark:border-slate-800/80 text-[11px] text-slate-400">
                   {transactions.length} transaksi pengeluaran tercatat
-                </p>
+                </div>
               </div>
 
               {/* 3 Button Persegi Berjejer ke Bawah */}
@@ -185,9 +192,9 @@ export default function PengeluaranPage() {
               </div>
             </div>
 
-            {/* SISI KANAN: Riwayat Pengeluaran (8 cols) */}
-            <div className="lg:col-span-8 rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4">
-              <div className="flex items-center justify-between">
+            {/* SISI KANAN: Riwayat Pengeluaran (8 cols) with Glass Sheen */}
+            <div className="lg:col-span-8 rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
+              <div className="flex items-center justify-between relative z-10">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <ArrowUpRight className="w-5 h-5 text-rose-500" />
                   <span>Riwayat Pengeluaran</span>
@@ -197,12 +204,14 @@ export default function PengeluaranPage() {
                 </span>
               </div>
 
-              <TransactionHistoryTable
-                type="expense"
-                transactions={transactions}
-                onDelete={handleDelete}
-                isLoading={isLoading}
-              />
+              <div className="relative z-10">
+                <TransactionHistoryTable
+                  type="expense"
+                  transactions={transactions}
+                  onDelete={handleDelete}
+                  isLoading={isLoading}
+                />
+              </div>
             </div>
           </div>
         </div>

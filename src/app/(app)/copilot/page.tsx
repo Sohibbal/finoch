@@ -192,71 +192,81 @@ export default function CopilotPage() {
         <div className="rounded-[2.25rem] bg-[#F8FAFC] dark:bg-[#0B101D] border border-slate-200/80 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 flex flex-col lg:flex-row gap-5 h-[calc(100vh-12rem)] min-h-[580px]">
           {/* Left Side: Financial Context & Quick Actions Panel (Desktop) */}
           <aside className="hidden lg:flex lg:w-72 shrink-0 flex-col gap-4 animate-content-in">
-            <div className="relative overflow-hidden rounded-3xl p-5 backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-blue-500/80 after:shadow-sm space-y-4">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                  <Wallet className="w-3.5 h-3.5 text-blue-500" />
-                  <span>Konteks Finansial</span>
-                </p>
-                <h3 className="text-xl font-extrabold text-slate-900 dark:text-white money mt-1">
-                  {rupiah(summary.balance)}
-                </h3>
-                <p className="text-[11px] text-slate-400 mt-0.5">Saldo bersih aktif</p>
-              </div>
-
-              <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 flex items-center gap-1">
-                    <TrendingUp className="w-3 h-3 text-emerald-500" />
-                    <span>Pemasukan:</span>
-                  </span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    +{rupiah(summary.income)}
-                  </span>
+            <div className="rounded-[2rem] p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
+              {/* Transparent Watermark Icon */}
+              <Wallet
+                className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/10 dark:text-blue-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                strokeWidth={1.5}
+              />
+              <div className="relative z-10 space-y-4">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                    <Wallet className="w-3.5 h-3.5 text-blue-500" />
+                    <span>Konteks Finansial</span>
+                  </p>
+                  <h3 className="text-xl font-extrabold text-slate-900 dark:text-white money mt-1">
+                    {rupiah(summary.balance)}
+                  </h3>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Saldo bersih aktif</p>
                 </div>
-                <div className="flex items-center justify-between text-xs">
-                  <span className="text-slate-500 flex items-center gap-1">
-                    <TrendingDown className="w-3 h-3 text-rose-500" />
-                    <span>Pengeluaran:</span>
-                  </span>
-                  <span className="font-bold text-slate-800 dark:text-slate-200">
-                    -{rupiah(summary.expense)}
-                  </span>
+
+                <div className="space-y-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500 flex items-center gap-1">
+                      <TrendingUp className="w-3 h-3 text-emerald-500" />
+                      <span>Pemasukan:</span>
+                    </span>
+                    <span className="font-bold text-emerald-600 dark:text-emerald-400">
+                      +{rupiah(summary.income)}
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-slate-500 flex items-center gap-1">
+                      <TrendingDown className="w-3 h-3 text-rose-500" />
+                      <span>Pengeluaran:</span>
+                    </span>
+                    <span className="font-bold text-slate-800 dark:text-slate-200">
+                      -{rupiah(summary.expense)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex-1 rounded-3xl p-5 backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm flex flex-col justify-between space-y-3">
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
-                  <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                  <span>Pusat Tanya Cepat</span>
-                </p>
-                <div className="mt-3 space-y-2">
-                  {quickPrompts.map((prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      disabled={isLoading}
-                      onClick={() => handleSendMessage(prompt)}
-                      className="w-full text-left text-xs p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/70 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-800 transition-colors"
-                    >
-                      {prompt}
-                    </button>
-                  ))}
+            <div className="flex-1 rounded-[2rem] p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-3 glass-sheen relative overflow-hidden group">
+              <div className="relative z-10 flex flex-col justify-between h-full space-y-3">
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                    <span>Pusat Tanya Cepat</span>
+                  </p>
+                  <div className="mt-3 space-y-2">
+                    {quickPrompts.map((prompt) => (
+                      <button
+                        key={prompt}
+                        type="button"
+                        disabled={isLoading}
+                        onClick={() => handleSendMessage(prompt)}
+                        className="w-full text-left text-xs p-2.5 rounded-xl border border-slate-200/70 dark:border-slate-700/70 bg-slate-50/70 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 hover:bg-blue-50 dark:hover:bg-blue-950/40 hover:border-blue-300 dark:hover:border-blue-800 transition-colors"
+                      >
+                        {prompt}
+                      </button>
+                    ))}
+                  </div>
                 </div>
+                <p className="text-[10px] text-slate-400 text-center">
+                  100% tersinkron dengan tabel transaksi lo.
+                </p>
               </div>
-              <p className="text-[10px] text-slate-400 text-center">
-                100% tersinkron dengan tabel transaksi lo.
-              </p>
             </div>
           </aside>
 
           {/* Right Side: Chat Container */}
           <section className="flex-1 flex flex-col min-w-0 h-full animate-content-in">
-            {/* Chat message history container */}
-            <div className="flex-1 overflow-y-auto space-y-3.5 p-4 sm:p-5 rounded-3xl backdrop-blur-xl bg-white/80 dark:bg-[#111C2E]/80 border border-slate-200/80 dark:border-slate-800 shadow-sm relative overflow-hidden before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-blue-500/80 after:shadow-sm">
-              {messages.map((msg) => {
+            {/* Chat message history container with Glass Sheen */}
+            <div className="flex-1 rounded-[2rem] backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs relative overflow-hidden glass-sheen flex flex-col">
+              <div className="relative z-10 flex-1 overflow-y-auto space-y-3.5 p-4 sm:p-5">
+                {messages.map((msg) => {
                 const isUser = msg.sender === "user";
                 return (
                   <div
@@ -316,6 +326,7 @@ export default function CopilotPage() {
               )}
 
               <div ref={messagesEndRef} />
+              </div>
             </div>
 
             {/* Quick Prompts Mobile Strip */}

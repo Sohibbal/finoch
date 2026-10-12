@@ -58,55 +58,57 @@ export function WishlistItemCard({
 
   return (
     <div
-      className={`p-5 rounded-2xl border transition-all ${
+      className={`rounded-[2rem] p-5 sm:p-6 border transition-all glass-sheen relative overflow-hidden group shadow-xs ${
         item.isAchieved
-          ? "bg-paper-sheet/40 dark:bg-navy-900/40 border-ink/10 opacity-70"
-          : "bg-paper-sheet dark:bg-navy-900 border-ink/15 dark:border-navy-800 shadow-sm hover:shadow-md"
+          ? "bg-white/60 dark:bg-[#111726]/60 border-slate-200/60 dark:border-slate-800/60 opacity-75"
+          : "bg-white dark:bg-[#111726] border-slate-200/80 dark:border-slate-800 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700"
       }`}
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
-        <div>
-          <h3
-            className={`text-body font-bold text-ink dark:text-white ${
-              item.isAchieved ? "line-through text-ink-soft" : ""
-            }`}
-          >
-            {item.name}
-          </h3>
-          <p className="text-head font-bold text-ink dark:text-white money mt-0.5">
-            {rupiah(item.targetPrice)}
-          </p>
+      <div className="relative z-10">
+        <div className="flex items-start justify-between gap-3 mb-3">
+          <div>
+            <h3
+              className={`text-sm sm:text-base font-bold text-slate-900 dark:text-white ${
+                item.isAchieved ? "line-through text-slate-400 dark:text-slate-500" : ""
+              }`}
+            >
+              {item.name}
+            </h3>
+            <p className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white money mt-0.5">
+              {rupiah(item.targetPrice)}
+            </p>
+          </div>
+          {getStatusBadge()}
         </div>
-        {getStatusBadge()}
-      </div>
 
-      <div className="flex items-center justify-between pt-3 border-t border-ink/10 dark:border-navy-800 text-meta">
-        <span className="text-ink-soft dark:text-navy-400">
-          Prioritas: <span className="font-semibold text-ink dark:text-white">Bintang {item.priority}</span>
-        </span>
+        <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800 text-xs">
+          <span className="text-slate-500 dark:text-slate-400">
+            Prioritas: <span className="font-semibold text-slate-800 dark:text-slate-200">Bintang {item.priority}</span>
+          </span>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onToggleAchieved(item.id)}
-            className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-semibold transition-colors ${
-              item.isAchieved
-                ? "bg-ink/5 dark:bg-navy-800 text-ink dark:text-white"
-                : "bg-emerald-600 text-white hover:bg-emerald-700"
-            }`}
-          >
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>{item.isAchieved ? "Batalkan" : "Tercapai!"}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => onToggleAchieved(item.id)}
+              className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-xl font-semibold transition-colors ${
+                item.isAchieved
+                  ? "bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  : "bg-emerald-600 text-white hover:bg-emerald-700 shadow-xs"
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>{item.isAchieved ? "Batalkan" : "Tercapai!"}</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={() => onDelete(item.id)}
-            className="p-1.5 rounded-xl text-ink-soft hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
-            title="Hapus"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
+            <button
+              type="button"
+              onClick={() => onDelete(item.id)}
+              className="p-1.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+              title="Hapus"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
         </div>
       </div>
     </div>
