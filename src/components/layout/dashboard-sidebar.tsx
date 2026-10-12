@@ -60,15 +60,30 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
 
   return (
     <aside
-      className={`sticky top-3 self-start my-3 ml-3 rounded-[2rem] bg-[#0E131F] dark:bg-[#070A11] border border-slate-800/80 shadow-2xl flex flex-col py-5 justify-between shrink-0 z-30 transition-all duration-300 h-[calc(100vh-1.5rem)] max-h-screen ${
+      className={`sticky top-3 self-start my-3 ml-3 rounded-[2rem] bg-white/95 dark:bg-[#070A11] border border-slate-200/80 dark:border-slate-800/80 shadow-xl shadow-slate-200/50 dark:shadow-2xl dark:shadow-black/50 backdrop-blur-xl flex flex-col py-5 justify-between shrink-0 z-30 transition-all duration-300 h-[calc(100vh-1.5rem)] max-h-screen relative ${
         isExpanded ? "w-56 md:w-60 px-3" : "w-16 md:w-20 px-2 items-center"
       } ${className}`}
     >
-      {/* Top: Logo & Brand + Expand/Collapse Button */}
+      {/* Floating Toggle Expand / Collapse Button placed on outer edge */}
+      <button
+        type="button"
+        onClick={toggleExpand}
+        title={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
+        aria-label={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
+        className="absolute -right-3.5 top-6 w-7 h-7 rounded-full bg-white dark:bg-[#151D2E] border border-slate-200 dark:border-slate-700 shadow-md hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white flex items-center justify-center transition-all z-40 cursor-pointer"
+      >
+        {isExpanded ? (
+          <ChevronLeft className="w-3.5 h-3.5" />
+        ) : (
+          <ChevronRight className="w-3.5 h-3.5" />
+        )}
+      </button>
+
+      {/* Top: Logo & Brand */}
       <div className="flex flex-col gap-3 w-full shrink-0">
         <div
-          className={`flex items-center ${
-            isExpanded ? "justify-between px-2" : "justify-center"
+          className={`flex items-center w-full ${
+            isExpanded ? "px-2" : "justify-center"
           }`}
         >
           <Link
@@ -76,30 +91,15 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
             className="flex items-center gap-2.5 text-blue-500 hover:scale-105 transition-transform"
             aria-label="finoch dashboard"
           >
-            <div className="w-10 h-10 rounded-2xl bg-blue-600/15 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-2xl bg-blue-600/10 dark:bg-blue-600/20 flex items-center justify-center shrink-0">
               <BrandLogo variant="symbol" className="w-6 h-6 text-blue-500" />
             </div>
             {isExpanded && (
-              <span className="font-extrabold text-base tracking-tight text-white animate-in fade-in duration-200">
+              <span className="font-extrabold text-base tracking-tight text-slate-900 dark:text-white animate-in fade-in duration-200">
                 finoch
               </span>
             )}
           </Link>
-
-          {/* Toggle Expand / Collapse Button */}
-          <button
-            type="button"
-            onClick={toggleExpand}
-            title={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
-            aria-label={isExpanded ? "Perkecil sidebar" : "Perbesar sidebar"}
-            className="w-7 h-7 rounded-xl bg-slate-800/60 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors shrink-0"
-          >
-            {isExpanded ? (
-              <ChevronLeft className="w-4 h-4" />
-            ) : (
-              <ChevronRight className="w-4 h-4" />
-            )}
-          </button>
         </div>
       </div>
 
@@ -121,7 +121,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
               } ${
                 active
                   ? "bg-[#2563EB] text-white shadow-lg shadow-blue-500/30 font-semibold"
-                  : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                  : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60"
               }`}
             >
               <Icon
@@ -142,15 +142,15 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
       </nav>
 
       {/* Bottom: User Card, Settings & Logout */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-slate-800/60 w-full shrink-0">
+      <div className="flex flex-col gap-2 pt-2 border-t border-slate-200/80 dark:border-slate-800/60 w-full shrink-0">
         {isExpanded ? (
-          <div className="px-2 py-1.5 flex items-center justify-between text-xs text-slate-400">
+          <div className="px-2 py-1.5 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
             <div className="min-w-0 pr-2">
-              <p className="font-bold text-white truncate text-xs">
+              <p className="font-bold text-slate-900 dark:text-white truncate text-xs">
                 {user?.name || "Budi Mahasiswa"}
               </p>
-              <p className="text-[10px] text-emerald-400 flex items-center gap-1">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+              <p className="text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 <span>PWA Offline Mode</span>
               </p>
             </div>
@@ -159,7 +159,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
               onClick={() => logout()}
               title="Keluar"
               aria-label="Keluar"
-              className="w-7 h-7 rounded-lg hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 flex items-center justify-center shrink-0 transition-colors"
+              className="w-7 h-7 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-950/40 text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 flex items-center justify-center shrink-0 transition-colors"
             >
               <LogOut className="w-3.5 h-3.5" />
             </button>
@@ -169,7 +169,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
             <Link
               href="/profile"
               title="Pengaturan"
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-white hover:bg-slate-800/60 transition-colors"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
             >
               <Settings className="w-4 h-4" />
               <span className="sr-only">Pengaturan</span>
@@ -180,7 +180,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
               onClick={() => logout()}
               title="Keluar"
               aria-label="Keluar"
-              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-400 hover:bg-rose-950/30 transition-colors"
+              className="w-9 h-9 rounded-xl flex items-center justify-center text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
             >
               <LogOut className="w-4 h-4" />
               <span className="sr-only">Keluar</span>

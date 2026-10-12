@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { Plus, Mic, Sparkles, Gift, Sliders } from "lucide-react";
+import Link from "next/link";
+import { Plus, Mic, Sparkles, Gift } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah } from "@/lib/format";
 import {
@@ -16,7 +17,6 @@ import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
 import { syncManager } from "@/lib/sync/sync-manager";
 import {
   getWishlistSavingsPercentage,
-  setWishlistSavingsPercentage,
   WISHLIST_SETTINGS_CHANGED_EVENT,
 } from "@/lib/storage/wishlist-settings";
 import { WishlistItemCard } from "@/components/wishlist/wishlist-item-card";
@@ -104,11 +104,6 @@ export default function WishlistPage() {
     return Math.max(1000, Math.round(dailyAllowance * (savingsPercentage / 100)));
   }, [dailyAllowance, savingsPercentage]);
 
-  const handleSavingsPercentageChange = (pct: number) => {
-    setSavingsPercentage(pct);
-    setWishlistSavingsPercentage(pct);
-  };
-
   const handleManualSave = async (data: { name: string; targetPrice: number; priority: number }) => {
     const saved = await saveWishlistItem({
       name: data.name,
@@ -184,71 +179,27 @@ export default function WishlistPage() {
                   <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white money">
                     {rupiah(totalValue)}
                   </h2>
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs space-y-1">
-                    <p className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Tabungan aktif: <strong className="text-slate-900 dark:text-white">{rupiah(currentSavings)}</strong></span>
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      {activeCount} impian aktif · {achievedCount} tercapai
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Setting Alokasi Tabungan Harian with Glass Sheen */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3 glass-sheen relative overflow-hidden group">
-                <div className="relative z-10 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                      <Sliders className="w-3.5 h-3.5 text-blue-500" />
-                      <span>Target Tabungan Harian</span>
-                    </p>
-                    <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-0.5 rounded-full">
-                      {savingsPercentage}% dari Jatah
-                    </span>
-                  </div>
-
-                  <div className="space-y-1">
-                    <p className="text-xl font-extrabold text-slate-900 dark:text-white money">
-                      {rupiah(dailySavingsRate)} <span className="text-xs font-normal text-slate-400">/ hari</span>
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      Dihitung dari jatah harian lo: {rupiah(dailyAllowance)}/hari
-                    </p>
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-2">
-                    <div className="flex items-center justify-between text-[11px] font-semibold text-slate-500 dark:text-slate-400">
-                      <span>Pilih Persentase Komitmen:</span>
-                      <span className="text-blue-600 dark:text-blue-400 font-bold">{savingsPercentage}%</span>
-                    </div>
-                    <div className="grid grid-cols-4 gap-1.5">
-                      {[10, 20, 30, 50].map((pct) => (
-                        <button
-                          key={pct}
-                          type="button"
-                          onClick={() => handleSavingsPercentageChange(pct)}
-                          className={`py-1.5 text-xs font-bold rounded-xl transition-all ${
-                            savingsPercentage === pct
-                              ? "bg-blue-600 text-white shadow-xs"
-                              : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
-                          }`}
-                        >
-                          {pct}%
-                        </button>
-                      ))}
+                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                        <span>Tabungan aktif: <strong className="text-slate-900 dark:text-white">{rupiah(currentSavings)}</strong></span>
+                      </p>
+                      <p className="text-[11px] text-slate-400">
+                        {activeCount} impian · {achievedCount} tercapai
+                      </p>
                     </div>
 
-                    <input
-                      type="range"
-                      min={5}
-                      max={80}
-                      step={5}
-                      value={savingsPercentage}
-                      onChange={(e) => handleSavingsPercentageChange(Number(e.target.value))}
-                      className="w-full accent-blue-600 cursor-pointer mt-1"
-                    />
+                    <div className="pt-2 border-t border-slate-100 dark:border-slate-800/60 flex items-center justify-between text-xs">
+                      <span className="text-slate-500">Target Alokasi:</span>
+                      <Link
+                        href="/profile"
+                        className="font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
+                        title="Atur persentase di menu Profil"
+                      >
+                        <span>{rupiah(dailySavingsRate)}/hari ({savingsPercentage}%)</span>
+                      </Link>
+                    </div>
                   </div>
                 </div>
               </div>
