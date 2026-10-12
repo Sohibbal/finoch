@@ -87,7 +87,7 @@ export function ManualTransactionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/50 dark:bg-black/70 backdrop-blur-md animate-fade-in">
-      <div className="w-full max-w-lg rounded-[2.25rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 shadow-2xl glass-sheen relative overflow-hidden group space-y-5">
+      <div className="w-full max-w-lg rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-6 sm:p-7 shadow-2xl glass-sheen relative overflow-hidden group space-y-5">
         {/* Background Watermark Icon */}
         <Plus
           className="absolute -right-3 -bottom-3 w-32 h-32 text-indigo-500/10 dark:text-indigo-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"

@@ -338,7 +338,7 @@ export default function DashboardPage() {
 
       {/* Outer ambient container matching Subly floating canvas */}
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-[2.25rem] bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
+        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
           
           {/* ROW 1: FinBot Daily Insight (Paling Atas, tinggi sama dengan card Saldo Bersih) */}
           <div className="w-full animate-content-in">
@@ -354,7 +354,7 @@ export default function DashboardPage() {
               {/* BARIS METRIK: Saldo Bersih & Total Pemasukan di atas Total Pengeluaran */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* CARD 1: Saldo Bersih */}
-                <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+                <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
                   {/* Transparent Watermark Icon */}
                   <Wallet
                     className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -425,7 +425,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* CARD 2: Total Pemasukan */}
-                <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+                <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
                   {/* Transparent Panah Naik Watermark */}
                   <ArrowUpRight
                     className="absolute -right-3 -bottom-3 w-28 h-28 text-emerald-500/10 dark:text-emerald-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -478,7 +478,7 @@ export default function DashboardPage() {
               <TransactionBarChart transactions={transactions} />
 
               {/* CARD: Riwayat Transaksi Terbaru (Tepat di bawah dan ukuran lebar yang sama dengan tren transaksi) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
                 {/* Transparent Receipt Watermark */}
                 <Receipt
                   className="absolute -right-3 -bottom-3 w-32 h-32 text-slate-400/5 dark:text-slate-300/5 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -601,7 +601,7 @@ export default function DashboardPage() {
             <div className="lg:col-span-4 space-y-6">
               
               {/* CARD: Total Pengeluaran (Dipindahkan ke posisi card wishlist sebelumnya) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
                 {/* Transparent Panah Turun Watermark */}
                 <ArrowDownRight
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -652,7 +652,7 @@ export default function DashboardPage() {
               </div>
 
               {/* CARD: Top 3 Wishlist Impian (Tepat di bawah card Total Pengeluaran, tinggi sejajar dengan Tren Bar Chart) */}
-              <div className="rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group min-h-[460px] lg:h-[460px] flex flex-col justify-between">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group min-h-[460px] lg:h-[460px] flex flex-col justify-between">
                 {/* Transparent Gift Watermark */}
                 <Gift
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-amber-500/5 dark:text-amber-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"

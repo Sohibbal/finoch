@@ -87,7 +87,7 @@ export function CategoryPieChart({
   return (
     <div
       ref={containerRef}
-      className={`rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 glass-sheen relative overflow-hidden group ${className}`}
+      className={`rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 glass-sheen relative overflow-hidden group ${className}`}
     >
       {type === "income" ? (
         <ArrowUpRight

@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "seed:demo": "node scripts/seed-demo-user.mjs",
     "postinstall": "node scripts/copy-wasm.mjs"
   },
   "dependencies": {

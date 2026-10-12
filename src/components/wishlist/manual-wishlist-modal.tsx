@@ -46,7 +46,7 @@ export function ManualWishlistModal({ isOpen, onClose, onSave }: ManualWishlistM
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-md bg-paper dark:bg-navy-900 rounded-3xl p-6 shadow-xl border border-ink/10 dark:border-navy-800 space-y-5">
+      <div className="w-full max-w-md bg-paper dark:bg-navy-900 rounded-2xl p-6 shadow-xl border border-ink/10 dark:border-navy-800 space-y-5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-950 flex items-center justify-center text-primary-600 dark:text-primary-400">

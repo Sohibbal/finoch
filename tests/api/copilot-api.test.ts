@@ -53,4 +53,18 @@ describe("Copilot Prompt Builder", () => {
     expect(prompt).toContain("PERTANYAAN BULAN TERTENTU");
     expect(prompt).toContain("PERTANYAAN KATEGORI");
   });
+
+  it("instructs LLM to evaluate today spending against daily allowance rather than net balance alone", () => {
+    const prompt = buildCopilotSystemPrompt({
+      nickname: "Budi",
+      monthlyIncome: 3000000,
+      monthlyExpense: 1000000,
+      netBalance: 2000000,
+      todayExpense: 120000,
+      dailyAllowance: 50000,
+    });
+    expect(prompt).toContain("PERTANYAAN AMAN / BOROS / JATAH PENGELUARAN HARI INI");
+    expect(prompt).toContain("TARGET JATAH HARIAN");
+    expect(prompt).toContain("DILARANG KERAS MENGGUNAKAN TANDA STRIP EM DASH");
+  });
 });

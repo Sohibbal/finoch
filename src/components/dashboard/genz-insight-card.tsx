@@ -27,12 +27,12 @@ function FinBotFullHeightLogo({ mood }: { mood: "hype" | "happy" | "warning" }) 
     <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center finbot-fade-loop select-none">
       {/* Ambient Looping Aura Glow */}
       <div
-        className="absolute inset-0 rounded-3xl blur-lg opacity-40 dark:opacity-50 transition-colors"
+        className="absolute inset-0 rounded-2xl blur-lg opacity-40 dark:opacity-50 transition-colors"
         style={{ backgroundColor: accentColor }}
       />
 
       {/* Modern FinBot Logo Emblem using Sidebar Bot Icon */}
-      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-700/80 shadow-lg flex items-center justify-center">
+      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-700/80 shadow-lg flex items-center justify-center">
         <Bot
           className="w-9 h-9 sm:w-11 sm:h-11"
           style={{ color: accentColor }}
@@ -50,7 +50,7 @@ export function GenZInsightCard({ nickname, insight, className = "" }: GenZInsig
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[2rem] backdrop-blur-xl border shadow-xs transition-all glass-sheen min-h-[178px] flex flex-row items-stretch before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none ${
+      className={`relative overflow-hidden rounded-2xl backdrop-blur-xl border shadow-xs transition-all glass-sheen min-h-[178px] flex flex-row items-stretch before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none ${
         isWarning
           ? "bg-amber-500/[0.05] dark:bg-amber-950/25 border-amber-300/70 dark:border-amber-800/60"
           : isHype

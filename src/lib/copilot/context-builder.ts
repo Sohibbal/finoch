@@ -43,6 +43,8 @@ export interface UserFinancialSnapshot {
   topExpenseItem?: string;
   wishlistSummary?: string;
   streakDays?: number;
+  todayExpense?: number;
+  dailyAllowance?: number;
 }
 
 const MONTH_NAMES_ID = [
@@ -58,16 +60,30 @@ export function formatFinancialContextForLLM(snapshot: UserFinancialSnapshot): s
   const curExp = snapshot.currentMonthExpense ?? snapshot.monthlyExpense ?? 0;
   const allInc = snapshot.allTimeIncome ?? snapshot.monthlyIncome ?? 0;
   const allExp = snapshot.allTimeExpense ?? snapshot.monthlyExpense ?? 0;
+  const todayExp = snapshot.todayExpense ?? 0;
+  const allowance = snapshot.dailyAllowance && snapshot.dailyAllowance > 0 ? snapshot.dailyAllowance : 50000;
+  const isOverspent = todayExp > allowance;
+  const overspentAmount = isOverspent ? todayExp - allowance : 0;
+  const remainingAllowance = isOverspent ? 0 : allowance - todayExp;
 
   let text = `DATA FAKTA KEUANGAN LIVE PENGGUNA (DARI DATABASE PRIBADI):
 - Nama Panggilan: ${snapshot.nickname || "Teman"}
-- Saldo Bersih: ${rupiah(snapshot.netBalance)}
+- Target Jatah Harian: ${rupiah(allowance)} / hari
+- Total Pengeluaran Hari Ini: ${rupiah(todayExp)}
+- Status Jatah Hari Ini: ${isOverspent ? `KURANG AMAN (MELEBIHI JATAH / OVERBUDGET sebesar ${rupiah(overspentAmount)})` : `AMAN (Sisa jatah hari ini: ${rupiah(remainingAllowance)})`}
+- Saldo Bersih / Tabungan Total: ${rupiah(snapshot.netBalance)}
 - Total Pemasukan Bulan Ini: ${rupiah(curInc)}
 - Total Pengeluaran Bulan Ini: ${rupiah(curExp)}
 - Pos Pengeluaran Terbesar: ${snapshot.currentMonthTopCategory || snapshot.topExpenseCategory || "Belum ada catatan"}
 - Transaksi Terbesar: ${snapshot.topExpenseItem || "Belum ada catatan"}
 - Daftar Wishlist Aktif: ${snapshot.wishlistSummary || "Belum ada wishlist"}
 - Streak Hemat Disiplin: ${snapshot.streakDays || 0} hari
+
+0. STATUS JATAH HARIAN & HARI INI:
+- Target Jatah Harian (User Setting): ${rupiah(allowance)} / hari
+- Pengeluaran Hari Ini: ${rupiah(todayExp)}
+- Sisa Jatah Hari Ini: ${rupiah(remainingAllowance)}
+- Status Evaluasi: ${isOverspent ? `KURANG AMAN (Melebihi target jatah harian lo sebesar ${rupiah(overspentAmount)}, tapi saldo tabungan masih ada ${rupiah(snapshot.netBalance)})` : `AMAN (Masih hemat dalam batas jatah harian, sisa jatah ${rupiah(remainingAllowance)})`}
 
 1. RANGKUMAN BULAN INI (${currentMonth}):
 - Total Pemasukan Bulan Ini: ${rupiah(curInc)}
@@ -140,6 +156,8 @@ export async function buildUserFinancialSnapshot(
     topExpenseCategory?: string;
     wishlistSummary?: string;
     streakDays?: number;
+    dailyAllowance?: number;
+    todayExpense?: number;
   }
 ): Promise<UserFinancialSnapshot> {
   const defaultSnapshot: UserFinancialSnapshot = {
@@ -147,6 +165,8 @@ export async function buildUserFinancialSnapshot(
     netBalance: 0,
     monthlyIncome: 0,
     monthlyExpense: 0,
+    todayExpense: 0,
+    dailyAllowance: 50000,
     topExpenseCategory: "Belum ada catatan",
     topExpenseItem: "Belum ada",
     wishlistSummary: "Belum ada wishlist aktif",
@@ -230,6 +250,7 @@ export async function buildUserFinancialSnapshot(
     let allTimeExpense = 0;
     let currentMonthIncome = 0;
     let currentMonthExpense = 0;
+    let todayExpense = 0;
 
     const monthlyMap: Record<string, { income: number; expense: number; catMap: Record<string, number> }> = {};
     const catMapAllTime: Record<string, { amount: number; count: number }> = {};
@@ -237,7 +258,8 @@ export async function buildUserFinancialSnapshot(
     let highestExpenseItem: { name: string; amount: number } | null = null;
 
     for (const t of txList) {
-      const mKey = t.transactionDate ? t.transactionDate.slice(0, 7) : currentMonthKey;
+      const txDateStr = t.transactionDate ? String(t.transactionDate).slice(0, 10) : "";
+      const mKey = txDateStr ? txDateStr.slice(0, 7) : currentMonthKey;
       if (!monthlyMap[mKey]) {
         monthlyMap[mKey] = { income: 0, expense: 0, catMap: {} };
       }
@@ -251,6 +273,9 @@ export async function buildUserFinancialSnapshot(
       } else if (t.type === "expense") {
         allTimeExpense += t.amount;
         monthlyMap[mKey].expense += t.amount;
+        if (txDateStr === nowStr) {
+          todayExpense += t.amount;
+        }
         const cat = t.category || "Lainnya";
         monthlyMap[mKey].catMap[cat] = (monthlyMap[mKey].catMap[cat] || 0) + t.amount;
 
@@ -270,6 +295,11 @@ export async function buildUserFinancialSnapshot(
         }
       }
     }
+
+    if (clientFacts?.todayExpense !== undefined && todayExpense === 0) {
+      todayExpense = clientFacts.todayExpense;
+    }
+    const dailyAllowance = clientFacts?.dailyAllowance || 50000;
 
     if (allTimeIncome === 0 && currentMonthIncome === 0 && (prisma as any).financialProfile) {
       const fp = await (prisma as any).financialProfile.findUnique({ where: { userId } }).catch(() => null);
@@ -394,6 +424,8 @@ export async function buildUserFinancialSnapshot(
       topExpenseItem: topItemString,
       wishlistSummary: wishlistSummary || clientFacts?.wishlistSummary,
       streakDays: clientFacts?.streakDays || 0,
+      todayExpense,
+      dailyAllowance,
     };
   } catch (err) {
     console.error("Error building financial snapshot for Copilot:", err);

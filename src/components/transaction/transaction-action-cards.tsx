@@ -33,7 +33,7 @@ export function TransactionActionCards({
       <button
         type="button"
         onClick={onOpenVoice}
-        className="w-full text-left rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-blue-400 dark:hover:border-blue-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
+        className="w-full text-left rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-blue-400 dark:hover:border-blue-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
       >
         {/* Transparent Watermark Icon */}
         <Mic
@@ -67,7 +67,7 @@ export function TransactionActionCards({
       <button
         type="button"
         onClick={onOpenScan}
-        className="w-full text-left rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-emerald-400 dark:hover:border-emerald-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
+        className="w-full text-left rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-emerald-400 dark:hover:border-emerald-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
       >
         {/* Transparent Watermark Icon */}
         <ScanLine
@@ -101,7 +101,7 @@ export function TransactionActionCards({
       <button
         type="button"
         onClick={onOpenManual}
-        className="w-full text-left rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-indigo-400 dark:hover:border-indigo-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
+        className="w-full text-left rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 shadow-xs glass-sheen relative overflow-hidden group hover:border-indigo-400 dark:hover:border-indigo-500/70 hover:shadow-md transition-all flex flex-col justify-between min-h-[142px] cursor-pointer"
       >
         {/* Transparent Watermark Icon */}
         <PenLine

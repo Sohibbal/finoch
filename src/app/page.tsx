@@ -2,74 +2,43 @@
 
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
-import { Camera, Mic, PenLine } from "lucide-react";
+import {
+  Zap,
+  ArrowRight,
+  ArrowDown,
+  CheckCircle2,
+  Mic,
+  ScanLine,
+} from "lucide-react";
 import { BrandLogo } from "@/components/brand/brand-logo";
-import { Guilloche } from "@/components/press/guilloche";
-import { SentencePress, EXAMPLE, EXAMPLE_JATAH } from "@/components/landing/sentence-press";
-import { VoiceExpenseSheet } from "@/components/expense/voice-expense-sheet";
+import { LandingNavbar } from "@/components/landing/landing-navbar";
+import { HeroDashboardMockup } from "@/components/landing/hero-dashboard-mockup";
+import { BentoGrid } from "@/components/landing/bento-grid";
+import { FinbotShowcase } from "@/components/landing/finbot-showcase";
+import { SentencePress } from "@/components/landing/sentence-press";
+import { VoiceTransactionModal } from "@/components/transaction/voice-transaction-modal";
 import { ReceiptScannerModal } from "@/components/transaction/receipt-scanner-modal";
 import { UnifiedConfirmationModal } from "@/components/transaction/unified-confirmation-modal";
 import { PrivacyDialog } from "@/components/layout/privacy-dialog";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
-import { NAV_GROUPS } from "@/components/layout/nav-items";
-import { ReceiptLine } from "@/components/press/masuk-receipt-line";
-import { rupiah } from "@/lib/format";
 import type { TransactionCandidate } from "@/types/financial-types";
-
-const PRIMARY =
-  "inline-flex items-center justify-center min-h-12 px-6 rounded-full bg-ink text-paper-sheet dark:text-paper text-body font-bold hover:bg-ink/90 transition-colors";
-const TEXT_LINK = "font-semibold text-ink underline underline-offset-4 decoration-ink/40 hover:decoration-ink";
-
-// What happens after the first sentence; only what the app actually does.
-const HERO_FACTS: [string, string][] = [
-  ["Satu kalimat, beberapa catatan", "Tiap barang jadi catatan sendiri, lengkap dengan kategorinya."],
-  ["Jatah dicetak ulang", "Setiap kamu catat, jatah hari ini langsung dihitung lagi."],
-  ["Tanpa sinyal tetap jalan", "Catatan disimpan di HP dulu, dikirim begitu online lagi."],
-];
-
-// Each feature group printed under its own denomination color.
-const GROUP_RULE: Record<string, string> = {
-  main: "border-ink",
-  student: "border-aman",
-  finances: "border-denom-blue",
-  planning: "border-denom-violet",
-  account: "border-mepet",
-};
 
 const FAQ = [
   {
     q: "Beneran gratis?",
-    a: "Gratis untuk mahasiswa. Tidak ada paket berbayar dan tidak ada iklan.",
+    a: "Finoch gratis digunakan. Tidak ada paket berlangganan tersembunyi dan tidak ada iklan yang mengganggu fokusmu.",
   },
   {
-    q: "Kalau lagi nggak ada sinyal?",
-    a: "Catatan tetap tersimpan di HP dan dikirim ke akunmu begitu online lagi. Mic tanpa sinyal memakai model Whisper yang jalan di perangkat; modelnya diunduh sekali selagi ada internet.",
+    q: "Bagaimana kalau sedang offline tanpa sinyal?",
+    a: "Catatan transaksi tetap tersimpan secara instan di browser/perangkat melalui IndexedDB lokal. Begitu perangkatmu kembali terhubung ke internet, data otomatis disinkronkan ke server.",
   },
   {
-    q: "Suaraku dikirim ke mana?",
-    a: "Saat online, mic memakai pengenal suara bawaan browser (di Chrome diproses oleh layanan Google). Saat offline, suara diproses Whisper di HP-mu sendiri. Finoch tidak menyimpan rekaman suara, hanya teks catatannya, dan kamu selalu melihat hasilnya sebelum disimpan.",
+    q: "Ke mana data suara saya diproses?",
+    a: "Suara diproses menggunakan Speech Recognition browser secara aman. Finoch tidak menyimpan rekaman audio mentah, melainkan hanya teks transaksi yang diekstrak, dan kamu selalu dapat meninjau hasilnya sebelum disimpan.",
   },
   {
-    q: "Salah kategori atau salah angka?",
-    a: "Setiap hasil bisa kamu koreksi sebelum disimpan. Pengeluaran masuk ke lima kategori: Makan & Minum, Transportasi, Tagihan, Belanja & Gaya Hidup, Lainnya.",
-  },
-];
-
-const WAYS = [
-  {
-    icon: Mic,
-    title: "Ngomong",
-    text: "Tekan Catat, sebut belanjaanmu. Beberapa barang dalam satu kalimat juga bisa.",
-  },
-  {
-    icon: Camera,
-    title: "Scan struk",
-    text: "Foto nota minimarket atau warung, totalnya dibaca dari gambar.",
-  },
-  {
-    icon: PenLine,
-    title: "Ketik manual",
-    text: "Kalau lagi di kelas dan nggak bisa ngomong, ketik saja.",
+    q: "Bisa dipasang di layar utama HP seperti aplikasi native?",
+    a: "Bisa. Finoch mendukung standar Progressive Web App (PWA). Cukup buka di browser ponselmu dan pilih opsi Pasang Aplikasi untuk pengalaman layar penuh yang cepat dan hemat memori.",
   },
 ];
 
@@ -90,244 +59,265 @@ export default function LandingPage() {
       .catch(() => {});
   }, []);
 
+  const handleVoiceSave = async (data: {
+    itemName: string;
+    amount: number;
+    category: string;
+    transactionDate: string;
+  }) => {
+    try {
+      const { saveTransaction } = await import("@/lib/storage/transaction-storage");
+      await saveTransaction({
+        itemName: data.itemName,
+        amount: data.amount,
+        category: data.category,
+        type: "expense",
+        source: "voice",
+        transactionDate: data.transactionDate,
+      });
+    } catch (err) {
+      console.error(err);
+    }
+    setIsVoiceOpen(false);
+  };
+
   const handleOcrSuccess = (candidate: TransactionCandidate) => {
     setCurrentCandidate(candidate);
     setIsConfirmModalOpen(true);
   };
 
-  const sisa = EXAMPLE.uangSaku - EXAMPLE.tetap;
-
   return (
-    <div className="min-h-screen bg-paper text-ink">
-      <header className="sticky top-0 z-40 bg-paper border-b border-ink/15 pt-[env(safe-area-inset-top)]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-2.5 flex items-center gap-4">
-          <Link href="/" aria-label="Finoch.id Beranda" className="shrink-0 mr-auto">
-            <BrandLogo variant="full" className="h-7 w-auto" />
-          </Link>
-          <nav aria-label="Bagian halaman" className="hidden md:flex items-center gap-6 text-body text-ink-soft">
-            <a href="#jatah" className="hover:text-ink">Jatah harian</a>
-            <a href="#fitur" className="hover:text-ink">Isi Finoch</a>
-            <a href="#tanya" className="hover:text-ink">Tanya jawab</a>
-          </nav>
-          <ThemeToggle className="hidden md:inline-flex" />
-          {userEmail ? (
-            <Link href="/dashboard" className="inline-flex items-center min-h-11 px-4 rounded-full border border-ink/30 text-body font-semibold hover:bg-ink/5">
-              Buka Finoch
-            </Link>
-          ) : (
-            <Link href="/login" className="inline-flex items-center min-h-11 px-4 rounded-full border border-ink/30 text-body font-semibold hover:bg-ink/5">
-              Masuk
-            </Link>
-          )}
-        </div>
-      </header>
+    <div className="min-h-screen bg-[#eaf0fd] dark:bg-[#070A11] text-slate-900 dark:text-slate-100 transition-colors selection:bg-blue-500 selection:text-white">
+      {/* 1. Floating Navigation Bar */}
+      <LandingNavbar userEmail={userEmail} />
 
-      <main>
-        {/* Hero: what Finoch is, what to do, and the proof right beside it. */}
-        <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-8 sm:pt-16 pb-14 sm:pb-24 grid grid-cols-1 lg:grid-cols-[1fr_minmax(0,34rem)] gap-x-14 gap-y-10 items-start">
-          <div className="space-y-6 lg:pt-10">
-            <h1 className="font-display font-bold text-ink text-numeral leading-[1.05] text-balance">
-              Ngomong aja, Finoch yang nyatat.
-            </h1>
-            <p className="text-body text-ink max-w-[34rem]">
-              Bilang &ldquo;makan warteg delapan belas ribu sama es teh lima ribu&rdquo;, langsung jadi dua catatan. Dari situ
-              Finoch menghitung <strong>jatah aman jajanmu hari ini</strong>, biar uang saku awet sampai akhir bulan.
-            </p>
-            <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
-              {userEmail ? (
-                <Link href="/dashboard" className={PRIMARY}>
-                  Buka Finoch
-                </Link>
-              ) : (
-                <>
-                  <Link href="/register" className={PRIMARY}>
-                    Daftar gratis
-                  </Link>
-                  <p className="text-body text-ink-soft">
-                    Sudah punya akun?{" "}
-                    <Link href="/login" className={TEXT_LINK}>
-                      Masuk
-                    </Link>
-                  </p>
-                </>
-              )}
-            </div>
-            {/* Desktop: the press beside this runs long, so the column says what happens after the first sentence. */}
-            <dl className="hidden lg:block max-w-[34rem] pt-6 border-b border-ink/20">
-              {HERO_FACTS.map(([term, detail]) => (
-                <div key={term} className="py-3 border-t border-ink/20 grid grid-cols-[11rem_1fr] gap-x-6">
-                  <dt className="text-body font-semibold text-ink">{term}</dt>
-                  <dd className="text-body text-ink-soft">{detail}</dd>
-                </div>
-              ))}
-            </dl>
+      <main className="w-full max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-16 space-y-20 sm:space-y-28">
+        {/* 2. Hero Section */}
+        <section className="relative pt-4 sm:pt-8 text-center space-y-6">
+          {/* Subtle Top Ambient Glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-40 bg-blue-500/10 dark:bg-blue-600/15 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Clean Top Tag */}
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-500/10 dark:bg-blue-400/10 border border-blue-500/20 dark:border-blue-400/20 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+            <Zap className="w-3.5 h-3.5" />
+            <span>Finansial Intuitif Generasi Baru</span>
           </div>
 
-          <SentencePress onTryMic={() => setIsVoiceOpen(true)} />
-        </section>
+          {/* Headline */}
+          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.1] text-numeral max-w-4xl mx-auto">
+            Pegang Kendali Finansial Tanpa Ribet.
+          </h1>
 
-        {/* How the one number is made, printed as a receipt. */}
-        <section id="jatah" aria-labelledby="jatah-title" className="scroll-mt-20 border-t border-ink/15">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-24 grid grid-cols-1 md:grid-cols-2 gap-x-14 gap-y-8 items-center">
-            <div className="space-y-4 max-w-prose">
-              <h2 id="jatah-title" className="font-display text-head font-bold text-ink text-balance">
-                Satu angka buat hari ini, bukan sepuluh grafik.
-              </h2>
-              <p className="text-body text-ink">
-                Uang saku dikurangi kos dan tagihan, dibagi hari yang tersisa. Itu jatahmu hari ini. Setiap kali kamu catat,
-                angkanya dicetak ulang.
-              </p>
-              <p className="text-body text-ink">
-                Kelewatan? Tidak ada alarm panik. Besok jatahnya dihitung ulang dari sisa uang bulan ini, jadi kamu tahu persis
-                harus ngerem berapa.
-              </p>
-            </div>
-            <figure className="w-full max-w-md md:justify-self-end bg-paper-sheet border-y-2 border-dashed border-ink/40 px-5 sm:px-7 py-6 space-y-4">
-              <figcaption className="text-meta text-ink-soft">Contoh, tanggal 11 dengan sisa {EXAMPLE.hariLagi} hari</figcaption>
-              <dl className="space-y-2">
-                <ReceiptLine label="Uang saku bulan ini" amount={rupiah(EXAMPLE.uangSaku)} />
-                <ReceiptLine label="Kos, listrik, kuota" amount={rupiah(-EXAMPLE.tetap)} />
-                <ReceiptLine label="Sisa buat hidup" amount={rupiah(sisa)} />
-                <ReceiptLine label={`Dibagi ${EXAMPLE.hariLagi} hari`} amount={`${rupiah(EXAMPLE_JATAH)} / hari`} strong />
-              </dl>
-              <div aria-hidden="true" className="microtext-rule" />
-            </figure>
-          </div>
-        </section>
+          {/* Subtitle */}
+          <p className="text-xs sm:text-base text-slate-600 dark:text-slate-400 max-w-2xl mx-auto leading-relaxed">
+            Tinggalkan spreadsheet kaku dan kalkulator manual yang bikin stres. Finoch mencatat transaksi secepat bicara, memantau jatah harian anti-boncos, serta didampingi AI Copilot pribadi.
+          </p>
 
-        {/* Three ways in; the scanner works right here too. */}
-        <section aria-labelledby="cara-title" className="border-t border-ink/15">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-24 space-y-8">
-            <h2 id="cara-title" className="font-display text-head font-bold text-ink max-w-2xl text-balance">
-              Nyatat pas lagi bayar, pakai satu tangan.
-            </h2>
-            <ul className="grid grid-cols-1 md:grid-cols-3 border-t border-ink/20">
-              {WAYS.map(({ icon: Icon, title, text }) => (
-                <li key={title} className="py-5 md:py-6 md:pr-8 border-b md:border-b-0 border-ink/20 md:[&:not(:first-child)]:border-l md:[&:not(:first-child)]:pl-8 space-y-2">
-                  <h3 className="flex items-center gap-2 text-body font-bold text-ink">
-                    <Icon className="w-5 h-5" strokeWidth={1.8} aria-hidden="true" />
-                    {title}
-                  </h3>
-                  <p className="text-body text-ink-soft">{text}</p>
-                </li>
-              ))}
-            </ul>
-            <p className="text-body text-ink-soft">
-              Mau lihat scan struk bekerja?{" "}
-              <button type="button" onClick={() => setIsScannerOpen(true)} className={`${TEXT_LINK} min-h-11`}>
-                Coba scan struk
-              </button>
-            </p>
-          </div>
-        </section>
-
-        {/* Every feature, by the names the app uses. */}
-        <section id="fitur" aria-labelledby="fitur-title" className="scroll-mt-20 border-t border-ink/15">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 py-14 sm:py-24 space-y-10">
-            <div className="space-y-3 max-w-2xl">
-              <h2 id="fitur-title" className="font-display text-head font-bold text-ink text-balance">
-                Dibuat buat hidup anak kost.
-              </h2>
-              <p className="text-body text-ink">
-                Kos dan UKT, patungan sehabis makan bareng, kasbon teman, sampai godaan checkout jam dua pagi. Semuanya dicetak
-                dari mesin yang sama.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-10 gap-y-10">
-              {NAV_GROUPS.filter((g) => g.id !== "account").map((group) => (
-                <section key={group.id} aria-labelledby={`grup-${group.id}`} className="space-y-3">
-                  <h3 id={`grup-${group.id}`} className={`text-body font-bold text-ink pb-2 border-b-[3px] ${GROUP_RULE[group.id]}`}>
-                    {group.label}
-                  </h3>
-                  <ul className="space-y-3">
-                    {group.items.map((item) => (
-                      <li key={item.href}>
-                        <p className="text-body font-semibold text-ink">{item.label}</p>
-                        <p className="text-meta text-ink-soft">{item.desc}</p>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="tanya" aria-labelledby="tanya-title" className="scroll-mt-20 border-t border-ink/15">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6 py-14 sm:py-24 space-y-6">
-            <h2 id="tanya-title" className="font-display text-head font-bold text-ink">
-              Yang sering ditanya
-            </h2>
-            <div className="border-t border-ink/20">
-              {FAQ.map(({ q, a }, i) => (
-                <details key={q} open={i === 0} className="group border-b border-ink/20">
-                  <summary className="flex items-center justify-between gap-4 min-h-12 py-3 cursor-pointer list-none text-body font-semibold text-ink [&::-webkit-details-marker]:hidden">
-                    {q}
-                    <span aria-hidden="true" className="money text-head leading-none text-ink-soft group-open:rotate-45 motion-safe:transition-transform">
-                      +
-                    </span>
-                  </summary>
-                  <p className="pb-4 text-body text-ink max-w-prose">{a}</p>
-                </details>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* The close: a blue-denomination note with the one thing to do. */}
-        <section aria-labelledby="tutup-title" className="px-4 sm:px-6 pb-14 sm:pb-24">
-          <div className="relative overflow-hidden max-w-6xl mx-auto bg-denom-blue text-paper-sheet dark:text-paper px-6 sm:px-12 py-12 sm:py-16">
-            <Guilloche
-              seed={0x2f6f}
-              size={360}
-              className="absolute -right-24 -top-16 sm:-right-10 !text-paper-sheet dark:!text-paper opacity-40"
-            />
-            <div className="relative max-w-xl space-y-5">
-              <h2 id="tutup-title" className="font-display text-numeral leading-[1.05] font-bold text-balance">
-                Uang saku awet sampai tanggal tua.
-              </h2>
-              <p className="text-body max-w-md">
-                Daftar pakai email kampus atau email biasa, isi uang saku sebulan, lalu catat jajan pertamamu hari ini.
-              </p>
-              <div className="flex flex-wrap items-center gap-x-5 gap-y-3">
+          {/* CTA Buttons */}
+          <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+            {userEmail ? (
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs sm:text-sm hover:opacity-90 transition-all shadow-md"
+              >
+                <span>Buka Dashboard Finoch</span>
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            ) : (
+              <>
                 <Link
-                  href={userEmail ? "/dashboard" : "/register"}
-                  className="inline-flex items-center justify-center min-h-12 px-6 rounded-full bg-paper-sheet text-ink dark:bg-paper dark:text-ink text-body font-bold hover:opacity-90 transition-opacity"
+                  href="/register"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-950 font-bold text-xs sm:text-sm hover:opacity-90 transition-all shadow-md"
                 >
-                  {userEmail ? "Buka Finoch" : "Daftar gratis"}
+                  <span>Mulai Gratis Sekarang</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Link>
-                {!userEmail && (
-                  <Link href="/login" className="text-body font-semibold underline underline-offset-4 hover:decoration-2">
-                    Masuk
-                  </Link>
-                )}
+                <a
+                  href="#demo"
+                  className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 font-semibold text-xs sm:text-sm hover:bg-white dark:hover:bg-slate-800 transition-all shadow-2xs"
+                >
+                  <span>Coba Demo Cepat</span>
+                  <ArrowDown className="w-3.5 h-3.5" />
+                </a>
+              </>
+            )}
+          </div>
+
+          {/* Hero Dashboard Showcase (Like Cobalt Mockup) */}
+          <HeroDashboardMockup />
+        </section>
+
+        {/* 3. Statement / Contrast Section */}
+        <section className="rounded-2xl p-6 sm:p-10 bg-white/80 dark:bg-[#111726]/80 backdrop-blur-xl border border-blue-200/70 dark:border-slate-800/80 shadow-xs grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center">
+          <div className="lg:col-span-6">
+            <h2 className="text-xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-snug">
+              Siapa bilang atur keuangan pribadi harus membosankan?
+            </h2>
+          </div>
+          <div className="lg:col-span-6 space-y-3 text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+            <p>
+              Mengelola uang saku, gaji, dan biaya hidup sehari-hari tidak seharusnya memerlukan rumus spreadsheet yang rumit atau aplikasi kaku yang membebani pikiran.
+            </p>
+            <p>
+              Finoch dirancang agar proses pencatatan terasa instan, jelas, dan memberikan ketenangan pikiran. Cukup sebutkan belanjaanmu atau scan struk kasir, biarkan sistem yang memproses kategorinya secara otomatis.
+            </p>
+          </div>
+        </section>
+
+        {/* 4. Bento Grid Fitur */}
+        <BentoGrid
+          onOpenVoice={() => setIsVoiceOpen(true)}
+          onOpenScan={() => setIsScannerOpen(true)}
+        />
+
+        {/* 5. Spotlight: Meet FinBot */}
+        <FinbotShowcase />
+
+        {/* 6. Interactive Playground (Demo Langsung) */}
+        <section id="demo" className="scroll-mt-20 space-y-6">
+          <div className="max-w-2xl space-y-2">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Uji Coba Langsung di Browser
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
+              Ketik contoh pengeluaranmu di bawah untuk melihat bagaimana kalimat natural langsung dipilah menjadi catatan rapi dengan jatah harian yang dihitung ulang.
+            </p>
+          </div>
+
+          <div className="rounded-2xl p-5 sm:p-8 bg-white dark:bg-[#111726] border border-blue-200/70 dark:border-slate-800/80 shadow-xs space-y-6">
+            <SentencePress onTryMic={() => setIsVoiceOpen(true)} />
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-4 border-t border-slate-100 dark:border-slate-800 text-xs">
+              <span className="text-slate-500 dark:text-slate-400">
+                Ingin mencoba input langsung via mikrofon atau kamera?
+              </span>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsVoiceOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-colors"
+                >
+                  <Mic className="w-3.5 h-3.5" />
+                  <span>Coba Bicara</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsScannerOpen(true)}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors"
+                >
+                  <ScanLine className="w-3.5 h-3.5" />
+                  <span>Coba Scan Struk</span>
+                </button>
               </div>
             </div>
           </div>
         </section>
+
+        {/* 7. FAQ Accordion */}
+        <section id="faq" className="scroll-mt-20 space-y-6">
+          <div className="max-w-2xl space-y-2">
+            <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Yang Sering Ditanyakan
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">
+              Jawaban cepat seputar cara kerja, privasi, dan fitur Finoch.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {FAQ.map(({ q, a }) => (
+              <details
+                key={q}
+                className="group rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-5 shadow-xs transition-colors"
+              >
+                <summary className="flex items-center justify-between gap-4 cursor-pointer list-none text-xs sm:text-sm font-bold text-slate-900 dark:text-white [&::-webkit-details-marker]:hidden">
+                  <span>{q}</span>
+                  <span className="w-6 h-6 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center shrink-0 group-open:rotate-45 transition-transform text-sm font-semibold">
+                    +
+                  </span>
+                </summary>
+                <p className="pt-3 text-xs text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/80 mt-3">
+                  {a}
+                </p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        {/* 8. Bottom CTA Banner (Like Cobalt Bottom Horizon) */}
+        <section className="relative rounded-2xl p-8 sm:p-14 bg-gradient-to-b from-[#111726] to-[#070A11] text-white border border-slate-800/80 shadow-2xl overflow-hidden text-center space-y-6">
+          {/* Top horizon blue line (like Cobalt reference) */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 h-[1px] bg-gradient-to-r from-transparent via-blue-500 to-transparent" />
+          <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-64 h-24 bg-blue-500/20 rounded-full blur-2xl pointer-events-none" />
+
+          <div className="relative z-10 max-w-2xl mx-auto space-y-3">
+            <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight">
+              Mulai Hari Ini. Uang Saku Awet & Impian Terwujud.
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-400 max-w-lg mx-auto leading-relaxed">
+              Aplikasi keuangan pertama yang kamu sukai, dan yang terakhir yang kamu butuhkan. Akses langsung di browser atau pasang aplikasi PWA sekarang.
+            </p>
+          </div>
+
+          <div className="relative z-10 flex flex-wrap items-center justify-center gap-3 pt-2">
+            <Link
+              href={userEmail ? "/dashboard" : "/register"}
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-white text-slate-950 font-bold text-xs sm:text-sm hover:bg-slate-100 transition-all shadow-md"
+            >
+              <span>{userEmail ? "Buka Dashboard" : "Daftar Gratis Sekarang"}</span>
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            {!userEmail && (
+              <Link
+                href="/login"
+                className="inline-flex items-center px-5 py-3 rounded-xl border border-slate-700 bg-slate-900/60 text-slate-300 font-semibold text-xs sm:text-sm hover:text-white hover:bg-slate-800 transition-all"
+              >
+                Masuk ke Akun
+              </Link>
+            )}
+          </div>
+        </section>
+
+        {/* 9. Clean Footer */}
+        <footer className="pt-6 pb-12 border-t border-slate-200/80 dark:border-slate-800/80 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <BrandLogo variant="full" className="h-6 w-auto" />
+              <span>&copy; {new Date().getFullYear()} Finoch. Hak cipta dilindungi.</span>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <button
+                type="button"
+                onClick={() => setIsPrivacyOpen(true)}
+                className="hover:text-slate-900 dark:hover:text-white transition-colors"
+              >
+                Kebijakan Privasi
+              </button>
+              <Link href="/dashboard" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+                Dashboard
+              </Link>
+              <Link href="/copilot" className="hover:text-slate-900 dark:hover:text-white transition-colors">
+                FinBot
+              </Link>
+              <ThemeToggle />
+            </div>
+          </div>
+        </footer>
       </main>
 
-      {/* Bottom padding keeps the landing install banner off the last line of content. */}
-      <footer className="border-t border-ink/15 pb-[calc(7rem+env(safe-area-inset-bottom))] md:pb-24">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 text-body text-ink-soft">
-          <div className="space-y-1 sm:mr-auto">
-            <BrandLogo variant="full" className="h-6 w-auto" />
-            <p className="text-meta">Finansial Anak Kost Rapi Sekali Bicara · &copy; {new Date().getFullYear()} Finoch</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-            <button type="button" onClick={() => setIsPrivacyOpen(true)} className="min-h-11 hover:text-ink underline-offset-4 hover:underline">
-              Kebijakan privasi
-            </button>
-            <Link href="/login" className="inline-flex items-center min-h-11 hover:text-ink underline-offset-4 hover:underline">
-              Masuk
-            </Link>
-            <ThemeToggle showLabel />
-          </div>
-        </div>
-      </footer>
-
-      <VoiceExpenseSheet isOpen={isVoiceOpen} onClose={() => setIsVoiceOpen(false)} onExpenseSaved={() => setIsVoiceOpen(false)} />
-      <ReceiptScannerModal isOpen={isScannerOpen} onClose={() => setIsScannerOpen(false)} onScanSuccess={handleOcrSuccess} />
+      {/* Interactive Modals */}
+      <VoiceTransactionModal
+        isOpen={isVoiceOpen}
+        type="expense"
+        onClose={() => setIsVoiceOpen(false)}
+        onSave={handleVoiceSave}
+      />
+      <ReceiptScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanSuccess={handleOcrSuccess}
+      />
       <UnifiedConfirmationModal
         isOpen={isConfirmModalOpen}
         candidate={currentCandidate}

@@ -85,7 +85,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
 
   return (
     <aside
-      className={`sticky top-3 self-start my-3 ml-3 rounded-[2rem] bg-[#eaf0fd]/95 dark:bg-[#070A11] border border-blue-200/70 dark:border-slate-800/80 shadow-xl shadow-blue-900/5 dark:shadow-2xl dark:shadow-black/50 backdrop-blur-xl flex flex-col py-5 justify-between shrink-0 z-40 transition-all duration-300 h-[calc(100vh-1.5rem)] max-h-screen relative ${
+      className={`sticky top-3 self-start my-3 ml-3 rounded-2xl bg-[#eaf0fd]/95 dark:bg-[#070A11] border border-blue-200/70 dark:border-slate-800/80 shadow-xl shadow-blue-900/5 dark:shadow-2xl dark:shadow-black/50 backdrop-blur-xl flex flex-col py-5 justify-between shrink-0 z-40 transition-all duration-300 h-[calc(100vh-1.5rem)] max-h-screen relative ${
         isExpanded ? "w-56 md:w-60 px-3" : "w-16 md:w-20 px-2 items-center"
       } ${className}`}
     >

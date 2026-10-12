@@ -9,6 +9,7 @@ import { getTransactions } from "@/lib/storage/transaction-storage";
 import { getWishlistItems } from "@/lib/storage/wishlist-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
 import { rupiah } from "@/lib/format";
+import { getDailyAllowanceSetting } from "@/lib/storage/daily-allowance-settings";
 
 interface ChatMessage {
   id: string;
@@ -114,7 +115,18 @@ export default function CopilotPage() {
         getWishlistItems().catch(() => []),
       ]);
 
+      const now = new Date();
+      const todayKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+      let clientTodayExpense = 0;
+      for (const t of txs) {
+        if (t.type === "expense" && t.transactionDate?.startsWith(todayKey)) {
+          clientTodayExpense += t.amount;
+        }
+      }
+
       const clientFacts = {
+        dailyAllowance: getDailyAllowanceSetting(),
+        todayExpense: clientTodayExpense,
         transactions: txs.map((t) => ({
           type: t.type,
           itemName: t.itemName,
@@ -177,10 +189,10 @@ export default function CopilotPage() {
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-[2.25rem] bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 flex flex-col lg:flex-row gap-5 h-[calc(100vh-12rem)] min-h-[580px]">
+        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 flex flex-col lg:flex-row gap-5 h-[calc(100vh-12rem)] min-h-[580px]">
           {/* Left Side: Financial Context & Quick Actions Panel (Desktop) */}
           <aside className="hidden lg:flex lg:w-72 shrink-0 flex-col gap-4 animate-content-in">
-            <div className="rounded-[2rem] p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
+            <div className="rounded-2xl p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
               {/* Transparent Watermark Icon */}
               <Wallet
                 className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/10 dark:text-blue-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -221,7 +233,7 @@ export default function CopilotPage() {
               </div>
             </div>
 
-            <div className="flex-1 rounded-[2rem] p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-3">
+            <div className="flex-1 rounded-2xl p-5 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-3">
               <div className="flex flex-col justify-between h-full space-y-3">
                 <div>
                   <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center gap-1.5">
@@ -252,7 +264,7 @@ export default function CopilotPage() {
           {/* Right Side: Chat Container */}
           <section className="flex-1 flex flex-col min-w-0 h-full animate-content-in">
             {/* Chat message history container */}
-            <div className="flex-1 rounded-[2rem] backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col">
+            <div className="flex-1 rounded-2xl backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col">
               <div className="flex-1 overflow-y-auto space-y-3.5 p-4 sm:p-5">
                 {messages.map((msg) => {
                 const isUser = msg.sender === "user";

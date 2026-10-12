@@ -58,7 +58,7 @@ export function WishlistItemCard({
 
   return (
     <div
-      className={`rounded-[2rem] p-5 sm:p-6 border transition-all glass-sheen relative overflow-hidden group shadow-xs ${
+      className={`rounded-2xl p-5 sm:p-6 border transition-all glass-sheen relative overflow-hidden group shadow-xs ${
         item.isAchieved
           ? "bg-white/60 dark:bg-[#111726]/60 border-slate-200/60 dark:border-slate-800/60 opacity-75"
           : "bg-white dark:bg-[#111726] border-slate-200/80 dark:border-slate-800 hover:shadow-md hover:border-slate-300 dark:hover:border-slate-700"

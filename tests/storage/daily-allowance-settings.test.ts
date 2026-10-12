@@ -64,16 +64,16 @@ describe("Daily Allowance Settings Storage", () => {
   });
 
   it("dispatches change event when setting updated", () => {
-    let capturedEvent: CustomEvent | null = null;
+    let capturedAllowance: number | null = null;
     const listener = (e: Event) => {
-      capturedEvent = e as CustomEvent;
+      const ce = e as CustomEvent<{ allowance: number }>;
+      capturedAllowance = ce.detail?.allowance ?? null;
     };
 
     window.addEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, listener);
     setDailyAllowanceSetting(120000);
 
-    expect(capturedEvent).not.toBeNull();
-    expect(capturedEvent?.detail?.allowance).toBe(120000);
+    expect(capturedAllowance).toBe(120000);
 
     window.removeEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, listener);
   });

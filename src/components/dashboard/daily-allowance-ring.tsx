@@ -32,7 +32,7 @@ export function DailyAllowanceRing({
 
   return (
     <div
-      className={`p-5 sm:p-6 rounded-[2rem] bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group ${className}`}
+      className={`p-5 sm:p-6 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group ${className}`}
     >
       <Coins
         className="absolute -right-3 -bottom-3 w-28 h-28 text-teal-500/5 dark:text-teal-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"

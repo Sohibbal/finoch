@@ -99,14 +99,14 @@ export function TransactionHistoryTable({
       {isLoading ? (
         <div className="p-12 text-center text-xs text-slate-400">Memuat riwayat...</div>
       ) : filtered.length === 0 ? (
-        <div className="p-12 text-center rounded-3xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#111C2E]/50">
+        <div className="p-12 text-center rounded-2xl border border-dashed border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-[#111C2E]/50">
           <Inbox className="w-9 h-9 mx-auto text-slate-300 dark:text-slate-600 mb-2" strokeWidth={1.5} />
           <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
             {search ? "Tidak ada transaksi yang cocok" : `Belum ada catatan ${type === "income" ? "pemasukan" : "pengeluaran"}.`}
           </p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111C2E] shadow-xs flex-1 flex flex-col justify-between">
+        <div className="overflow-hidden rounded-2xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-[#111C2E] shadow-xs flex-1 flex flex-col justify-between">
           <div className="divide-y divide-slate-100 dark:divide-slate-800">
             {paginatedItems.map((item) => {
               const dateStr = new Date(item.transactionDate).toLocaleDateString("id-ID", {

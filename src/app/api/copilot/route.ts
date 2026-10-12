@@ -69,8 +69,9 @@ export async function POST(req: Request) {
 
           if (res.ok) {
             const data = await res.json();
-            const reply = data.choices?.[0]?.message?.content?.trim();
-            if (reply) {
+            const rawReply = data.choices?.[0]?.message?.content?.trim();
+            if (rawReply) {
+              const reply = rawReply.replace(/—/g, " - ");
               return NextResponse.json({
                 reply,
                 source: "llm",
@@ -109,36 +110,60 @@ export async function POST(req: Request) {
     const curMonthName = facts.currentMonthName || "bulan ini";
     const allInc = facts.allTimeIncome ?? facts.monthlyIncome ?? 0;
     const allExp = facts.allTimeExpense ?? facts.monthlyExpense ?? 0;
+    const todayExp = facts.todayExpense ?? 0;
+    const allowance = facts.dailyAllowance && facts.dailyAllowance > 0 ? facts.dailyAllowance : 50000;
 
     let reply = `Halo ${name}! Nih rangkuman cepat dari database lo: Saldo bersih saat ini ${rupiah(facts.netBalance)}, pemasukan bulan ini ${rupiah(facts.monthlyIncome)}, dan pengeluaran ${rupiah(facts.monthlyExpense)}. Lo bisa tanya detail pengeluaran per bulan, per kategori, atau wishlist lo!`;
 
-    // 1. Specific month matching
-    const monthKeywords = [
-      "januari", "februari", "maret", "april", "mei", "juni",
-      "juli", "agustus", "september", "oktober", "november", "desember"
-    ];
-    const foundMonthWord = monthKeywords.find((m) => lower.includes(m));
+    // 0. Today spending safety vs Daily Allowance target
+    const isTodayQuery =
+      lower.includes("hari ini") ||
+      lower.includes("aman") ||
+      lower.includes("boros") ||
+      lower.includes("jatah");
 
-    // 2. All-time query flag
-    const isAllTimeQuery =
-      lower.includes("selama ini") ||
-      lower.includes("seluruh waktu") ||
-      lower.includes("akumulasi") ||
-      lower.includes("total seluruh") ||
-      lower.includes("sepanjang masa") ||
-      (lower.includes("semua") && (lower.includes("pengeluaran") || lower.includes("transaksi")));
+    if (
+      isTodayQuery &&
+      (lower.includes("aman") ||
+        lower.includes("boros") ||
+        lower.includes("jatah") ||
+        (lower.includes("hari ini") && lower.includes("pengeluaran")))
+    ) {
+      if (todayExp > allowance) {
+        const boncos = todayExp - allowance;
+        reply = `Pengeluaran hari ini (${rupiah(todayExp)}) sudah melebihi target jatah harian lo (${rupiah(allowance)}), jadi hari ini kurang aman karena boncos ${rupiah(boncos)}. Tapi tenang, tabungan atau saldo bersih total lo masih ada ${rupiah(facts.netBalance)}. Besok coba lebih ngerem belanja ya!`;
+      } else {
+        const sisa = allowance - todayExp;
+        reply = `Pengeluaran hari ini (${rupiah(todayExp)}) masih aman di bawah target jatah harian lo (${rupiah(allowance)}). Sisa jatah hari ini masih ada ${rupiah(sisa)}, dan saldo bersih lo ${rupiah(facts.netBalance)}. Mantap, pertahanin terus!`;
+      }
+    } else {
+      // 1. Specific month matching
+      const monthKeywords = [
+        "januari", "februari", "maret", "april", "mei", "juni",
+        "juli", "agustus", "september", "oktober", "november", "desember"
+      ];
+      const foundMonthWord = monthKeywords.find((m) => lower.includes(m));
 
-    // 3. Category matching
-    const matchedCategory = facts.categoryBreakdownAllTime?.find((c) => {
-      const cLower = c.category.toLowerCase();
-      if (lower.includes(cLower)) return true;
-      if (cLower.includes("makan") && (lower.includes("makan") || lower.includes("kuliner") || lower.includes("food") || lower.includes("jajan") || lower.includes("minum"))) return true;
-      if (cLower.includes("transport") && (lower.includes("transport") || lower.includes("bensin") || lower.includes("ojol") || lower.includes("parkir"))) return true;
-      if (cLower.includes("belanja") && (lower.includes("belanja") || lower.includes("shopping") || lower.includes("mall"))) return true;
-      if (cLower.includes("tagihan") && (lower.includes("tagihan") || lower.includes("listrik") || lower.includes("pulsa") || lower.includes("wifi") || lower.includes("air"))) return true;
-      if (cLower.includes("hiburan") && (lower.includes("hiburan") || lower.includes("nonton") || lower.includes("game"))) return true;
-      return false;
-    });
+      // 2. All-time query flag
+      const isAllTimeQuery =
+        lower.includes("selama ini") ||
+        lower.includes("seluruh waktu") ||
+        lower.includes("akumulasi") ||
+        lower.includes("total seluruh") ||
+        lower.includes("sepanjang masa") ||
+        (lower.includes("semua") && (lower.includes("pengeluaran") || lower.includes("transaksi")));
+
+      // 3. Category matching
+      const matchedCategory = facts.categoryBreakdownAllTime?.find((c) => {
+        const cLower = c.category.toLowerCase();
+        if (lower.includes(cLower)) return true;
+        if (cLower.includes("makan") && (lower.includes("makan") || lower.includes("kuliner") || lower.includes("food") || lower.includes("jajan") || lower.includes("minum"))) return true;
+        if (cLower.includes("transport") && (lower.includes("transport") || lower.includes("bensin") || lower.includes("ojol") || lower.includes("parkir"))) return true;
+        if (cLower.includes("belanja") && (lower.includes("belanja") || lower.includes("shopping") || lower.includes("mall"))) return true;
+        if (cLower.includes("tagihan") && (lower.includes("tagihan") || lower.includes("listrik") || lower.includes("pulsa") || lower.includes("wifi") || lower.includes("air"))) return true;
+        if (cLower.includes("hiburan") && (lower.includes("hiburan") || lower.includes("nonton") || lower.includes("game"))) return true;
+        return false;
+      });
 
     if (foundMonthWord) {
       const matchedMonth = facts.monthlyBreakdown?.find(
@@ -188,6 +213,7 @@ export async function POST(req: Request) {
       } else {
         reply = `Waduh ${name}, pengeluaran lo saat ini udah melebihi pemasukan (-${rupiah(Math.abs(facts.netBalance))}). Waktunya pasang rem belanja darurat nih!`;
       }
+    }
     }
 
     return NextResponse.json({

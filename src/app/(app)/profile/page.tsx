@@ -157,7 +157,7 @@ export default function ProfilePage() {
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-[2.25rem] bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6 animate-content-in">
+        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6 animate-content-in">
           {feedback && (
             <div
               className={`p-3.5 rounded-2xl flex items-center gap-2.5 border ${
@@ -180,13 +180,13 @@ export default function ProfilePage() {
             {/* Column 1: Personal Identity & Wishlist Allocation */}
             <div className="space-y-6">
               {/* Card 1: Nickname Setting with Glass Sheen */}
-              <section className="rounded-[2rem] p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
+              <section className="rounded-2xl p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
                 {/* Transparent Watermark Icon */}
                 <User
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/10 dark:text-blue-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
                   strokeWidth={1.5}
                 />
-                <div className="relative z-10 space-y-4">
+                <div className="relative z-10 space-y-3.5">
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                       <User className="w-4 h-4" />
@@ -201,7 +201,7 @@ export default function ProfilePage() {
                     </div>
                   </div>
 
-                  <form onSubmit={handleSaveNickname} className="space-y-3.5 pt-1">
+                  <form onSubmit={handleSaveNickname} className="space-y-2.5 pt-1">
                     <div>
                       <label
                         htmlFor="nickname"
@@ -209,31 +209,32 @@ export default function ProfilePage() {
                       >
                         Panggilan Akrab
                       </label>
-                      <input
-                        id="nickname"
-                        type="text"
-                        required
-                        value={nickname}
-                        onChange={(e) => setNickname(e.target.value)}
-                        placeholder="Contoh: Alex, Budi, Salsa"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-xs"
-                      />
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <input
+                          id="nickname"
+                          type="text"
+                          required
+                          value={nickname}
+                          onChange={(e) => setNickname(e.target.value)}
+                          placeholder="Contoh: Alex, Budi, Salsa"
+                          className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-blue-500 shadow-xs"
+                        />
+                        <button
+                          type="submit"
+                          disabled={isSaving || !nickname.trim()}
+                          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-xs hover:opacity-90 disabled:opacity-50 transition-all shadow-xs shrink-0"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          <span>{isSaving ? "Menyimpan..." : "Simpan Panggilan"}</span>
+                        </button>
+                      </div>
                     </div>
-
-                    <button
-                      type="submit"
-                      disabled={isSaving || !nickname.trim()}
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 font-semibold text-xs hover:opacity-90 disabled:opacity-50 transition-all shadow-xs"
-                    >
-                      <Save className="w-3.5 h-3.5" />
-                      <span>{isSaving ? "Menyimpan..." : "Simpan Panggilan"}</span>
-                    </button>
                   </form>
                 </div>
               </section>
 
               {/* Card 2: Wishlist Savings Allocation (Moved from Wishlist) with Glass Sheen */}
-              <section className="rounded-[2rem] p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
+              <section className="rounded-2xl p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
                 {/* Transparent Watermark Icon */}
                 <Gift
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-purple-500/10 dark:text-purple-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -308,7 +309,7 @@ export default function ProfilePage() {
             {/* Column 2: Display Preferences & Account Management */}
             <div className="space-y-6">
               {/* Card 3: Daily Allowance Target Setting with Glass Sheen */}
-              <section className="rounded-[2rem] p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
+              <section className="rounded-2xl p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
                 {/* Transparent Watermark Icon */}
                 <Coins
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-teal-500/10 dark:text-teal-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -346,20 +347,29 @@ export default function ProfilePage() {
                       >
                         Nominal Jatah Per Hari (Rp)
                       </label>
-                      <div className="relative">
-                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500">
-                          Rp
-                        </span>
-                        <input
-                          id="daily-allowance"
-                          type="text"
-                          inputMode="numeric"
-                          required
-                          value={allowanceInput}
-                          onChange={(e) => setAllowanceInput(e.target.value.replace(/\D/g, ""))}
-                          placeholder="Contoh: 50000"
-                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-xs"
-                        />
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <div className="relative flex-1">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500">
+                            Rp
+                          </span>
+                          <input
+                            id="daily-allowance"
+                            type="text"
+                            inputMode="numeric"
+                            required
+                            value={allowanceInput}
+                            onChange={(e) => setAllowanceInput(e.target.value.replace(/\D/g, ""))}
+                            placeholder="Contoh: 50000"
+                            className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-xs"
+                          />
+                        </div>
+                        <button
+                          type="submit"
+                          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-teal-600 text-white font-semibold text-xs hover:bg-teal-700 transition-all shadow-xs shrink-0"
+                        >
+                          <Save className="w-3.5 h-3.5" />
+                          <span>Simpan Jatah Harian</span>
+                        </button>
                       </div>
                     </div>
 
@@ -384,20 +394,12 @@ export default function ProfilePage() {
                         ))}
                       </div>
                     </div>
-
-                    <button
-                      type="submit"
-                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 text-white font-semibold text-xs hover:bg-teal-700 transition-all shadow-xs"
-                    >
-                      <Save className="w-3.5 h-3.5" />
-                      <span>Simpan Jatah Harian</span>
-                    </button>
                   </form>
                 </div>
               </section>
 
               {/* Card 4: Account Details & Actions with Glass Sheen */}
-              <section className="rounded-[2rem] p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
+              <section className="rounded-2xl p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
                 {/* Transparent Watermark Icon */}
                 <Shield
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"

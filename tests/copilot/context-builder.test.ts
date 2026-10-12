@@ -58,4 +58,30 @@ describe("FinBot Context Builder", () => {
     expect(formatted).toContain("REKAP HISTORI PER BULAN");
     expect(formatted).toContain("RINCIAN PENGELUARAN PER KATEGORI");
   });
+
+  it("formats daily allowance status properly when overspent vs safe", () => {
+    const safeText = formatFinancialContextForLLM({
+      nickname: "Alex",
+      netBalance: 1000000,
+      monthlyIncome: 2000000,
+      monthlyExpense: 500000,
+      todayExpense: 30000,
+      dailyAllowance: 50000,
+    });
+    expect(safeText).toContain("Target Jatah Harian");
+    expect(safeText).toContain("AMAN");
+    expect(safeText).toContain("Sisa jatah hari ini: Rp20.000");
+
+    const overspentText = formatFinancialContextForLLM({
+      nickname: "Alex",
+      netBalance: 1000000,
+      monthlyIncome: 2000000,
+      monthlyExpense: 500000,
+      todayExpense: 120000,
+      dailyAllowance: 50000,
+    });
+    expect(overspentText).toContain("KURANG AMAN");
+    expect(overspentText).toContain("MELEBIHI JATAH");
+    expect(overspentText).toContain("Rp70.000");
+  });
 });

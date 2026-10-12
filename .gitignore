@@ -26,17 +26,23 @@
 *.tsbuildinfo
 next-env.d.ts
 
-# SDD scratch
+# SDD scratch & Large binary data
 .superpowers/
 *.traineddata
 
 # AI Agents & Local Skills
 .agents/
+skills-lock.json
 
 # Self-signed certs for `pnpm dev:lan`
 /.certs
 
-# Impeccable runtime state (decision pages, live server)
-/.impeccable/questions/
-/.impeccable/live/
+# Impeccable runtime state & design reviews
+.impeccable/
 /.playwright-mcp/
+
+# Non-essential design drafts & internal docs
+DESIGN.md
+PRODUCT.md
+docs/
+logo-design/
