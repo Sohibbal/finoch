@@ -41,4 +41,16 @@ describe("Copilot Prompt Builder", () => {
     expect(prompt).toContain("data fakta database");
     expect(prompt).toMatch(/boncos/i);
   });
+
+  it("instructs LLM to distinguish current month vs all-time and respect category filters", () => {
+    const prompt = buildCopilotSystemPrompt({
+      nickname: "Maya",
+      monthlyIncome: 4000000,
+      monthlyExpense: 2500000,
+      netBalance: 1500000,
+    });
+    expect(prompt).toContain('"BULAN INI" VS "SELAMA INI / SEMUA"');
+    expect(prompt).toContain("PERTANYAAN BULAN TERTENTU");
+    expect(prompt).toContain("PERTANYAAN KATEGORI");
+  });
 });

@@ -26,13 +26,15 @@ export async function POST(req: Request) {
     }
 
     // Grounding on live database snapshot
-    let facts: UserFinancialSnapshot = await buildUserFinancialSnapshot(session.userId);
-    if (body.clientFacts && facts.monthlyIncome === 0 && facts.monthlyExpense === 0 && facts.netBalance === 0) {
+    let facts: UserFinancialSnapshot = await buildUserFinancialSnapshot(session.userId, body.clientFacts);
+    if (body.clientFacts && facts.currentMonthIncome === 0 && facts.currentMonthExpense === 0 && facts.netBalance === 0) {
       facts = {
         ...facts,
         netBalance: typeof body.clientFacts.netBalance === "number" ? body.clientFacts.netBalance : facts.netBalance,
         monthlyIncome: typeof body.clientFacts.monthlyIncome === "number" ? body.clientFacts.monthlyIncome : facts.monthlyIncome,
         monthlyExpense: typeof body.clientFacts.monthlyExpense === "number" ? body.clientFacts.monthlyExpense : facts.monthlyExpense,
+        currentMonthIncome: typeof body.clientFacts.monthlyIncome === "number" ? body.clientFacts.monthlyIncome : (facts.currentMonthIncome ?? facts.monthlyIncome),
+        currentMonthExpense: typeof body.clientFacts.monthlyExpense === "number" ? body.clientFacts.monthlyExpense : (facts.currentMonthExpense ?? facts.monthlyExpense),
         topExpenseCategory: body.clientFacts.topExpenseCategory || facts.topExpenseCategory,
         wishlistSummary: body.clientFacts.wishlistSummary || facts.wishlistSummary,
         streakDays: typeof body.clientFacts.streakDays === "number" ? body.clientFacts.streakDays : facts.streakDays,
@@ -101,21 +103,90 @@ export async function POST(req: Request) {
     const name = facts.nickname || "Kawan";
     const rupiah = (n: number) => `Rp${(n || 0).toLocaleString("id-ID")}`;
 
-    let reply = `Halo ${name}! Nih rangkuman cepat dari database lo: Saldo bersih saat ini ${rupiah(facts.netBalance)}, pemasukan bulan ini ${rupiah(facts.monthlyIncome)}, dan pengeluaran ${rupiah(facts.monthlyExpense)}.`;
+    const curInc = facts.currentMonthIncome ?? facts.monthlyIncome ?? 0;
+    const curExp = facts.currentMonthExpense ?? facts.monthlyExpense ?? 0;
+    const curBal = curInc - curExp;
+    const curMonthName = facts.currentMonthName || "bulan ini";
+    const allInc = facts.allTimeIncome ?? facts.monthlyIncome ?? 0;
+    const allExp = facts.allTimeExpense ?? facts.monthlyExpense ?? 0;
 
-    if (lower.includes("masuk") || lower.includes("income") || lower.includes("gaji") || lower.includes("pendapatan")) {
-      reply = `Total pemasukan lo bulan ini tercatat sebesar ${rupiah(facts.monthlyIncome)}. Dengan pengeluaran ${rupiah(facts.monthlyExpense)}, sisa saldo bersih lo saat ini ${rupiah(facts.netBalance)}. Mantap, kawal terus tabungan lo!`;
-    } else if (lower.includes("keluar") || lower.includes("expense") || (lower.includes("pengeluaran") && !lower.includes("pemasukan"))) {
-      reply = `Total pengeluaran lo bulan ini tercatat ${rupiah(facts.monthlyExpense)}. Pos pengeluaran terbanyak ada di ${facts.topExpenseCategory || "pengeluaran harian"}. Selalu pantau jatah harian lo ya!`;
-    } else if (lower.includes("boros") || lower.includes("kategori") || lower.includes("makan") || lower.includes("jajan")) {
-      reply = `Berdasarkan database lo nih ${name}, pos yang paling banyak menyedot pengeluaran ada di ${facts.topExpenseCategory || "pengeluaran harian"}. Biar gak boncos, rem dulu nongkrong gak penting ya!`;
-    } else if (lower.includes("wishlist") || lower.includes("beli") || lower.includes("target")) {
-      reply = `Buat wishlist lo (${facts.wishlistSummary || "belum ada wishlist"}), saldo bersih lo sekarang ${rupiah(facts.netBalance)}. Selalu pastiin ada sisa buat dana darurat sebelum checkout barang incaran lo!`;
-    } else if (lower.includes("aman") || lower.includes("kondisi") || lower.includes("hemat")) {
-      if (facts.netBalance >= 0) {
-        reply = `Kondisi finansial lo masih aman terkendali kok ${name}! Saldo surplus ${rupiah(facts.netBalance)}. Gass pertahanin streak hemat lo!`;
+    let reply = `Halo ${name}! Nih rangkuman cepat dari database lo: Saldo bersih saat ini ${rupiah(facts.netBalance)}, pemasukan bulan ini ${rupiah(facts.monthlyIncome)}, dan pengeluaran ${rupiah(facts.monthlyExpense)}. Lo bisa tanya detail pengeluaran per bulan, per kategori, atau wishlist lo!`;
+
+    // 1. Specific month matching
+    const monthKeywords = [
+      "januari", "februari", "maret", "april", "mei", "juni",
+      "juli", "agustus", "september", "oktober", "november", "desember"
+    ];
+    const foundMonthWord = monthKeywords.find((m) => lower.includes(m));
+
+    // 2. All-time query flag
+    const isAllTimeQuery =
+      lower.includes("selama ini") ||
+      lower.includes("seluruh waktu") ||
+      lower.includes("akumulasi") ||
+      lower.includes("total seluruh") ||
+      lower.includes("sepanjang masa") ||
+      (lower.includes("semua") && (lower.includes("pengeluaran") || lower.includes("transaksi")));
+
+    // 3. Category matching
+    const matchedCategory = facts.categoryBreakdownAllTime?.find((c) => {
+      const cLower = c.category.toLowerCase();
+      if (lower.includes(cLower)) return true;
+      if (cLower.includes("makan") && (lower.includes("makan") || lower.includes("kuliner") || lower.includes("food") || lower.includes("jajan") || lower.includes("minum"))) return true;
+      if (cLower.includes("transport") && (lower.includes("transport") || lower.includes("bensin") || lower.includes("ojol") || lower.includes("parkir"))) return true;
+      if (cLower.includes("belanja") && (lower.includes("belanja") || lower.includes("shopping") || lower.includes("mall"))) return true;
+      if (cLower.includes("tagihan") && (lower.includes("tagihan") || lower.includes("listrik") || lower.includes("pulsa") || lower.includes("wifi") || lower.includes("air"))) return true;
+      if (cLower.includes("hiburan") && (lower.includes("hiburan") || lower.includes("nonton") || lower.includes("game"))) return true;
+      return false;
+    });
+
+    if (foundMonthWord) {
+      const matchedMonth = facts.monthlyBreakdown?.find(
+        (m) =>
+          m.monthName.toLowerCase().includes(foundMonthWord) ||
+          m.monthKey.toLowerCase().includes(foundMonthWord)
+      );
+      if (matchedMonth) {
+        reply = `Berdasarkan database lo untuk ${matchedMonth.monthName}: total pengeluaran sebesar ${rupiah(matchedMonth.expense)}, dan pemasukan sebesar ${rupiah(matchedMonth.income)}.${matchedMonth.topCategory ? ` Pengeluaran terbesarnya di ${matchedMonth.topCategory}.` : ""} Selisih bersih bulan itu: ${rupiah(matchedMonth.income - matchedMonth.expense)}.`;
       } else {
-        reply = `Waduh ${name}, pengeluaran lo bulan ini udah melebihi pemasukan (-${rupiah(Math.abs(facts.netBalance))}). Waktunya pasang rem belanja darurat nih!`;
+        const available = facts.monthlyBreakdown?.map((m) => m.monthName).join(", ");
+        reply = `Di database belum ada catatan transaksi untuk bulan ${foundMonthWord} nih ${name}.${available ? ` Bulan yang tercatat baru: ${available}.` : ""}`;
+      }
+    } else if (matchedCategory) {
+      if (lower.includes("bulan ini") || lower.includes("sekarang")) {
+        const curCat = facts.categoryBreakdownCurrentMonth?.find(
+          (c) => c.category.toLowerCase() === matchedCategory.category.toLowerCase()
+        );
+        if (curCat) {
+          reply = `Pengeluaran lo untuk kategori "${curCat.category}" khusus di ${curMonthName} tercatat sebesar ${rupiah(curCat.amount)} (${curCat.count}x transaksi).`;
+        } else {
+          reply = `Khusus di ${curMonthName}, belum ada catatan pengeluaran untuk kategori "${matchedCategory.category}". Total selama ini untuk kategori ini ada di ${rupiah(matchedCategory.amount)}.`;
+        }
+      } else {
+        reply = `Untuk kategori "${matchedCategory.category}", total pengeluaran lo yang tercatat di database sebesar ${rupiah(matchedCategory.amount)} dari total ${matchedCategory.count} kali transaksi. ${matchedCategory.amount > 1000000 ? "Lumayan berasa nih, jangan lupa dikontrol ya!" : "Masih dalam batas aman kok, mantap!"}`;
+      }
+    } else if (isAllTimeQuery) {
+      reply = `Total akumulasi pengeluaran lo selama ini (seluruh waktu di database) adalah ${rupiah(allExp)}, dengan total pemasukan ${rupiah(allInc)}. Sisa saldo bersih lo saat ini ${rupiah(facts.netBalance)}.`;
+    } else if (lower.includes("masuk") || lower.includes("income") || lower.includes("gaji") || lower.includes("pendapatan")) {
+      reply = `Total pemasukan lo ${curMonthName} tercatat sebesar ${rupiah(curInc)}. Dengan pengeluaran ${rupiah(curExp)}, saldo surplus bulan ini sebesar ${rupiah(curBal)}. Total saldo lo saat ini ${rupiah(facts.netBalance)}. Mantap, kawal terus tabungan lo!`;
+    } else if (lower.includes("keluar") || lower.includes("expense") || (lower.includes("pengeluaran") && !lower.includes("pemasukan"))) {
+      reply = `Total pengeluaran lo ${curMonthName} tercatat sebesar ${rupiah(curExp)}. Pos pengeluaran terbanyak ada di ${facts.currentMonthTopCategory || facts.topExpenseCategory || "pengeluaran harian"}. Selalu pantau jatah harian lo ya!`;
+    } else if (lower.includes("saldo") || lower.includes("uang gue") || lower.includes("sisa uang")) {
+      reply = `Saldo bersih lo saat ini tercatat sebesar ${rupiah(facts.netBalance)}. Untuk ${curMonthName}, pemasukan lo ${rupiah(curInc)} dan pengeluaran ${rupiah(curExp)}.`;
+    } else if (lower.includes("wishlist") || lower.includes("beli") || lower.includes("target")) {
+      reply = `Buat wishlist lo (${facts.wishlistSummary || "belum ada wishlist aktif"}), saldo bersih lo sekarang ${rupiah(facts.netBalance)}. Selalu pastiin ada sisa buat dana darurat sebelum checkout barang incaran lo!`;
+    } else if (lower.includes("terakhir") || lower.includes("terbaru") || lower.includes("riwayat")) {
+      if (facts.recentTransactions && facts.recentTransactions.length > 0) {
+        const list = facts.recentTransactions.slice(0, 5).map((t) => `${t.date}: ${t.name} (${t.type === "income" ? "+" : "-"}${rupiah(t.amount)})`).join(", ");
+        reply = `Ini transaksi terbaru yang tercatat di database lo: ${list}.`;
+      } else {
+        reply = `Belum ada riwayat transaksi yang tercatat di database nih ${name}.`;
+      }
+    } else if (lower.includes("aman") || lower.includes("kondisi") || lower.includes("hemat") || lower.includes("streak")) {
+      if (facts.netBalance >= 0) {
+        reply = `Kondisi finansial lo masih aman terkendali kok ${name}! Saldo surplus ${rupiah(facts.netBalance)}, dan streak disiplin lo udah ${facts.streakDays || 0} hari. Gass pertahanin streak hemat lo!`;
+      } else {
+        reply = `Waduh ${name}, pengeluaran lo saat ini udah melebihi pemasukan (-${rupiah(Math.abs(facts.netBalance))}). Waktunya pasang rem belanja darurat nih!`;
       }
     }
 

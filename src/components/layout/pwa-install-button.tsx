@@ -107,11 +107,11 @@ export function PwaInstallButton() {
         <button
           type="button"
           onClick={handleInstallClick}
-          aria-label="Pasang Aplikasi Finoch"
-          className="flex items-center gap-2 px-4 min-h-10 rounded-full bg-paper-sheet border border-ink/30 text-ink hover:bg-paper-deep text-meta font-semibold transition-colors"
+          aria-label="Install PWA"
+          className="flex items-center gap-2 px-4 min-h-10 rounded-full bg-white dark:bg-[#0E1526] border border-slate-200/90 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold shadow-lg transition-all"
         >
-          <Download className="w-4 h-4" />
-          <span>Pasang Finoch</span>
+          <Download className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+          <span>Install PWA</span>
         </button>
       </div>
     );
@@ -137,7 +137,7 @@ export function PwaInstallButton() {
             className="min-h-11 px-3 bg-ink text-paper-sheet text-meta font-semibold flex items-center gap-1.5 hover:bg-ink/90 transition-colors"
           >
             <Download className="w-4 h-4" aria-hidden="true" />
-            <span>Pasang</span>
+            <span>Install PWA</span>
           </button>
           <button
             type="button"

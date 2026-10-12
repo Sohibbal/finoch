@@ -24,17 +24,17 @@ function FinBotFullHeightLogo({ mood }: { mood: "hype" | "happy" | "warning" }) 
       : "#059669"; // emerald 600
 
   return (
-    <div className="relative w-14 h-14 sm:w-16 sm:h-16 flex items-center justify-center finbot-fade-loop select-none">
+    <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center finbot-fade-loop select-none">
       {/* Ambient Looping Aura Glow */}
       <div
-        className="absolute inset-0 rounded-2xl blur-md opacity-35 dark:opacity-45 transition-colors"
+        className="absolute inset-0 rounded-3xl blur-lg opacity-40 dark:opacity-50 transition-colors"
         style={{ backgroundColor: accentColor }}
       />
 
       {/* Modern FinBot Logo Emblem using Sidebar Bot Icon */}
-      <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 shadow-md flex items-center justify-center">
+      <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white/95 dark:bg-slate-900/95 border border-slate-200/80 dark:border-slate-700/80 shadow-lg flex items-center justify-center">
         <Bot
-          className="w-7 h-7 sm:w-8 sm:h-8"
+          className="w-9 h-9 sm:w-11 sm:h-11"
           style={{ color: accentColor }}
           strokeWidth={2}
           aria-hidden="true"
@@ -66,7 +66,7 @@ export function GenZInsightCard({ nickname, insight, className = "" }: GenZInsig
       />
 
       {/* SISI KIRI: FinBot Logo Emblem dengan tinggi full sesuai card dan efek memudar looping */}
-      <div className="w-20 sm:w-28 shrink-0 self-stretch flex items-center justify-center border-r border-slate-200/70 dark:border-slate-800/70 bg-slate-50/50 dark:bg-slate-800/30 relative z-10 p-3">
+      <div className="w-28 sm:w-36 shrink-0 self-stretch flex items-center justify-center border-r border-slate-200/70 dark:border-slate-800/70 bg-slate-50/50 dark:bg-slate-800/30 relative z-10 p-3 sm:p-4">
         <FinBotFullHeightLogo mood={insight.mood} />
       </div>
 

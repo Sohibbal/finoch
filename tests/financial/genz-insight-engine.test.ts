@@ -41,4 +41,33 @@ describe("Gen-Z Financial Insight Engine", () => {
     expect(insight.body).toContain("Budi");
     expect(insight.mood).toBe("hype");
   });
+
+  it("produces varied phrasing across different variantIndex calls while maintaining consistent sentiment and facts", () => {
+    const v1 = generateDailyGenZInsight({
+      nickname: "Alex",
+      todaySpent: 120000,
+      dailyAllowance: 50000,
+      topWishlistName: "Sepatu Vans",
+      streakDays: 3,
+      variantIndex: 0,
+    });
+
+    const v2 = generateDailyGenZInsight({
+      nickname: "Alex",
+      todaySpent: 120000,
+      dailyAllowance: 50000,
+      topWishlistName: "Sepatu Vans",
+      streakDays: 3,
+      variantIndex: 1,
+    });
+
+    expect(v1.mood).toBe("warning");
+    expect(v2.mood).toBe("warning");
+    expect(v1.body).toContain("Alex");
+    expect(v2.body).toContain("Alex");
+    expect(v1.body).toContain("Sepatu Vans");
+    expect(v2.body).toContain("Sepatu Vans");
+    expect(v1.headline).not.toBe(v2.headline);
+    expect(v1.body).not.toBe(v2.body);
+  });
 });

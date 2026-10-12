@@ -31,4 +31,31 @@ describe("FinBot Context Builder", () => {
     expect(text).toContain("Teman");
     expect(text).toContain("Rp0");
   });
+
+  it("builds multi-month breakdown and category summaries from clientFacts", async () => {
+    const { buildUserFinancialSnapshot } = await import("@/lib/copilot/context-builder");
+
+    const snapshot = await buildUserFinancialSnapshot("demo-user", {
+      transactions: [
+        { type: "expense", amount: 50000, itemName: "Nasi Padang", category: "Makanan", transactionDate: "2026-09-10" },
+        { type: "expense", amount: 150000, itemName: "Bensin Mobil", category: "Transportasi", transactionDate: "2026-08-15" },
+        { type: "income", amount: 5000000, itemName: "Gaji Bulanan", category: "Gaji", transactionDate: "2026-09-01" },
+      ],
+      wishlists: [
+        { name: "iPad Pro", targetPrice: 15000000, isAchieved: false },
+      ],
+      streakDays: 7,
+    });
+
+    expect(snapshot.allTimeIncome).toBe(5000000);
+    expect(snapshot.allTimeExpense).toBe(200000);
+    expect(snapshot.netBalance).toBe(4800000);
+    expect(snapshot.wishlistSummary).toContain("iPad Pro");
+    expect(snapshot.monthlyBreakdown).toBeDefined();
+    expect(snapshot.monthlyBreakdown?.length).toBeGreaterThanOrEqual(2);
+
+    const formatted = formatFinancialContextForLLM(snapshot);
+    expect(formatted).toContain("REKAP HISTORI PER BULAN");
+    expect(formatted).toContain("RINCIAN PENGELUARAN PER KATEGORI");
+  });
 });
