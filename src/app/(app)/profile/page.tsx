@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import {
   User,
   Save,
-  Moon,
   Trash2,
   LogOut,
   CheckCircle2,
@@ -13,21 +12,29 @@ import {
   Shield,
   Smartphone,
   Gift,
+  Coins,
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { useAuthContext } from "@/components/layout/auth-provider";
-import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { rupiah } from "@/lib/format";
 import {
   getWishlistSavingsPercentage,
   setWishlistSavingsPercentage,
   WISHLIST_SETTINGS_CHANGED_EVENT,
 } from "@/lib/storage/wishlist-settings";
+import {
+  getDailyAllowanceSetting,
+  setDailyAllowanceSetting,
+  DAILY_ALLOWANCE_CHANGED_EVENT,
+} from "@/lib/storage/daily-allowance-settings";
 
 export default function ProfilePage() {
   const router = useRouter();
   const { user, logout } = useAuthContext();
   const [nickname, setNickname] = useState("");
   const [savingsPercentage, setSavingsPercentage] = useState<number>(() => getWishlistSavingsPercentage());
+  const [dailyAllowance, setDailyAllowance] = useState<number>(() => getDailyAllowanceSetting());
+  const [allowanceInput, setAllowanceInput] = useState<string>(() => String(getDailyAllowanceSetting()));
   const [isSaving, setIsSaving] = useState(false);
   const [feedback, setFeedback] = useState<{ type: "success" | "error"; message: string } | null>(null);
 
@@ -52,15 +59,45 @@ export default function ProfilePage() {
       }
     };
 
+    const handleAllowanceChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ allowance: number }>;
+      const val = customEvent.detail?.allowance || getDailyAllowanceSetting();
+      setDailyAllowance(val);
+      setAllowanceInput(String(val));
+    };
+
     window.addEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+    window.addEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, handleAllowanceChanged);
     return () => {
       window.removeEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+      window.removeEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, handleAllowanceChanged);
     };
   }, []);
 
   const handleSavingsPercentageChange = (pct: number) => {
     setSavingsPercentage(pct);
     setWishlistSavingsPercentage(pct);
+  };
+
+  const handleSelectPresetAllowance = (val: number) => {
+    setDailyAllowance(val);
+    setAllowanceInput(String(val));
+    setDailyAllowanceSetting(val);
+    setFeedback({ type: "success", message: `Target jatah harian disimpan: ${rupiah(val)} / hari` });
+    setTimeout(() => setFeedback(null), 3000);
+  };
+
+  const handleSaveDailyAllowance = (e: React.FormEvent) => {
+    e.preventDefault();
+    const parsed = parseInt(allowanceInput.replace(/\D/g, ""), 10);
+    if (Number.isNaN(parsed) || parsed < 1000) {
+      setFeedback({ type: "error", message: "Nominal jatah harian minimal Rp 1.000." });
+      return;
+    }
+    setDailyAllowance(parsed);
+    setDailyAllowanceSetting(parsed);
+    setFeedback({ type: "success", message: `Target jatah harian disimpan: ${rupiah(parsed)} / hari` });
+    setTimeout(() => setFeedback(null), 3000);
   };
 
   const handleSaveNickname = async (e: React.FormEvent) => {
@@ -116,7 +153,7 @@ export default function ProfilePage() {
     <>
       <PageHeader
         title="Profil"
-        subtitle="Kelola nama panggilan lo, akun, dan tampilan aplikasi"
+        subtitle="Kelola nama panggilan lo, jatah harian, dan akun"
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
@@ -270,40 +307,92 @@ export default function ProfilePage() {
 
             {/* Column 2: Display Preferences & Account Management */}
             <div className="space-y-6">
-              {/* Card 3: Display Settings with Glass Sheen */}
+              {/* Card 3: Daily Allowance Target Setting with Glass Sheen */}
               <section className="rounded-[2rem] p-5 sm:p-6 backdrop-blur-xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 shadow-xs glass-sheen relative overflow-hidden group space-y-4">
                 {/* Transparent Watermark Icon */}
-                <Moon
-                  className="absolute -right-3 -bottom-3 w-28 h-28 text-indigo-500/10 dark:text-indigo-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
+                <Coins
+                  className="absolute -right-3 -bottom-3 w-28 h-28 text-teal-500/10 dark:text-teal-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
                   strokeWidth={1.5}
                 />
-                <div className="relative z-10 space-y-4">
+                <div className="relative z-10 space-y-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
-                        <Moon className="w-4 h-4" />
+                      <div className="w-9 h-9 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center">
+                        <Coins className="w-4 h-4" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Tema Tampilan</h3>
-                        <p className="text-xs text-slate-500 dark:text-slate-400">Pilih tema terang atau gelap</p>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                          Target Jatah Harian
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
+                          Batas belanja harian pilihan lo
+                        </p>
+                      </div>
+                    </div>
+                    <span className="text-xs font-extrabold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2.5 py-0.5 rounded-full">
+                      {rupiah(dailyAllowance)} / hari
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+                    FinBot dan ring status di dashboard akan menggunakan nominal ini sebagai batas pengeluaran harian lo.
+                  </p>
+
+                  <form onSubmit={handleSaveDailyAllowance} className="space-y-3 pt-1">
+                    <div>
+                      <label
+                        htmlFor="daily-allowance"
+                        className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1"
+                      >
+                        Nominal Jatah Per Hari (Rp)
+                      </label>
+                      <div className="relative">
+                        <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 dark:text-slate-500">
+                          Rp
+                        </span>
+                        <input
+                          id="daily-allowance"
+                          type="text"
+                          inputMode="numeric"
+                          required
+                          value={allowanceInput}
+                          onChange={(e) => setAllowanceInput(e.target.value.replace(/\D/g, ""))}
+                          placeholder="Contoh: 50000"
+                          className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-slate-50 dark:bg-slate-800/80 text-xs font-bold text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-teal-500 shadow-xs"
+                        />
                       </div>
                     </div>
 
-                    <ThemeToggle />
-                  </div>
-
-                  <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs space-y-2">
-                    <div className="flex items-center justify-between py-1">
-                      <span className="text-slate-500 dark:text-slate-400">Arsitektur Aplikasi</span>
-                      <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                        <Smartphone className="w-3.5 h-3.5" />
-                        <span>Local-First PWA</span>
+                    <div className="space-y-1.5">
+                      <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                        Pilihan Cepat:
                       </span>
+                      <div className="grid grid-cols-4 gap-2">
+                        {[30000, 50000, 75000, 100000].map((amt) => (
+                          <button
+                            key={amt}
+                            type="button"
+                            onClick={() => handleSelectPresetAllowance(amt)}
+                            className={`py-2 text-[11px] font-bold rounded-xl transition-all ${
+                              dailyAllowance === amt
+                                ? "bg-teal-600 text-white shadow-xs"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
+                            }`}
+                          >
+                            {amt >= 1000 ? `${amt / 1000}rb` : rupiah(amt)}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed">
-                      Data tersimpan otomatis di perangkat lo dan tersinkron saat terhubung ke internet.
-                    </p>
-                  </div>
+
+                    <button
+                      type="submit"
+                      className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-teal-600 text-white font-semibold text-xs hover:bg-teal-700 transition-all shadow-xs"
+                    >
+                      <Save className="w-3.5 h-3.5" />
+                      <span>Simpan Jatah Harian</span>
+                    </button>
+                  </form>
                 </div>
               </section>
 

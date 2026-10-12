@@ -41,7 +41,7 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
     <header
       className={`sticky top-2.5 z-30 w-full max-w-[1440px] mx-auto px-3 sm:px-5 lg:px-6 pt-1 pb-0.5 print:static ${className}`}
     >
-      <div className="rounded-[2rem] bg-[#eaf0fd]/95 dark:bg-[#070A11]/95 backdrop-blur-xl border border-blue-200/70 dark:border-slate-800/80 shadow-xl shadow-blue-900/5 dark:shadow-2xl dark:shadow-black/50 px-4 sm:px-6 py-2.5 transition-all">
+      <div className="rounded-2xl bg-[#eaf0fd]/95 dark:bg-[#070A11]/95 backdrop-blur-xl border border-blue-200/70 dark:border-slate-800/80 shadow-xl shadow-blue-900/5 dark:shadow-2xl dark:shadow-black/50 px-4 sm:px-6 py-2.5 transition-all">
         <div className="flex items-center justify-between gap-3">
           {/* Left: Brand / Mobile Back / Title */}
           <div className="flex items-center gap-3 min-w-0">

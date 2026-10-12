@@ -26,6 +26,10 @@ import {
   getWishlistSavingsPercentage,
   WISHLIST_SETTINGS_CHANGED_EVENT,
 } from "@/lib/storage/wishlist-settings";
+import {
+  getDailyAllowanceSetting,
+  DAILY_ALLOWANCE_CHANGED_EVENT,
+} from "@/lib/storage/daily-allowance-settings";
 import { calculateStreakMetrics } from "@/lib/financial/streak-engine";
 import { generateDailyGenZInsight } from "@/lib/financial/genz-insight-engine";
 import { calculateWishlistProjection } from "@/lib/financial/wishlist-engine";
@@ -46,6 +50,7 @@ export default function DashboardPage() {
   const [nickname, setNickname] = useState("Kawan");
   const [transactions, setTransactions] = useState<LocalTransaction[]>([]);
   const [wishlists, setWishlists] = useState<LocalWishlist[]>([]);
+  const [configuredAllowance, setConfiguredAllowance] = useState<number>(() => getDailyAllowanceSetting());
   const [isLoading, setIsLoading] = useState(true);
 
   // Modal controls
@@ -166,14 +171,19 @@ export default function DashboardPage() {
   useEffect(() => {
     loadData();
 
-    const handleUpdate = () => loadData();
+    const handleUpdate = () => {
+      loadData();
+      setConfiguredAllowance(getDailyAllowanceSetting());
+    };
     window.addEventListener("finoch:transaction-changed", handleUpdate);
     window.addEventListener("finoch:data-pulled", handleUpdate);
+    window.addEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, handleUpdate);
     window.addEventListener("storage", handleUpdate);
 
     return () => {
       window.removeEventListener("finoch:transaction-changed", handleUpdate);
       window.removeEventListener("finoch:data-pulled", handleUpdate);
+      window.removeEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, handleUpdate);
       window.removeEventListener("storage", handleUpdate);
     };
   }, [loadData]);
@@ -229,16 +239,8 @@ export default function DashboardPage() {
     }
     const displayBalance = displayIncome - displayExpense;
 
-    // Calculate dynamic daily allowance from actual cashflow
-    const now = new Date();
-    const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-    const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
-    const spendableMonth = monthIncome - (monthExpense - todayExpense);
-    const dailyAllowance = monthIncome > 0
-      ? Math.max(10000, Math.round(spendableMonth / daysLeft))
-      : allIncome > 0
-      ? Math.max(10000, Math.round(allIncome / 30))
-      : 50000;
+    // User-configured daily allowance target (not derived from saldo averages)
+    const dailyAllowance = configuredAllowance;
 
     const streakSummary = calculateStreakMetrics(streakCandidates, dailyAllowance);
 
@@ -270,7 +272,7 @@ export default function DashboardPage() {
       insight,
       recentTx,
     };
-  }, [transactions, wishlists, nickname, saldoFilter]);
+  }, [transactions, wishlists, nickname, saldoFilter, configuredAllowance]);
 
   const displayedTx = useMemo(() => {
     return transactions.slice(0, MAX_DASHBOARD_TX);

@@ -20,6 +20,8 @@ describe("Profile Management Page", () => {
     expect(html).toContain("Informasi Akun");
     expect(html).toContain("sari@finoch.id");
     expect(html).toContain("Simpan Panggilan");
+    expect(html).toContain("Target Jatah Harian");
+    expect(html).toContain("Simpan Jatah Harian");
     expect(html).toContain("Keluar dari Akun");
   });
 });

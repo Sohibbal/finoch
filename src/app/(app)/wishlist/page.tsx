@@ -19,6 +19,10 @@ import {
   getWishlistSavingsPercentage,
   WISHLIST_SETTINGS_CHANGED_EVENT,
 } from "@/lib/storage/wishlist-settings";
+import {
+  getDailyAllowanceSetting,
+  DAILY_ALLOWANCE_CHANGED_EVENT,
+} from "@/lib/storage/daily-allowance-settings";
 import { WishlistItemCard } from "@/components/wishlist/wishlist-item-card";
 import { ManualWishlistModal } from "@/components/wishlist/manual-wishlist-modal";
 import { VoiceWishlistModal } from "@/components/wishlist/voice-wishlist-modal";
@@ -26,7 +30,7 @@ import { VoiceWishlistModal } from "@/components/wishlist/voice-wishlist-modal";
 export default function WishlistPage() {
   const [items, setItems] = useState<LocalWishlist[]>([]);
   const [currentSavings, setCurrentSavings] = useState(0);
-  const [dailyAllowance, setDailyAllowance] = useState(50000);
+  const [dailyAllowance, setDailyAllowance] = useState<number>(() => getDailyAllowanceSetting());
   const [savingsPercentage, setSavingsPercentage] = useState<number>(() => getWishlistSavingsPercentage());
   const [isLoading, setIsLoading] = useState(true);
   const [filter, setFilter] = useState<"active" | "achieved" | "all">("active");
@@ -68,15 +72,7 @@ export default function WishlistPage() {
       }
       setCurrentSavings(Math.max(0, income - expenses));
 
-      const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-      const daysLeft = Math.max(1, daysInMonth - now.getDate() + 1);
-      const spendable = monthIncome - (monthExpense - todayExpense);
-      const computedDaily = monthIncome > 0
-        ? Math.max(10000, Math.round(spendable / daysLeft))
-        : income > 0
-        ? Math.max(10000, Math.round(income / 30))
-        : 50000;
-      setDailyAllowance(computedDaily);
+      setDailyAllowance(getDailyAllowanceSetting());
     } finally {
       setIsLoading(false);
     }
@@ -96,9 +92,20 @@ export default function WishlistPage() {
       }
     };
 
+    const handleAllowanceChanged = (e: Event) => {
+      const customEvent = e as CustomEvent<{ allowance: number }>;
+      if (customEvent.detail?.allowance) {
+        setDailyAllowance(customEvent.detail.allowance);
+      } else {
+        setDailyAllowance(getDailyAllowanceSetting());
+      }
+    };
+
     window.addEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+    window.addEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, handleAllowanceChanged);
     return () => {
       window.removeEventListener(WISHLIST_SETTINGS_CHANGED_EVENT, handleSettingsChanged);
+      window.removeEventListener(DAILY_ALLOWANCE_CHANGED_EVENT, handleAllowanceChanged);
     };
   }, []);
 
