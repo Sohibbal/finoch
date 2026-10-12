@@ -1,6 +1,10 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import {
+  renderFormattedMarkdown,
+  sanitizeBotMessage,
+} from "@/components/copilot/formatted-message";
 
 export interface TypewriterTextProps {
   text: string;
@@ -12,6 +16,7 @@ export interface TypewriterTextProps {
   onTick?: (currentLength: number) => void;
   onComplete?: () => void;
   allowSkip?: boolean; // click to instantly reveal full text (default: true)
+  formatMarkdown?: boolean; // enable rich formatting without raw asterisks
 }
 
 /**
@@ -28,6 +33,7 @@ export function TypewriterText({
   onTick,
   onComplete,
   allowSkip = true,
+  formatMarkdown = false,
 }: TypewriterTextProps) {
   const [displayedLength, setDisplayedLength] = useState(0);
   const [isTyping, setIsTyping] = useState(true);
@@ -36,8 +42,10 @@ export function TypewriterText({
   const onTickRef = useRef(onTick);
   onTickRef.current = onTick;
 
+  const processedText = formatMarkdown ? sanitizeBotMessage(text) : text;
+
   useEffect(() => {
-    if (!text) {
+    if (!processedText) {
       setDisplayedLength(0);
       setIsTyping(false);
       return;
@@ -48,15 +56,15 @@ export function TypewriterText({
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches
     ) {
-      setDisplayedLength(text.length);
+      setDisplayedLength(processedText.length);
       setIsTyping(false);
-      onTickRef.current?.(text.length);
+      onTickRef.current?.(processedText.length);
       onCompleteRef.current?.();
       return;
     }
 
     // Adaptive step size based on text length for professional, snappy pacing
-    const step = text.length > 280 ? 3 : text.length > 120 ? 2 : 1;
+    const step = processedText.length > 280 ? 3 : processedText.length > 120 ? 2 : 1;
 
     setDisplayedLength(0);
     setIsTyping(true);
@@ -65,15 +73,15 @@ export function TypewriterText({
     let timerId: NodeJS.Timeout | null = null;
 
     const tick = () => {
-      currentIndex = Math.min(text.length, currentIndex + step);
+      currentIndex = Math.min(processedText.length, currentIndex + step);
       setDisplayedLength(currentIndex);
       onTickRef.current?.(currentIndex);
 
-      if (currentIndex >= text.length) {
+      if (currentIndex >= processedText.length) {
         setIsTyping(false);
         onCompleteRef.current?.();
       } else {
-        const char = text[currentIndex - 1];
+        const char = processedText[currentIndex - 1];
         // Natural micro-pause at punctuation
         const pause =
           char === "." || char === "!" || char === "?"
@@ -94,18 +102,18 @@ export function TypewriterText({
     return () => {
       if (timerId) clearTimeout(timerId);
     };
-  }, [text, speed, delay]);
+  }, [processedText, speed, delay]);
 
   const handleSkip = () => {
     if (allowSkip && isTyping) {
-      setDisplayedLength(text.length);
+      setDisplayedLength(processedText.length);
       setIsTyping(false);
-      onTickRef.current?.(text.length);
+      onTickRef.current?.(processedText.length);
       onCompleteRef.current?.();
     }
   };
 
-  const visibleText = text.slice(0, displayedLength);
+  const visibleText = processedText.slice(0, displayedLength);
 
   return (
     <span
@@ -113,9 +121,15 @@ export function TypewriterText({
       onClick={handleSkip}
       title={isTyping && allowSkip ? "Klik untuk tampilkan semua" : undefined}
     >
-      <span className="sr-only">{text}</span>
-      <span aria-hidden="true">
-        {visibleText}
+      <span className="sr-only">{processedText}</span>
+      <span aria-hidden="true" className={formatMarkdown ? "block w-full" : ""}>
+        {formatMarkdown ? (
+          <span className="inline-block w-full">
+            {renderFormattedMarkdown(visibleText, isTyping)}
+          </span>
+        ) : (
+          visibleText
+        )}
         {isTyping && showCursor && (
           <span
             className={`inline-block w-1.5 h-3.5 ml-0.5 align-middle bg-blue-500 dark:bg-blue-400 rounded-xs animate-pulse ${cursorClassName}`}

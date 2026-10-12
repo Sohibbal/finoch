@@ -1,9 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Send, Loader2, Sparkles, Wallet, TrendingUp, TrendingDown } from "lucide-react";
+import { Send, Loader2, Sparkles, Wallet, TrendingUp, TrendingDown, Bot } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { TypewriterText } from "@/components/ui/typewriter-text";
+import { FormattedBotMessage } from "@/components/copilot/formatted-message";
 import { getTransactions } from "@/lib/storage/transaction-storage";
 import { getWishlistItems } from "@/lib/storage/wishlist-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
@@ -17,24 +18,11 @@ interface ChatMessage {
   source?: "llm" | "facts_fallback";
 }
 
-/** Original FinBot vector mark - geometric wallet & pulse emblem */
+/** FinBot avatar mark - matching sidebar Bot icon */
 function FinBotAvatar() {
   return (
     <div className="w-8 h-8 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 border border-blue-500/20 shadow-xs finbot-fade-loop">
-      <svg
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        className="w-4 h-4"
-        aria-hidden="true"
-      >
-        <rect x="2" y="5" width="20" height="14" rx="3" />
-        <path d="M2 9h20" />
-        <circle cx="16" cy="14" r="1.5" fill="currentColor" />
-      </svg>
+      <Bot className="w-4 h-4" strokeWidth={2} aria-hidden="true" />
     </div>
   );
 }
@@ -44,7 +32,7 @@ export default function CopilotPage() {
     {
       id: "msg-1",
       sender: "copilot",
-      text: "Yo! Gue FinBot 🤖 Asisten finansial pribadi lo. Tanya apa aja soal duit lo: 'Bulan ini gue paling boros apa?', 'Sisa uang jajan aman gak?', atau 'Kapan wishlist gue bisa kebeli?'. Semua langsung gue cek dari database lo, no halu-halu!",
+      text: "Yo! Gue FinBot, asisten finansial pribadi lo. Tanya apa aja soal duit lo: 'Bulan ini gue paling boros apa?', 'Sisa uang jajan aman gak?', atau 'Kapan wishlist gue bisa kebeli?'. Semua langsung gue cek dari database lo, no halu-halu!",
       timestamp: "Baru saja",
       source: "facts_fallback",
     },
@@ -52,7 +40,7 @@ export default function CopilotPage() {
   const [inputMessage, setInputMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [summary, setSummary] = useState({ income: 0, expense: 0, balance: 0 });
-  const [completedMsgIds, setCompletedMsgIds] = useState<Set<string>>(() => new Set());
+  const [completedMsgIds, setCompletedMsgIds] = useState<Set<string>>(() => new Set(["msg-1"]));
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const scrollFrameRef = useRef<number | null>(null);
 
@@ -282,12 +270,15 @@ export default function CopilotPage() {
                           : "bg-slate-50 dark:bg-slate-800/90 border border-slate-200/70 dark:border-slate-700/70 text-slate-800 dark:text-white rounded-tl-xs"
                       }`}
                     >
-                      <div className="text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
-                        {isUser || completedMsgIds.has(msg.id) ? (
-                          msg.text
+                      <div className="text-xs sm:text-sm leading-relaxed">
+                        {isUser ? (
+                          <div className="whitespace-pre-wrap">{msg.text}</div>
+                        ) : completedMsgIds.has(msg.id) ? (
+                          <FormattedBotMessage text={msg.text} />
                         ) : (
                           <TypewriterText
                             text={msg.text}
+                            formatMarkdown={true}
                             speed={12}
                             onTick={() => scrollToBottom(false)}
                             onComplete={() => {

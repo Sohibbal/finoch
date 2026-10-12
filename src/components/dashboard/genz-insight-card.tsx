@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { Bot } from "lucide-react";
 import type { GenZInsightResult } from "@/lib/financial/genz-insight-engine";
 import { TypewriterText } from "@/components/ui/typewriter-text";
 
@@ -12,6 +13,7 @@ interface GenZInsightCardProps {
 
 /**
  * Full-height FinBot logo emblem on the left side with looping fade/breathe effect
+ * Matching the exact Bot icon used in the sidebar.
  */
 function FinBotFullHeightLogo({ mood }: { mood: "hype" | "happy" | "warning" }) {
   const accentColor =
@@ -29,39 +31,14 @@ function FinBotFullHeightLogo({ mood }: { mood: "hype" | "happy" | "warning" }) 
         style={{ backgroundColor: accentColor }}
       />
 
-      {/* Modern FinBot Logo Emblem */}
+      {/* Modern FinBot Logo Emblem using Sidebar Bot Icon */}
       <div className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-white/90 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-700/80 shadow-md flex items-center justify-center">
-        <svg
-          viewBox="0 0 44 44"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
+        <Bot
           className="w-7 h-7 sm:w-8 sm:h-8"
+          style={{ color: accentColor }}
+          strokeWidth={2}
           aria-hidden="true"
-        >
-          {/* Robot & Wallet hybrid visor frame */}
-          <rect
-            x="6"
-            y="8"
-            width="32"
-            height="28"
-            rx="7"
-            stroke={accentColor}
-            strokeWidth="2.2"
-          />
-          {/* Folded Cantilever Flap */}
-          <path
-            d="M6 14L22 24L38 14"
-            stroke={accentColor}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-          {/* Central AI Interactive Pulse Node */}
-          <circle cx="22" cy="24" r="3.5" fill={accentColor} />
-          {/* Acoustic nodes */}
-          <circle cx="14" cy="30" r="1.5" fill={accentColor} fillOpacity="0.8" />
-          <circle cx="30" cy="30" r="1.5" fill={accentColor} fillOpacity="0.8" />
-        </svg>
+        />
       </div>
     </div>
   );
@@ -73,7 +50,7 @@ export function GenZInsightCard({ nickname, insight, className = "" }: GenZInsig
 
   return (
     <div
-      className={`relative overflow-hidden rounded-[2rem] backdrop-blur-xl border shadow-xs transition-all glass-sheen min-h-[178px] flex flex-row items-stretch before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none after:absolute after:top-0 after:left-7 after:w-10 after:h-1 after:rounded-b-md after:bg-slate-300/80 dark:after:bg-slate-700/80 after:shadow-sm ${
+      className={`relative overflow-hidden rounded-[2rem] backdrop-blur-xl border shadow-xs transition-all glass-sheen min-h-[178px] flex flex-row items-stretch before:absolute before:inset-0 before:bg-gradient-to-tr before:from-transparent before:via-white/[0.08] dark:before:via-white/[0.03] before:to-transparent before:pointer-events-none ${
         isWarning
           ? "bg-amber-500/[0.05] dark:bg-amber-950/25 border-amber-300/70 dark:border-amber-800/60"
           : isHype
@@ -82,18 +59,11 @@ export function GenZInsightCard({ nickname, insight, className = "" }: GenZInsig
       } ${className}`}
     >
       {/* Background Transparent Watermark */}
-      <svg
-        viewBox="0 0 44 44"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
+      <Bot
         className="absolute -right-6 -bottom-6 w-36 h-36 opacity-[0.04] dark:opacity-[0.07] text-slate-900 dark:text-white pointer-events-none select-none"
+        strokeWidth={1.5}
         aria-hidden="true"
-      >
-        <rect x="7" y="10" width="30" height="24" rx="5" stroke="currentColor" strokeWidth="2" />
-        <path d="M7 14L22 23L37 14" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" />
-        <circle cx="22" cy="23" r="3" fill="currentColor" />
-        <path d="M12 30H32" stroke="currentColor" strokeWidth="1.5" strokeDasharray="2 3" strokeLinecap="round" />
-      </svg>
+      />
 
       {/* SISI KIRI: FinBot Logo Emblem dengan tinggi full sesuai card dan efek memudar looping */}
       <div className="w-20 sm:w-28 shrink-0 self-stretch flex items-center justify-center border-r border-slate-200/70 dark:border-slate-800/70 bg-slate-50/50 dark:bg-slate-800/30 relative z-10 p-3">
