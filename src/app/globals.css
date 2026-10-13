@@ -248,13 +248,148 @@ body {
   }
 }
 
-.animate-scanner-laser {
-  animation: scannerLaser 2.2s ease-in-out infinite;
+
+/* Cobalt Grid System & Glow Atmosphere */
+.cobalt-grid {
+  background-size: 56px 56px;
+  background-image: 
+    linear-gradient(to right, rgba(37, 99, 235, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.07) 1px, transparent 1px);
+}
+
+.dark .cobalt-grid {
+  background-size: 56px 56px;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+}
+
+/* Clear 2D Cobalt Square Grid (80px) for Hero (fades down toward middle) */
+.cobalt-grid-hero {
+  background-size: 80px 80px;
+  background-position: center top;
+  background-image: 
+    linear-gradient(to right, rgba(37, 99, 235, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.2) 1px, transparent 1px);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 50%, rgba(0, 0, 0, 0) 95%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 50%, rgba(0, 0, 0, 0) 95%);
+}
+
+.dark .cobalt-grid-hero {
+  background-size: 80px 80px;
+  background-position: center top;
+  background-image: 
+    linear-gradient(to right, rgba(96, 165, 250, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(96, 165, 250, 0.25) 1px, transparent 1px);
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 50%, rgba(0, 0, 0, 0) 95%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.85) 50%, rgba(0, 0, 0, 0) 95%);
+}
+
+/* Clear 2D Cobalt Square Grid (80px) for Footer (fades back in toward bottom) */
+.cobalt-grid-footer {
+  background-size: 80px 80px;
+  background-position: center bottom;
+  background-image: 
+    linear-gradient(to right, rgba(37, 99, 235, 0.2) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(37, 99, 235, 0.2) 1px, transparent 1px);
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0) 90%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0) 90%);
+}
+
+.dark .cobalt-grid-footer {
+  background-size: 80px 80px;
+  background-position: center bottom;
+  background-image: 
+    linear-gradient(to right, rgba(96, 165, 250, 0.25) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(96, 165, 250, 0.25) 1px, transparent 1px);
+  -webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0) 90%);
+  mask-image: linear-gradient(to top, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0) 90%);
+}
+
+/* Vertical guide lines overlay (like Cobalt editorial layout) */
+.cobalt-guides {
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(100% / 6 - 1px),
+    rgba(59, 130, 246, 0.04) calc(100% / 6 - 1px),
+    rgba(59, 130, 246, 0.04) calc(100% / 6)
+  );
+}
+
+.dark .cobalt-guides {
+  background-image: repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent calc(100% / 6 - 1px),
+    rgba(255, 255, 255, 0.02) calc(100% / 6 - 1px),
+    rgba(255, 255, 255, 0.02) calc(100% / 6)
+  );
+}
+
+/* Smooth cubic-bezier ease-out transitions */
+.transition-card {
+  transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hover-card-lift:hover {
+  transform: translateY(-4px);
+}
+
+/* Subtle organic ambient floating particle animations */
+@keyframes particleFloat1 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.35;
+  }
+  50% {
+    transform: translate3d(-14px, -20px, 0);
+    opacity: 0.9;
+  }
+}
+
+@keyframes particleFloat2 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translate3d(18px, -15px, 0);
+    opacity: 0.95;
+  }
+}
+
+@keyframes particleFloat3 {
+  0%, 100% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0.3;
+  }
+  50% {
+    transform: translate3d(10px, -22px, 0);
+    opacity: 0.85;
+  }
+}
+
+.animate-float-1 {
+  animation: particleFloat1 infinite ease-in-out;
+}
+
+.animate-float-2 {
+  animation: particleFloat2 infinite ease-in-out;
+}
+
+.animate-float-3 {
+  animation: particleFloat3 infinite ease-in-out;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .animate-scanner-laser {
-    animation: none !important;
+  .animate-float-1,
+  .animate-float-2,
+  .animate-float-3 {
+    animation: none;
   }
 }
+
 

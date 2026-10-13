@@ -1,18 +1,11 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Mic } from "lucide-react";
-import { Guilloche } from "@/components/press/guilloche";
-import { Note } from "@/components/press/note";
-import { Serial } from "@/components/press/serial";
-import { StatusStamp, type MoneyStatus } from "@/components/press/status-stamp";
-import { Stub, type StubData } from "@/components/press/stub";
-import { useRolledNumber } from "@/components/press/rolling-numeral";
+import { Mic, CornerDownLeft } from "lucide-react";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
 import { localDateKey } from "@/lib/date";
 import { rupiah } from "@/lib/format";
 
-/** The worked example the landing explains: uang saku minus kos & tagihan, over the days left. */
 export const EXAMPLE = { uangSaku: 1_500_000, tetap: 650_000, hariLagi: 20 };
 export const EXAMPLE_JATAH = (EXAMPLE.uangSaku - EXAMPLE.tetap) / EXAMPLE.hariLagi;
 
@@ -22,13 +15,22 @@ export const SAMPLE_SENTENCES = [
   "nasi padang ceban, kopi susu 15rb, fotokopi 3 ribu",
 ];
 
-// Same rule as dailyJatah on the dashboard, so the demo stamps what the app would.
+export type MoneyStatus = "aman" | "mepet" | "habis";
+
 export function demoStatus(spent: number, jatah = EXAMPLE_JATAH): MoneyStatus {
   const left = jatah - spent;
   return left <= 0 ? "habis" : spent >= jatah * 0.8 ? "mepet" : "aman";
 }
 
-/** A sentence through the real parser, as stubs. `run` keeps serials distinct per print. */
+export interface StubData {
+  id: string;
+  item: string;
+  amount: number;
+  date: string;
+  category: string;
+  time: string;
+}
+
 export function pressSentence(sentence: string, today: string, run: number): StubData[] {
   return parseIndonesianExpense(sentence).map((item, i) => ({
     id: `contoh-${run}-${i}-${item.itemName}`,
@@ -40,143 +42,188 @@ export function pressSentence(sentence: string, today: string, run: number): Stu
   }));
 }
 
-/**
- * The landing's proof: type or pick a sentence, the on-device parser prints it into
- * serial-numbered stubs and the example jatah note re-prints with what is left.
- */
-export function SentencePress({ onTryMic }: { onTryMic: () => void }) {
+export function SentencePress({
+  onTryMic,
+  onTryScan,
+}: {
+  onTryMic: () => void;
+  onTryScan?: () => void;
+}) {
   const [sentence, setSentence] = useState(SAMPLE_SENTENCES[0]);
   const [stubs, setStubs] = useState<StubData[]>([]);
-  const [run, setRun] = useState(0);
-  // Local day is only known in the browser; the first print happens after mount.
-  const [today, setToday] = useState<string | null>(null);
-
-  const print = (text: string, day: string) => {
-    setStubs(pressSentence(text, day, run + 1));
-    setRun((r) => r + 1);
-  };
+  const [run, setRun] = useState(1);
+  const [today, setToday] = useState("2026-10-13");
 
   useEffect(() => {
     const day = localDateKey(new Date());
     setToday(day);
     setStubs(pressSentence(SAMPLE_SENTENCES[0], day, 1));
-    setRun(1);
   }, []);
+
+  const handleUpdate = (text: string) => {
+    setSentence(text);
+    if (text.trim()) {
+      setStubs(pressSentence(text, today, run + 1));
+      setRun((r) => r + 1);
+    } else {
+      setStubs([]);
+    }
+  };
 
   const spent = stubs.reduce((s, x) => s + x.amount, 0);
   const left = EXAMPLE_JATAH - spent;
   const status = demoStatus(spent);
-  const rolled = useRolledNumber(Math.max(0, left));
-
-  const submit = (e?: React.FormEvent) => {
-    e?.preventDefault();
-    if (today) print(sentence, today);
-  };
 
   return (
-    <Note
-      as="section"
-      aria-labelledby="press-title"
-      thread={status}
-      microtext
-      serial={today ? <Serial id={`contoh-${run}`} date={today} /> : null}
-      className="overflow-hidden"
-    >
-      <div className="px-5 sm:px-8 pt-6 pb-5 pr-12 sm:pr-16 space-y-5">
-        <form onSubmit={submit} className="space-y-3">
-          <h2 id="press-title" className="font-display text-head font-bold text-ink">
-            Coba sendiri, bilang apa yang barusan kamu beli
-          </h2>
-          <label htmlFor="press-sentence" className="block text-body text-ink-soft">
-            Ketik seperti ngomong. Angka boleh pakai kata, &ldquo;goceng&rdquo;, atau &ldquo;15rb&rdquo;.
-          </label>
+    <div className="relative w-full rounded-2xl bg-[#080D1A] border border-slate-800/90 shadow-xl p-6 sm:p-8 lg:p-9 space-y-7 overflow-hidden transition-card hover-card-lift">
+      {/* Subtle dot pattern overlay */}
+      <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
+
+      {/* Header Form & Sample Pills */}
+      <div className="relative z-10 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" />
+            <h3 className="text-base sm:text-lg font-bold text-white">
+              Coba Sendiri: Ketik atau Sebutkan Belanjaanmu
+            </h3>
+          </div>
+          <span className="text-xs text-slate-400">
+            Mendukung kata, slang ("goceng", "ceban"), dan singkatan ("15rb")
+          </span>
+        </div>
+
+        {/* Input box */}
+        <div className="relative">
           <textarea
-            id="press-sentence"
             rows={2}
             value={sentence}
-            onChange={(e) => setSentence(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) submit(e);
-            }}
-            className="w-full resize-none bg-paper border border-ink/30 px-3 py-2.5 text-body text-ink placeholder:text-ink-soft focus:outline-none focus-visible:border-ink"
+            onChange={(e) => handleUpdate(e.target.value)}
+            placeholder="Ketik kalimat belanja santai, misal: beli nasi goreng 18rb es teh ceban..."
+            className="w-full rounded-2xl border border-slate-800/80 bg-[#0C1427] px-4 py-3.5 pr-28 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none shadow-inner"
           />
-          <div className="flex flex-wrap items-center gap-2">
-            <button
-              type="submit"
-              className="inline-flex items-center min-h-11 px-5 rounded-full border-2 border-ink text-ink text-body font-bold hover:bg-ink hover:text-paper-sheet dark:hover:text-paper transition-colors"
-            >
-              Cetak catatan
-            </button>
+
+          <div className="absolute right-3 bottom-3 flex items-center gap-2">
             <button
               type="button"
               onClick={onTryMic}
-              className="inline-flex items-center gap-2 min-h-11 px-4 rounded-full text-ink text-body font-semibold underline underline-offset-4 decoration-ink/40 hover:decoration-ink"
+              className="p-2 rounded-xl bg-blue-500/15 border border-blue-500/20 text-blue-400 hover:bg-blue-500/25 transition-colors"
+              title="Bicara via Mikrofon"
             >
-              <Mic className="w-4 h-4" aria-hidden="true" />
-              Pakai mic asli
+              <Mic className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => handleUpdate(sentence)}
+              className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-xs transition-colors"
+            >
+              <span>Proses</span>
+              <CornerDownLeft className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="space-y-1">
-            <p className="text-meta text-ink-soft">Atau ambil contoh:</p>
-            <ul className="flex flex-col items-start gap-1">
-              {SAMPLE_SENTENCES.map((s) => (
-                <li key={s}>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSentence(s);
-                      if (today) print(s, today);
-                    }}
-                    className="text-left min-h-11 py-2 text-body text-ink underline decoration-dotted underline-offset-4 decoration-ink/50 hover:decoration-ink"
-                  >
-                    &ldquo;{s}&rdquo;
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </form>
+        </div>
 
-        <div aria-live="polite" className="border-t border-ink/20 pt-5 space-y-4">
-          <div className="relative flex items-center gap-5">
-            <Guilloche seed={0xc4a3} turn={run * 9} size={96} className="hidden sm:block shrink-0" />
-            <div className="min-w-0 space-y-2">
-              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                <p className="text-body font-semibold text-ink-soft">Sisa jatah hari ini</p>
-                <StatusStamp status={status} />
-              </div>
-              <p className="font-display font-bold text-ink money flex items-baseline gap-2">
-                <span className="text-head">Rp</span>
-                <span className="text-numeral" aria-hidden="true">
-                  {rolled.toLocaleString("id-ID")}
-                </span>
-                <span className="sr-only">{Math.max(0, left).toLocaleString("id-ID")}</span>
-              </p>
-              <p className="text-body text-ink">
-                dari jatah <span className="money font-semibold">{rupiah(EXAMPLE_JATAH)}</span> · terpakai{" "}
-                <span className="money font-semibold">{rupiah(spent)}</span>
-                {left < 0 && (
-                  <>
-                    {" "}· lewat <span className="money font-semibold">{rupiah(-left)}</span>
-                  </>
-                )}
-              </p>
-            </div>
-          </div>
-
-          {today && stubs.length === 0 ? (
-            <p className="text-body text-ink">
-              Belum ketemu nominalnya. Sebut harganya juga, misal &ldquo;kopi goceng&rdquo;.
-            </p>
-          ) : (
-            <ol className="space-y-2 min-h-[4.5rem]" aria-label="Catatan yang tercetak">
-              {stubs.map((stub) => (
-                <Stub key={stub.id} data={stub} className="animate-stub-in" />
-              ))}
-            </ol>
-          )}
+        {/* Sample Pills */}
+        <div className="flex flex-wrap items-center gap-2 text-xs">
+          <span className="text-slate-400 font-medium">Contoh cepat:</span>
+          {SAMPLE_SENTENCES.map((sample) => (
+            <button
+              key={sample}
+              type="button"
+              onClick={() => handleUpdate(sample)}
+              className={`px-3 py-1.5 rounded-xl border text-xs transition-all ${
+                sentence === sample
+                  ? "border-blue-500 bg-blue-500/15 text-blue-400 font-bold"
+                  : "border-slate-800/80 bg-[#0C1427] text-slate-400 hover:border-slate-700 hover:text-slate-200"
+              }`}
+            >
+              {sample}
+            </button>
+          ))}
         </div>
       </div>
-    </Note>
+
+      {/* Real-time Parsed Results */}
+      <div className="relative z-10 pt-6 border-t border-slate-800/80 grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+        {/* Left: Parsed Items Breakdown */}
+        <div className="lg:col-span-7 space-y-3">
+          <div className="flex items-center justify-between text-xs text-slate-400">
+            <span className="font-semibold text-slate-300">
+              Hasil Ekstraksi AI ({stubs.length} Item Terdeteksi)
+            </span>
+            <span>Total: {rupiah(spent)}</span>
+          </div>
+
+          <div className="space-y-2">
+            {stubs.length === 0 ? (
+              <p className="text-xs text-slate-400 italic py-2">
+                Belum ada pengeluaran terdeteksi dari kalimat di atas.
+              </p>
+            ) : (
+              stubs.map((s) => (
+                <div
+                  key={s.id}
+                  className="rounded-xl p-3 bg-[#0C1427] border border-slate-800/80 flex items-center justify-between gap-3 text-xs animate-content-in"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+                    <div>
+                      <p className="font-bold text-white capitalize">
+                        {s.item}
+                      </p>
+                      <span className="text-[10px] text-slate-400">{s.category}</span>
+                    </div>
+                  </div>
+                  <span className="font-extrabold text-rose-400 money text-sm">
+                    {rupiah(s.amount)}
+                  </span>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+
+        {/* Right: Sisa Jatah Harian Impact */}
+        <div className="lg:col-span-5 rounded-2xl p-5 bg-[#0C1427] border border-slate-800/80 space-y-3.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-400">
+              Simulasi Jatah Hari Ini
+            </span>
+            <span
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                status === "habis"
+                  ? "bg-rose-500/15 border-rose-500/30 text-rose-400"
+                  : status === "aman"
+                  ? "bg-emerald-500/15 border-emerald-500/30 text-emerald-400"
+                  : "bg-amber-500/15 border-amber-500/30 text-amber-400"
+              }`}
+            >
+              {status === "habis" ? "Over Budget" : status === "aman" ? "Aman" : "Mepet"}
+            </span>
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-2xl font-extrabold text-white money">
+              {rupiah(Math.max(0, left))}
+            </p>
+            <p className="text-[11px] text-slate-400">
+              Sisa dari plafon {rupiah(EXAMPLE_JATAH)} setelah belanja di atas
+            </p>
+          </div>
+
+          {/* Progress bar */}
+          <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all duration-500 ease-out ${
+                status === "habis" ? "bg-rose-500" : status === "aman" ? "bg-emerald-500" : "bg-amber-500"
+              }`}
+              style={{
+                width: `${Math.min(100, (spent / EXAMPLE_JATAH) * 100)}%`,
+              }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
