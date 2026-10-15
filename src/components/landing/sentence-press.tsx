@@ -190,7 +190,7 @@ export function SentencePress({
               Simulasi Jatah Hari Ini
             </span>
             <span
-              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+              className={`px-2 py-0.5 rounded-lg text-[10px] font-bold border ${
                 status === "habis"
                   ? "bg-rose-500/15 border-rose-500/30 text-rose-400"
                   : status === "aman"

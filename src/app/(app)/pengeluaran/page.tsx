@@ -99,7 +99,7 @@ export default function PengeluaranPage() {
       type: "expense",
       itemName: candidate.merchant || candidate.description || candidate.items?.[0]?.name || "Pengeluaran",
       amount: candidate.amount,
-      category: candidate.category || "Makanan",
+      category: candidate.category || "Makanan & Minuman",
       source: "ocr",
       transactionDate: candidate.date,
     });

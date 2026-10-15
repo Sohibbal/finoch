@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Check, Plus, PenLine } from "lucide-react";
 import { localDateKey } from "@/lib/date";
 import { rupiah } from "@/lib/format";
@@ -47,6 +47,16 @@ export function ManualTransactionModal({
   const [date, setDate] = useState(localDateKey(new Date()));
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setDate(localDateKey(new Date()));
+      if (!categories.includes(category)) {
+        setCategory(categories[0]);
+      }
+      setError("");
+    }
+  }, [isOpen, categories, category]);
 
   if (!isOpen) return null;
 

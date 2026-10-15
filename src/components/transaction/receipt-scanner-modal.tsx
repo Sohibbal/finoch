@@ -88,8 +88,15 @@ export function ReceiptScannerModal({
       if (previewUrl) URL.revokeObjectURL(previewUrl);
       setPreviewUrl(null);
       setScannedItems([]);
+      setCategory(categories[0]);
+      setDate(localDateKey(new Date()));
+    } else {
+      if (!categories.includes(category)) {
+        setCategory(categories[0]);
+      }
+      setDate(localDateKey(new Date()));
     }
-  }, [isOpen]);
+  }, [isOpen, categories]);
 
   const mapCategoryToUi = (catStr?: string): string => {
     if (!catStr) return categories[0];
@@ -164,7 +171,7 @@ export function ReceiptScannerModal({
     setMerchant(cand.merchant || (isIncome ? "Pemasukan Transfer" : "Struk Belanja"));
     setAmount(cand.amount || 0);
     setCategory(mapCategoryToUi(cand.category));
-    setDate(cand.date || localDateKey(new Date()));
+    setDate(localDateKey(new Date()));
     setScannedItems(Array.isArray(cand.items) ? cand.items : []);
     setStep("confirm");
   };

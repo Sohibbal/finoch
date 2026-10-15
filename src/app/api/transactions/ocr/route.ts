@@ -68,7 +68,7 @@ Ekstrak data dari teks OCR struk berikut ke dalam format JSON valid tanpa format
   "merchant": "Nama Toko / Resto",
   "amount": 25000,
   "category": "Food & Drinks",
-  "date": "2026-10-12",
+  "date": "${jakartaDate()}",
   "items": [{"name": "Ayam Bg Kumis", "amount": 25000}]
 }
 Aturan Ekstraksi:

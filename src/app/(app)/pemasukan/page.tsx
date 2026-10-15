@@ -202,6 +202,7 @@ export default function PemasukanPage() {
 
       <ReceiptScannerModal
         isOpen={isScanOpen}
+        type="income"
         onClose={() => setIsScanOpen(false)}
         onConfirm={handleScanConfirmed}
       />

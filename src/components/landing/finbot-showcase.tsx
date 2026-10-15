@@ -49,7 +49,7 @@ export function FinbotShowcase() {
                   FinBot Daily Insight di Dashboard
                 </h3>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                 Kondisi Aman
               </span>
             </div>
@@ -73,11 +73,11 @@ export function FinbotShowcase() {
               {/* SISI KANAN: Konten Insight */}
               <div className="flex-1 p-4 sm:p-5 flex flex-col justify-between min-w-0 relative z-10 space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-slate-900/5 dark:bg-white/10 text-slate-700 dark:text-slate-300">
+                  <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-slate-900/5 dark:bg-white/10 text-slate-700 dark:text-slate-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     <span>FinBot Daily Insight</span>
                   </span>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100/80 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-lg bg-emerald-100/80 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300">
                     Aman Terkendali
                   </span>
                 </div>
@@ -117,7 +117,7 @@ export function FinbotShowcase() {
                   Konsultasi Finansial Interaktif
                 </h3>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                 FinBot Copilot
               </span>
             </div>
@@ -168,10 +168,10 @@ export function FinbotShowcase() {
               {/* Quick Prompts Strip from /copilot */}
               <div className="pt-2 flex flex-wrap items-center gap-2">
                 <span className="text-[11px] text-slate-400">Pusat Tanya Cepat:</span>
-                <span className="text-[11px] px-2.5 py-1 rounded-full border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-200">
+                <span className="text-[11px] px-2.5 py-1 rounded-lg border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-200">
                   Sisa uang jajan masih aman gak?
                 </span>
-                <span className="text-[11px] px-2.5 py-1 rounded-full border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-200">
+                <span className="text-[11px] px-2.5 py-1 rounded-lg border border-slate-200/70 dark:border-slate-700/70 bg-white dark:bg-slate-800/60 text-slate-700 dark:text-slate-200">
                   Kapan wishlist gue bisa kebeli?
                 </span>
               </div>

@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah, shortDate } from "@/lib/format";
-import { localDateKey } from "@/lib/date";
+import { localDateKey, parseDate } from "@/lib/date";
 import { useAuthContext } from "@/components/layout/auth-provider";
 import { getTransactions, saveTransaction, type LocalTransaction } from "@/lib/storage/transaction-storage";
 import { getWishlistItems, type LocalWishlist } from "@/lib/storage/wishlist-storage";
@@ -205,8 +205,35 @@ export default function DashboardPage() {
     for (const tx of transactions) {
       const isInc = tx.type === "income";
       const txDate = tx.transactionDate || "";
-      const isToday = txDate.startsWith(todayKey);
-      const isThisMonth = txDate.startsWith(currentMonthKey);
+      const txCreated = tx.createdAt || "";
+
+      let isToday = false;
+      let isThisMonth = false;
+
+      const dateCandidates = [txDate, txCreated].filter(Boolean);
+      for (const dStr of dateCandidates) {
+        if (dStr.startsWith(todayKey)) {
+          isToday = true;
+          isThisMonth = true;
+          break;
+        }
+        const parsed = parseDate(dStr);
+        if (parsed && !isNaN(parsed.getTime())) {
+          const lKey = localDateKey(parsed);
+          if (lKey === todayKey) {
+            isToday = true;
+            isThisMonth = true;
+            break;
+          }
+          if (lKey.startsWith(currentMonthKey)) {
+            isThisMonth = true;
+          }
+        }
+      }
+
+      if (!isThisMonth && (txDate.startsWith(currentMonthKey) || txCreated.startsWith(currentMonthKey))) {
+        isThisMonth = true;
+      }
 
       if (isInc) {
         allIncome += tx.amount;
@@ -222,7 +249,7 @@ export default function DashboardPage() {
           itemName: tx.itemName,
           amount: tx.amount,
           category: tx.category,
-          createdAt: tx.transactionDate,
+          createdAt: tx.transactionDate || tx.createdAt,
         });
       }
     }

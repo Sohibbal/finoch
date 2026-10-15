@@ -51,7 +51,7 @@ export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
                   Input Cepat: Suara & Scan Struk
                 </h3>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                 Web Speech & OCR
               </span>
             </div>
@@ -92,7 +92,7 @@ export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
                 </div>
 
                 <div className="hidden sm:flex items-center gap-1.5">
-                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                  <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-medium inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
                     <span>Makanan & Minuman</span>
                   </span>
@@ -147,7 +147,7 @@ export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
                   Status Jatah Harian
                 </h3>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-500/20">
                 70% Aman
               </span>
             </div>
@@ -233,7 +233,7 @@ export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
                   Wishlist Impian Berdasar Kemampuan
                 </h3>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20">
                 Alokasi 20% Jatah
               </span>
             </div>
@@ -253,7 +253,7 @@ export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
                     Mechanical Keyboard
                   </p>
                 </div>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0 bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
                   ~9 hari lagi
                 </span>
               </div>
@@ -300,7 +300,7 @@ export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
                   Tersedia di Mode PWA
                 </h3>
               </div>
-              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-lg bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-500/20">
                 PWA Standalone
               </span>
             </div>

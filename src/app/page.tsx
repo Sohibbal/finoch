@@ -253,7 +253,7 @@ export default function LandingPage() {
                   href={userEmail ? "/dashboard" : "/register"}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-white text-slate-950 font-bold text-sm hover:-translate-y-0.5 hover:shadow-xl active:scale-98 transition-all duration-300 ease-out shadow-md"
                 >
-                  <span>{userEmail ? "Buka Dashboard Finoch" : "Daftar Gratis Sekarang"}</span>
+                  <span>{userEmail ? "Akses Finoch" : "Daftar Gratis Sekarang"}</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
                 {!userEmail && (
