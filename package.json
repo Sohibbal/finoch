@@ -7,7 +7,7 @@
   "scripts": {
     "dev": "next dev",
     "dev:lan": "node scripts/dev-lan.mjs",
-    "build": "node -e \"require('fs').rmSync('.next', {recursive: true, force: true})\" && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint src/",
     "typecheck": "tsc --noEmit",
