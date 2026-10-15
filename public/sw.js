@@ -12,6 +12,8 @@ const STATIC_ASSETS = [
   "/bills",
   "/split-bill",
   "/wishlist",
+  "/pemasukan",
+  "/pengeluaran",
   "/reports",
   "/meal-calc",
   "/ukt-savings",
