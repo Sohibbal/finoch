@@ -142,15 +142,17 @@ export default function LandingPage() {
           </div>
 
           {/* Scroll Indicator Arrow to Main Content below */}
-          <div className="shrink-0 pt-4 pb-2 sm:pb-4 animate-hero-fade-up animate-hero-delay-2">
+          <div className="shrink-0 pt-6 sm:pt-8 pb-3 sm:pb-4 animate-hero-fade-up animate-hero-delay-2">
             <a
               href="#konten"
-              className="inline-flex flex-col items-center gap-1.5 text-xs text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group cursor-pointer p-2"
+              className="inline-flex flex-col items-center gap-2 sm:gap-2.5 text-xs text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors group cursor-pointer p-2"
               aria-label="Scroll ke konten jelajahi dashboard dan fitur"
             >
-              <span className="text-[10px] sm:text-[11px] font-semibold tracking-wider uppercase">Jelajahi Dashboard</span>
-              <div className="w-8 h-8 rounded-full border border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xs flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:border-blue-500/50 transition-all animate-bounce shadow-2xs">
-                <ArrowDown className="w-4 h-4" />
+              <span className="text-[9px] sm:text-[11px] font-semibold tracking-wider uppercase">
+                Jelajahi Dashboard
+              </span>
+              <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xs flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:border-blue-500/50 transition-all animate-bounce shadow-2xs mt-1 sm:mt-1.5">
+                <ArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
             </a>
           </div>
