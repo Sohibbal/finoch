@@ -6,12 +6,13 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   FlaskConical,
-  Bell,
+  LogOut,
 } from "lucide-react";
 import { isDemoMode } from "@/lib/storage/local-storage";
 import { seedDemoExpenses } from "@/lib/storage/demo-seed";
 import { ThemeToggle } from "./theme-toggle";
 import { GlobalSearchBar } from "./global-search-bar";
+import { useAuthContext } from "./auth-provider";
 
 interface PageHeaderProps {
   title: React.ReactNode;
@@ -32,6 +33,7 @@ export function PageHeader({
   const pathname = usePathname();
   const isDashboard = pathname === "/dashboard";
   const [demo, setDemo] = useState(false);
+  const { logout } = useAuthContext();
 
   useEffect(() => {
     const on = isDemoMode();
@@ -75,23 +77,24 @@ export function PageHeader({
             </div>
           </div>
 
-          {/* Right: Actions, Search, Notifications, Theme */}
-          <div className="flex items-center gap-2.5 shrink-0 ml-auto">
+          {/* Right: Actions, Search, Theme, Mobile Logout */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0 ml-auto">
             <GlobalSearchBar className="hidden sm:block" />
 
-            {/* Notification Button */}
-            <button
-              type="button"
-              title="Notifikasi"
-              aria-label="Notifikasi"
-              className="w-8 h-8 rounded-full bg-white/80 dark:bg-slate-800 border border-blue-200/70 dark:border-transparent text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white hover:bg-white dark:hover:bg-slate-700 flex items-center justify-center transition-colors shadow-xs"
-            >
-              <Bell className="w-3.5 h-3.5" />
-            </button>
+            {actions}
 
             <ThemeToggle />
 
-            {actions}
+            {/* Mobile Logout Button (Visible only on mobile screen where BottomNav appears) */}
+            <button
+              type="button"
+              onClick={() => logout()}
+              title="Keluar"
+              aria-label="Keluar dari akun"
+              className="md:hidden w-8 h-8 rounded-full bg-white/80 dark:bg-slate-800 border border-blue-200/70 dark:border-slate-700/80 text-slate-500 hover:text-rose-600 dark:text-slate-400 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/40 flex items-center justify-center transition-colors shadow-xs cursor-pointer shrink-0"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+            </button>
           </div>
         </div>
 

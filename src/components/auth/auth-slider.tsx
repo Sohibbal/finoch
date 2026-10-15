@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -89,17 +89,26 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
         const res = await fetch("/api/profile");
         if (res.ok) {
           const data = await res.json();
-          if (data?.profile) {
-            router.push(safeNextPath(searchParams.get("next")));
+          if (data?.profile?.nickname) {
+            router.replace(safeNextPath(searchParams.get("next")));
             return;
           }
         }
       } catch {
         // Fallback to onboarding
       }
-      router.push("/onboarding");
+      router.replace("/onboarding");
     }
   };
+
+  const isRegisteringRef = useRef(false);
+
+  // If user is already logged in, redirect directly without showing session card
+  useEffect(() => {
+    if (user && !isRegisteringRef.current) {
+      router.replace(safeNextPath(searchParams.get("next")));
+    }
+  }, [user, router, searchParams]);
 
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,63 +124,21 @@ export function AuthSlider({ initialMode = "login" }: AuthSliderProps) {
       return;
     }
 
+    isRegisteringRef.current = true;
     setIsRegSubmitting(true);
     const success = await register(regEmail, regPassword, regName);
     setIsRegSubmitting(false);
 
     if (success) {
-      router.push("/onboarding");
+      router.replace("/onboarding");
+      return;
     }
+    isRegisteringRef.current = false;
   };
 
-  // If user is already logged in
+  // If user is already logged in, do not render auth forms or session card
   if (user) {
-    return (
-      <div className="min-h-screen bg-[#eaf0fd] dark:bg-[#050813] text-slate-900 dark:text-slate-100 flex flex-col justify-center px-4 sm:px-6 py-12 relative overflow-hidden">
-        {/* Glow */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[500px] bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(37,99,235,0.25)_0%,rgba(30,58,138,0.12)_40%,transparent_75%)] dark:bg-[radial-gradient(ellipse_70%_50%_at_50%_0%,rgba(59,130,246,0.25)_0%,rgba(30,58,138,0.12)_40%,transparent_75%)] pointer-events-none" />
-        </div>
-
-        <section
-          aria-labelledby="akun-title"
-          className="relative z-10 max-w-md w-full mx-auto rounded-3xl bg-white/85 dark:bg-[#080D1A]/95 border border-slate-200/80 dark:border-slate-800/90 p-6 sm:p-8 space-y-6 shadow-2xl backdrop-blur-xl glass-sheen group overflow-hidden"
-        >
-          {/* Glass specular top highlight */}
-          <div
-            className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/80 dark:via-teal-400/30 to-transparent pointer-events-none z-20"
-            aria-hidden="true"
-          />
-          <div className="relative z-10 space-y-1.5">
-            <span className="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider">
-              Sesi Aktif
-            </span>
-            <h1 id="akun-title" className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight break-words">
-              {user.name}
-            </h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400 break-words">{user.email}</p>
-          </div>
-          <div className="flex flex-col gap-3">
-            <Link
-              href="/dashboard"
-              className="w-full min-h-12 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-sm font-bold shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 flex items-center justify-center transition-all"
-            >
-              Buka Beranda
-            </Link>
-            <button
-              type="button"
-              onClick={async () => {
-                await logout();
-              }}
-              className="w-full min-h-12 rounded-xl border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800/60 flex items-center justify-center gap-2 transition-all cursor-pointer"
-            >
-              <LogOut className="w-4 h-4" aria-hidden="true" />
-              Keluar Akun
-            </button>
-          </div>
-        </section>
-      </div>
-    );
+    return null;
   }
 
   return (

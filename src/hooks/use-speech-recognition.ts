@@ -32,6 +32,13 @@ export interface UseSpeechRecognitionReturn {
   resetTranscript: () => void;
 }
 
+const isMobileDevice = (): boolean => {
+  if (typeof navigator === "undefined") return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+    navigator.userAgent || ""
+  );
+};
+
 export function useSpeechRecognition(): UseSpeechRecognitionReturn {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
@@ -42,6 +49,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
   const recognitionRef = useRef<any>(null);
   const silenceTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const interimRef = useRef("");
 
   // Clear silence timer helper
   const clearSilenceTimer = useCallback(() => {
@@ -62,6 +70,14 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         // Ignore if already stopped
       }
     }
+
+    // Promote any unfinalized interim speech before stopping
+    if (interimRef.current.trim()) {
+      const salvaged = interimRef.current.trim();
+      setTranscript(prev => (prev ? `${prev} ${salvaged}` : salvaged));
+      interimRef.current = "";
+    }
+
     setIsListening(false);
     setInterimTranscript("");
   }, [clearSilenceTimer]);
@@ -75,23 +91,23 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     }, SILENCE_TIMEOUT_MS);
   }, [clearSilenceTimer, stopListening]);
 
-  // Check Web Speech API availability on mount
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // Instantiate and wire speech recognition instance
+  const initRecognition = useCallback(() => {
+    if (typeof window === "undefined") return null;
 
     const win = window as ExtendedWindow;
     const SpeechRecognitionClass = win.SpeechRecognition || win.webkitSpeechRecognition;
 
     if (!SpeechRecognitionClass) {
       setIsSupported(false);
-      return;
+      return null;
     }
 
-    setIsSupported(true);
-
     try {
+      const isMobile = isMobileDevice();
       const recognition = new SpeechRecognitionClass();
-      recognition.continuous = true;
+      // On mobile browsers, continuous mode can stall or freeze speech processing; disable continuous for mobile
+      recognition.continuous = !isMobile;
       recognition.interimResults = true;
       recognition.lang = SPEECH_LANG_ID;
 
@@ -111,7 +127,7 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
           const result = event.results[i];
-          const text = result[0].transcript;
+          const text = result[0]?.transcript || "";
 
           if (result.isFinal) {
             finalPart += text + " ";
@@ -122,6 +138,9 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
         if (finalPart.trim()) {
           setTranscript(prev => (prev ? `${prev} ${finalPart.trim()}` : finalPart.trim()));
+          interimRef.current = "";
+        } else if (interimPart.trim()) {
+          interimRef.current = interimPart.trim();
         }
         setInterimTranscript(interimPart.trim());
       };
@@ -146,14 +165,28 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
 
       recognition.onend = () => {
         clearSilenceTimer();
+        // On mobile Chrome/WebKit, promote any trailing interim speech before ending
+        if (interimRef.current.trim()) {
+          const salvaged = interimRef.current.trim();
+          setTranscript(prev => (prev ? `${prev} ${salvaged}` : salvaged));
+          interimRef.current = "";
+        }
         setIsListening(false);
         setInterimTranscript("");
       };
 
       recognitionRef.current = recognition;
+      setIsSupported(true);
+      return recognition;
     } catch {
       setIsSupported(false);
+      return null;
     }
+  }, [clearSilenceTimer, resetSilenceTimer, stopListening]);
+
+  // Check Web Speech API availability on mount
+  useEffect(() => {
+    initRecognition();
 
     return () => {
       clearSilenceTimer();
@@ -165,10 +198,10 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
         }
       }
     };
-  }, [clearSilenceTimer, resetSilenceTimer, stopListening]);
+  }, [clearSilenceTimer, initRecognition]);
 
   const startListening = useCallback(() => {
-    if (!isSupported || !recognitionRef.current) {
+    if (!isSupported) {
       setError("unsupported");
       setErrorMessage("Browser Anda tidak mendukung Web Speech API.");
       return;
@@ -183,19 +216,33 @@ export function useSpeechRecognition(): UseSpeechRecognitionReturn {
     setError(null);
     setErrorMessage(null);
 
+    // If existing instance exists, try starting it
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.start();
+        setIsListening(true);
+        return;
+      } catch {
+        // If start failed (e.g. stopped instance on mobile), create fresh instance below
+      }
+    }
+
     try {
-      recognitionRef.current.start();
-      setIsListening(true);
+      const freshRecognition = initRecognition();
+      if (freshRecognition) {
+        freshRecognition.start();
+        setIsListening(true);
+      }
     } catch (err: any) {
-      // If already started, ignore or restart
-      if (err.name !== "InvalidStateError") {
+      if (err?.name !== "InvalidStateError") {
         setError("unknown");
         setErrorMessage("Tidak dapat memulai mikrofon.");
       }
     }
-  }, [isSupported]);
+  }, [isSupported, initRecognition]);
 
   const resetTranscript = useCallback(() => {
+    interimRef.current = "";
     setTranscript("");
     setInterimTranscript("");
     setError(null);

@@ -6,13 +6,18 @@ import { Bot, ArrowRight } from "lucide-react";
 interface TypewriterCardProps {
   onComplete: (nickname: string) => void;
   isLoading?: boolean;
+  initialNickname?: string;
 }
 
 const GREETING_TEXT = "Hai! Kenalin, gue FinBot. Teman finansial lo. Biar kita makin akrab, nama panggilan lo siapa nih?";
 
-export function TypewriterCard({ onComplete, isLoading = false }: TypewriterCardProps) {
+export function TypewriterCard({
+  onComplete,
+  isLoading = false,
+  initialNickname = "",
+}: TypewriterCardProps) {
   const [displayedText, setDisplayedText] = useState("");
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(initialNickname);
   const [error, setError] = useState("");
 
   useEffect(() => {

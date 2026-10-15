@@ -12,133 +12,47 @@ export function AudioFrequencyVisualizer({
   className = "",
 }: AudioFrequencyVisualizerProps) {
   const [frequencies, setFrequencies] = useState<number[]>(() =>
-    new Array(24).fill(16)
+    new Array(24).fill(14)
   );
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const streamRef = useRef<MediaStream | null>(null);
   const animFrameRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!isListening) {
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-        audioContextRef.current.close().catch(() => {});
-        audioContextRef.current = null;
-      }
       setFrequencies(new Array(24).fill(14));
       return;
     }
 
-    let isCancelled = false;
-    let fallbackTick = 0;
+    let tick = 0;
+    const barCount = 24;
+    const center = (barCount - 1) / 2;
 
-    const initAudio = async () => {
-      try {
-        if (
-          typeof window !== "undefined" &&
-          navigator?.mediaDevices?.getUserMedia
-        ) {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            audio: {
-              echoCancellation: true,
-              noiseSuppression: true,
-              autoGainControl: true,
-            },
-          });
+    const renderLoop = () => {
+      tick += 0.08;
 
-          if (isCancelled) {
-            stream.getTracks().forEach((track) => track.stop());
-            return;
-          }
+      const nextBars = Array.from({ length: barCount }, (_, i) => {
+        // Distance from center bell curve factor (peaked in middle, tapered at edges)
+        const distFromCenter = Math.abs(i - center) / center;
+        const bellCurve = Math.max(0.35, 1 - distFromCenter * 0.7);
 
-          streamRef.current = stream;
-          const AudioContextClass =
-            window.AudioContext ||
-            (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-          const ctx = new AudioContextClass();
-          audioContextRef.current = ctx;
+        // Layered harmonic sine waves for organic, dynamic voice frequency simulation
+        const wave1 = Math.sin(tick * 1.8 + i * 0.4) * 0.5 + 0.5;
+        const wave2 = Math.cos(tick * 2.3 + i * 0.55) * 0.3 + 0.3;
+        const wave3 = Math.sin(tick * 3.1 - i * 0.25) * 0.2 + 0.2;
 
-          const analyser = ctx.createAnalyser();
-          analyser.fftSize = 64;
-          analyser.smoothingTimeConstant = 0.65;
+        const combined = (wave1 + wave2 + wave3) * bellCurve;
+        const heightPct = Math.max(16, Math.min(92, Math.round(18 + combined * 70)));
+        return heightPct;
+      });
 
-          const source = ctx.createMediaStreamSource(stream);
-          source.connect(analyser);
-
-          const bufferLength = analyser.frequencyBinCount;
-          const dataArray = new Uint8Array(bufferLength);
-
-          const renderLoop = () => {
-            if (isCancelled) return;
-            analyser.getByteFrequencyData(dataArray);
-
-            const barCount = 24;
-            const step = Math.max(1, Math.floor(bufferLength / barCount));
-            let totalVolume = 0;
-            const nextBars: number[] = [];
-
-            for (let i = 0; i < barCount; i++) {
-              const val = dataArray[i * step] || 0;
-              totalVolume += val;
-              const mapped = Math.max(14, Math.min(100, Math.round((val / 255) * 100)));
-              nextBars.push(mapped);
-            }
-
-            // If background is very quiet, overlay subtle rhythmic breathing pulse
-            if (totalVolume < 35) {
-              fallbackTick += 0.08;
-              const pulsed = nextBars.map((_, idx) => {
-                const wave = Math.sin(fallbackTick + idx * 0.45) * 0.5 + 0.5;
-                const wave2 = Math.cos(fallbackTick * 1.4 + idx * 0.25) * 0.3 + 0.3;
-                return Math.round(18 + (wave + wave2) * 32);
-              });
-              setFrequencies(pulsed);
-            } else {
-              setFrequencies(nextBars);
-            }
-
-            animFrameRef.current = requestAnimationFrame(renderLoop);
-          };
-
-          animFrameRef.current = requestAnimationFrame(renderLoop);
-          return;
-        }
-      } catch {
-        // Fallback gracefully if getUserMedia is denied, mocked, or unsupported
-      }
-
-      // Synthetic dynamic audio visualizer fallback loop
-      const fallbackLoop = () => {
-        if (isCancelled) return;
-        fallbackTick += 0.09;
-        const fakeBars = Array.from({ length: 24 }, (_, i) => {
-          const wave1 = Math.sin(fallbackTick * 1.8 + i * 0.4) * 0.5 + 0.5;
-          const wave2 = Math.cos(fallbackTick * 2.2 + i * 0.3) * 0.3 + 0.3;
-          return Math.round(20 + (wave1 + wave2) * 45);
-        });
-        setFrequencies(fakeBars);
-        animFrameRef.current = requestAnimationFrame(fallbackLoop);
-      };
-      animFrameRef.current = requestAnimationFrame(fallbackLoop);
+      setFrequencies(nextBars);
+      animFrameRef.current = requestAnimationFrame(renderLoop);
     };
 
-    initAudio();
+    animFrameRef.current = requestAnimationFrame(renderLoop);
 
     return () => {
-      isCancelled = true;
       if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-      if (audioContextRef.current && audioContextRef.current.state !== "closed") {
-        audioContextRef.current.close().catch(() => {});
-        audioContextRef.current = null;
-      }
     };
   }, [isListening]);
 

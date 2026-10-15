@@ -22,7 +22,11 @@ export function PwaInstallButton() {
   const [pastHero, setPastHero] = useState(false);
   useEffect(() => {
     if (!isLanding) return;
-    const onScroll = () => setPastHero(window.scrollY > window.innerHeight * 0.8);
+    const onScroll = () =>
+      setPastHero(
+        window.scrollY > window.innerHeight * 0.8 ||
+          (window.innerWidth < 768 && window.scrollY > 40)
+      );
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -101,19 +105,35 @@ export function PwaInstallButton() {
   if (!isLanding || isDismissed) {
     // In the app only a small desktop pill, and only when the browser says Finoch is installable.
     // Phones keep the bottom edge for the nav alone. z-30 keeps it under modals (z-50).
-    if (!deferredPrompt || !isLanding) return null;
+    if (!isLanding) return null;
     return (
-      <div className="hidden md:block fixed md:bottom-6 md:right-6 z-30">
-        <button
-          type="button"
-          onClick={handleInstallClick}
-          aria-label="Install PWA"
-          className="flex items-center gap-2 px-4 min-h-10 rounded-full bg-white dark:bg-[#0E1526] border border-slate-200/90 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold shadow-lg transition-all"
-        >
-          <Download className="w-4 h-4 text-teal-600 dark:text-teal-400" />
-          <span>Install PWA</span>
-        </button>
-      </div>
+      <>
+        {/* Floating mobile install button on landing page */}
+        <div className="md:hidden fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40">
+          <button
+            type="button"
+            onClick={handleInstallClick}
+            aria-label="Install PWA"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold shadow-lg border border-slate-800 dark:border-slate-200 active:scale-95 transition-all"
+          >
+            <Download className="w-3.5 h-3.5 text-teal-400 dark:text-teal-600" />
+            <span>Install App</span>
+          </button>
+        </div>
+
+        {/* Desktop pill */}
+        <div className="hidden md:block fixed md:bottom-6 md:right-6 z-30">
+          <button
+            type="button"
+            onClick={handleInstallClick}
+            aria-label="Install PWA"
+            className="flex items-center gap-2 px-4 min-h-10 rounded-full bg-white dark:bg-[#0E1526] border border-slate-200/90 dark:border-slate-700/80 text-slate-800 dark:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-800 text-xs font-bold shadow-lg transition-all"
+          >
+            <Download className="w-4 h-4 text-teal-600 dark:text-teal-400" />
+            <span>Install PWA</span>
+          </button>
+        </div>
+      </>
     );
   }
 
@@ -127,7 +147,7 @@ export function PwaInstallButton() {
           <BrandLogo variant="symbol" className="w-8 h-8 shrink-0" theme="auto" />
           <div className="min-w-0">
             <p className="text-xs font-bold truncate">Pasang Finoch di HP</p>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Layar penuh &amp; tetap jalan offline</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Kontrol &amp; akses cepat</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5 shrink-0">

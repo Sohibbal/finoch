@@ -190,10 +190,6 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
                 <p className="font-bold text-slate-900 dark:text-white truncate text-xs">
                   {user?.name || "Budi Mahasiswa"}
                 </p>
-                <p className="text-[10px] text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                  <span>PWA Offline Mode</span>
-                </p>
               </div>
               <button
                 type="button"
