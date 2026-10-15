@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { CheckCircle2, Trash2, Calendar, Clock, Sparkles } from "lucide-react";
+import { CheckCircle2, Trash2, Calendar, Clock } from "lucide-react";
 import { rupiah } from "@/lib/format";
 import type { LocalWishlist } from "@/lib/storage/wishlist-storage";
 
@@ -23,35 +23,35 @@ export function WishlistItemCard({
   const getStatusBadge = () => {
     if (item.isAchieved) {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
           <CheckCircle2 className="w-3.5 h-3.5" />
-          <span>Tercapai 🎉</span>
+          <span>Tercapai</span>
         </span>
       );
     }
 
     if (projectionStatus === "achievable_now") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-meta font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>Tabungan Cukup!</span>
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 whitespace-nowrap">
+          <CheckCircle2 className="w-3.5 h-3.5" />
+          <span>Tercapai</span>
         </span>
       );
     }
 
     if (projectionStatus === "delayed") {
       return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-meta font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0 whitespace-nowrap">
           <Clock className="w-3.5 h-3.5" />
-          <span>Tertunda (Rem Belanja)</span>
+          <span>Tertunda</span>
         </span>
       );
     }
 
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
         <Calendar className="w-3.5 h-3.5" />
-        <span>{`~${estimatedDays} hari lagi`}</span>
+        <span>{`~${estimatedDays} hari`}</span>
       </span>
     );
   };

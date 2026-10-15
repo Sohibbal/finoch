@@ -63,7 +63,7 @@ describe("Wishlist Dynamic Components Architecture", () => {
       })
     );
     expect(htmlAchievable).toContain("Sepatu Adidas Samba");
-    expect(htmlAchievable).toContain("Tabungan Cukup!");
+    expect(htmlAchievable).toContain("Tercapai");
 
     // 2. Delayed
     const htmlDelayed = renderToString(
@@ -75,7 +75,7 @@ describe("Wishlist Dynamic Components Architecture", () => {
         onDelete: noop,
       })
     );
-    expect(htmlDelayed).toContain("Tertunda (Rem Belanja)");
+    expect(htmlDelayed).toContain("Tertunda");
 
     // 3. On track
     const htmlOnTrack = renderToString(
@@ -87,7 +87,7 @@ describe("Wishlist Dynamic Components Architecture", () => {
         onDelete: noop,
       })
     );
-    expect(htmlOnTrack).toContain("~14 hari lagi");
+    expect(htmlOnTrack).toContain("~14 hari");
 
     // 4. Achieved
     const htmlAchieved = renderToString(

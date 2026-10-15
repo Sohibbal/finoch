@@ -16,6 +16,7 @@ interface CategoryPieChartProps {
   data: CategoryDataPoint[];
   type: "income" | "expense";
   className?: string;
+  compact?: boolean;
 }
 
 // Consistent Signature Palette: Biru, Hijau Tosca, Putih & Ice accents
@@ -36,6 +37,7 @@ export function CategoryPieChart({
   data,
   type,
   className = "",
+  compact = false,
 }: CategoryPieChartProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [hoveredCategory, setHoveredCategory] = useState<string | null>(null);
@@ -87,7 +89,9 @@ export function CategoryPieChart({
   return (
     <div
       ref={containerRef}
-      className={`rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 glass-sheen relative overflow-hidden group ${className}`}
+      className={`rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 ${
+        compact ? "p-4 sm:p-5 space-y-3" : "p-5 sm:p-6 space-y-4"
+      } shadow-xs glass-sheen relative overflow-hidden group ${className}`}
     >
       {type === "income" ? (
         <ArrowUpRight
@@ -190,7 +194,11 @@ export function CategoryPieChart({
 
       {/* SVG Donut Graphic with Enlarged Clean Hole */}
       <div className="flex items-center justify-center py-2 animate-content-in relative z-10">
-        <div className="relative w-48 h-48 sm:w-56 sm:h-56 flex items-center justify-center">
+        <div
+          className={`relative ${
+            compact ? "w-32 h-32 sm:w-36 sm:h-36" : "w-48 h-48 sm:w-56 sm:h-56"
+          } flex items-center justify-center`}
+        >
           <svg viewBox="0 0 120 120" className="w-full h-full transform -rotate-90">
             {slices.length === 0 ? (
               <circle
@@ -232,10 +240,9 @@ export function CategoryPieChart({
                       isDimmed ? "opacity-35" : "opacity-100"
                     }`}
                   >
-                    <title>
-                      {slice.category}: {rupiah(slice.amount)} ({slice.percentage.toFixed(0)}%)
-                      {slice.count ? ` • ${slice.count} transaksi` : ""}
-                    </title>
+                    <title>{`${slice.category}: ${rupiah(slice.amount)} (${slice.percentage.toFixed(0)}%)${
+                      slice.count ? ` • ${slice.count} transaksi` : ""
+                    }`}</title>
                   </circle>
                 );
               })
@@ -243,14 +250,26 @@ export function CategoryPieChart({
           </svg>
 
           {/* Inner Center Label - Clean Non-Overlapping Layout */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-3 select-none">
-            <span className="text-[10px] sm:text-[11px] font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider">
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none px-2 select-none">
+            <span
+              className={`${
+                compact ? "text-[8px] sm:text-[9px]" : "text-[10px] sm:text-[11px]"
+              } font-bold text-slate-400 dark:text-slate-400 uppercase tracking-wider`}
+            >
               {type === "income" ? "Total Masuk" : "Total Keluar"}
             </span>
-            <span className="text-sm sm:text-base font-black text-slate-900 dark:text-white money tracking-tight max-w-[130px] truncate">
+            <span
+              className={`${
+                compact ? "text-xs sm:text-sm" : "text-sm sm:text-base"
+              } font-black text-slate-900 dark:text-white money tracking-tight max-w-[130px] truncate`}
+            >
               {totalAmount > 0 ? rupiah(totalAmount) : "Rp 0"}
             </span>
-            <span className="text-[10px] text-teal-600 dark:text-teal-400 font-semibold mt-0.5">
+            <span
+              className={`${
+                compact ? "text-[9px]" : "text-[10px]"
+              } text-teal-600 dark:text-teal-400 font-semibold mt-0.5`}
+            >
               {sortedData.length} Kategori
             </span>
           </div>
@@ -263,7 +282,11 @@ export function CategoryPieChart({
           Belum ada transaksi {type === "income" ? "pemasukan" : "pengeluaran"} tercatat
         </p>
       ) : (
-        <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 text-[11px] font-medium text-slate-600 dark:text-slate-400 pt-1 relative z-10">
+        <div
+          className={`flex flex-wrap items-center justify-center ${
+            compact ? "gap-x-1.5 gap-y-1 text-[10px]" : "gap-x-2.5 gap-y-1.5 text-[11px]"
+          } font-medium text-slate-600 dark:text-slate-400 pt-1 relative z-10`}
+        >
           {slices.slice(0, 6).map((slice) => {
             const isHovered = hoveredCategory === slice.category;
 

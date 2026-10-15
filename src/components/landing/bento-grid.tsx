@@ -6,14 +6,9 @@ import {
   Coins,
   Gift,
   Smartphone,
-  Shield,
   ArrowUpRight,
   CheckCircle2,
   Database,
-  Cloud,
-  Command,
-  Search,
-  Sparkles,
 } from "lucide-react";
 
 interface BentoGridProps {
@@ -23,244 +18,319 @@ interface BentoGridProps {
 
 export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
   return (
-    <section id="fitur" className="scroll-mt-28 space-y-12 sm:space-y-16">
-      {/* Section Header with Cobalt typography feel */}
-      <div className="max-w-3xl space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs font-bold tracking-wide">
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>MODULAR & INTUITIF</span>
-        </div>
-        <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
-          Semua yang Kamu Butuhkan. Tanpa Fitur Basa-Basi.
-        </h2>
-        <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed max-w-2xl">
-          Dirancang untuk kecepatan operasional mahasiswa dan anak kost. Bebas friksi pencatatan manual, dengan kontrol keuangan yang bekerja di latar belakang.
-        </p>
-      </div>
-
-      {/* Grid Bento: Row 1 (3 Cards) & Row 2 (2 Wide Cards) */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-7">
-        
-        {/* Card 1: Input Suara & Scan Struk */}
-        <div className="relative rounded-2xl p-6 sm:p-7 bg-[#080D1A] border border-slate-800/90 shadow-xl overflow-hidden group hover:border-blue-500/50 hover:shadow-2xl transition-card hover-card-lift flex flex-col justify-between space-y-6">
-          {/* Subtle dot pattern overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
-
-          <div className="relative z-10 space-y-4">
-            <div className="w-11 h-11 rounded-2xl bg-blue-500/15 text-blue-400 border border-blue-500/20 flex items-center justify-center shadow-xs">
-              <Mic className="w-5 h-5" />
-            </div>
-            <div className="space-y-1.5">
-              <h3 className="text-base sm:text-lg font-bold text-white">
-                Catat Secepat Bicara
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Ucapkan belanjaanmu secara santai. AI lokal mengekstrak nama item, nominal rupiah, dan kategori secara presisi.
-              </p>
-            </div>
-          </div>
-
-          {/* Mini Interactive Preview */}
-          <div className="relative z-10 rounded-xl p-3.5 bg-[#0C1427] border border-slate-800/80 space-y-2.5 text-xs">
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span className="flex items-center gap-1.5 font-medium text-slate-300">
-                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
-                Audio Aktif
-              </span>
-              <span>Web Speech Native</span>
-            </div>
-            <p className="font-semibold text-white text-xs leading-snug">
-              &ldquo;Makan siang ayam geprek 18 ribu sama es teh 4 ribu&rdquo;
+    <section id="fitur" className="scroll-mt-28">
+      {/* 2-Column Responsive Layout: Left Sticky Header & Highlights, Right Scrolling Cards Stack */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+        {/* Left Column: Sticky Title & Description */}
+        <div className="lg:col-span-5 lg:sticky lg:top-28 space-y-6 self-start">
+          <div className="space-y-4">
+            <h2 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15]">
+              Semua yang Kamu Butuhkan. Tanpa Fitur Basa-Basi.
+            </h2>
+            <p className="text-sm sm:text-base text-slate-600 dark:text-slate-400 leading-relaxed">
+              Dirancang untuk kecepatan operasional harian. Bebas friksi pencatatan manual, dengan kontrol keuangan yang bekerja di latar belakang.
             </p>
-            <div className="flex flex-wrap gap-1.5 pt-1">
-              <span className="px-2 py-0.5 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-semibold text-[10px]">
-                Ayam Geprek Rp18.000
-              </span>
-              <span className="px-2 py-0.5 rounded-md bg-blue-500/15 text-blue-400 border border-blue-500/30 font-semibold text-[10px]">
-                Es Teh Rp4.000
-              </span>
-            </div>
-          </div>
-
-          <div className="relative z-10 flex items-center gap-3 pt-2 border-t border-slate-800/80 text-xs font-semibold">
-            <button
-              type="button"
-              onClick={onOpenVoice}
-              className="text-blue-400 hover:text-blue-300 hover:underline inline-flex items-center gap-1 transition-colors"
-            >
-              <span>Tes Bicara</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
-            <span className="text-slate-700">·</span>
-            <button
-              type="button"
-              onClick={onOpenScan}
-              className="text-emerald-400 hover:text-emerald-300 hover:underline inline-flex items-center gap-1 transition-colors"
-            >
-              <span>Tes Scan Struk</span>
-              <ArrowUpRight className="w-3.5 h-3.5" />
-            </button>
           </div>
         </div>
 
-        {/* Card 2: Jatah Harian Dinamis */}
-        <div className="relative rounded-2xl p-6 sm:p-7 bg-[#080D1A] border border-slate-800/90 shadow-xl overflow-hidden group hover:border-emerald-500/50 hover:shadow-2xl transition-card hover-card-lift flex flex-col justify-between space-y-6">
-          {/* Subtle dot pattern overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
+        {/* Right Column: Cards Stack matching the Dashboard Card Style */}
+        <div className="lg:col-span-7 space-y-6">
+          {/* Card 1: Input Suara & Scan Struk */}
+          <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
+            {/* Watermark Icon matching Dashboard Cards */}
+            <Mic
+              className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+              strokeWidth={1.5}
+            />
 
-          <div className="relative z-10 space-y-4">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/20 flex items-center justify-center shadow-xs">
-              <Coins className="w-5 h-5" />
-            </div>
-            <div className="space-y-1.5">
-              <h3 className="text-base sm:text-lg font-bold text-white">
-                Disiplin Jatah Harian
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Tetapkan plafon belanja harian anti-boncos. Pantau secara instan apakah sisa uang saku hari ini aman atau kritis.
-              </p>
-            </div>
-          </div>
-
-          {/* Mini Ring Meter Preview */}
-          <div className="relative z-10 rounded-xl p-3.5 bg-[#0C1427] border border-slate-800/80 space-y-2.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-400">Target Harian:</span>
-              <span className="font-bold text-white money">Rp150.000</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-              <div className="h-full bg-emerald-500 rounded-full transition-all duration-700 ease-out" style={{ width: "30%" }} />
-            </div>
-            <div className="flex items-center justify-between text-[11px] font-medium">
-              <span className="text-emerald-400 flex items-center gap-1">
-                <CheckCircle2 className="w-3.5 h-3.5" /> Sisa Rp105.000 (Aman)
+            {/* Header */}
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-blue-600 dark:bg-blue-400" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Input Cepat: Suara & Scan Struk
+                </h3>
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                Web Speech & OCR
               </span>
-              <span className="text-slate-400">Terpakai Rp45.000</span>
             </div>
-          </div>
 
-          <p className="relative z-10 text-xs text-slate-400 pt-2 border-t border-slate-800/80">
-            Dihitung otomatis dari sisa hari & anggaran bulanan.
-          </p>
-        </div>
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed relative z-10">
+              Ucapkan belanjaanmu secara santai atau foto struk kasir. Sistem mengekstrak nama item, nominal rupiah, dan kategorinya secara otomatis tanpa ketik manual.
+            </p>
 
-        {/* Card 3: Wishlist Planner */}
-        <div className="relative rounded-2xl p-6 sm:p-7 bg-[#080D1A] border border-slate-800/90 shadow-xl overflow-hidden group hover:border-purple-500/50 hover:shadow-2xl transition-card hover-card-lift flex flex-col justify-between space-y-6">
-          {/* Subtle dot pattern overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
+            {/* Real Interactive Preview: Speech bubble + Exact Dashboard Transaction row */}
+            <div className="space-y-2.5 relative z-10">
+              <div className="p-3 rounded-xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 space-y-1">
+                <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
+                  <span className="flex items-center gap-1.5 font-semibold text-rose-500">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                    Audio Terdeteksi
+                  </span>
+                  <span>Web Speech Native</span>
+                </div>
+                <p className="font-semibold text-slate-800 dark:text-slate-100 text-xs sm:text-sm">
+                  &ldquo;Makan siang ayam geprek sama es teh 22 ribu&rdquo;
+                </p>
+              </div>
 
-          <div className="relative z-10 space-y-4">
-            <div className="w-11 h-11 rounded-2xl bg-purple-500/15 text-purple-400 border border-purple-500/20 flex items-center justify-center shadow-xs">
-              <Gift className="w-5 h-5" />
-            </div>
-            <div className="space-y-1.5">
-              <h3 className="text-base sm:text-lg font-bold text-white">
-                Wishlist & Target Nyata
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Redam belanja impulsif dengan masa tunggu evaluasi. Finoch menghitung estimasi tanggal ketercapaian secara realistis.
-              </p>
-            </div>
-          </div>
+              {/* Exact Dashboard Transaction Row Style */}
+              <div className="rounded-2xl border border-slate-100 dark:border-slate-800/80 p-3.5 flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-rose-500/10 text-rose-600 dark:text-rose-400">
+                    <ArrowUpRight className="w-4 h-4" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+                      Ayam Geprek + Es Teh
+                    </p>
+                    <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
+                      Hari Ini · Input Suara
+                    </p>
+                  </div>
+                </div>
 
-          {/* Mini Wishlist Preview */}
-          <div className="relative z-10 rounded-xl p-3.5 bg-[#0C1427] border border-slate-800/80 space-y-2.5">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-bold text-white">Mechanical Keyboard</span>
-              <span className="font-extrabold text-purple-400 money">Rp450.000</span>
-            </div>
-            <div className="w-full h-2 rounded-full bg-slate-800 overflow-hidden">
-              <div className="h-full bg-purple-500 rounded-full transition-all duration-700 ease-out" style={{ width: "70%" }} />
-            </div>
-            <div className="flex items-center justify-between text-[11px] text-slate-400">
-              <span>Terkumpul Rp315.000</span>
-              <span className="font-bold text-slate-300">~9 hari lagi</span>
-            </div>
-          </div>
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-medium inline-flex items-center gap-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                    <span className="w-1.5 h-1.5 rounded-full bg-rose-500" />
+                    <span>Makanan & Minuman</span>
+                  </span>
+                </div>
 
-          <p className="relative z-10 text-xs text-slate-400 pt-2 border-t border-slate-800/80">
-            Alokasi otomatis dari sisa jatah harian yang dihemat.
-          </p>
-        </div>
-      </div>
-
-      {/* Row 2: 2 Wider Bento Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-7">
-        
-        {/* Card 4: PWA Offline-First (7 cols) */}
-        <div className="md:col-span-7 relative rounded-2xl p-6 sm:p-8 bg-[#080D1A] border border-slate-800/90 shadow-xl overflow-hidden group hover:border-blue-500/50 hover:shadow-2xl transition-card hover-card-lift flex flex-col justify-between space-y-6">
-          {/* Subtle dot pattern overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
-
-          <div className="relative z-10 space-y-4">
-            <div className="w-11 h-11 rounded-2xl bg-blue-500/15 text-blue-400 border border-blue-500/20 flex items-center justify-center shadow-xs">
-              <Smartphone className="w-5 h-5" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                PWA Offline-First & Sinkronisasi Cerdas
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed max-w-xl">
-                Bisa dipasang langsung di Android, iOS, maupun Desktop seperti aplikasi native. Tetap berfungsi tanpa koneksi internet; transaksi disimpan lokal di IndexedDB dan disinkronkan otomatis begitu online.
-              </p>
-            </div>
-          </div>
-
-          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
-            <div className="rounded-xl p-3.5 bg-[#0C1427] border border-slate-800/80 flex items-center gap-3">
-              <Database className="w-5 h-5 text-blue-400 shrink-0" />
-              <div>
-                <p className="text-xs font-bold text-white">Lokal IndexedDB</p>
-                <p className="text-[11px] text-slate-400">Pencatatan instan & tanpa jeda</p>
+                <div className="text-right shrink-0">
+                  <span className="text-xs sm:text-sm font-bold money text-rose-600 dark:text-rose-400">
+                    -Rp22.000
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="rounded-xl p-3.5 bg-[#0C1427] border border-slate-800/80 flex items-center gap-3">
-              <Cloud className="w-5 h-5 text-indigo-400 shrink-0" />
-              <div>
-                <p className="text-xs font-bold text-white">Cloud PostgreSQL</p>
-                <p className="text-[11px] text-slate-400">Auto-sync di latar belakang</p>
+            {/* Context Footer with interactive action triggers */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs relative z-10">
+              <div className="flex items-center gap-3 font-semibold">
+                <button
+                  type="button"
+                  onClick={onOpenVoice}
+                  className="text-blue-600 dark:text-blue-400 hover:underline inline-flex items-center gap-1 transition-colors"
+                >
+                  <span>Tes Bicara</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-slate-300 dark:text-slate-700">·</span>
+                <button
+                  type="button"
+                  onClick={onOpenScan}
+                  className="text-emerald-600 dark:text-emerald-400 hover:underline inline-flex items-center gap-1 transition-colors"
+                >
+                  <span>Tes Scan Struk</span>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+              <span className="text-[11px] text-slate-400">Tersimpan ke database</span>
+            </div>
+          </div>
+
+          {/* Card 2: Disiplin Jatah Harian (Matches DailyAllowanceRing) */}
+          <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
+            {/* Watermark Icon */}
+            <Coins
+              className="absolute -right-3 -bottom-3 w-28 h-28 text-teal-500/5 dark:text-teal-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+              strokeWidth={1.5}
+            />
+
+            {/* Header */}
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-teal-500" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Status Jatah Harian
+                </h3>
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+                70% Aman
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed relative z-10">
+              Tetapkan batas aman belanja per hari. Sistem memisahkan secara tegas uang jajan harian dari simpanan masa depan agar tidak boncos.
+            </p>
+
+            {/* Real SVG Donut Ring matching DailyAllowanceRing in Dashboard */}
+            <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800/80 flex flex-col sm:flex-row items-center justify-around gap-4 relative z-10">
+              <div className="relative w-36 h-36 flex items-center justify-center shrink-0">
+                <svg className="w-full h-full -rotate-90 transform" viewBox="0 0 160 160">
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="currentColor"
+                    strokeWidth="11"
+                    fill="transparent"
+                    className="text-slate-200 dark:text-slate-800"
+                  />
+                  <circle
+                    cx="80"
+                    cy="80"
+                    r="64"
+                    stroke="#14B8A6"
+                    strokeWidth="11"
+                    strokeDasharray="402.12"
+                    strokeDashoffset="120.6"
+                    strokeLinecap="round"
+                    fill="transparent"
+                    className="transition-all duration-700 ease-out"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-2">
+                  <span className="text-lg sm:text-xl font-extrabold tracking-tight money text-slate-900 dark:text-white">
+                    Rp105.000
+                  </span>
+                  <span className="text-[10px] text-slate-400 font-medium">Sisa Jatah</span>
+                </div>
+              </div>
+
+              <div className="space-y-2 text-xs w-full sm:w-auto">
+                <div className="flex items-center justify-between sm:justify-start gap-4">
+                  <span className="text-slate-500 dark:text-slate-400">Plafon Harian:</span>
+                  <span className="font-bold text-slate-900 dark:text-white money">Rp150.000</span>
+                </div>
+                <div className="flex items-center justify-between sm:justify-start gap-4">
+                  <span className="text-slate-500 dark:text-slate-400">Terpakai Hari Ini:</span>
+                  <span className="font-bold text-rose-500 money">Rp45.000</span>
+                </div>
+                <div className="pt-1.5 border-t border-slate-200/60 dark:border-slate-700/60 flex items-center justify-between sm:justify-start gap-4">
+                  <span className="text-slate-500 dark:text-slate-400">Status Keamanan:</span>
+                  <span className="font-bold text-teal-600 dark:text-teal-400 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" /> Aman Terkendali
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Card 5: Pintasan Cepat & Privasi Penuh (5 cols) */}
-        <div className="md:col-span-5 relative rounded-2xl p-6 sm:p-8 bg-[#080D1A] border border-slate-800/90 shadow-xl overflow-hidden group hover:border-slate-500/50 hover:shadow-2xl transition-card hover-card-lift flex flex-col justify-between space-y-6">
-          {/* Subtle dot pattern overlay */}
-          <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
-
-          <div className="relative z-10 space-y-4">
-            <div className="w-11 h-11 rounded-2xl bg-slate-800/90 text-slate-300 border border-slate-700/60 flex items-center justify-center shadow-xs">
-              <Command className="w-5 h-5" />
-            </div>
-            <div className="space-y-2">
-              <h3 className="text-lg sm:text-xl font-bold text-white">
-                Pencarian Cepat & Privasi Penuh
-              </h3>
-              <p className="text-xs sm:text-sm text-slate-400 leading-relaxed">
-                Akses semua histori dengan pintasan keyboard. Tanpa pelacak iklan pihak ketiga, data finansialmu terjaga aman.
-              </p>
+            {/* Context Footer */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+              <span>Metode:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                Dihitung dinamis dari sisa hari & anggaran bulanan
+              </span>
             </div>
           </div>
 
-          <div className="relative z-10 rounded-xl p-3.5 bg-[#0C1427] border border-slate-800/80 space-y-2 text-xs">
-            <div className="flex items-center justify-between text-slate-300">
-              <span className="flex items-center gap-2">
-                <Search className="w-4 h-4 text-slate-400" />
-                Global Search
+          {/* Card 3: Top Wishlist Impian (Matches Dashboard Top Wishlist) */}
+          <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
+            {/* Watermark Icon */}
+            <Gift
+              className="absolute -right-3 -bottom-3 w-28 h-28 text-amber-500/5 dark:text-amber-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+              strokeWidth={1.5}
+            />
+
+            {/* Header */}
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Wishlist Impian Berdasar Kemampuan
+                </h3>
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                Alokasi 20% Jatah
               </span>
-              <kbd className="px-2 py-0.5 rounded bg-slate-800 border border-slate-700/70 font-mono text-[10px] text-slate-300">
-                Ctrl + K
-              </kbd>
             </div>
-            <div className="flex items-center justify-between text-slate-300">
-              <span className="flex items-center gap-2">
-                <Shield className="w-4 h-4 text-emerald-400" />
-                Enkripsi JWT Cookie
+
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed relative z-10">
+              Cegah belanja impulsif. Finoch menghitung estimasi tanggal ketercapaian barang impian dari sisa uang jajan yang kamu sisihkan tiap hari.
+            </p>
+
+            {/* Exact Dashboard Top Wishlist Item Style */}
+            <div className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 space-y-2 relative z-10">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="w-5 h-5 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 font-extrabold text-[10px] flex items-center justify-center shrink-0">
+                    #1
+                  </span>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white truncate">
+                    Mechanical Keyboard
+                  </p>
+                </div>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                  ~9 hari lagi
+                </span>
+              </div>
+
+              <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                <span className="money font-semibold text-slate-700 dark:text-slate-300">
+                  Rp450.000
+                </span>
+                <span className="text-[10px]">
+                  Rp315.000 (70%)
+                </span>
+              </div>
+
+              <div className="w-full h-1.5 rounded-full bg-slate-200/80 dark:bg-slate-700/80 overflow-hidden">
+                <div
+                  className="h-full rounded-full bg-gradient-to-r from-amber-500 to-blue-500 transition-all duration-500"
+                  style={{ width: "70%" }}
+                />
+              </div>
+            </div>
+
+            {/* Context Footer */}
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+              <span>Proyeksi Otomatis:</span>
+              <span className="font-semibold text-blue-600 dark:text-blue-400">
+                +Rp30.000/hari saat disiplin jatah
               </span>
-              <span className="text-[11px] font-semibold text-emerald-400">
-                Aktif
+            </div>
+          </div>
+
+          {/* Card 4: Tersedia di Mode PWA */}
+          <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group">
+            {/* Watermark Icon */}
+            <Smartphone
+              className="absolute -right-3 -bottom-3 w-28 h-28 text-teal-500/5 dark:text-teal-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
+              strokeWidth={1.5}
+            />
+
+            {/* Header */}
+            <div className="flex items-center justify-between relative z-10">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-teal-500" />
+                <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                  Tersedia di Mode PWA
+                </h3>
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+                PWA Standalone
+              </span>
+            </div>
+
+            <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 leading-relaxed relative z-10">
+              Dapat dipasang langsung di HP Android, iPhone, maupun Laptop/PC tanpa lewat app store. Tampil layar penuh layaknya aplikasi native, ringan, dan tetap aktif mencatat transaksi meski tanpa koneksi internet.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-10">
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex items-center gap-3">
+                <Smartphone className="w-5 h-5 text-teal-600 dark:text-teal-400 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">Instalasi Layar Penuh</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">Bebas bilah peramban & instan</p>
+                </div>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-slate-50/80 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700/60 flex items-center gap-3">
+                <Database className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0" />
+                <div>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">Lokal &amp; Sinkronisasi</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">IndexedDB offline + auto-sync</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 relative z-10">
+              <span>Dukungan Perangkat:</span>
+              <span className="font-semibold text-slate-700 dark:text-slate-300">
+                Android, iOS, macOS, Windows
               </span>
             </div>
           </div>
@@ -269,3 +339,4 @@ export function BentoGrid({ onOpenVoice, onOpenScan }: BentoGridProps) {
     </section>
   );
 }
+

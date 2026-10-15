@@ -43,7 +43,7 @@ import { VoiceTransactionModal } from "@/components/transaction/voice-transactio
 import { OPEN_VOICE_EVENT } from "@/components/layout/app-shell";
 import type { TransactionCandidate } from "@/types/financial-types";
 
-const MAX_DASHBOARD_TX = 14;
+const MAX_DASHBOARD_TX = 15;
 
 export default function DashboardPage() {
   const { user } = useAuthContext();
@@ -585,13 +585,6 @@ export default function DashboardPage() {
                   <span className="text-[11px] text-slate-400">
                     Menampilkan {Math.min(transactions.length, MAX_DASHBOARD_TX)} dari {transactions.length} transaksi
                   </span>
-                  <Link
-                    href="/pengeluaran"
-                    className="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline flex items-center gap-1"
-                  >
-                    <span>Lihat Seluruh Riwayat</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </Link>
                 </div>
               </div>
 
@@ -716,13 +709,13 @@ export default function DashboardPage() {
                               </p>
                             </div>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 ${
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${
                                 isReady
                                   ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                                   : "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"
                               }`}
                             >
-                              {isReady ? "Siap Dibeli! 🎉" : `~${days} hari lagi`}
+                              {isReady ? "Tercapai" : `~${days} hari`}
                             </span>
                           </div>
 

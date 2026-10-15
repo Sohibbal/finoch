@@ -53,6 +53,46 @@ function Tab({
   );
 }
 
+function FloatingFinBotTab({
+  active,
+}: {
+  active: boolean;
+}) {
+  return (
+    <Link
+      href="/copilot"
+      aria-label="FinBot Asisten AI"
+      aria-current={active ? "page" : undefined}
+      className="relative flex flex-col items-center justify-center -top-5 group cursor-pointer focus:outline-hidden"
+    >
+      {/* Floating Squircle Button ala Livin QRIS */}
+      <div
+        className={`w-14 h-14 rounded-[1.35rem] flex items-center justify-center transition-all duration-300 border-[3.5px] border-white dark:border-[#0B1320] shadow-[0_8px_24px_rgba(20,184,166,0.32)] dark:shadow-[0_8px_24px_rgba(13,148,136,0.35)] ${
+          active
+            ? "bg-gradient-to-b from-[#38BDF8] via-[#14B8A6] to-[#2563EB] text-white scale-105 ring-4 ring-teal-500/20 shadow-[0_10px_28px_rgba(37,99,235,0.4)]"
+            : "bg-gradient-to-b from-[#38BDF8] via-[#14B8A6] to-[#2563EB] text-white group-hover:scale-105 group-hover:shadow-[0_10px_28px_rgba(20,184,166,0.45)] active:scale-95"
+        }`}
+      >
+        <Bot
+          className="w-7 h-7 text-white transition-transform group-hover:scale-110 drop-shadow-xs"
+          strokeWidth={2.2}
+          aria-hidden="true"
+        />
+      </div>
+      <span
+        className={`text-[11px] font-black tracking-tight mt-1 transition-colors ${
+          active
+            ? "text-blue-600 dark:text-teal-400"
+            : "text-slate-600 dark:text-slate-300 group-hover:text-slate-900 dark:group-hover:text-white"
+        }`}
+      >
+        FinBot
+      </span>
+      {active && <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-teal-400 -mt-0.5" />}
+    </Link>
+  );
+}
+
 /** Mobile bottom bar providing instant access to the core features */
 export function BottomNav({ userEmail }: BottomNavProps) {
   const pathname = usePathname();
@@ -133,9 +173,10 @@ export function BottomNav({ userEmail }: BottomNavProps) {
 
       <nav
         aria-label="Navigasi Bawah Mobile"
-        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0B1320]/95 backdrop-blur-md border-t border-slate-200/80 dark:border-slate-800 pb-[env(safe-area-inset-bottom)]"
+        className="md:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0B1320]/95 backdrop-blur-md rounded-t-[1.75rem] border-t border-slate-200/80 dark:border-slate-800 shadow-[0_-8px_30px_rgba(0,0,0,0.06)] dark:shadow-[0_-8px_30px_rgba(0,0,0,0.4)] pb-[env(safe-area-inset-bottom)]"
       >
         <div className="grid grid-cols-5 items-center h-16 max-w-md mx-auto px-1">
+          {/* 1. Beranda */}
           <Tab
             href={homeHref}
             label="Beranda"
@@ -143,29 +184,30 @@ export function BottomNav({ userEmail }: BottomNavProps) {
             active={isHome}
             ariaLabel={isGuest ? "Halaman Beranda" : "Halaman Dashboard"}
           />
+          {/* 2. Pemasukan */}
           <Tab
             href="/pemasukan"
             label="Masuk"
             icon={ArrowDownLeft}
             active={pathname === "/pemasukan"}
           />
+          {/* 3. FinBot (Tengah - Floating Mobile Banking Action Button) */}
+          <FloatingFinBotTab
+            active={pathname === "/copilot"}
+          />
+          {/* 4. Pengeluaran (Di kanan FinBot) */}
           <Tab
             href="/pengeluaran"
             label="Keluar"
             icon={ArrowUpRight}
             active={pathname === "/pengeluaran"}
           />
+          {/* 5. Wishlist (Paling ujung kanan) */}
           <Tab
             href="/wishlist"
             label="Wishlist"
             icon={Gift}
             active={pathname === "/wishlist"}
-          />
-          <Tab
-            href="/copilot"
-            label="FinBot"
-            icon={Bot}
-            active={pathname === "/copilot"}
           />
         </div>
       </nav>

@@ -75,12 +75,12 @@ export function SentencePress({
   const status = demoStatus(spent);
 
   return (
-    <div className="relative w-full rounded-2xl bg-[#080D1A] border border-slate-800/90 shadow-xl p-6 sm:p-8 lg:p-9 space-y-7 overflow-hidden transition-card hover-card-lift">
+    <div className="relative w-full rounded-2xl bg-[#080D1A] border border-slate-800/90 shadow-xl p-4 sm:p-7 lg:p-9 space-y-5 sm:space-y-7 overflow-hidden transition-card hover-card-lift">
       {/* Subtle dot pattern overlay */}
       <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:20px_20px] opacity-40 pointer-events-none" />
 
       {/* Header Form & Sample Pills */}
-      <div className="relative z-10 space-y-4">
+      <div className="relative z-10 space-y-3.5 sm:space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse" />
@@ -100,10 +100,10 @@ export function SentencePress({
             value={sentence}
             onChange={(e) => handleUpdate(e.target.value)}
             placeholder="Ketik kalimat belanja santai, misal: beli nasi goreng 18rb es teh ceban..."
-            className="w-full rounded-2xl border border-slate-800/80 bg-[#0C1427] px-4 py-3.5 pr-28 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none shadow-inner"
+            className="w-full min-h-[96px] sm:min-h-[80px] rounded-2xl border border-slate-800/80 bg-[#0C1427] px-3.5 sm:px-4 py-3 sm:py-3.5 pb-12 sm:pb-3.5 sm:pr-28 text-xs sm:text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/50 transition-all resize-none shadow-inner"
           />
 
-          <div className="absolute right-3 bottom-3 flex items-center gap-2">
+          <div className="absolute right-2.5 bottom-2.5 sm:right-3 sm:bottom-3 flex items-center gap-1.5 sm:gap-2">
             <button
               type="button"
               onClick={onTryMic}

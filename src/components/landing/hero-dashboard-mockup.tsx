@@ -6,7 +6,7 @@ import {
   TrendingUp,
   TrendingDown,
   ShieldCheck,
-  Sparkles,
+  Bot,
   Flame,
   Calendar,
   Mic,
@@ -28,7 +28,7 @@ export function HeroDashboardMockup() {
         <div className="relative z-10 rounded-2xl p-4 sm:p-5 bg-[#0C1427] border border-slate-800/80 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-start sm:items-center gap-3.5">
             <div className="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md">
-              <Sparkles className="w-5 h-5 text-sky-200" />
+              <Bot className="w-5 h-5 text-sky-200" />
             </div>
             <div className="space-y-0.5">
               <div className="flex items-center gap-2">
@@ -126,7 +126,7 @@ export function HeroDashboardMockup() {
           
           {/* SISI KIRI (lg:col-span-8): Tren Keuangan 6 Bulan Terakhir */}
           <div className="lg:col-span-8 rounded-2xl p-5 sm:p-6 bg-[#0C1427] border border-slate-800/80 shadow-xs flex flex-col justify-between space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
               <div>
                 <h4 className="text-sm sm:text-base font-bold text-white">
                   Tren Keuangan 6 Bulan Terakhir
@@ -135,7 +135,7 @@ export function HeroDashboardMockup() {
                   Perbandingan arus pemasukan vs pengeluaran
                 </p>
               </div>
-              <div className="flex items-center gap-4 text-xs font-medium">
+              <div className="flex items-center gap-3.5 text-xs font-medium">
                 <span className="flex items-center gap-1.5 text-blue-400">
                   <span className="w-2 h-2 rounded-full bg-blue-500" /> Pemasukan
                 </span>
@@ -205,8 +205,8 @@ export function HeroDashboardMockup() {
                 />
               </svg>
 
-              {/* Floating Tooltip Box matching capture card */}
-              <div className="absolute top-2 left-[68%] -translate-x-1/2 bg-white text-slate-900 rounded-xl px-3 py-2 shadow-2xl pointer-events-none space-y-0.5 border border-slate-100 min-w-[130px] z-20">
+              {/* Floating Tooltip Box matching capture card (hidden on small mobile to prevent overlap) */}
+              <div className="hidden sm:block absolute top-2 left-[68%] -translate-x-1/2 bg-white text-slate-900 rounded-xl px-3 py-2 shadow-2xl pointer-events-none space-y-0.5 border border-slate-100 min-w-[130px] z-20">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
                   <Calendar className="w-3.5 h-3.5 text-blue-600" />
                   <span>12 Oktober</span>

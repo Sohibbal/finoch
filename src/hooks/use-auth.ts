@@ -5,6 +5,7 @@ import type { UserProfile } from "@/lib/types/auth";
 import { expenseStorage } from "@/lib/storage/expense-storage";
 import { syncManager } from "@/lib/sync/sync-manager";
 import { getStorageScope, setStorageScope } from "@/lib/storage/local-storage";
+import { clearFinBotChatHistory } from "@/lib/storage/finbot-chat-storage";
 
 // Guest data moves into the account before sync starts, so the first sync already uploads it.
 async function startUserSession(userId: string) {
@@ -121,6 +122,7 @@ export function useAuth() {
     } catch {
       // IndexedDB unavailable: nothing queued to clear
     }
+    clearFinBotChatHistory(userId);
     setStorageScope(null);
     setUser(null);
   };

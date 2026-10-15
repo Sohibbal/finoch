@@ -47,7 +47,7 @@ export const NAVIGATION_ITEMS: NavigationItem[] = [
   },
   {
     href: "/copilot",
-    label: "FinBot Copilot",
+    label: "FinBot",
     desc: "Tanya data finansial lo",
     icon: Bot,
     keywords: ["finbot", "copilot", "ai", "asisten", "tanya"],

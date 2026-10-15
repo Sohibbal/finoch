@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, Plus, Sparkles, Star } from "lucide-react";
+import { X, Plus, Gift, Star } from "lucide-react";
 
 interface ManualWishlistModalProps {
   isOpen: boolean;
@@ -50,7 +50,7 @@ export function ManualWishlistModal({ isOpen, onClose, onSave }: ManualWishlistM
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="w-9 h-9 rounded-xl bg-primary-100 dark:bg-primary-950 flex items-center justify-center text-primary-600 dark:text-primary-400">
-              <Sparkles className="w-5 h-5" />
+              <Gift className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-head font-bold text-ink dark:text-white">Tambah Wishlist</h2>

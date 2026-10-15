@@ -38,6 +38,18 @@ export default function PemasukanPage() {
 
   useEffect(() => {
     loadData();
+
+    const handleUpdate = () => {
+      loadData();
+    };
+    window.addEventListener("finoch:transaction-changed", handleUpdate);
+    window.addEventListener("finoch:data-pulled", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("finoch:transaction-changed", handleUpdate);
+      window.removeEventListener("finoch:data-pulled", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
   }, [loadData]);
 
   const handleManualSave = async (data: {
@@ -114,6 +126,7 @@ export default function PemasukanPage() {
       <PageHeader
         title="Pemasukan"
         subtitle="Kelola seluruh uang masuk via suara, scan bukti, atau manual"
+        showBackButton={false}
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">

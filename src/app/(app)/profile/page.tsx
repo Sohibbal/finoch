@@ -154,6 +154,7 @@ export default function ProfilePage() {
       <PageHeader
         title="Profil"
         subtitle="Kelola nama panggilan lo, jatah harian, dan akun"
+        showBackButton={false}
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">

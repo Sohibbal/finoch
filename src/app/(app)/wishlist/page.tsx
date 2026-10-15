@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
-import { Plus, Mic, Sparkles, Gift, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
+import { Plus, Mic, Coins, Gift, ChevronLeft, ChevronRight, ArrowUpRight } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { rupiah } from "@/lib/format";
 import {
@@ -80,6 +80,18 @@ export default function WishlistPage() {
 
   useEffect(() => {
     loadData();
+
+    const handleUpdate = () => {
+      loadData();
+    };
+    window.addEventListener("finoch:transaction-changed", handleUpdate);
+    window.addEventListener("finoch:data-pulled", handleUpdate);
+    window.addEventListener("storage", handleUpdate);
+    return () => {
+      window.removeEventListener("finoch:transaction-changed", handleUpdate);
+      window.removeEventListener("finoch:data-pulled", handleUpdate);
+      window.removeEventListener("storage", handleUpdate);
+    };
   }, [loadData]);
 
   useEffect(() => {
@@ -205,7 +217,7 @@ export default function WishlistPage() {
                   <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-xs space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                        <Sparkles className="w-3.5 h-3.5 text-blue-500" />
+                        <Coins className="w-3.5 h-3.5 text-blue-500" />
                         <span>Tabungan aktif: <strong className="text-slate-900 dark:text-white">{rupiah(currentSavings)}</strong></span>
                       </p>
                       <p className="text-[11px] text-slate-400">

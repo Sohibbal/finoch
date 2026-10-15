@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Mic, MicOff, X, Check, RotateCcw, Sparkles } from "lucide-react";
+import { Mic, MicOff, X, Check, RotateCcw, Bot } from "lucide-react";
 import { useHybridSpeech } from "@/hooks/use-hybrid-speech";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
 import { rupiah } from "@/lib/format";
@@ -297,7 +297,7 @@ export function VoiceTransactionModal({
             {amount && amount > 0 && (
               <div className="flex items-center justify-between p-3 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
                 <div className="flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-emerald-500" />
+                  <Check className="w-4 h-4 text-emerald-500" />
                   <span>Item: &quot;{itemName}&quot;</span>
                 </div>
                 <span className="money text-sm font-bold text-emerald-600 dark:text-emerald-400">
@@ -349,7 +349,7 @@ export function VoiceTransactionModal({
             {/* Informational notice */}
             <div className="flex items-center justify-between px-3 py-2 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200/80 dark:border-blue-900/60 text-xs text-blue-700 dark:text-blue-300">
               <div className="flex items-center gap-1.5 font-medium">
-                <Sparkles className="w-4 h-4 text-blue-500 shrink-0" />
+                <Bot className="w-4 h-4 text-blue-500 shrink-0" />
                 <span>Hasil ekstraksi AI bersih dari kata awalan</span>
               </div>
               {isParsingLlm && (

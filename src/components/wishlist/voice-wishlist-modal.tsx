@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Mic, MicOff, X, Sparkles, CheckCircle2 } from "lucide-react";
+import { Mic, MicOff, X, CheckCircle2 } from "lucide-react";
 import { useHybridSpeech } from "@/hooks/use-hybrid-speech";
 import { parseIndonesianExpense } from "@/lib/nlp/indonesian-expense-parser";
 import { rupiah } from "@/lib/format";
@@ -130,7 +130,7 @@ export function VoiceWishlistModal({ isOpen, onClose, onSave }: VoiceWishlistMod
         {candidateName && (
           <div className="p-4 rounded-2xl bg-paper-sheet dark:bg-navy-950 border border-ink/10 dark:border-navy-800 space-y-3">
             <div className="flex items-center gap-2 text-primary-600 dark:text-primary-400 text-meta font-semibold">
-              <Sparkles className="w-4 h-4" />
+              <CheckCircle2 className="w-4 h-4" />
               <span>Terdeteksi</span>
             </div>
             <div>

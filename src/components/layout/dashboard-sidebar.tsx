@@ -79,7 +79,7 @@ export function DashboardSidebar({ className = "" }: DashboardSidebarProps) {
     { href: "/pemasukan", icon: ArrowDownLeft, label: "Pemasukan" },
     { href: "/pengeluaran", icon: ArrowUpRight, label: "Pengeluaran" },
     { href: "/wishlist", icon: Gift, label: "Wishlist" },
-    { href: "/copilot", icon: Bot, label: "Copilot" },
+    { href: "/copilot", icon: Bot, label: "FinBot" },
     { href: "/profile", icon: User, label: "Profil" },
   ];
 

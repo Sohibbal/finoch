@@ -3,7 +3,7 @@ import { AuthSlider } from "@/components/auth/auth-slider";
 
 export default function RegisterPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-paper" />}>
+    <Suspense fallback={<div className="min-h-screen bg-[#eaf0fd] dark:bg-[#050813]" />}>
       <AuthSlider initialMode="register" />
     </Suspense>
   );

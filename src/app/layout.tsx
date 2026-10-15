@@ -22,8 +22,8 @@ const displayFont = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: "Finoch - Finansial Anak Kost Rapi Sekali Bicara",
-  description: "Catat pengeluaran anak kost cukup dengan bicara. Jatah aman hari ini, dompet, amplop, tagihan, dan kasbon dalam satu aplikasi yang tetap jalan tanpa sinyal.",
+  title: "Finoch",
+  description: "Financial Orchestration",
   manifest: "/manifest.webmanifest",
   icons: {
     icon: [

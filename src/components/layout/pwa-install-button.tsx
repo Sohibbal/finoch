@@ -103,7 +103,7 @@ export function PwaInstallButton() {
     // Phones keep the bottom edge for the nav alone. z-30 keeps it under modals (z-50).
     if (!deferredPrompt || !isLanding) return null;
     return (
-      <div className="hidden md:block fixed md:bottom-6 md:left-6 z-30">
+      <div className="hidden md:block fixed md:bottom-6 md:right-6 z-30">
         <button
           type="button"
           onClick={handleInstallClick}
@@ -120,30 +120,30 @@ export function PwaInstallButton() {
   if (!pastHero) return null;
 
   return (
-    // Landing only, after the first screen: a printed slip anchored to the bottom.
-    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-4 right-4 sm:right-auto sm:max-w-sm md:bottom-6 md:left-6 z-40">
-      <div className="p-3 bg-paper-sheet border border-ink/30 flex items-center justify-between gap-3 text-ink">
+    // Landing only, after the first screen: floating card anchored to the bottom-right.
+    <div className="fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 left-auto sm:max-w-sm md:bottom-6 md:right-6 z-40">
+      <div className="p-3.5 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/90 dark:border-slate-800 shadow-xl flex items-center justify-between gap-3 text-slate-900 dark:text-white">
         <div className="flex items-center gap-3 min-w-0">
           <BrandLogo variant="symbol" className="w-8 h-8 shrink-0" theme="auto" />
           <div className="min-w-0">
-            <p className="text-body font-semibold truncate">Pasang Finoch di HP</p>
-            <p className="text-meta text-ink-soft truncate">Buka dari layar utama, tetap jalan tanpa sinyal</p>
+            <p className="text-xs font-bold truncate">Pasang Finoch di HP</p>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 truncate">Layar penuh &amp; tetap jalan offline</p>
           </div>
         </div>
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1.5 shrink-0">
           <button
             type="button"
             onClick={handleInstallClick}
-            className="min-h-11 px-3 bg-ink text-paper-sheet text-meta font-semibold flex items-center gap-1.5 hover:bg-ink/90 transition-colors"
+            className="h-9 px-3 rounded-xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 text-xs font-bold flex items-center gap-1.5 hover:opacity-90 active:scale-95 transition-all shadow-xs"
           >
-            <Download className="w-4 h-4" aria-hidden="true" />
-            <span>Install PWA</span>
+            <Download className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>Install</span>
           </button>
           <button
             type="button"
             onClick={handleDismiss}
             aria-label="Tutup rekomendasi pasang"
-            className="w-11 h-11 flex items-center justify-center text-ink-soft hover:text-ink transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors"
           >
             <X className="w-4 h-4" aria-hidden="true" />
           </button>

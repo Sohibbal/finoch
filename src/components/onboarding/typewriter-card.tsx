@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Bot, ArrowRight, Sparkles } from "lucide-react";
+import { Bot, ArrowRight } from "lucide-react";
 
 interface TypewriterCardProps {
   onComplete: (nickname: string) => void;
@@ -55,7 +55,7 @@ export function TypewriterCard({ onComplete, isLoading = false }: TypewriterCard
           </span>
         </div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-ink/5 dark:bg-navy-800 text-meta font-semibold text-ink-soft dark:text-navy-200">
-          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+          <Bot className="w-3.5 h-3.5 text-amber-500" />
           <span>FinBot AI Copilot</span>
         </div>
       </div>

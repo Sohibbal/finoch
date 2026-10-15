@@ -18,9 +18,16 @@ interface PageHeaderProps {
   subtitle?: React.ReactNode;
   actions?: React.ReactNode;
   className?: string;
+  showBackButton?: boolean;
 }
 
-export function PageHeader({ title, subtitle, actions, className = "" }: PageHeaderProps) {
+export function PageHeader({
+  title,
+  subtitle,
+  actions,
+  className = "",
+  showBackButton = false,
+}: PageHeaderProps) {
   const router = useRouter();
   const pathname = usePathname();
   const isDashboard = pathname === "/dashboard";
@@ -45,7 +52,7 @@ export function PageHeader({ title, subtitle, actions, className = "" }: PageHea
         <div className="flex items-center justify-between gap-3">
           {/* Left: Brand / Mobile Back / Title */}
           <div className="flex items-center gap-3 min-w-0">
-            {!isDashboard && (
+            {!isDashboard && showBackButton && (
               <button
                 type="button"
                 onClick={() => router.push("/dashboard")}

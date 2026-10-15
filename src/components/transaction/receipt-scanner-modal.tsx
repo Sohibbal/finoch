@@ -9,7 +9,6 @@ import {
   Check,
   RotateCcw,
   ScanLine,
-  Sparkles,
   Receipt,
   Store,
 } from "lucide-react";
@@ -437,7 +436,7 @@ export function ReceiptScannerModal({
           <form onSubmit={handleSaveConfirmed} className="relative z-10 space-y-4 animate-fade-in">
             {/* Informational banner */}
             <div className="flex items-center gap-2 p-3 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200/80 dark:border-emerald-900/60 text-xs text-emerald-700 dark:text-emerald-300">
-              <Sparkles className="w-4 h-4 shrink-0 text-emerald-500" />
+              <Check className="w-4 h-4 shrink-0 text-emerald-500" />
               <span>Data struk terbaca. Periksa & edit field jika diperlukan sebelum disimpan.</span>
             </div>
 
