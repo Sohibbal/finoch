@@ -174,14 +174,14 @@ export function TransactionBarChart({
         {/* View Mode & Year Switchers */}
         <div className="flex flex-wrap items-center gap-2">
           {/* Category vs 12-Month Switcher */}
-          <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
+          <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
             <button
               type="button"
               onClick={() => {
                 setViewMode("category");
                 setHoveredIndex(null);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                 viewMode === "category"
                   ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                   : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -196,7 +196,7 @@ export function TransactionBarChart({
                 setViewMode("monthly");
                 setHoveredIndex(null);
               }}
-              className={`flex items-center gap-1.5 px-3 py-1 rounded-full transition-colors cursor-pointer ${
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
                 viewMode === "monthly"
                   ? "bg-white dark:bg-[#1E293B] text-teal-600 dark:text-teal-400 shadow-xs"
                   : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -209,11 +209,11 @@ export function TransactionBarChart({
 
           {/* Year selector (only in monthly mode) */}
           {viewMode === "monthly" && (
-            <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
+            <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
               <button
                 type="button"
                 onClick={() => setSelectedYear("2025")}
-                className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
                   selectedYear === "2025"
                     ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -224,7 +224,7 @@ export function TransactionBarChart({
               <button
                 type="button"
                 onClick={() => setSelectedYear("2026")}
-                className={`px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+                className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
                   selectedYear === "2026"
                     ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                     : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"

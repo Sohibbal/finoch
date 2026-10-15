@@ -54,7 +54,7 @@ export function DailyAllowanceRing({
           </span>
         </div>
         <span
-          className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${
+          className={`text-[11px] font-bold px-2 py-0.5 rounded-lg ${
             isOverspent
               ? "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400 border border-rose-500/20"
               : "bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400 border border-teal-500/20"

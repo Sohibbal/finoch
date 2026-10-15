@@ -158,7 +158,7 @@ export default function ProfilePage() {
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6 animate-content-in">
+        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-3.5 sm:p-6 lg:p-7 space-y-5 sm:space-y-6 animate-content-in">
           {feedback && (
             <div
               className={`p-3.5 rounded-2xl flex items-center gap-2.5 border ${
@@ -256,7 +256,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-0.5 rounded-full">
+                    <span className="text-xs font-extrabold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/50 px-2.5 py-0.5 rounded-lg">
                       {savingsPercentage}% dari Jatah
                     </span>
                   </div>
@@ -331,7 +331,7 @@ export default function ProfilePage() {
                         </p>
                       </div>
                     </div>
-                    <span className="text-xs font-extrabold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2.5 py-0.5 rounded-full">
+                    <span className="text-xs font-extrabold text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-950/50 px-2.5 py-0.5 rounded-lg">
                       {rupiah(dailyAllowance)} / hari
                     </span>
                   </div>

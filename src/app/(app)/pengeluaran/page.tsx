@@ -130,7 +130,7 @@ export default function PengeluaranPage() {
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
+        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-3.5 sm:p-6 lg:p-7 space-y-5 sm:space-y-6">
           
           {/* Main 2-Column Split: Kiri 3 Button Persegi & Kanan Riwayat */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
@@ -138,7 +138,7 @@ export default function PengeluaranPage() {
             {/* SISI KIRI: Summary Metric Card + 3 Button Persegi Berjejer ke Bawah (4 cols) */}
             <div className="lg:col-span-4 space-y-4">
               {/* Summary Card with Glass Sheen */}
-              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-2 glass-sheen relative overflow-hidden group min-h-[140px] flex flex-col justify-between">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-2 glass-sheen relative overflow-hidden group min-h-[140px] flex flex-col justify-between">
                 {/* Transparent Watermark Icon */}
                 <ArrowUpRight
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -168,13 +168,13 @@ export default function PengeluaranPage() {
             </div>
 
             {/* SISI KANAN: Riwayat Pengeluaran (8 cols) with 100% Height & Glass Sheen */}
-            <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between glass-sheen relative overflow-hidden group h-full min-h-[460px]">
+            <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs flex flex-col justify-between glass-sheen relative overflow-hidden group h-full min-h-[460px]">
               <div className="flex items-center justify-between relative z-10 shrink-0 mb-3">
                 <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
                   <ArrowUpRight className="w-5 h-5 text-rose-500" />
                   <span>Riwayat Pengeluaran</span>
                 </h3>
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500">
                   {transactions.length} data
                 </span>
               </div>

@@ -74,7 +74,7 @@ export function GenZInsightCard({ nickname, insight, className = "" }: GenZInsig
       <div className="flex-1 p-4 sm:p-6 flex flex-col justify-between min-w-0 relative z-10 space-y-2">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold uppercase tracking-wider bg-slate-900/5 dark:bg-white/10 text-slate-700 dark:text-slate-300">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg text-[11px] font-bold uppercase tracking-wider bg-slate-900/5 dark:bg-white/10 text-slate-700 dark:text-slate-300">
               <span
                 className={`w-1.5 h-1.5 rounded-full ${
                   isWarning
@@ -90,7 +90,7 @@ export function GenZInsightCard({ nickname, insight, className = "" }: GenZInsig
 
           <div className="hidden sm:flex items-center gap-1.5 text-right">
             <span
-              className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+              className={`text-[11px] font-semibold px-2.5 py-0.5 rounded-lg ${
                 isWarning
                   ? "bg-amber-100/80 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300"
                   : isHype

@@ -194,7 +194,7 @@ export default function WishlistPage() {
       />
 
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
+        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-3.5 sm:p-6 lg:p-7 space-y-5 sm:space-y-6">
           
           {/* Main 2-Column Split: Kiri Button Persegi & Kanan Grid Wishlist */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
@@ -202,7 +202,7 @@ export default function WishlistPage() {
             {/* SISI KIRI: Summary Metric Card + Button Persegi Berjejer ke Bawah (4 cols) */}
             <div className="lg:col-span-4 flex flex-col justify-between space-y-4 h-full">
               {/* Summary Metric Card with Glass Sheen */}
-              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3 glass-sheen relative overflow-hidden group">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-3 glass-sheen relative overflow-hidden group">
                 <Gift
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/10 dark:text-blue-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
                   strokeWidth={1.5}
@@ -302,15 +302,15 @@ export default function WishlistPage() {
             </div>
 
             {/* SISI KANAN: Filter Tabs & Grid Wishlist (8 cols) with 100% Height & Glass Sheen */}
-            <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between glass-sheen relative overflow-hidden group h-full min-h-[460px]">
+            <div className="lg:col-span-8 rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs flex flex-col justify-between glass-sheen relative overflow-hidden group h-full min-h-[460px]">
               <div className="relative z-10 space-y-4">
                 {/* Filter Tabs Header */}
                 <div className="flex items-center justify-between gap-3 flex-wrap">
-                  <div className="flex items-center gap-1.5 p-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
+                  <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-xs font-semibold">
                     <button
                       type="button"
                       onClick={() => handleFilterChange("active")}
-                      className={`px-3 py-1.5 rounded-full transition-colors ${
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${
                         filter === "active"
                           ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                           : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -321,7 +321,7 @@ export default function WishlistPage() {
                     <button
                       type="button"
                       onClick={() => handleFilterChange("achieved")}
-                      className={`px-3 py-1.5 rounded-full transition-colors ${
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${
                         filter === "achieved"
                           ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                           : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -332,7 +332,7 @@ export default function WishlistPage() {
                     <button
                       type="button"
                       onClick={() => handleFilterChange("all")}
-                      className={`px-3 py-1.5 rounded-full transition-colors ${
+                      className={`px-3 py-1.5 rounded-lg transition-colors ${
                         filter === "all"
                           ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                           : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"

@@ -365,7 +365,7 @@ export default function DashboardPage() {
 
       {/* Outer ambient container matching Subly floating canvas */}
       <div className="w-full max-w-[1440px] mx-auto p-3 sm:p-5 lg:p-6">
-        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-4 sm:p-6 lg:p-7 space-y-6">
+        <div className="rounded-2xl bg-[#eaf0fd] dark:bg-[#0B101D] border border-blue-200/60 dark:border-slate-800/80 shadow-2xl p-3.5 sm:p-6 lg:p-7 space-y-5 sm:space-y-6">
           
           {/* ROW 1: FinBot Daily Insight (Paling Atas, tinggi sama dengan card Saldo Bersih) */}
           <div className="w-full animate-content-in">
@@ -381,7 +381,7 @@ export default function DashboardPage() {
               {/* BARIS METRIK: Saldo Bersih & Total Pemasukan di atas Total Pengeluaran */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 {/* CARD 1: Saldo Bersih */}
-                <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+                <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
                   {/* Transparent Watermark Icon */}
                   <Wallet
                     className="absolute -right-3 -bottom-3 w-28 h-28 text-blue-500/5 dark:text-blue-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -397,11 +397,11 @@ export default function DashboardPage() {
                       </h3>
                     </div>
 
-                    <div className="flex items-center p-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
+                    <div className="flex items-center p-0.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-[11px] font-semibold">
                       <button
                         type="button"
                         onClick={() => setSaldoFilter("all")}
-                        className={`px-2.5 py-0.5 rounded-full transition-colors ${
+                        className={`px-2.5 py-0.5 rounded-lg transition-colors ${
                           saldoFilter === "all"
                             ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                             : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -412,7 +412,7 @@ export default function DashboardPage() {
                       <button
                         type="button"
                         onClick={() => setSaldoFilter("month")}
-                        className={`px-2.5 py-0.5 rounded-full transition-colors ${
+                        className={`px-2.5 py-0.5 rounded-lg transition-colors ${
                           saldoFilter === "month"
                             ? "bg-white dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 shadow-xs"
                             : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
@@ -452,7 +452,7 @@ export default function DashboardPage() {
                 </div>
 
                 {/* CARD 2: Total Pemasukan */}
-                <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+                <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
                   {/* Transparent Panah Naik Watermark */}
                   <ArrowUpRight
                     className="absolute -right-3 -bottom-3 w-28 h-28 text-emerald-500/10 dark:text-emerald-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -482,7 +482,7 @@ export default function DashboardPage() {
                       +{rupiah(financialData.displayIncome)}
                     </h2>
                     <div className="flex items-center gap-2 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                      <span className="px-1.5 py-0.5 rounded bg-emerald-50 dark:bg-emerald-950/40 text-[10px]">
+                      <span className="px-1.5 py-0.5 rounded-md bg-emerald-50 dark:bg-emerald-950/40 text-[10px]">
                         Aktif
                       </span>
                       <span className="text-slate-400 font-normal">
@@ -505,7 +505,7 @@ export default function DashboardPage() {
               <TransactionBarChart transactions={transactions} />
 
               {/* CARD: Riwayat Transaksi Terbaru (Tepat di bawah dan ukuran lebar yang sama dengan tren transaksi) */}
-              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 lg:p-7 shadow-xs space-y-4 glass-sheen relative overflow-hidden group">
                 {/* Transparent Receipt Watermark */}
                 <Receipt
                   className="absolute -right-3 -bottom-3 w-32 h-32 text-slate-400/5 dark:text-slate-300/5 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -517,7 +517,7 @@ export default function DashboardPage() {
                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
                       Riwayat Transaksi Terbaru
                     </h3>
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">
+                    <span className="text-xs font-semibold px-2.5 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-500">
                       {transactions.length} total
                     </span>
                   </div>
@@ -546,11 +546,11 @@ export default function DashboardPage() {
                       return (
                         <div
                           key={tx.id}
-                          className="rounded-2xl border border-slate-100 dark:border-slate-800/80 p-3.5 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40"
+                          className="rounded-2xl border border-slate-100 dark:border-slate-800/80 p-3 sm:p-3.5 hover:border-slate-300 dark:hover:border-slate-700 transition-colors flex items-center justify-between gap-3 bg-slate-50/50 dark:bg-slate-800/40"
                         >
-                          <div className="flex items-center gap-3 min-w-0 flex-1 sm:max-w-[40%]">
+                          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1 sm:max-w-[40%]">
                             <div
-                              className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${
+                              className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 ${
                                 isInc
                                   ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
                                   : "bg-rose-500/10 text-rose-600 dark:text-rose-400"
@@ -562,19 +562,23 @@ export default function DashboardPage() {
                                 <ArrowUpRight className="w-4 h-4" />
                               )}
                             </div>
-                            <div className="min-w-0">
+                            <div className="min-w-0 flex-1">
                               <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
                                 {tx.itemName}
                               </p>
-                              <p className="text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500">
-                                {shortDate(tx.transactionDate)}
-                              </p>
+                              <div className="flex items-center gap-1.5 text-[10px] sm:text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 overflow-hidden">
+                                <span className="px-1.5 py-0.5 rounded-md bg-slate-200/70 dark:bg-slate-700/70 text-slate-600 dark:text-slate-300 font-medium sm:hidden whitespace-nowrap shrink-0">
+                                  {tx.category}
+                                </span>
+                                <span className="sm:hidden text-slate-300 dark:text-slate-600 shrink-0">·</span>
+                                <span className="whitespace-nowrap shrink-0">{shortDate(tx.transactionDate)}</span>
+                              </div>
                             </div>
                           </div>
 
                           <div className="hidden sm:flex items-center justify-center flex-1">
                             <span
-                              className={`px-2.5 py-0.5 rounded-full text-[11px] font-medium inline-flex items-center gap-1.5 ${
+                              className={`px-2.5 py-0.5 rounded-lg text-[11px] font-medium inline-flex items-center gap-1.5 ${
                                 isInc
                                   ? "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400"
                                   : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300"
@@ -591,7 +595,7 @@ export default function DashboardPage() {
 
                           <div className="text-right shrink-0">
                             <span
-                              className={`text-xs sm:text-sm font-bold money ${
+                              className={`text-xs sm:text-sm font-bold money whitespace-nowrap ${
                                 isInc
                                   ? "text-emerald-600 dark:text-emerald-400"
                                   : "text-slate-900 dark:text-white"
@@ -621,7 +625,7 @@ export default function DashboardPage() {
             <div className="lg:col-span-4 space-y-6">
               
               {/* CARD: Total Pengeluaran (Dipindahkan ke posisi card wishlist sebelumnya) */}
-              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs flex flex-col justify-between space-y-4 glass-sheen relative overflow-hidden group min-h-[178px]">
                 {/* Transparent Panah Turun Watermark */}
                 <ArrowDownRight
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-rose-500/10 dark:text-rose-400/10 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -651,7 +655,7 @@ export default function DashboardPage() {
                     -{rupiah(financialData.displayExpense)}
                   </h2>
                   <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 dark:text-slate-400">
-                    <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px]">
+                    <span className="px-1.5 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-[10px]">
                       Hari Ini
                     </span>
                     <span className="text-slate-400 font-normal">
@@ -672,7 +676,7 @@ export default function DashboardPage() {
               </div>
 
               {/* CARD: Top 3 Wishlist Impian (Tepat di bawah card Total Pengeluaran, tinggi sejajar dengan Tren Bar Chart) */}
-              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group min-h-[460px] lg:h-[460px] flex flex-col justify-between">
+              <div className="rounded-2xl bg-white dark:bg-[#111726] border border-slate-200/80 dark:border-slate-800 p-4 sm:p-6 shadow-xs space-y-3.5 glass-sheen relative overflow-hidden group min-h-[460px] lg:h-[460px] flex flex-col justify-between">
                 {/* Transparent Gift Watermark */}
                 <Gift
                   className="absolute -right-3 -bottom-3 w-28 h-28 text-amber-500/5 dark:text-amber-400/5 pointer-events-none select-none transition-transform group-hover:scale-105"
@@ -736,7 +740,7 @@ export default function DashboardPage() {
                               </p>
                             </div>
                             <span
-                              className={`text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${
+                              className={`text-[10px] font-bold px-2 py-0.5 rounded-lg shrink-0 whitespace-nowrap ${
                                 isReady
                                   ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300"
                                   : "bg-blue-100 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300"

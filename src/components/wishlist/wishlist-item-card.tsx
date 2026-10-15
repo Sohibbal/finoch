@@ -23,7 +23,7 @@ export function WishlistItemCard({
   const getStatusBadge = () => {
     if (item.isAchieved) {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
           <CheckCircle2 className="w-3.5 h-3.5" />
           <span>Tercapai</span>
         </span>
@@ -32,7 +32,7 @@ export function WishlistItemCard({
 
     if (projectionStatus === "achievable_now") {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 whitespace-nowrap">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-meta font-semibold bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 whitespace-nowrap">
           <CheckCircle2 className="w-3.5 h-3.5" />
           <span>Tercapai</span>
         </span>
@@ -41,7 +41,7 @@ export function WishlistItemCard({
 
     if (projectionStatus === "delayed") {
       return (
-        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0 whitespace-nowrap">
+        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-meta font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400 shrink-0 whitespace-nowrap">
           <Clock className="w-3.5 h-3.5" />
           <span>Tertunda</span>
         </span>
@@ -49,7 +49,7 @@ export function WishlistItemCard({
     }
 
     return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-meta font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 whitespace-nowrap">
         <Calendar className="w-3.5 h-3.5" />
         <span>{`~${estimatedDays} hari`}</span>
       </span>

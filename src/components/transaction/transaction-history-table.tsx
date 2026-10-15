@@ -118,29 +118,29 @@ export function TransactionHistoryTable({
               return (
                 <div
                   key={item.id}
-                  className="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                  className="flex items-center justify-between p-3.5 sm:p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors gap-2.5 sm:gap-4"
                 >
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div className="w-8 h-8 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
+                  <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
+                    <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center shrink-0">
                       {getSourceIcon(item.source)}
                     </div>
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs sm:text-sm font-semibold text-slate-800 dark:text-slate-100 truncate">
                         {item.itemName}
                       </p>
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400 dark:text-slate-500">
-                        <span className="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-medium text-slate-600 dark:text-slate-300">
+                      <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] text-slate-400 dark:text-slate-500 mt-0.5 overflow-hidden">
+                        <span className="px-2 py-0.5 rounded-lg bg-slate-100 dark:bg-slate-800 text-[10px] font-medium text-slate-600 dark:text-slate-300 whitespace-nowrap shrink-0">
                           {item.category}
                         </span>
-                        <span>·</span>
-                        <span>{dateStr}</span>
+                        <span className="text-slate-300 dark:text-slate-600 shrink-0">·</span>
+                        <span className="whitespace-nowrap shrink-0 text-[10px] sm:text-[11px]">{dateStr}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-4 shrink-0">
+                  <div className="flex flex-col sm:flex-row items-end sm:items-center gap-1 sm:gap-3 shrink-0 ml-1 sm:ml-2">
                     <span
-                      className={`font-semibold money text-sm ${
+                      className={`font-bold money text-xs sm:text-sm whitespace-nowrap ${
                         type === "income" ? "text-emerald-600 dark:text-emerald-400" : "text-slate-900 dark:text-white"
                       }`}
                     >
@@ -149,11 +149,11 @@ export function TransactionHistoryTable({
                     <button
                       type="button"
                       onClick={() => onDelete(item.id)}
-                      className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors"
+                      className="p-1 sm:p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer"
                       title="Hapus"
                       aria-label="Hapus"
                     >
-                      <Trash2 className="w-4 h-4" strokeWidth={1.5} />
+                      <Trash2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" strokeWidth={1.5} />
                     </button>
                   </div>
                 </div>
@@ -163,7 +163,7 @@ export function TransactionHistoryTable({
 
           {/* Pagination Controls */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-xs text-slate-500 dark:text-slate-400 shrink-0">
+            <div className="flex items-center justify-between px-3.5 sm:px-4 py-3 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/30 text-xs text-slate-500 dark:text-slate-400 shrink-0">
               <span className="text-[11px]">
                 Menampilkan {(safeCurrentPage - 1) * ITEMS_PER_PAGE + 1} - {Math.min(safeCurrentPage * ITEMS_PER_PAGE, filtered.length)} dari {filtered.length} data
               </span>
@@ -172,7 +172,7 @@ export function TransactionHistoryTable({
                   type="button"
                   disabled={safeCurrentPage <= 1}
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="p-1.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-[#111C2E] hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-[#111C2E] hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   title="Halaman sebelumnya"
                   aria-label="Halaman sebelumnya"
                 >
@@ -185,7 +185,7 @@ export function TransactionHistoryTable({
                   type="button"
                   disabled={safeCurrentPage >= totalPages}
                   onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="p-1.5 rounded-lg border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-[#111C2E] hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  className="p-1.5 rounded-xl border border-slate-200/80 dark:border-slate-700/80 bg-white dark:bg-[#111C2E] hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                   title="Halaman berikutnya"
                   aria-label="Halaman berikutnya"
                 >
