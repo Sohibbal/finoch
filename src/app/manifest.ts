@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Finoch - Finansial Anak Kost",
+    name: "Finoch",
     short_name: "Finoch",
-    description: "Asisten finansial cerdas anak kost berbasis AI & suara (PWA, Local-first, Offline-ready).",
+    description: "Financial Orchestration",
     id: "/",
     scope: "/",
     orientation: "portrait",

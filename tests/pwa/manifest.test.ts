@@ -7,7 +7,7 @@ import path from "path";
 describe("PWA Web App Manifest & Offline Engine", () => {
   it("provides valid PWA metadata for Indonesian students", () => {
     const config = manifest();
-    expect(config.name).toBe("Finoch - Finansial Anak Kost");
+    expect(config.name).toBe("Finoch");
     expect(config.short_name).toBe("Finoch");
     expect(config.display).toBe("standalone");
     expect(config.icons?.length).toBeGreaterThan(0);

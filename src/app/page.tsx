@@ -149,7 +149,7 @@ export default function LandingPage() {
               aria-label="Scroll ke konten jelajahi dashboard dan fitur"
             >
               <span className="text-[9px] sm:text-[11px] font-semibold tracking-wider uppercase">
-                Jelajahi Dashboard
+                Eksplor Finoch
               </span>
               <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-slate-300 dark:border-slate-800 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xs flex items-center justify-center text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 group-hover:border-blue-500/50 transition-all animate-bounce shadow-2xs mt-1 sm:mt-1.5">
                 <ArrowDown className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
